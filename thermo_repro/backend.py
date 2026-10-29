@@ -295,13 +295,70 @@ def _ref_sample_states(
 # ---------------------------------------------------------------------------
 
 if USING_NATIVE_THRML:
-    SpinNode = _ThrmlSpinNode
+    def SpinNode(name: str | None = None) -> Any:  # noqa: N802
+        """Create a native `thrml.SpinNode` (accepts optional label for convenience)."""
+        return _ThrmlSpinNode()
+
     Block = _ThrmlBlock
     SamplingSchedule = _ThrmlSamplingSchedule
-    IsingEBM = _ThrmlIsingEBM
-    IsingSamplingProgram = _ThrmlIsingSamplingProgram
-    hinton_init = _thrml_hinton_init
-    sample_states = _thrml_sample_states
+
+    def IsingEBM(  # noqa: N802
+        nodes: Sequence[Any],
+        edges: Sequence[tuple[Any, Any]],
+        biases: Any,
+        weights: Any,
+        beta: Any,
+    ) -> Any:
+        """Create a native `thrml.models.IsingEBM` with JAX float32 arrays."""
+        return _ThrmlIsingEBM(
+            list(nodes),
+            list(edges),
+            jnp.asarray(biases, dtype=jnp.float32),
+            jnp.asarray(weights, dtype=jnp.float32),
+            jnp.asarray(beta, dtype=jnp.float32),
+        )
+
+    def IsingSamplingProgram(  # noqa: N802
+        model: Any,
+        free_blocks: Sequence[Any],
+        clamped_blocks: Sequence[Any] = (),
+    ) -> Any:
+        """Create a native `thrml.models.IsingSamplingProgram`."""
+        return _ThrmlIsingSamplingProgram(
+            model,
+            free_blocks=list(free_blocks),
+            clamped_blocks=list(clamped_blocks),
+        )
+
+    def hinton_init(
+        key: Any,
+        model: Any,
+        free_blocks: Sequence[Any],
+        batch_shape: tuple[int, ...] = (),
+    ) -> list[Any]:
+        """Run native `thrml.models.hinton_init`."""
+        shape = batch_shape if isinstance(batch_shape, tuple) else ()
+        return _thrml_hinton_init(key, model, list(free_blocks), shape)
+
+    def sample_states(
+        key: Any,
+        program: Any,
+        schedule: Any,
+        init_state: Sequence[Any],
+        clamped_values: Sequence[Any],
+        readout_blocks: Sequence[Any],
+    ) -> list[Any]:
+        """Run native `thrml.sample_states` ensuring JAX boolean arrays for init & clamp states."""
+        init_jax = [jnp.asarray(s, dtype=bool) for s in init_state]
+        clamp_jax = [jnp.asarray(c, dtype=bool) for c in clamped_values]
+        return _thrml_sample_states(
+            key,
+            program,
+            schedule,
+            init_jax,
+            clamp_jax,
+            list(readout_blocks),
+        )
 else:
     SpinNode = _RefSpinNode
     Block = _RefBlock

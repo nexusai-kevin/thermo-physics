@@ -1,14 +1,14 @@
 {
-  "using_native_thrml": false,
+  "using_native_thrml": true,
   "bipartite_benchmark": {
     "samples_shape": [
       500,
       96
     ],
-    "mean_energy": -20.337514877319336,
-    "min_energy": -32.05659866333008,
-    "max_energy": -8.726394653320312,
-    "wall_time_sec": 0.02542910003103316,
+    "mean_energy": -19.72699546813965,
+    "min_energy": -33.088314056396484,
+    "max_energy": -7.884278297424316,
+    "wall_time_sec": 0.5680677001364529,
     "hardware_efficiency_profile": {
       "problem_scale": {
         "n_nodes": 96,
@@ -18,12 +18,12 @@
         "total_spin_updates": 105600
       },
       "classical_hardware_measured": {
-        "wall_time_sec": 0.02542910003103316,
-        "sweeps_per_sec": 43257.527740171,
+        "wall_time_sec": 0.5680677001364529,
+        "sweeps_per_sec": 1936.3889193766413,
         "assumed_power_watts": 300.0,
-        "total_energy_joules": 7.6287300093099475,
-        "joules_per_sweep": 0.00693520909937268,
-        "nanojoules_per_spin_update": 72241.76145179875
+        "total_energy_joules": 170.42031004093587,
+        "joules_per_sweep": 0.15492755458266896,
+        "nanojoules_per_spin_update": 1613828.6935694683
       },
       "tsu_projected": {
         "relaxation_time_sec": 1.1e-05,
@@ -34,8 +34,8 @@
         "femtojoules_per_spin_update": 104.16666666666666
       },
       "tsu_vs_classical_ratios": {
-        "latency_speedup_x": 2311.73636645756,
-        "energy_reduction_x": 693520909.937268
+        "latency_speedup_x": 51642.51819422299,
+        "energy_reduction_x": 15492755458.2669
       }
     }
   },
@@ -48,63 +48,63 @@
     "exact_Z": 554.0621999100531,
     "exact_log_Z": 6.317276954650879,
     "exact_mean_energy": -1.7699272632598877,
-    "empirical_mean_energy": -1.752576470375061,
-    "energy_abs_error": 0.01735079288482666,
-    "total_variation_distance": 0.04655241349492523,
-    "kl_divergence": 0.010160702215969628,
-    "tau_int_energy": 0.525602791019235,
-    "effective_sample_size": 11415.464496231001,
+    "empirical_mean_energy": -1.768497347831726,
+    "energy_abs_error": 0.001429915428161621,
+    "total_variation_distance": 0.04837812117696497,
+    "kl_divergence": 0.01089318888050262,
+    "tau_int_energy": 0.5503148480496214,
+    "effective_sample_size": 10902.849561963818,
     "energy_trajectory_head": [
-      -2.9242162704467773,
-      -2.1575169563293457,
-      -1.1994954347610474,
-      -2.9242162704467773,
-      0.9163004159927368,
-      -0.650418758392334,
-      -0.4895091950893402,
-      -1.323970079421997,
+      0.8509392738342285,
       -2.8633856773376465,
-      -2.8633856773376465,
-      -3.2752766609191895,
-      -3.3361077308654785,
-      -3.3361077308654785,
-      -2.3162426948547363,
-      -3.603267192840576,
-      -3.603267192840576,
-      -2.470587730407715,
-      -2.1804094314575195,
-      -3.603267192840576,
-      -2.1804094314575195,
-      -2.50895094871521,
       -2.1933398246765137,
-      -1.5302139520645142,
-      -0.21380983293056488,
-      -3.603267192840576,
-      -0.7903320789337158,
-      -1.9648090600967407,
-      1.0861541032791138,
-      -0.3009190559387207,
-      -1.3762714862823486,
-      -1.4028091430664062,
+      -2.409757137298584,
+      -1.0061742067337036,
+      -3.3361077308654785,
       -4.088497638702393,
-      2.4992828369140625,
-      1.0759059190750122,
-      -1.8352687358856201,
-      -3.4105589389801025,
-      -2.1706368923187256,
-      -0.21795031428337097,
-      -1.4010088443756104,
-      -3.2752766609191895,
-      -2.3508384227752686,
-      -1.0270307064056396,
+      0.8509392738342285,
       -2.1575169563293457,
-      -2.8633856773376465,
-      -2.50895094871521,
-      0.26836493611335754,
-      -2.8633856773376465,
+      -2.6700642108917236,
+      -4.088497638702393,
+      -0.17118920385837555,
+      2.109254837036133,
+      -1.2533683776855469,
+      -1.7744379043579102,
+      -2.3508384227752686,
+      -3.4105589389801025,
+      -1.154492974281311,
+      -1.4010088443756104,
+      -3.3361077308654785,
+      -1.2603261470794678,
+      -0.13019901514053345,
+      -1.0270307064056396,
+      -0.9954286217689514,
+      -2.1575169563293457,
+      -2.9242162704467773,
+      -3.3361077308654785,
+      -2.3508384227752686,
+      -0.7271766662597656,
+      -1.7069966793060303,
+      -3.171832799911499,
+      -1.5811166763305664,
+      1.0207550525665283,
+      -3.2752766609191895,
+      -1.1994954347610474,
+      -1.9325505495071411,
       -3.603267192840576,
-      -0.2746404707431793,
-      -2.409757137298584
+      -1.5302139520645142,
+      -3.4105589389801025,
+      -3.3361077308654785,
+      -3.171832799911499,
+      -3.171832799911499,
+      -2.1933398246765137,
+      -3.171832799911499,
+      -4.088497638702393,
+      -2.9242162704467773,
+      0.1372509002685547,
+      -1.3884085416793823,
+      -3.603267192840576,
+      -1.593717098236084
     ]
   },
   "mixing_time_comparison": {
@@ -112,27 +112,27 @@
     "n_edges": 60,
     "block_gibbs": {
       "n_blocks_colors": 2,
-      "wall_time_sec": 0.04627260006964207,
-      "tau_int_energy_sweeps": 0.984696989754964,
-      "tau_int_magnetization_sweeps": 3.7996978655078224,
-      "ess_energy": 1015.5408317525619,
+      "wall_time_sec": 0.5266366999130696,
+      "tau_int_energy_sweeps": 0.7483767153992887,
+      "tau_int_magnetization_sweeps": 2.9242787553112337,
+      "ess_energy": 1336.2254322229417,
       "hardware_clock_cycles_per_sweep": 2,
-      "hardware_cycles_per_independent_sample": 3.938787959019856,
-      "mean_energy": -7.434000015258789
+      "hardware_cycles_per_independent_sample": 2.993506861597155,
+      "mean_energy": -7.55649995803833
     },
     "sequential_gibbs": {
       "n_blocks_colors": 36,
-      "wall_time_sec": 0.7113952999934554,
-      "tau_int_energy_sweeps": 0.9399159475450172,
-      "tau_int_magnetization_sweeps": 3.5311661791820237,
-      "ess_energy": 1063.924920746283,
+      "wall_time_sec": 4.4040165999904275,
+      "tau_int_energy_sweeps": 0.9314213390410291,
+      "tau_int_magnetization_sweeps": 3.696342100766295,
+      "ess_energy": 1073.627968443989,
       "hardware_clock_cycles_per_sweep": 36,
-      "hardware_cycles_per_independent_sample": 67.67394822324124,
-      "mean_energy": -7.46584939956665
+      "hardware_cycles_per_independent_sample": 67.06233641095409,
+      "mean_energy": -7.618450164794922
     },
     "parallel_cycle_speedup_factor": 18.0,
-    "decorrelation_cycle_speedup_factor": 17.181414416652554,
-    "software_wall_time_speedup": 15.374007488725029
+    "decorrelation_cycle_speedup_factor": 22.40259986415186,
+    "software_wall_time_speedup": 8.36253265432771
   },
   "project_a_associative_classifier": {
     "project": "Project A: Associative Memory & Robust EBM Classification",
@@ -160,7 +160,7 @@
       "occluded_bit_recovery_accuracy": 1.0,
       "occluded_classification_accuracy": 1.0
     },
-    "wall_time_sec": 0.1764738999772817
+    "wall_time_sec": 15.036579600069672
   },
   "project_b_dtm_denoising": {
     "project": "Project B: Denoising Thermodynamic Model (DTM) 2D Lattice Suite",
@@ -175,21 +175,21 @@
       "n_parallel_blocks": 2,
       "total_sweeps": 54,
       "hardware_clock_cycles": 108,
-      "wall_time_sec": 0.002515499945729971,
+      "wall_time_sec": 0.7968762998934835,
       "initial_energy": -87.74008178710938,
-      "final_energy": -95.39950561523438,
-      "denoised_accuracy": 0.8333333333333334,
-      "bit_error_reduction_pct": 33.33333333333335
+      "final_energy": -96.56228637695312,
+      "denoised_accuracy": 0.8194444444444444,
+      "bit_error_reduction_pct": 27.777777777777768
     },
     "classical_sequential_mcmc": {
       "n_parallel_blocks": 144,
       "total_sweeps": 54,
       "hardware_clock_cycles": 7776,
-      "wall_time_sec": 0.07651330018416047,
+      "wall_time_sec": 71.81485949992202,
       "initial_energy": -87.74008178710938,
-      "final_energy": -94.91950988769531,
-      "denoised_accuracy": 0.8055555555555556,
-      "bit_error_reduction_pct": 22.222222222222232
+      "final_energy": -96.15673828125,
+      "denoised_accuracy": 0.7916666666666666,
+      "bit_error_reduction_pct": 16.66666666666665
     },
     "hardware_cycle_advantage_x": 72.0
   }
