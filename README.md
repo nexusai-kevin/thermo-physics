@@ -308,6 +308,30 @@ Restores corrupted binary image patterns by coupling a 2D spatial Ising prior on
 uv run image_denoiser.py
 ```
 
+---
+
+## Experiment 6: Associative Memory & Prototype Recall via Restricted Boltzmann Machine (RBM)
+
+Stores orthogonal $8 \times 8$ binary prototype patterns in visible-to-hidden bipartite couplings ($64$ visible nodes, $32$ hidden nodes) and recovers complete memories from $50\%$ occluded queries using 2-block parallel Gibbs sampling in Extropic `thrml`.
+
+### Methodology
+- **Bipartite Hebbian Projection:** Encodes three orthogonal $8 \times 8$ prototypes into a $64 \times 32$ visible-hidden interaction matrix $W$ with zero intra-layer connections.
+- **Clamped Partial Observation:** Splits the visible layer into a clamped unoccluded top-half block (`clamped_blocks=[Block(vis_nodes[:32])]`) and a free occluded bottom-half block (`Block(vis_nodes[32:])`), alternating parallel block Gibbs updates against `Block(hid_nodes)` in 2 steps per sweep.
+- **Attractor Relaxation:** Starting from random $50\%$ spin noise in the occluded half, thermal relaxation ($\beta = 2.2$) projects the partial cue onto the hidden representation and reconstructs the missing visible spins.
+
+### Recall Benchmark
+- **Query Corruption:** Bottom $50\%$ of the target prototype ($32 / 64$ spins) replaced with uniform random $\{-1, +1\}$ noise.
+- **Memory Recall Overlap:** **$100.0\%$** cosine overlap with ground truth (**$100.0\%$ occluded bit recovery**).
+- **Execution Speed:** Complete warmup ($150$ sweeps) and $300$ trajectory samples executed in **$0.583\text{s}$** on JAX.
+
+![RBM Associative Memory Recall](thrml_rbm_memory.png)
+
+### Reproduction
+```bash
+uv run rbm_associative_memory.py
+```
+
+
 
 
 
