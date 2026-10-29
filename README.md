@@ -331,6 +331,41 @@ Stores orthogonal $8 \times 8$ binary prototype patterns in visible-to-hidden bi
 uv run rbm_associative_memory.py
 ```
 
+---
+
+## Experiment 7: QUBO Financial Portfolio Optimization via Thermodynamic Annealing
+
+Formulates constrained Markowitz portfolio selection (choosing exactly $K = 5$ assets from an $N = 20$ asset universe to maximize expected return $\mu^\top x$ while minimizing covariance risk $x^\top \Sigma x$) as a Quadratic Unconstrained Binary Optimization (QUBO) problem mapped directly onto an `IsingEBM` in Extropic `thrml`.
+
+### Methodology
+- **QUBO Objective & Budget Penalty:**
+  $$\min_{x \in \{0, 1\}^{20}} \; q\, x^\top \Sigma x - \mu^\top x + \lambda \left(\sum_{i=1}^{20} x_i - K\right)^2$$
+  with risk aversion $q = 1.0$, target cardinality $K = 5$, and budget penalty $\lambda = 0.65$.
+- **Exact Ising Hamiltonian Mapping:** Substituting $x_i = \frac{s_i + 1}{2}$ ($s_i \in \{-1, +1\}$) into the symmetric QUBO matrix $Q$ yields explicit spin couplings and fields that preserve exact energy differences ($\Delta \mathcal{E}_{\text{Ising}} \equiv \Delta E_{\text{QUBO}}$):
+  $$J_{ij} = -\frac{1}{2} Q_{ij}, \qquad b_i = -\frac{1}{2} Q_{ii} - \frac{1}{2} \sum_{j \neq i} Q_{ij}$$
+- **Thermal Annealing & Constraint Satisfaction:** Evaluates multi-stage cooling ($\beta \in \{0.4, 0.8, 1.5, 2.5, 5.0, 12.0\}$) against an exact brute-force solver across all $\binom{20}{5} = 15,504$ feasible portfolios.
+
+### Optimization Results
+| Inverse Temp ($\beta$) | Budget Feasibility ($\sum x_i = 5$) | Mean QUBO Energy | Minimum Energy Observed |
+|---|---|---|---|
+| $\beta = 0.4$ | $18.3\%$ | $+1.4588$ | $-0.9539$ |
+| $\beta = 0.8$ | $25.4\%$ | $+0.3275$ | $-0.9522$ |
+| $\beta = 1.5$ | $41.1\%$ | $-0.1302$ | $-1.0673$ |
+| $\beta = 2.5$ | $56.6\%$ | $-0.3679$ | $-1.0654$ |
+| $\beta = 5.0$ | $81.1\%$ | $-0.5710$ | $-1.0561$ |
+| $\beta = 12.0$ | **$99.1\%$** | **$-0.8591$** | **$-1.0762$** |
+
+- **Constraint Convergence:** Budget feasibility ($\sum x_i = 5$) climbs from $18.3\%$ at $\beta = 0.4$ to **$99.1\%$** at $\beta = 12.0$.
+- **Pareto Optimality:** Achieves a **94.1% objective match** ($-1.0762$ vs. $-1.1443$ brute-force global optimum across all $15,504$ combinations), selecting 4 of the 5 planted high-Sharpe star assets (`[0, 2, 5, 9, 18]`).
+
+![QUBO Portfolio Optimization](thrml_qubo_portfolio.png)
+
+### Reproduction
+```bash
+uv run qubo_portfolio.py
+```
+
+
 
 
 
