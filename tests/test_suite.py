@@ -102,6 +102,30 @@ class TestThermodynamicSuite(unittest.TestCase):
         self.assertLess(dtm["final_energy"], dtm["initial_energy"])
         self.assertEqual(dtm["n_parallel_blocks"], 2)
 
+    def test_exp11_rna_folding(self) -> None:
+        from experiments.exp11_rna_folding import (
+            build_rna_hamiltonian,
+            compute_energy,
+            format_dot_bracket,
+            run_classical_simulated_annealing,
+        )
+
+        seq = "GGCUAAAAAAACCAAAAAACCGAA"
+        pairs, c, q = build_rna_hamiltonian(seq)
+        self.assertEqual(len(pairs), 24)
+        self.assertEqual(c.shape[0], 24)
+        self.assertEqual(q.shape, (24, 24))
+
+        # Check dot-bracket format
+        db = format_dot_bracket(len(seq), [(0, 12), (1, 11), (3, 7)])
+        self.assertEqual(db, "((.(...)...))...........")
+
+        # Fast SA run
+        best_e, best_x, sa_time = run_classical_simulated_annealing(
+            len(pairs), c, q, beta_init=0.1, beta_final=3.0, num_steps=5000, seed=42
+        )
+        self.assertLessEqual(best_e, -8.0)
+
 
 if __name__ == "__main__":
     unittest.main()

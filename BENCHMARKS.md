@@ -14,6 +14,7 @@
 | **Exp 8** | Continuous Double-Well Chain | Analog Physics (ContinuousNode) | N = 32 Coupled Analog Oscillators (x in R) | `2.692s` | Hop Rate: 38.4% (beta=0.35) -> 0.9% (beta=4.0) | — | — | [`run_continuous_double_well.py`](run_continuous_double_well.py) |
 | **Exp 9** | 10-City TSP QUBO Router | NP-Complete Routing (TSP) | 10 x 10 Permutation Lattice (100 spins, 28 colors) | `285.0s` | 100.0% Pure Opt (6.296 pure / 6.296 hyb vs 6.296) | — | — | [`solve_tsp.py`](solve_tsp.py) |
 | **Exp 10** | SK Frustrated Spin Glass | Physics (Spin Glass) | N = 24 Dense All-to-All (276 edges) | `10.57s` | 100.0% Exact Ground State Match ($E_0 = -15.4266$) | 438.6 / 13000 | 14.82 | [`experiments/exp10_sk_spin_glass.py`](experiments/exp10_sk_spin_glass.py) |
+| **Exp 11** | Thermodynamic RNA Folding | Biophysics (Conformational Ensemble) | 24 nt Bistable Switch ($M = 24$ contacts) | `3.71s` | 100.0% Exact MFE Match ($E_0 = -10.0000\text{ kcal/mol}$) | 654.1 / 25000 | 38.22 | [`experiments/exp11_rna_folding.py`](experiments/exp11_rna_folding.py) |
 
 ESS / τ_int are reported for the sampling experiments with a meaningful scalar observable (Exp 2, Exp 6); `—` means not measured. Exp 2 uses the critical point β = 0.4407; Exp 6 uses the benchmark setting β = 2.2.
 
@@ -83,6 +84,50 @@ Evaluates thermodynamic Gibbs sampling against the canonical dense spin glass pr
 * **Replica Symmetry Breaking (Low $T$, $\beta=2.5$):** $\langle |q| \rangle = 0.5215, \text{Var}(q) = 0.3345$ reveals multi-valley Parisi structures.
 * **Paramagnetic Collapse (High $T$, $\beta=0.5$):** $\langle |q| \rangle = 0.1629, \text{Var}(q) = 0.0430 \ll 0.1$ confirms single-basin Gaussian collapse around $q = 0$.
 * **Classical SA Baseline:** Converges to the global minimum ($E = -15.4266$) within 0.055s over 30,000 single-spin Metropolis updates with incremental local field updates.
+
+## Experiment 11: Thermodynamic RNA Secondary-Structure Conformational Ensemble
+
+### Overview
+Models RNA secondary-structure folding as an energy-based quadratic formulation over candidate base pairs $x_k \in \{0, 1\}$ ($s_k = 2x_k - 1$) sampled according to the Boltzmann distribution $P(x) \propto e^{-\beta H(x)}$. Rather than predicting a single minimum free energy (MFE) structure via classical dynamic programming (Zuker algorithm), this experiment samples the complete thermodynamic conformational ensemble, quantifying structural switching, marginal base-pairing probabilities ($P_{ij} = \langle x_{ij} \rangle$), and conformational Shannon entropy ($S$).
+
+### Hamiltonian & Energy Model ($H(x)$)
+$$H(x) = \sum_{k} \epsilon_k x_k - \sum_{(k, l) \text{ adjacent}} \sigma_{kl} x_k x_l + \sum_{(k, l) \text{ conflict}} \lambda_{\text{conflict}} x_k x_l + \sum_{(k, l) \text{ pseudo}} \lambda_{\text{pseudo}} x_k x_l$$
+* **Binding Affinities ($\epsilon_k$):** $\text{G-C} = -3.0$, $\text{A-U} = -2.0$, $\text{G-U (wobble)} = -1.0\text{ kcal/mol}$.
+* **Stacking Stabilization ($\sigma_{kl}$):** $-2.0\text{ kcal/mol}$ for adjacent paired bases in anti-parallel stems.
+* **Steric Clash Penalty ($\lambda_{\text{conflict}}$):** $+15.0\text{ kcal/mol}$ hard penalty enforcing that each nucleotide pairs with at most one partner.
+* **Pseudoknot Penalty ($\lambda_{\text{pseudo}}$):** $+5.0\text{ kcal/mol}$ for crossing contacts ($i < i' < j < j'$).
+
+### Benchmark Results ($N = 24\text{ nt}$ Bistable Switch, $M = 24$ Candidate Contacts)
+* **Sequence:** `GGCUAAAAAAACCAAAAAACCGAA`
+* **Exact Ground-State Energy ($2^{24} = 16.7\text{M}$ Brute-Force):** $E_0 = -10.0000\text{ kcal/mol}$ [Solved in $3.71\text{s}$]
+* **Ground-State Dot-Bracket Structure:** `((.(...)...))...........` (Active pairs: `[(0, 12), (1, 11), (3, 7)]`)
+* **Best Gibbs Sampled Energy:** $E_{\text{best}} = -10.0000\text{ kcal/mol}$ (**100.0% Exact Ground State Match**)
+* **Sokal Autocorrelation Time ($\tau_{\text{int}}$):** $38.22\text{ sweeps}$ at $\beta = 1.0$ (ESS: $654.1 / 25,000$)
+* **Physiological Shannon Entropy ($37^\circ\text{C}, \beta = 1.0$):** $S = 5.13\text{ bits}$ ($290$ distinct configurations)
+* **Thermal Melting Shannon Entropy ($T_{\text{melt}}, \beta = 0.2$):** $S = 10.66\text{ bits}$ ($4,264$ distinct configurations)
+
+### Comparative Benchmark Summary ($N=24\text{ nt}, M=24$)
+
+| Method | Condition / Schedule | Best E (kcal/mol) | Mean E | Entropy | Wall Time |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Exact Brute-Force** | All $2^{24}$ States | $-10.0000$ | N/A | $0.00\text{ b}$ | $3.71\text{s}$ |
+| **Gibbs (Physiological $37^\circ\text{C}$)** | $\beta = 1.0$ ($T = 310\text{K}$) | $-10.0000$ | $-9.30$ | $5.13\text{ b}$ | $0.27\text{s}$ |
+| **Gibbs (Thermal Melt)** | $\beta = 0.2$ ($T_{\text{melt}}$) | $-10.0000$ | $+0.93$ | $10.66\text{ b}$ | $0.19\text{s}$ |
+| **Simulated Annealing (SA)** | $\beta: 0.1 \to 3.0$ | $-10.0000$ | N/A | N/A | $0.101\text{s}$ |
+
+### Dominant Base-Pairing Marginal Probabilities ($P_{ij} = \langle x_{ij} \rangle$)
+
+| Pair $(i, j)$ | Interacting Bases | Type | $P(i, j)$ at $37^\circ\text{C}$ ($\beta = 1.0$) | $P(i, j)$ at $T_{\text{melt}}$ ($\beta = 0.2$) |
+| :---: | :---: | :---: | :---: | :---: |
+| **$(0, 20)$** | $\text{G}_0 \leftrightarrow \text{C}_{20}$ | G-C | $0.4873$ | $0.2834$ |
+| **$(1, 11)$** | $\text{G}_1 \leftrightarrow \text{C}_{11}$ | G-C | $0.4572$ | $0.2139$ |
+| **$(1, 19)$** | $\text{G}_1 \leftrightarrow \text{C}_{19}$ | G-C | $0.4178$ | $0.2212$ |
+| **$(0, 12)$** | $\text{G}_0 \leftrightarrow \text{C}_{12}$ | G-C | $0.3389$ | $0.1200$ |
+| **$(3, 9)$** | $\text{U}_3 \leftrightarrow \text{A}_9$ | U-A | $0.1936$ | $0.1488$ |
+| **$(3, 7)$** | $\text{U}_3 \leftrightarrow \text{A}_7$ | U-A | $0.1851$ | $0.1483$ |
+
+* **Bistable Conformational Switching:** Base $\text{G}_0$ actively partitions between $\text{C}_{20}$ ($48.7\%$) in the extended distal hairpin and $\text{C}_{12}$ ($33.9\%$) in the proximal hairpin, demonstrating thermodynamic multi-state equilibrium.
+* **Thermal Denaturation:** As temperature increases to the melting regime ($\beta = 0.2$), native contact probabilities drop and conformational entropy doubles from $5.13\text{ bits}$ to $10.66\text{ bits}$, recovering the open-coil statistical ensemble.
 
 ## CLI Usage
 
