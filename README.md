@@ -285,5 +285,29 @@ Extends beyond binary Ising spins into categorical variables ($K=4$ discrete sta
 uv run run_potts_model.py
 ```
 
+---
+
+## Experiment 5: Discrete Image Denoising & Reconstruction via Clamped Thermodynamic Sampling
+
+Restores corrupted binary image patterns by coupling a 2D spatial Ising prior on free latent spins to a clamped observation layer across a $28 \times 28$ lattice ($N = 784$ latent + $784$ clamped nodes).
+
+### Methodology
+- **Hierarchical Spin Architecture:** Latent spins ($x_i$) are coupled to adjacent neighbors via a ferromagnetic smoothness prior ($J_{\text{spatial}} = 1.0$) and coupled to observed evidence ($y_i$) via fidelity couplings ($J_{\text{obs}} = 1.8$).
+- **Clamped Conditioning Program:** `IsingSamplingProgram` freezes observed pixel values in `clamped_blocks`, allowing parallel 2-color checkerboard block Gibbs sweeps over the free latent blocks in JAX.
+- **Associative Denoising:** High-frequency noise is filtered out as the free spins relax thermally to the lowest-energy pattern consistent with the boundary evidence.
+
+### Reconstruction Benchmark
+- **Corruption Level:** $22.07\%$ injected random flip noise.
+- **Reconstructed Error:** **$4.97\%$** residual pixel error (**$77.5\%$ relative noise reduction**).
+- **Execution Speed:** Complete burn-in (150 steps) and 300 lattice draws executed in **$0.583\text{s}$** on JAX.
+
+![Image Denoising Verification](thrml_image_denoising.png)
+
+### Reproduction
+```bash
+uv run image_denoiser.py
+```
+
+
 
 
