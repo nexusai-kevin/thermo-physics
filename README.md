@@ -456,6 +456,14 @@ uv run thrml-bench run --exp 9
 uv run thrml-bench run-all
 ```
 
+---
+
+## Research Application & Executive Brief
+- **Printable 1-Page Executive Summary:** [`docs/one_pager.html`](docs/one_pager.html) (designed for direct PDF export and physical submission)
+- **Application Memo:** [`docs/EXTROPIC_APPLICATION_MEMO.md`](docs/EXTROPIC_APPLICATION_MEMO.md)
+- **Upstream Contribution:** [PR #79 on extropic-ai/thrml](https://github.com/extropic-ai/thrml/pull/79)
+
+
 
 
 

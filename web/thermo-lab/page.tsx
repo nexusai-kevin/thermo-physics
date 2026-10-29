@@ -1393,6 +1393,65 @@ export default function ThermoLabPage() {
             ))}
           </div>
         </section>
+
+        {/* ===================================================================
+            COMMUNITY, UPSTREAM CONTRIBUTION & QUICKSTART TUTORIAL BANNER
+        =================================================================== */}
+        <section className="rounded-2xl bg-gradient-to-r from-indigo-950/60 via-slate-900 to-cyan-950/60 border border-indigo-500/30 p-6 sm:p-8 shadow-2xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-bold mb-2">
+                <span>🚀 Community &amp; Upstream Alignment</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white">
+                Contribute, Replicate &amp; Run the Code
+              </h3>
+              <p className="text-slate-300 text-sm max-w-2xl mt-1 leading-relaxed">
+                Connect directly with our open-source thermodynamic computing research on Extropic’s <code className="text-cyan-300 font-mono">thrml</code> ecosystem. Inspect our active upstream PR, run the end-to-end interactive Jupyter tutorial, or explore the reproducibility repository.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+              {/* Upstream PR #79 */}
+              <a
+                href="https://github.com/extropic-ai/thrml/pull/79"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/25 transition text-xs font-bold shadow-lg"
+              >
+                <span className="text-emerald-400 text-sm">⚡</span>
+                <div className="text-left">
+                  <div className="text-[10px] text-emerald-400/80 uppercase tracking-wider">Upstream Contribution</div>
+                  <div>PR #79 on extropic-ai/thrml ↗</div>
+                </div>
+              </a>
+
+              {/* Open in Colab */}
+              <a
+                href="https://colab.research.google.com/github/nexusai-kevin/thermo-physics/blob/main/notebooks/quickstart_tutorial.ipynb"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-300 hover:bg-amber-500/25 transition text-xs font-bold shadow-lg"
+              >
+                <img
+                  src="https://colab.research.google.com/assets/colab-badge.svg"
+                  alt="Open in Colab"
+                  className="h-5"
+                />
+              </a>
+
+              {/* GitHub Repository */}
+              <a
+                href="https://github.com/nexusai-kevin/thermo-physics"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-200 hover:bg-slate-700/80 transition text-xs font-bold shadow-lg"
+              >
+                <span>📂 GitHub Repo ↗</span>
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
