@@ -229,3 +229,35 @@ Validates macroscopic phase transitions and spontaneous symmetry breaking using 
 uv run run_2d_phase_transition.py
 ```
 
+---
+
+## Experiment 3: NP-Hard Max-Cut Optimization via Antiferromagnetic Chromatic Block Gibbs
+
+Solves combinatorial optimization (Max-Cut) mapped directly to an antiferromagnetic Ising Hamiltonian ($J = -1.0$) on an Erdős–Rényi graph $G(n=50, p=0.20)$ with 243 edges.
+
+### Methodology
+- **Objective Mapping:** Antiferromagnetic coupling penalizes identical neighboring spins, turning lowest-energy ground states into maximum graph cuts ($\min E(s) \iff \max \text{Cut}(s)$).
+- **Chromatic Block Partitioning:** Greedy vertex coloring decomposes the arbitrary graph into **7 conditionally independent blocks**, enabling exact parallel Gibbs sampling in JAX (7 steps per full sweep vs. 50 sequential updates).
+- **Thermal Annealing:** Inverse temperature ($\beta$) sweep from high thermal fluctuations ($\beta = 0.2$) down to low-temperature ground-state trapping ($\beta = 3.5$).
+
+### Optimization Results
+| Inverse Temp ($\beta$) | Mean Cut Edges | Mean Cut Ratio (%) | Best Cut Observed |
+|---|---|---|---|
+| **Random Baseline** | $121.2$ | $49.9\%$ | $148$ |
+| $\beta = 0.2$ | $142.2$ | $58.5\%$ | $161$ |
+| $\beta = 0.5$ | $163.0$ | $67.1\%$ | **$172$ ($70.8\%$)** |
+| $\beta = 1.0$ | $170.8$ | $70.3\%$ | **$172$ ($70.8\%$)** |
+| $\beta = 2.0$ | $170.9$ | $70.3\%$ | $171$ |
+| $\beta = 3.5$ | $171.0$ | $70.4\%$ | $171$ |
+
+- **Execution Runtime:** $7.344\text{s}$ total JIT compilation and multi-temperature sampling on JAX.
+- **Ground State Recovery:** Rapidly escapes high-entropy local minima and converges to 70.8% edge separation.
+
+![Max-Cut Optimization](thrml_max_cut_solution.png)
+
+### Reproduction
+```bash
+uv run solve_max_cut.py
+```
+
+

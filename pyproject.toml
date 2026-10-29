@@ -9,6 +9,7 @@ description = "Reference Implementations and Reproducibility Suite for Thermodyn
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "networkx>=3.6.1",
     "numpy>=1.26.0",
 ]
 
