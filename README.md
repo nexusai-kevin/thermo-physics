@@ -260,4 +260,30 @@ Solves combinatorial optimization (Max-Cut) mapped directly to an antiferromagne
 uv run solve_max_cut.py
 ```
 
+---
+
+## Experiment 4: Multistate Potts Model (K=4) via Categorical Factor Graph Sampling
+
+Extends beyond binary Ising spins into categorical variables ($K=4$ discrete states) using `CategoricalNode`, `CategoricalEBMFactor`, and `CategoricalGibbsConditional` on a $24 \times 24$ periodic torus ($N = 576$ nodes).
+
+### Methodology
+- **Categorical Coupling:** Standard Potts energy rewarding state agreement ($\Delta E = -\beta \cdot \mathbb{I}[s_u = s_v]$) across nearest-neighbor directed factor edges.
+- **Bipartite Decomposition:** Checkerboard split into conditionally independent white/black blocks wrapped in `BlockGibbsSpec(free_blocks, clamped_blocks=[])` for parallel sampling in JAX.
+- **Analytical Critical Benchmark:** The theoretical 2D square-lattice $K$-state Potts critical temperature is:
+  $$\beta_c = \ln(1 + \sqrt{K}) = \ln(1 + \sqrt{4}) = \ln 3 \approx 1.0986$$
+
+### Simulation Observations
+- **$\beta = 0.40$ (Disordered Gas):** Thermal noise dominates; categorical entropy is near maximum with random pixel distribution.
+- **$\beta = 1.20$ (Critical Domain Formation):** Past the critical threshold ($\beta > 1.0986$), localized thermal fluctuations coalesce into dominant categorical clusters.
+- **$\beta = 2.20$ (Macroscopic Phase Separation):** Rapid ground-state relaxation into broad, connected single-color domains wrapping around the torus.
+- **Execution Performance:** Complete multi-temperature burn-in and sampling completed in $2.956\text{s}$ on JAX.
+
+![Multistate Potts Clustering](thrml_potts_k4.png)
+
+### Reproduction
+```bash
+uv run run_potts_model.py
+```
+
+
 
