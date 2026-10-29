@@ -21,8 +21,7 @@ We build and independently check sampling workloads on Extropic's open-source `t
 3. **Throughput measurement.** 20.18 M spin-updates/s at 128×128 (16,384 spins), CPU only, 500 sweeps. The
    8,192× figure in our tables is the *theoretical* ratio N/2 of sequential to two-colour updates per sweep, not a
    measured wall-clock speedup. Sweeps/s is flat across 16² to 128², so small lattices are overhead-bound.
-4. **Upstream contribution.** A QUBO portfolio example (`examples/qubo_portfolio_optimization`) packaged as a patch
-   for `extropic-ai/thrml`; it applies cleanly to current `main` and passes upstream's black/isort/flake8 config.
+4. **Upstream contribution.** A QUBO portfolio example (`examples/qubo_portfolio_optimization`) submitted upstream as [PR #79](https://github.com/extropic-ai/thrml/pull/79) on `extropic-ai/thrml`; it applies cleanly to `main` and conforms to upstream's black/isort/flake8 config.
 5. **Educational front end.** The `/thermo-lab` page runs nine interactive stations in the browser. These are
    JavaScript Glauber/Metropolis re-implementations for teaching, not calls into `thrml`.
 
