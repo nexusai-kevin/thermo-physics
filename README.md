@@ -1,5 +1,7 @@
 # Thermodynamic Computing Reference Implementations & Reproducibility Suite
 
+[![CI](https://github.com/nexusai-kevin/thermo-physics/actions/workflows/ci.yml/badge.svg)](https://github.com/nexusai-kevin/thermo-physics/actions/workflows/ci.yml)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nexusai-kevin/thermo-physics/blob/main/notebooks/quickstart_tutorial.ipynb)
 [![Extropic thrml](https://img.shields.io/badge/Extropic_thrml-v0.1.4-7c3aed?style=flat-square)](https://github.com/extropic-ai/thrml)
 [![JAX](https://img.shields.io/badge/JAX-v0.12.0-008080?style=flat-square)](https://github.com/jax-ml/jax)
 [![Boltzmann Equilibrium](https://img.shields.io/badge/Boltzmann_TV_Distance-0.0484-2ea44f?style=flat-square)](#4-reproducibility-benchmark-results-native-thrml)
@@ -44,6 +46,8 @@ To sample from the Boltzmann distribution $P(s) = \frac{1}{Z(\theta)} e^{-\beta 
 thermo-physics/
 ├── pyproject.toml                     # Package metadata & dependencies (jax, thrml, numpy)
 ├── README.md                          # Architecture, mapping guide, and verified benchmark outputs
+├── notebooks/
+│   └── quickstart_tutorial.ipynb      # Interactive Colab/Jupyter walkthrough (Onsager & TSP)
 ├── first_ising.py                     # Minimal 5-spin 1D Ising chain starter example
 ├── run_suite.py                       # Top-level CLI entrypoint for the full benchmark suite
 ├── benchmark_results.json             # Generated empirical reproducibility metrics (Native thrml)
@@ -185,6 +189,13 @@ Saved full JSON benchmark report to: C:\Users\mcder\Desktop\thermo-physics\bench
 ---
 
 ## 6. Quickstart Usage
+
+### Interactive Jupyter / Google Colab Tutorial
+Launch the complete end-to-end interactive tutorial in Google Colab or locally in Jupyter:
+- **Colab Notebook:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nexusai-kevin/thermo-physics/blob/main/notebooks/quickstart_tutorial.ipynb)
+- **Local Notebook Path:** [`notebooks/quickstart_tutorial.ipynb`](notebooks/quickstart_tutorial.ipynb)
+
+### Local CLI & Reproduction Suite
 
 ```powershell
 # 1. Run the minimal 5-spin 1D Ising chain example
