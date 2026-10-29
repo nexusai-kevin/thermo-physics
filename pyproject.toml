@@ -17,6 +17,7 @@ thrml = [
     "jax>=0.4.20",
     "jaxlib>=0.4.20",
     "thrml",
+    "matplotlib>=3.8.0",
 ]
 dev = [
     "pytest>=8.0.0",

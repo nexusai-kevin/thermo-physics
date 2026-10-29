@@ -200,3 +200,32 @@ Saved full JSON benchmark report to: C:\Users\mcder\Desktop\thermo-physics\bench
 # 3. Run the automated unit & statistical verification test suite (6/6 tests)
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
+
+---
+
+## Experiment 2: 2D Ising Lattice Phase Transitions & Onsager Criticality
+
+Validates macroscopic phase transitions and spontaneous symmetry breaking using 2-color bipartite block Gibbs sampling on a periodic $32 \times 32$ torus lattice ($N = 1,024$ spins).
+
+### Methodology
+- **Graph Topology:** 2D grid with periodic toroidal boundary conditions.
+- **Partitioning:** Bipartite checkerboard split ($r + c \pmod 2$) into conditionally independent white/black node blocks for concurrent JAX GPU sampling.
+- **Critical Benchmark:** Analytical Onsager critical inverse temperature:
+  $$\beta_c = \frac{1}{2} \ln(1 + \sqrt{2}) \approx 0.4407$$
+
+### Verification Sweep
+| Inverse Temp ($\beta$) | Order Parameter $|\langle M \rangle|$ | Observed Regime |
+|---|---|---|
+| $0.20$ | $0.0434$ | Disordered (Paramagnetic noise) |
+| $0.35$ | $0.0960$ | High-temperature fluctuations |
+| $0.44$ | $0.6866$ | Critical domain percolation |
+| $0.50$ | $0.9122$ | Ferromagnetic macro-ordering |
+| $0.70$ | $0.9417$ | Strongly ordered ground state |
+
+![2D Phase Transition Verification](thrml_2d_phase_transition.png)
+
+### Reproduction
+```bash
+uv run run_2d_phase_transition.py
+```
+
