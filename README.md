@@ -1,6 +1,26 @@
 # Thermodynamic Computing Reference Implementations & Reproducibility Suite
 
-A modular reference implementation and hardware-aware reproducibility benchmark suite for **Energy-Based Models (EBMs)**, **Factor Graphs**, **Multi-Color Block Gibbs Sampling**, and **Denoising Thermodynamic Models (DTMs)** compatible with Extropic's `thrml` software stack.
+[![Extropic thrml](https://img.shields.io/badge/Extropic_thrml-v0.1.4-7c3aed?style=flat-square)](https://github.com/extropic-ai/thrml)
+[![JAX](https://img.shields.io/badge/JAX-v0.12.0-008080?style=flat-square)](https://github.com/jax-ml/jax)
+[![Boltzmann Equilibrium](https://img.shields.io/badge/Boltzmann_TV_Distance-0.0484-2ea44f?style=flat-square)](#4-reproducibility-benchmark-results-native-thrml)
+[![Parallel Speedup](https://img.shields.io/badge/Parallel_Speedup-18.0x_%2F_sweep-0969da?style=flat-square)](#4-reproducibility-benchmark-results-native-thrml)
+[![DTM Relaxation](https://img.shields.io/badge/DTM_Energy--87.74_%E2%86%92_--96.56-d97706?style=flat-square)](#5-visual-proof-2d-lattice-dtm-denoising-output)
+[![Tests](https://img.shields.io/badge/Tests-6%2F6_Passing-success?style=flat-square)](#6-quickstart-usage)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+
+A modular reference implementation and hardware-aware reproducibility benchmark suite for **Energy-Based Models (EBMs)**, **Factor Graphs**, **Multi-Color Block Gibbs Sampling**, and **Denoising Thermodynamic Models (DTMs)** executing on Extropic's [`thrml`](https://github.com/extropic-ai/thrml) and JAX stack.
+
+---
+
+## Key Verified Highlights (Native `thrml` v0.1.4)
+
+| Core Verification Metric | Measured Result | Physical Meaning |
+| :--- | :--- | :--- |
+| **Boltzmann Equilibrium** | `TV Distance = 0.0484` (`KL = 0.01089`) | Empirical Block Gibbs distribution converges to exact brute-force $P(s) = e^{-\beta E(s)} / Z$ |
+| **Exact vs. Empirical Energy** | `Exact <E> = -1.7699` vs. `Empirical <E> = -1.7685` | Absolute energy error $\|\Delta E\| = 0.0014$ across 12,000 samples on a frustrated $2 \times 4$ spin lattice |
+| **Hardware Parallel Speedup** | `18.0x per sweep` (`22.4x per independent sample`) | 2-Color Checkerboard Block Gibbs updates in **2 clock cycles/sweep** vs. **36 cycles** for sequential MCMC |
+| **DTM Energy Relaxation** | `-87.74 -> -96.56` (`75.0% -> 81.9%` pixel accuracy) | Physical thermal annealing repairs spin-flip corruption in **72.0x** fewer clock cycles than single-site MCMC |
+| **Projected TSU Energy Efficiency** | `104.17 fJ / spin-update` (`1.55e+10x` reduction) | Subthreshold CMOS p-bit array (~1W) vs. measured 300W GPU tensor/MCMC execution (`154.93 mJ/sweep`) |
 
 ---
 
@@ -22,21 +42,21 @@ To sample from the Boltzmann distribution $P(s) = \frac{1}{Z(\theta)} e^{-\beta 
 
 ```text
 thermo-physics/
-├── pyproject.toml                     # Package metadata & dependencies
-├── README.md                          # Architecture, mapping guide, and benchmark results
+├── pyproject.toml                     # Package metadata & dependencies (jax, thrml, numpy)
+├── README.md                          # Architecture, mapping guide, and verified benchmark outputs
 ├── first_ising.py                     # Minimal 5-spin 1D Ising chain starter example
 ├── run_suite.py                       # Top-level CLI entrypoint for the full benchmark suite
-├── benchmark_results.json             # Generated empirical reproducibility metrics
+├── benchmark_results.json             # Generated empirical reproducibility metrics (Native thrml)
 ├── thermo_repro/
 │   ├── __init__.py                    # Unified API exports
-│   ├── backend.py                     # Native `thrml` loader + built-in JAX/NumPy compatible engine
+│   ├── backend.py                     # Native `thrml` loader + fallback engine & exact Z(θ) solver
 │   ├── coloring.py                    # Independent-set graph coloring & block verifier
 │   ├── metrics.py                     # Exact Z(θ), Autocorrelation (τ_int), and TSU vs. GPU energy profiler
 │   ├── project_a_classifier.py        # Project A: Bipartite V-H-L EBM Classifier & Associative Memory (CD-k)
 │   ├── project_b_dtm.py               # Project B: 2D Lattice Denoising Thermodynamic Model (DTM)
 │   └── benchmark_runner.py            # End-to-end benchmark orchestrator & CLI
 └── tests/
-    └── test_suite.py                  # Unit & statistical equilibrium verification tests
+    └── test_suite.py                  # Unit & statistical equilibrium verification tests (6/6 passing)
 ```
 
 ---
@@ -48,39 +68,135 @@ Maps a multi-class classifier and Hopfield associative memory onto a 3-layer bip
 
 $$E(v, h, l) = -\sum_{i} a_i v_i - \sum_{j} b_j h_j - \sum_{k} c_k l_k - \sum_{i,j} W_{ij} v_i h_j - \sum_{j,k} U_{jk} h_j l_k$$
 
-- **Training:** Contrastive Divergence ($\text{CD-}k$) comparing positive clamped correlations $\langle v_i h_j \rangle_{\text{pos}}, \langle h_j l_k \rangle_{\text{pos}}$ against free bipartite Block Gibbs trajectories.
-- **Classification by Relaxation:** Clamps $V$ to a noisy input (e.g., 20% random spin flips) and relaxes `[Block(H), Block(L)]` to read out the class posterior $\arg\max_k \langle l_k \rangle$.
-- **Associative Pattern Completion:** Clamps only the unoccluded visible spins $V_{\text{obs}}$ and jointly relaxes `[Block(V_masked + L), Block(H)]` to reconstruct occluded patterns.
+- **Training:** Contrastive Divergence ($\text{CD-}3$) comparing positive clamped correlations $\langle v_i h_j \rangle_{\text{pos}}, \langle h_j l_k \rangle_{\text{pos}}$ against free bipartite Block Gibbs trajectories.
+- **Classification by Relaxation:** Clamps $V$ to a noisy input (20% random spin flips) and relaxes `[Block(H), Block(L)]` to read out the class posterior $\arg\max_k \langle l_k \rangle$ (**100.0%** clean accuracy, **93.8%** noisy accuracy).
+- **Associative Pattern Completion:** Clamps only the unoccluded visible spins $V_{\text{obs}}$ (with 37.5% of the pattern masked out) and jointly relaxes `[Block(V_masked + L), Block(H)]` to achieve **100.0%** occluded bit recovery and classification accuracy.
 
 ### Project B: Denoising Thermodynamic Model Suite (`thermo_repro/project_b_dtm.py`)
 Replaces score-based reverse diffusion with physical thermal annealing on a 2D spin lattice:
 
 $$E(s \mid y) = -J_{\text{prior}} \sum_{\langle i,j \rangle} s_i s_j - \sum_{i} \lambda_{\text{obs}} y_i s_i, \quad \lambda_{\text{obs}} = \frac{1}{2}\ln\left(\frac{1 - p_{\text{noise}}}{p_{\text{noise}}}\right)$$
 
-- **Execution:** Anneals inverse temperature $\beta_1 < \beta_2 < \dots < \beta_K$ using 2-color checkerboard `Block` updates (`[Block(even_sites), Block(odd_sites)]`) and compares hardware clock cycles against sequential single-site MCMC.
+- **Execution:** Anneals inverse temperature $\beta \in (0.7, 1.4, 2.2)$ using 2-color checkerboard `Block` updates (`[Block(even_sites), Block(odd_sites)]`) and compares hardware clock cycles against sequential single-site MCMC.
 
 ---
 
-## 4. Reproducibility Benchmark Results
+## 4. Reproducibility Benchmark Results (Native `thrml`)
 
-Running `python run_suite.py --show-dtm-ascii` executes all five verification rubrics:
+### Exact vs. Empirical Boltzmann-Gibbs Convergence ($2 \times 4$ Frustrated Spin Lattice, $2^8 = 256$ States)
 
-| Benchmark Rubric | Metric | Measured Result |
+| Quantity | Theoretical Exact ($Z(\theta)$ Brute-Force) | Empirical `thrml` Block Gibbs (12,000 Samples) | Discrepancy / Metric |
+| :--- | :--- | :--- | :--- |
+| **Partition Function $Z(\theta)$** | `692.6901` ($\ln Z = 6.5406$) | — | Exact enumeration over all $2^8$ spin states |
+| **Mean Energy $\langle E \rangle$** | `-1.7699` | `-1.7685` | **`\|ΔE\| = 0.0014`** |
+| **Total Variation Distance $D_{\text{TV}}(\hat{P}, P)$** | `0.0000` | `0.0484` | $\frac{1}{2}\sum_s \|\hat{P}(s) - P(s)\| < 0.05$ |
+| **KL Divergence $D_{\text{KL}}(\hat{P} \parallel P)$** | `0.0000` | `0.01089` | Strong distributional convergence |
+| **Integrated Autocorrelation $\tau_{\text{int}}$** | — | `0.73 sweeps` | Effective Sample Size $\text{ESS} = 8,214$ |
+
+### Full 5-Stage Suite Summary
+
+| Benchmark Stage | Configuration | Key Measured Results |
 | :--- | :--- | :--- |
-| **1. Bipartite EBM & TSU Energy Profile** | $64 \times 32$ RBM (1,100 sweeps) | $\langle E \rangle = -20.338$, **104.2 fJ/spin-update** projected on TSU vs. **6.94 mJ/sweep** on 300W GPU (**$6.9 \times 10^8\times$** energy reduction) |
-| **2. Exact Boltzmann Equilibrium** | Brute-force $Z(\theta)$ on $2 \times 4$ lattice (256 states) | Exact $\langle E \rangle = -1.7699$ vs. Empirical $\langle E \rangle = -1.7526$ ($\|\Delta E\| = 0.0174$, $D_{\text{TV}} = 0.0466$, $D_{\text{KL}} = 0.0102$) |
-| **3. Mixing Time & Autocorrelation ($\tau_{\text{int}}$)** | $6 \times 6$ Lattice: 2-Color Block vs. Sequential Gibbs | $\tau_{\text{int}} = 0.98$ sweeps (2 clock cycles/sweep vs. 36 clock cycles/sweep $\rightarrow$ **18.0x parallel cycle speedup**) |
-| **4. Project A: V-H-L EBM Classifier** | Clean / Noisy (20% flips) / Occluded (37.5% masked) | **100.0%** clean accuracy, **93.8%** noisy accuracy, **100.0%** occluded associative recall |
-| **5. Project B: 2D Lattice DTM** | $12 \times 12$ Lattice with 25% spin corruption | Accuracy recovered from **75.0% $\rightarrow$ 83.3%** (**33.3%** bit-error reduction), **72.0x** fewer hardware clock cycles than sequential MCMC |
+| **1. Bipartite EBM & TSU Energy Profile** | $64 \text{ Visible} \times 32 \text{ Hidden}$ ($2,048$ edges, $1,100$ sweeps) | $\langle E \rangle = -19.727$ \| Classical GPU: `154.928 mJ/sweep` vs. Projected TSU: `104.17 fJ/spin-update` (**`1.55e+10x` energy reduction**) |
+| **2. Exact Boltzmann Equilibrium** | $2 \times 4$ Lattice ($\beta = 0.85$, $12,000$ samples) | Exact $\langle E \rangle = -1.7699$ vs. Empirical $\langle E \rangle = -1.7685$ (**`\|err\| = 0.0014`**, **`TV = 0.0484`**) |
+| **3. Mixing Time & Autocorrelation ($\tau_{\text{int}}$)** | $6 \times 6$ Lattice: 2-Color Block vs. Sequential Gibbs | Block Gibbs $\tau_{\text{int}} = 0.75\text{ sweeps}$ (`2 cycles/sweep`) vs. Sequential $\tau_{\text{int}} = 0.93\text{ sweeps}$ (`36 cycles/sweep`) $\rightarrow$ **`18.0x` per sweep / `22.4x` per independent sample** |
+| **4. Project A: V-H-L EBM Classifier** | $16\text{V} \times 16\text{H} \times 4\text{L}$ ($\text{CD-}3$ trained) | **100.0%** clean accuracy \| **93.8%** noisy accuracy (20% spin flips) \| **100.0%** occluded bit recovery |
+| **5. Project B: 2D Lattice DTM** | $12 \times 12$ Lattice ($144$ spins, 25% corruption) | Accuracy: **`75.0% -> 81.9%`** (**27.8%** bit-error reduction) \| Energy: **`-87.74 -> -96.56`** \| **`72.0x`** fewer clock cycles than sequential MCMC |
 
 ---
 
-## 5. Quickstart Usage
+## 5. Visual Proof: 2D Lattice DTM Denoising Output
+
+Running `python run_suite.py --show-dtm-ascii` executes the full suite on native `thrml` and prints the $12 \times 12$ spin lattice before corruption, after 25% random spin-flip noise, and after 2-color Checkerboard Block Gibbs thermal relaxation (`##` = $+1$ spin, `..` = $-1$ spin):
+
+```text
+==============================================================================
+ THERMODYNAMIC COMPUTING REFERENCE & REPRODUCIBILITY SUITE
+ Backend: Native Extropic thrml
+==============================================================================
+
+[1/5] Running Bipartite EBM Benchmark (64 Visible x 32 Hidden) & TSU Energy Profile...
+  -> Generated samples shape: (500, 96) | <E> = -19.727 | Wall time = 568.1 ms
+  -> Classical (300W GPU): 154.928 mJ/sweep vs. Projected TSU (1W array): 104.17 fJ/spin-update (1.55e+10x energy reduction)
+
+[2/5] Verifying Exact Boltzmann-Gibbs Equilibrium (Brute-Force Z on 2x4 Spin Lattice)...
+  -> Exact <E> = -1.7699 | Empirical <E> = -1.7685 (|err| = 0.0014)
+  -> Total Variation Distance TV(P_emp, P_exact) = 0.0484 | KL Divergence = 0.01089
+
+[3/5] Comparing Mixing Time & Autocorrelation (tau_int): Parallel Block vs. Sequential Gibbs...
+  -> 2-Color Block Gibbs: tau_int = 0.75 sweeps (2 clock cycles/sweep)
+  -> Sequential Gibbs:    tau_int = 0.93 sweeps (36 clock cycles/sweep)
+  -> Hardware Parallel Cycle Speedup: 18.0x per sweep | 22.4x per independent sample
+
+[4/5] Running Project A: Associative Memory & Robust EBM Classification (Bipartite V-H-L)...
+  -> Clean Classification Accuracy: 100.0% | Noisy (20% spin flips): 93.8%
+  -> Associative Memory Occluded Bit Recovery: 100.0% | Occluded Class Accuracy: 100.0%
+
+[5/5] Running Project B: Denoising Thermodynamic Model (DTM) on 12x12 Spin Lattice...
+  -> Corrupted Input Accuracy: 75.0% -> DTM Denoised Accuracy: 81.9% (27.8% bit-error reduction)
+  -> Energy Relaxation: -87.74 -> -96.56 | Hardware Clock Cycle Advantage vs. Sequential MCMC: 72.0x
+
+Saved full JSON benchmark report to: C:\Users\mcder\Desktop\thermo-physics\benchmark_results.json
+==============================================================================
+
+--- Clean 12x12 Lattice ---
+........................
+........................
+........................
+......############......
+......############......
+......############......
+......############......
+......############......
+......############......
+........................
+........................
+........................
+
+--- Corrupted (25% Spin Flips) ---
+........##......##......
+......##..##............
+..##..####............##
+##..##############......
+..####..##########..####
+......##########....##..
+..################....##
+####..##..##..####......
+..################......
+##....##....##..........
+....##..##....####..##..
+......##......##........
+
+--- DTM Relaxed Reconstruction ---
+........##..............
+......######............
+......####..............
+....##############......
+..################..####
+......##########....##..
+..################......
+##################......
+##################......
+##....##....##..........
+..............####......
+........................
+```
+
+---
+
+## 6. Quickstart Usage
 
 ```powershell
-# Run the full reproducibility benchmark suite and export benchmark_results.json
+# 1. Run the minimal 5-spin 1D Ising chain example
+.\.venv\Scripts\python.exe first_ising.py
+# Output:
+# Average energy: -0.96500003
+# Min energy seen: -2.0
+# Max energy seen: 2.0
+
+# 2. Run the full reproducibility benchmark suite with ASCII lattice visualization
 .\.venv\Scripts\python.exe run_suite.py --show-dtm-ascii
 
-# Run the automated unit & statistical verification test suite
+# 3. Run the automated unit & statistical verification test suite (6/6 tests)
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 ```
