@@ -13,6 +13,7 @@
 | **Exp 7** | QUBO Portfolio Optimizer | Finance (Constrained QUBO) | N = 20 Assets, K = 5 Budget (190 edges) | `14.868s` | 99.1% Budget Feasibility \| 94.1% Pareto Match | — | — | [`qubo_portfolio.py`](qubo_portfolio.py) |
 | **Exp 8** | Continuous Double-Well Chain | Analog Physics (ContinuousNode) | N = 32 Coupled Analog Oscillators (x in R) | `2.692s` | Hop Rate: 38.4% (beta=0.35) -> 0.9% (beta=4.0) | — | — | [`run_continuous_double_well.py`](run_continuous_double_well.py) |
 | **Exp 9** | 10-City TSP QUBO Router | NP-Complete Routing (TSP) | 10 x 10 Permutation Lattice (100 spins, 28 colors) | `285.0s` | 100.0% Pure Opt (6.296 pure / 6.296 hyb vs 6.296) | — | — | [`solve_tsp.py`](solve_tsp.py) |
+| **Exp 10** | SK Frustrated Spin Glass | Physics (Spin Glass) | N = 24 Dense All-to-All (276 edges) | `10.55s` | 100.0% Exact Ground State Match ($E_0 = -18.4120$) | 438.6 / 13000 | 14.82 | [`experiments/exp10_sk_spin_glass.py`](experiments/exp10_sk_spin_glass.py) |
 
 ESS / τ_int are reported for the sampling experiments with a meaningful scalar observable (Exp 2, Exp 6); `—` means not measured. Exp 2 uses the critical point β = 0.4407; Exp 6 uses the benchmark setting β = 2.2.
 
@@ -56,6 +57,19 @@ Evaluated across 5 independent restarts on a 100-spin permutation lattice ($10 \
 | **Ramped ($\lambda \in [0.5, 5.0]$, $\beta \in [0.2, 8.0]$)** | Hybrid (+ 2-opt) | $6.296$ | $6.296$ | $+0.0\%$ | $5 / 5$ | $100.0\%$ |
 
 Under fixed penalty $\lambda = 2.8$, pure sampling explores a constrained space but terminates at suboptimal local minima (+34.0% gap), which 2-opt repairs to global optimality. Under a geometrically ramped schedule ($\lambda = 0.5 \to 5.0$), pure Block Gibbs sampling directly converges to the global Held-Karp optimum ($L = 6.296$) without any classical post-processing.
+
+## Experiment 10: Sherrington-Kirkpatrick (SK) Frustrated Spin Glass
+
+### Overview
+Evaluates thermodynamic Gibbs sampling against the canonical dense spin glass problem with Gaussian quenched disorder $J_{ij} \sim \mathcal{N}(0, 1/N)$. Unlike 2D planar Ising systems, the SK model features dense $O(N^2)$ non-planar couplings and high frustration, inducing a rugged free-energy landscape with exponentially many metastable states.
+
+### Benchmark Results ($N=24$, $\beta = 2.5$)
+* **Exact Ground-State Energy ($2^{24}$ Brute-Force):** $E_0 = -18.4120$ ($E_0/N = -0.7672$)
+* **Best Sampled Energy:** $E_{\text{best}} = -18.4120$ (**100.0% Exact Ground State Match**)
+* **Sokal Autocorrelation Time ($\tau_{\text{int}}$):** 14.82 steps
+* **Effective Sample Size (ESS):** 438.6 uncorrelated samples / 13,000 recorded iterations
+* **Mean Absolute Overlap $\langle |q| \rangle$:** 0.6124 (demonstrating cluster condensation in low-lying Parisi valleys)
+* **Overlap Variance $\text{Var}(q)$:** 0.1841 (broad bimodal support indicating multi-valley exploration)
 
 ## CLI Usage
 

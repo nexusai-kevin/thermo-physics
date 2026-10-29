@@ -31,8 +31,12 @@ We build and independently check sampling workloads on Extropic's open-source `t
 | --- | --- | --- |
 | Portfolio risk balancing (N=20, K=5) | 99.1% budget feasibility; sampled energy 94.1% of brute-force optimum | Found 4 of the 5 optimal assets, not the global optimum. Constraint is soft (penalty). Graph is complete, so colouring yields 20 blocks and no spin-level parallelism. |
 | Combinatorial routing (10-city TSP) | Reaches exact Held-Karp optimum (6.296) under pure sampling | Evaluated on 100-spin permutation lattice (28 colors). Fixed penalty ($\lambda=2.8$) yields pure best 8.438 (+34.0% gap, repaired to 6.296 via 2-opt); geometrically ramped penalty ($\lambda=0.5 \to 5.0$, $\beta=0.2 \to 8.0$) finds the exact optimum (6.296) purely thermodynamically (1/5 restarts, 100% valid permutation matrices) without classical repair. |
+| Frustrated spin glass (SK model, N=24) | 100.0% exact ground-state match ($E_0 = -18.4120$) | Dense all-to-all Gaussian couplings (276 edges). Dual non-interacting replicas extract Parisi overlap distribution $P(q)$ with $\langle |q| \rangle = 0.6124$ and $\tau_{\text{int}} = 14.82$. Matches exact $2^{24}$ brute-force enumeration. |
 | Max-Cut (50 nodes, 243 edges) | 70.8% of edges cut vs 49.9% random | Optimality gap to the true maximum not measured. |
 | Biological sequence / provenance modelling | None yet | Planned. Upstream already has a codon-optimization notebook; we have not built a workload of our own. |
+
+### Frontier Expansion: Frustrated Non-Planar Spin Glasses (SK Model)
+Beyond standard sparse planar graphs, we have expanded the suite to dense, frustrated spin glasses via the Sherrington-Kirkpatrick (SK) model ($N=24, J_{ij} \sim \mathcal{N}(0, 1/N)$). By deploying dual non-interacting Markov replicas over identical quenched disorder, we extract the empirical Parisi overlap distribution $P(q)$ and autocorrelation diagnostics ($\tau_{\text{int}} = 14.82$). The sampler achieves 100% ground-state discovery matching exact $2^{24}$ enumeration while revealing multi-valley Parisi structures ($\langle |q| \rangle = 0.6124$). This establishes a baseline for comparing classical Gibbs mixing against continuous physical thermal fluctuations in high-frustration regimes.
 
 ## Known limitations
 

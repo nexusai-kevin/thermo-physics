@@ -435,6 +435,25 @@ uv run solve_tsp.py
 
 ---
 
+## Experiment 10: Sherrington-Kirkpatrick (SK) Frustrated Spin Glass
+
+Evaluates thermodynamic Gibbs sampling against the canonical dense spin glass with Gaussian quenched disorder $J_{ij} \sim \mathcal{N}(0, 1/N)$ ($N = 24$, $276$ all-to-all couplings). Two non-interacting replicas sample identical disorder to measure the Parisi overlap distribution $P(q)$ and autocorrelation diagnostics.
+
+### Benchmark Results ($N = 24$, $\beta = 2.5$)
+* **Exact Ground State ($2^{24}$ Brute-Force):** $E_0 = -18.4120$ ($E_0/N = -0.7672$, solved in $10.55\text{s}$)
+* **Best Sampled Energy:** $E_{\text{best}} = -18.4120$ (**100.0% Exact Ground State Match**)
+* **Sokal Autocorrelation Time ($\tau_{\text{int}}$):** $14.82\text{ steps}$
+* **Effective Sample Size (ESS):** $438.6$ uncorrelated samples / $13,000$ recorded draws
+* **Parisi Order Parameter $\langle |q| \rangle$:** $0.6124$ (indicating condensation into low-lying Parisi valleys)
+* **Overlap Variance $\text{Var}(q)$:** $0.1841$ (multi-valley exploration across configuration space)
+
+### Reproduction
+```bash
+python experiments/exp10_sk_spin_glass.py
+```
+
+---
+
 ## Hardware Performance & Multi-Scale Lattice Scaling (`run_scaling_benchmark.py`)
 
 Benchmarks XLA JIT compilation overhead against pure compiled 2-color Block Gibbs sampling throughput across 4 lattice scales ($500$ full sweeps per scale: $L = 16 \to 32 \to 64 \to 128$, up to $16,384$ spins):
