@@ -60,7 +60,7 @@ def qubo_to_ising(
         E(s) = sum_{i<j} (Q_ij / 2) s_i s_j + sum_i (Q_ii / 2 + sum_{j != i} Q_ij / 4) s_i + const
     Matching E(s) = -(sum_i b_i s_i + sum_{i<j} J_{ij} s_i s_j) yields:
         J_{ij} = -0.5 * Q_ij
-        b_i    = -0.5 * Q_ii - 0.25 * sum_{j != i} Q_ij
+        b_i    = -0.5 * Q_ii - 0.5 * sum_{j != i} Q_ij
     """
     n = len(mu)
     q_mat = risk_aversion * sigma.copy() + penalty_lambda * np.ones((n, n), dtype=np.float64)

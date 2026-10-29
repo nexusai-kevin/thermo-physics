@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -30,6 +31,161 @@ console = Console(legacy_windows=False)
 
 ROOT_DIR = Path(__file__).resolve().parent
 BENCHMARKS_MD_PATH = ROOT_DIR / "BENCHMARKS.md"
+
+# ----------------------------------------------------------------------------
+# MCMC diagnostics: integrated autocorrelation time and effective sample size
+# ----------------------------------------------------------------------------
+DIAG_N_WARMUP = 500
+DIAG_N_SAMPLES = 4000
+DIAG_WINDOW_C = 5.0  # Sokal automatic-windowing constant
+
+
+def autocorrelation(x: np.ndarray) -> np.ndarray:
+    """Normalised autocorrelation function rho(k), k = 0..N-1, computed with a zero-padded FFT."""
+    x = np.asarray(x, dtype=np.float64)
+    x = x - x.mean()
+    n = len(x)
+    spectrum = np.fft.rfft(x, n=2 * n)
+    acov = np.fft.irfft(spectrum * np.conj(spectrum))[:n]
+    return acov / acov[0]
+
+
+def integrated_autocorr_time(x: np.ndarray, c: float = DIAG_WINDOW_C) -> tuple[float, int]:
+    """tau_int = 1 + 2 * sum_{k=1}^{W} rho(k), with W chosen by Sokal's automatic window (W >= c * tau_int(W)).
+
+    tau_int is clamped below at 1 so that ESS never exceeds the number of samples (a conservative choice
+    for anti-correlated chains). Returns (tau_int, W). The series must have non-zero variance.
+    """
+    rho = autocorrelation(x)
+    taus = 2.0 * np.cumsum(rho) - 1.0  # taus[W] = 1 + 2 * sum_{k=1}^{W} rho(k)
+    window = len(taus) - 1
+    for w in range(len(taus)):
+        if w >= c * taus[w]:
+            window = w
+            break
+    return float(max(taus[window], 1.0)), int(window)
+
+
+def effective_sample_size(x: np.ndarray) -> tuple[float, float, int]:
+    """ESS = N / (1 + 2 * sum_{k=1}^{W} rho(k)). Returns (ess, tau_int, window)."""
+    tau, window = integrated_autocorr_time(x)
+    return len(x) / tau, tau, window
+
+
+def _constant(x: np.ndarray) -> bool:
+    return bool(np.ptp(x) == 0)
+
+
+def _diag_row(exp_id: int, setting: str, observable: str, n: int, tau, ess, note: str, primary: bool) -> dict:
+    return {
+        "exp_id": exp_id,
+        "setting": setting,
+        "observable": observable,
+        "n_samples": n,
+        "tau_int": tau,
+        "ess": ess,
+        "note": note,
+        "primary": primary,
+    }
+
+
+def diagnose_ising(betas=(0.20, 0.4407, 0.70), L: int = 32) -> list[dict]:
+    """Experiment 2: tau_int / ESS of |M| from block Gibbs trajectories (1 full 2-colour sweep between samples)."""
+    import jax
+    import jax.numpy as jnp
+    from thrml import Block, SamplingSchedule, sample_states
+    from thrml.models import hinton_init
+
+    sys.path.insert(0, str(ROOT_DIR))
+    import run_2d_phase_transition as ising
+
+    rows = []
+    key = jax.random.key(0)
+    for beta in betas:
+        key, k_init, k_samp = jax.random.split(key, 3)
+        model, program, free_blocks, flat_nodes = ising.build_2d_lattice(L=L, J=1.0, beta_val=beta)
+        init_state = hinton_init(k_init, model, free_blocks, ())
+        schedule = SamplingSchedule(n_warmup=DIAG_N_WARMUP, n_samples=DIAG_N_SAMPLES, steps_per_sample=2)
+        raw = sample_states(k_samp, program, schedule, init_state, [], [Block(flat_nodes)])
+        spins = 2.0 * np.asarray(raw[0], dtype=np.float64) - 1.0
+        abs_m = np.abs(spins.mean(axis=1))
+        primary = abs(beta - 0.4407) < 1e-6
+        if _constant(abs_m):
+            rows.append(_diag_row(2, f"beta={beta}", "|M|", len(abs_m), None, None, "constant series", primary))
+            continue
+        ess, tau, window = effective_sample_size(abs_m)
+        rows.append(_diag_row(2, f"beta={beta}", "|M|", len(abs_m), tau, ess, f"window W={window}", primary))
+    del jnp
+    return rows
+
+
+def diagnose_rbm(betas=(2.2, 0.15)) -> list[dict]:
+    """Experiment 6: worst-case (max over non-frozen free spins) tau_int and the resulting minimum ESS."""
+    import jax
+    import jax.numpy as jnp
+    from thrml import Block, SamplingSchedule, sample_states
+    from thrml.models import hinton_init
+
+    sys.path.insert(0, str(ROOT_DIR))
+    import rbm_associative_memory as rbm
+
+    n_vis, n_hid, n_clamped = 64, 32, 32
+    prototypes = rbm.generate_orthogonal_prototypes(size=8)
+    weights = rbm.train_hebbian_rbm(prototypes, n_hidden=n_hid)
+    cue = prototypes[0].copy()
+    cue[n_clamped:] = np.random.default_rng(42).choice([-1, 1], size=n_vis - n_clamped)
+
+    rows = []
+    key = jax.random.key(0)
+    for beta in betas:
+        key, k_init, k_samp = jax.random.split(key, 3)
+        program, ebm, free_blocks, vis_nodes, hid_nodes = rbm.build_rbm_program(weights, n_clamped_vis=n_clamped, beta_val=beta)
+        init_state = hinton_init(k_init, ebm, free_blocks, ())
+        init_state[0] = jnp.array(cue[n_clamped:] == 1, dtype=jnp.bool_)
+        clamped = [jnp.array(cue[:n_clamped] == 1, dtype=jnp.bool_)]
+        observed = vis_nodes[n_clamped:] + hid_nodes
+        schedule = SamplingSchedule(n_warmup=DIAG_N_WARMUP, n_samples=DIAG_N_SAMPLES, steps_per_sample=2)
+        raw = sample_states(k_samp, program, schedule, init_state, clamped, [Block(observed)])
+        series = 2.0 * np.asarray(raw[0], dtype=np.float64) - 1.0  # (n_samples, n_free_spins)
+
+        live = [j for j in range(series.shape[1]) if not _constant(series[:, j])]
+        frozen = series.shape[1] - len(live)
+        primary = beta == betas[0]
+        setting = f"beta={beta}"
+        observable = f"{len(observed)} free spins (worst case)"
+        if not live:
+            rows.append(
+                _diag_row(6, setting, observable, series.shape[0], None, None, f"all {frozen} free spins frozen", primary)
+            )
+            continue
+        taus = [integrated_autocorr_time(series[:, j])[0] for j in live]
+        tau_max = float(max(taus))
+        rows.append(
+            _diag_row(6, setting, observable, series.shape[0], tau_max, series.shape[0] / tau_max, f"{frozen}/{series.shape[1]} spins frozen", primary)
+        )
+    return rows
+
+
+def collect_diagnostics() -> list[dict]:
+    console.print("[bold cyan]▶ Computing MCMC diagnostics (tau_int, ESS) for Experiments 2 and 6...[/bold cyan]")
+    rows = diagnose_ising() + diagnose_rbm()
+    for r in rows:
+        if r["ess"] is None:
+            console.print(f"  Exp {r['exp_id']} {r['setting']}: n/a ({r['note']})")
+        else:
+            console.print(
+                f"  Exp {r['exp_id']} {r['setting']}: tau_int = {r['tau_int']:.2f} sweeps, "
+                f"ESS = {r['ess']:.0f} / {r['n_samples']} ({r['note']})"
+            )
+    return rows
+
+
+def _fmt_tau(row: Optional[dict]) -> str:
+    return "—" if row is None else ("n/a" if row["tau_int"] is None else f"{row['tau_int']:.2f}")
+
+
+def _fmt_ess(row: Optional[dict]) -> str:
+    return "—" if row is None else ("n/a" if row["ess"] is None else f"{row['ess']:.0f} / {row['n_samples']}")
 
 
 @dataclass
@@ -219,8 +375,11 @@ def execute_experiment(spec: ExperimentSpec) -> dict:
     }
 
 
-def render_and_export_results(results: list[dict], export_md: bool = True) -> None:
+def render_and_export_results(results: list[dict], export_md: bool = True, diag_rows: Optional[list[dict]] = None) -> None:
     """Displays a Rich comparison table in the terminal and writes BENCHMARKS.md."""
+    diag_rows = diag_rows or []
+    primary_diag = {r["exp_id"]: r for r in diag_rows if r["primary"]}
+
     table = Table(
         title="⚡ Extropic THRML Benchmark Suite (Experiments 1–9) — Empirical Verification Summary",
         show_header=True,
@@ -233,8 +392,11 @@ def render_and_export_results(results: list[dict], export_md: bool = True) -> No
     table.add_column("Graph / Lattice Dimension", style="slate_blue1")
     table.add_column("JAX Runtime (s)", justify="right", style="green")
     table.add_column("Key Convergence Metric", style="yellow")
+    table.add_column("ESS", justify="right")
+    table.add_column("τ_int (sweeps)", justify="right")
 
     for r in results:
+        d = primary_diag.get(r["exp_id"])
         table.add_row(
             f"Exp {r['exp_id']}",
             r["name"],
@@ -242,6 +404,8 @@ def render_and_export_results(results: list[dict], export_md: bool = True) -> No
             r["dimension"],
             f"{r['runtime_s']:.3f}s",
             r["metric"],
+            _fmt_ess(d),
+            _fmt_tau(d),
         )
 
     console.print()
@@ -253,13 +417,47 @@ def render_and_export_results(results: list[dict], export_md: bool = True) -> No
             "",
             "> Automatically generated by `uv run thrml-bench`. Do not edit manually.",
             "",
-            "| Exp # | Experiment Name | Problem Type | Graph / Lattice Dimension | JAX Runtime (s) | Key Convergence Metric | Script |",
-            "| :---: | :--- | :--- | :--- | :---: | :--- | :--- |",
+            "| Exp # | Experiment Name | Problem Type | Graph / Lattice Dimension | JAX Runtime (s) | Key Convergence Metric | ESS | τ_int (sweeps) | Script |",
+            "| :---: | :--- | :--- | :--- | :---: | :--- | :---: | :---: | :--- |",
         ]
         for r in results:
             safe_metric = str(r["metric"]).replace("|", "\\|")
+            d = primary_diag.get(r["exp_id"])
             lines.append(
-                f"| **Exp {r['exp_id']}** | {r['name']} | {r['domain']} | {r['dimension']} | `{r['runtime_s']:.3f}s` | {safe_metric} | [`{r['script']}`]({r['script']}) |"
+                f"| **Exp {r['exp_id']}** | {r['name']} | {r['domain']} | {r['dimension']} | `{r['runtime_s']:.3f}s` | {safe_metric} "
+                f"| {_fmt_ess(d)} | {_fmt_tau(d)} | [`{r['script']}`]({r['script']}) |"
+            )
+
+        if diag_rows:
+            lines.extend(
+                [
+                    "",
+                    "ESS / τ_int are reported for the sampling experiments with a meaningful scalar observable "
+                    "(Exp 2, Exp 6); `—` means not measured. Exp 2 uses the critical point β = 0.4407; Exp 6 uses the benchmark "
+                    "setting β = 2.2.",
+                    "",
+                    "## MCMC Sampling Diagnostics (`uv run thrml-bench diagnose`)",
+                    "",
+                    f"Method: {DIAG_N_WARMUP} warmup sweeps, then {DIAG_N_SAMPLES} samples spaced one full 2-colour block-Gibbs sweep apart. "
+                    "τ_int = 1 + 2·Σ_{k=1..W} ρ(k) with Sokal automatic windowing (W ≥ 5·τ_int), clamped at τ_int ≥ 1; "
+                    "ESS = N / τ_int. τ_int is in sweeps (the integrated autocorrelation, i.e. mixing time of the observable).",
+                    "",
+                    "| Exp # | Setting | Observable | Samples (N) | τ_int (sweeps) | ESS | Note |",
+                    "| :---: | :--- | :--- | :---: | :---: | :---: | :--- |",
+                ]
+            )
+            for d in diag_rows:
+                lines.append(
+                    f"| Exp {d['exp_id']} | {d['setting']} | {d['observable'].replace('|', chr(92) + '|')} | {d['n_samples']} "
+                    f"| {_fmt_tau(d)} | {_fmt_ess(d).split(' / ')[0]} | {d['note']} |"
+                )
+            lines.extend(
+                [
+                    "",
+                    "At the benchmark setting the clamped RBM is a near-deterministic attractor: free spins that never flip have zero "
+                    "variance, so autocorrelation is undefined for them and they are excluded from the worst-case τ_int. ESS for such "
+                    "a chain says nothing about exploration, which is why a hot setting (β = 0.15) is reported alongside.",
+                ]
             )
 
         lines.extend(
@@ -273,6 +471,12 @@ def render_and_export_results(results: list[dict], export_md: bool = True) -> No
                 "| $32 \\times 32$ | $1,024$ | `0.031s` | `0.394s` | `1,270.4 /s` | `1.30 MSU/s` | `512x` |",
                 "| $64 \\times 64$ | $4,096$ | `0.021s` | `0.299s` | `1,673.9 /s` | `6.86 MSU/s` | `2,048x` |",
                 "| $128 \\times 128$ | $16,384$ | `0.052s` | `0.406s` | `1,231.6 /s` | **`20.18 MSU/s`** | **`8,192x`** |",
+                "",
+                "Measured on a single CPU device (`cpu:0`). Throughput is measured; the \"parallel clock speedup\" column is the "
+                "theoretical ratio N/2 of sequential single-site updates to 2-colour updates per sweep (the number of update steps "
+                "needed on hardware that can update a whole colour class at once), **not** a measured wall-time speedup. Sweeps/s is "
+                "roughly flat across sizes, which indicates the small lattices are dominated by fixed per-call overhead rather than "
+                "compute.",
                 "",
                 "## CLI Usage",
                 "",
@@ -349,8 +553,23 @@ def run_all() -> None:
         results.append(res)
 
     total_wall = time.perf_counter() - t_start
-    render_and_export_results(results, export_md=True)
+    diag_rows = collect_diagnostics()
+    render_and_export_results(results, export_md=True, diag_rows=diag_rows)
     console.print(f"[bold cyan]Total Suite Wall Time:[/bold cyan] {total_wall:.2f}s")
+
+
+@app.command("diagnose")
+def diagnose() -> None:
+    """Compute integrated autocorrelation time (tau_int) and Effective Sample Size (ESS) for Exp 2 and Exp 6."""
+    rows = collect_diagnostics()
+    table = Table(title="MCMC Diagnostics (ESS = N / tau_int)", header_style="bold cyan", border_style="bright_blue")
+    for col in ("Exp #", "Setting", "Observable", "N", "τ_int (sweeps)", "ESS", "Note"):
+        table.add_column(col)
+    for d in rows:
+        table.add_row(
+            f"Exp {d['exp_id']}", d["setting"], d["observable"], str(d["n_samples"]), _fmt_tau(d), _fmt_ess(d).split(" / ")[0], d["note"]
+        )
+    console.print(table)
 
 
 if __name__ == "__main__":
