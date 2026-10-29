@@ -399,9 +399,21 @@ Solves the 10-city Traveling Salesperson Problem by mapping tour positions onto 
 
 $$E(x) = \lambda \sum_{i=0}^{N-1} \left(\sum_{t=0}^{N-1} x_{i,t} - 1\right)^2 + \lambda \sum_{t=0}^{N-1} \left(\sum_{i=0}^{N-1} x_{i,t} - 1\right)^2 + \sum_{t=0}^{N-1} \sum_{i \neq j} d_{ij}\, x_{i,t}\, x_{j,(t+1) \bmod N}$$
 
-### Optimization Results
+To ensure the thermodynamic contribution is not conflated with classical post-processing, results are evaluated under both **Pure Sampling** (raw decoded tour directly from exact permutation states without repair or heuristics) and **Hybrid Search** (sampling followed by classical 2-opt local search), benchmarked against the exact global optimum computed via the **Held-Karp** dynamic programming algorithm ($L_{\text{opt}} = 6.296$).
+
+### Optimization & Annealing Benchmark
+
 - **Chromatic Block Partitioning:** Greedy vertex coloring partitions the dense 100-spin constraint graph into **28 conditionally independent color blocks** for parallel JAX block updates.
-- **Route Untangling:** Starts from a highly tangled crossing tour ($L_{\text{naive}} = 17.986$), untangles mid-annealing ($\beta = 0.3 \rightarrow L = 11.438$), and locks into the exact shortest perimeter ring tour (**$L_{\text{opt}} = 6.296$, $100.0\%$ optimality, $65.0\%$ route reduction**).
+- **Fixed Penalty Schedule ($\lambda = 2.8$, $\beta \in [0.2, 8.0]$):** Pure sampling achieves a best tour of $L = 8.438$ (+34.0% optimality gap, mean $9.336$, 0/5 hitting global optimum). Classical 2-opt local search repairs this to the global optimum ($L = 6.296$) across 5/5 restarts.
+- **Ramped Penalty Schedule ($\lambda \in [0.5, 5.0]$, $\beta \in [0.2, 8.0]$):** By allowing soft constraint exploration at high temperatures and tightening row/column orthogonality at lower temperatures, **pure Block Gibbs sampling directly recovers the exact Held-Karp optimum ($L = 6.296$, +0.0% gap, 100.0% optimality)** without any classical repair or 2-opt heuristics.
+- **Constraint Satisfaction:** Both schedules achieve a **100.0% valid permutation matrix rate** at the final stage ($5/5$ restarts yielding valid closed tours).
+
+| Schedule | Evaluation Mode | Best Tour Length | Mean Tour Length | Optimality Gap | Hits Optimum | Final Valid Perm Rate |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Fixed ($\lambda = 2.8$)** | Pure Sampling (Block Gibbs) | $8.438$ | $9.336$ | $+34.0\%$ | $0 / 5$ | $100.0\%$ |
+| **Fixed ($\lambda = 2.8$)** | Hybrid (Sampling + 2-opt) | $6.296$ | $6.296$ | $+0.0\%$ | $5 / 5$ | $100.0\%$ |
+| **Ramped ($\lambda = 0.5 \to 5.0$)** | **Pure Sampling (Block Gibbs)** | **$6.296$** | **$7.856$** | **$+0.0\%$** | **$1 / 5$** | **$100.0\%$** |
+| **Ramped ($\lambda = 0.5 \to 5.0$)** | Hybrid (Sampling + 2-opt) | $6.296$ | $6.296$ | $+0.0\%$ | $5 / 5$ | $100.0\%$ |
 
 ![TSP Route Optimization](thrml_tsp_solution.png)
 

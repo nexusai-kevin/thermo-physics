@@ -288,7 +288,7 @@ EXPERIMENTS: dict[int, ExperimentSpec] = {
         dimension="10 x 10 Permutation Lattice (100 spins, 28 colors)",
         script="solve_tsp.py",
         artifact="thrml_tsp_solution.png",
-        default_metric="100.0% Optimal Tour (6.296 vs 17.986 naive, -65.0%)",
+        default_metric="100.0% Optimal Tour (6.296 pure / 6.296 hyb, -65.0%)",
         description="Maps 10-city TSP to an N x N permutation QUBO solved via chromatic Block Gibbs annealing.",
     ),
 }
@@ -331,9 +331,15 @@ def parse_dynamic_metric(exp_id: int, stdout: str, fallback: str) -> str:
         if len(hops) >= 2:
             return f"Hop Rate: {hops[0]}% (beta=0.35) -> {hops[-1]}% (beta=4.0)"
     elif exp_id == 9:
-        m = re.search(r"THRML Converged Tour Length:\s*([\d.]+)\s*vs Exact:\s*([\d.]+)\s*\(([\d.]+)% Optimality \| ([\d.]+)% Route Reduction\)", stdout)
+        m = re.search(r"RESULT opt=([\d.]+) naive=([\d.]+) ramped_pure_best=([\d.]+) .*? ramped_hybrid_best=([\d.]+)", stdout)
         if m:
-            return f"{m.group(3)}% Optimal Tour ({m.group(1)} len, -{m.group(4)}% vs naive)"
+            opt = float(m.group(1))
+            pure_best = float(m.group(3))
+            ratio = (opt / pure_best) * 100.0 if pure_best > 0 else 0.0
+            return f"{ratio:.1f}% Pure Opt ({pure_best:.3f} pure / {float(m.group(4)):.3f} hyb vs {opt:.3f})"
+        m_old = re.search(r"THRML Converged Tour Length:\s*([\d.]+)\s*vs Exact:\s*([\d.]+)\s*\(([\d.]+)% Optimality \| ([\d.]+)% Route Reduction\)", stdout)
+        if m_old:
+            return f"{m_old.group(3)}% Optimal Tour ({m_old.group(1)} len, -{m_old.group(4)}% vs naive)"
     return fallback
 
 
@@ -354,7 +360,7 @@ def execute_experiment(spec: ExperimentSpec) -> dict:
         console.print(f"[bold red]✗ Experiment {spec.exp_id} failed (exit {proc.returncode}):[/bold red]\n{proc.stderr}")
         raise typer.Exit(code=proc.returncode)
 
-    internal_time_match = re.search(r"(?:completed in|Time:|complete in)\s*([\d.]+)s", proc.stdout)
+    internal_time_match = re.search(r"(?:completed in|time:|complete in)\s*([\d.]+)s", proc.stdout, re.IGNORECASE)
     reported_runtime = float(internal_time_match.group(1)) if internal_time_match else wall_time
     metric_str = parse_dynamic_metric(spec.exp_id, proc.stdout, spec.default_metric)
 

@@ -8,7 +8,7 @@
     "mean_energy": -19.72699546813965,
     "min_energy": -33.088314056396484,
     "max_energy": -7.884278297424316,
-    "wall_time_sec": 0.5680677001364529,
+    "wall_time_sec": 0.5514024998992682,
     "hardware_efficiency_profile": {
       "problem_scale": {
         "n_nodes": 96,
@@ -18,12 +18,12 @@
         "total_spin_updates": 105600
       },
       "classical_hardware_measured": {
-        "wall_time_sec": 0.5680677001364529,
-        "sweeps_per_sec": 1936.3889193766413,
+        "wall_time_sec": 0.5514024998992682,
+        "sweeps_per_sec": 1994.9129722860366,
         "assumed_power_watts": 300.0,
-        "total_energy_joules": 170.42031004093587,
-        "joules_per_sweep": 0.15492755458266896,
-        "nanojoules_per_spin_update": 1613828.6935694683
+        "total_energy_joules": 165.42074996978045,
+        "joules_per_sweep": 0.15038249997252767,
+        "nanojoules_per_spin_update": 1566484.37471383
       },
       "tsu_projected": {
         "relaxation_time_sec": 1.1e-05,
@@ -34,8 +34,8 @@
         "femtojoules_per_spin_update": 104.16666666666666
       },
       "tsu_vs_classical_ratios": {
-        "latency_speedup_x": 51642.51819422299,
-        "energy_reduction_x": 15492755458.2669
+        "latency_speedup_x": 50127.49999084256,
+        "energy_reduction_x": 15038249997.25277
       }
     }
   },
@@ -112,7 +112,7 @@
     "n_edges": 60,
     "block_gibbs": {
       "n_blocks_colors": 2,
-      "wall_time_sec": 0.5266366999130696,
+      "wall_time_sec": 0.5061385000590235,
       "tau_int_energy_sweeps": 0.7483767153992887,
       "tau_int_magnetization_sweeps": 2.9242787553112337,
       "ess_energy": 1336.2254322229417,
@@ -122,7 +122,7 @@
     },
     "sequential_gibbs": {
       "n_blocks_colors": 36,
-      "wall_time_sec": 4.4040165999904275,
+      "wall_time_sec": 4.139791599940509,
       "tau_int_energy_sweeps": 0.9314213390410291,
       "tau_int_magnetization_sweeps": 3.696342100766295,
       "ess_energy": 1073.627968443989,
@@ -132,7 +132,7 @@
     },
     "parallel_cycle_speedup_factor": 18.0,
     "decorrelation_cycle_speedup_factor": 22.40259986415186,
-    "software_wall_time_speedup": 8.36253265432771
+    "software_wall_time_speedup": 8.17916755879615
   },
   "project_a_associative_classifier": {
     "project": "Project A: Associative Memory & Robust EBM Classification",
@@ -160,7 +160,7 @@
       "occluded_bit_recovery_accuracy": 1.0,
       "occluded_classification_accuracy": 1.0
     },
-    "wall_time_sec": 15.036579600069672
+    "wall_time_sec": 14.726415800163522
   },
   "project_b_dtm_denoising": {
     "project": "Project B: Denoising Thermodynamic Model (DTM) 2D Lattice Suite",
@@ -175,7 +175,7 @@
       "n_parallel_blocks": 2,
       "total_sweeps": 54,
       "hardware_clock_cycles": 108,
-      "wall_time_sec": 0.7968762998934835,
+      "wall_time_sec": 0.777104299981147,
       "initial_energy": -87.74008178710938,
       "final_energy": -96.56228637695312,
       "denoised_accuracy": 0.8194444444444444,
@@ -185,7 +185,7 @@
       "n_parallel_blocks": 144,
       "total_sweeps": 54,
       "hardware_clock_cycles": 7776,
-      "wall_time_sec": 71.81485949992202,
+      "wall_time_sec": 68.78754470008425,
       "initial_energy": -87.74008178710938,
       "final_energy": -96.15673828125,
       "denoised_accuracy": 0.7916666666666666,

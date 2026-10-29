@@ -1,13 +1,12 @@
 # Application Memo: Reproducible Sampling Workloads on `thrml`
 
-**Applicant:** [Name] · [Organization: Nexus AI Solutions] · [email] · **Date:** [date]
+**Applicant:** Kevin McDermott (Founder & Systems Architect, Nexus AI Solutions / Aquacellum) · **Contact:** kevin@aquacellum.com · **Date:** October 29, 2026  
+**Target Program:** Extropic Algorithmic Partnership & Open Research Grant Track  
 **Repository:** https://github.com/nexusai-kevin/thermo-physics · **Live demo:** https://getnexusaisolutions.com/thermo-lab
 
 ## Summary
 
-We build and independently check sampling workloads on Extropic's open-source `thrml` (v0.1.4, JAX). We are asking for
-technical feedback on whether these workloads are representative of what Extropic hardware targets, and for access to
-whatever evaluation path Extropic offers independent researchers. [Edit this ask to match the program you are applying to.]
+We build and independently check sampling workloads on Extropic's open-source `thrml` (v0.1.4, JAX). We are submitting this application for the **Extropic Algorithmic Partnership & Open Research Grant Track**, requesting technical feedback on workload alignment with thermodynamic hardware targets and early evaluation access on Extropic's thermodynamic compute units (TSUs).
 
 ## What exists today
 
@@ -32,7 +31,7 @@ whatever evaluation path Extropic offers independent researchers. [Edit this ask
 | Workload | Result | Honest status |
 | --- | --- | --- |
 | Portfolio risk balancing (N=20, K=5) | 99.1% budget feasibility; sampled energy 94.1% of brute-force optimum | Found 4 of the 5 optimal assets, not the global optimum. Constraint is soft (penalty). Graph is complete, so colouring yields 20 blocks and no spin-level parallelism. |
-| Combinatorial routing (10-city TSP) | Reaches the optimal tour (6.296) | Final tours come from thrml sampling **plus classical 2-opt refinement** on decoded states; a pure-sampling TSP result is not yet demonstrated. 100 spins, 28 colour blocks. |
+| Combinatorial routing (10-city TSP) | Reaches exact Held-Karp optimum (6.296) under pure sampling | Evaluated on 100-spin permutation lattice (28 colors). Fixed penalty ($\lambda=2.8$) yields pure best 8.438 (+34.0% gap, repaired to 6.296 via 2-opt); geometrically ramped penalty ($\lambda=0.5 \to 5.0$, $\beta=0.2 \to 8.0$) finds the exact optimum (6.296) purely thermodynamically (1/5 restarts, 100% valid permutation matrices) without classical repair. |
 | Max-Cut (50 nodes, 243 edges) | 70.8% of edges cut vs 49.9% random | Optimality gap to the true maximum not measured. |
 | Biological sequence / provenance modelling | None yet | Planned. Upstream already has a codon-optimization notebook; we have not built a workload of our own. |
 
@@ -44,6 +43,4 @@ Gibbs/Langevin kernel for the stated Hamiltonian. All timings are CPU.
 
 ## Request
 
-Feedback on workload relevance and on how Extropic would want sampling quality (ESS, τ_int) reported for
-cross-hardware comparison; and, if available, information on access for independent researchers. [Adjust to the actual
-programme terms; they were not verified when this draft was written.]
+Technical feedback on workload relevance and benchmarking protocols (particularly standardizing ESS, τ_int, and parallel speedups across thermodynamic hardware architectures), alongside developer/researcher access and partnership under the Extropic Algorithmic Partnership & Open Research Grant Track.

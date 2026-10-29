@@ -1,58 +1,108 @@
 """
 Experiment 9: Traveling Salesperson Problem (TSP) via N x N Permutation QUBO in Extropic THRML
-Maps a 10-city TSP tour to an N x N binary assignment lattice (100 SpinNodes) with
-row/column orthogonality penalties lambda * (sum_t x_{i,t} - 1)^2 + lambda * (sum_i x_{i,t} - 1)^2
-and pairwise step-to-step Euclidean distance couplings, solved via Chromatic Block Gibbs in JAX.
+
+Maps a 10-city tour to an N x N binary assignment lattice (100 SpinNodes) with row/column permutation penalties
+    lambda * sum_i (sum_t x_{i,t} - 1)^2 + lambda * sum_t (sum_i x_{i,t} - 1)^2
+and step-to-step Euclidean distance couplings, sampled with chromatic block Gibbs in JAX.
+
+Two things are reported separately so the thermodynamic contribution is not conflated with classical post-processing:
+
+  * PURE sampling: tours read directly from sampled states that are exact permutation matrices. No 2-opt, no repair.
+  * HYBRID: the same pure result followed by classical 2-opt local search.
+
+Two annealing schedules are compared over several independent restarts:
+
+  * fixed  : penalty lambda constant (2.8) while beta cools 0.2 -> 8.0
+  * ramped : penalty lambda ramps 0.5 -> 5.0 (geometrically) while beta cools 0.2 -> 8.0
+
+The reference optimum is computed exactly with the Held-Karp dynamic program.
 """
 
 import time
-import math
-import networkx as nx
-import numpy as np
-import matplotlib.pyplot as plt
+
 import jax
 import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
 
-from thrml import SpinNode, Block, SamplingSchedule, sample_states
+from thrml import Block, SamplingSchedule, SpinNode, sample_states
 from thrml.models import IsingEBM, IsingSamplingProgram
 
+N_CITIES = 10
+N_STAGES = 6
+BETA_RANGE = (0.2, 8.0)
+LAMBDA_RAMP = (0.5, 5.0)
+LAMBDA_FIXED = 2.8
+DIST_SCALE = 0.85
+N_RESTARTS = 5
+N_WARMUP = 60
+N_SAMPLES = 200
 
-def generate_cities(n_cities: int = 10, seed: int = 42):
-    """
-    Generates N cities arranged on a perturbed ring so the exact global shortest tour
-    is non-trivial when scrambled, yet provably equal to the perimeter cyclic order.
-    """
+
+def generate_cities(n_cities: int = N_CITIES, seed: int = 42):
+    """Cities on a perturbed ring with scrambled labels, so the naive tour [0..N-1] is heavily tangled."""
     rng = np.random.default_rng(seed)
     angles = np.linspace(0, 2 * np.pi, n_cities, endpoint=False)
-    # Scramble city indices so a naive sequential tour [0,1,2,...,9] has many crossings
     perm = np.array([0, 5, 2, 8, 4, 9, 1, 6, 3, 7], dtype=np.int32)
-    ordered_angles = angles[perm]
     radii = 1.0 + rng.uniform(-0.08, 0.08, size=n_cities)
-
-    coords = np.stack([radii * np.cos(ordered_angles), radii * np.sin(ordered_angles)], axis=1)
-    dist_mat = np.zeros((n_cities, n_cities), dtype=np.float64)
-    for i in range(n_cities):
-        for j in range(n_cities):
-            if i != j:
-                dist_mat[i, j] = float(np.linalg.norm(coords[i] - coords[j]))
-
-    # Exact optimal tour visits cities in angular order around the ring
-    inv_perm = np.argsort(perm)
-    return coords, dist_mat, inv_perm
+    coords = np.stack([radii * np.cos(angles[perm]), radii * np.sin(angles[perm])], axis=1)
+    dist_mat = np.linalg.norm(coords[:, None, :] - coords[None, :, :], axis=-1)
+    ring_tour = [int(c) for c in np.argsort(perm)]
+    return coords, dist_mat, ring_tour
 
 
-def tour_length(tour: list[int] | np.ndarray, dist_mat: np.ndarray) -> float:
+def tour_length(tour, dist_mat: np.ndarray) -> float:
     n = len(tour)
     return float(sum(dist_mat[tour[t], tour[(t + 1) % n]] for t in range(n)))
 
 
-def build_tsp_qubo_ising(dist_mat: np.ndarray, penalty_lambda: float = 2.8, dist_scale: float = 0.85):
+def held_karp(dist_mat: np.ndarray) -> float:
+    """Exact optimal closed-tour length via the Held-Karp dynamic program (O(2^n n^2), fine for n = 10)."""
+    n = dist_mat.shape[0]
+    full = 1 << (n - 1)  # subsets of cities 1..n-1; city 0 is the fixed start
+    dp = np.full((full, n - 1), np.inf)
+    for j in range(n - 1):
+        dp[1 << j, j] = dist_mat[0, j + 1]
+    for mask in range(full):
+        for j in range(n - 1):
+            if not (mask >> j) & 1 or not np.isfinite(dp[mask, j]):
+                continue
+            for k in range(n - 1):
+                if (mask >> k) & 1:
+                    continue
+                nxt = mask | (1 << k)
+                cand = dp[mask, j] + dist_mat[j + 1, k + 1]
+                if cand < dp[nxt, k]:
+                    dp[nxt, k] = cand
+    return float(min(dp[full - 1, j] + dist_mat[j + 1, 0] for j in range(n - 1)))
+
+
+def two_opt(tour, dist_mat: np.ndarray):
+    """Classical 2-opt local search, run to convergence. Used ONLY for the hybrid comparison."""
+    tour = list(tour)
+    n = len(tour)
+    improved = True
+    while improved:
+        improved = False
+        for i in range(n - 1):
+            for j in range(i + 2, n):
+                if i == 0 and j == n - 1:
+                    continue
+                candidate = tour[: i + 1] + tour[i + 1 : j + 1][::-1] + tour[j + 1 :]
+                if tour_length(candidate, dist_mat) < tour_length(tour, dist_mat) - 1e-12:
+                    tour = candidate
+                    improved = True
+    return tour
+
+
+def build_tsp_qubo_ising(dist_mat: np.ndarray, penalty_lambda: float, dist_scale: float = DIST_SCALE):
     """
-    Constructs the N^2 x N^2 QUBO matrix Q for the N-city TSP:
-        E(x) = lambda * sum_i (sum_t x_{i,t} - 1)^2
-             + lambda * sum_t (sum_i x_{i,t} - 1)^2
-             + dist_scale * sum_{t=0}^{N-1} sum_{i != j} d_{ij} x_{i,t} x_{j,(t+1)%N}
-    and converts it exactly to THRML's IsingEBM parameters (biases b_k, edge weights J_{kl}).
+    QUBO over x_{i,t} (city i at step t), index u = i * N + t:
+        E(x) = lambda * sum_i (sum_t x_{i,t} - 1)^2 + lambda * sum_t (sum_i x_{i,t} - 1)^2
+             + dist_scale * sum_t sum_{i != j} d_ij x_{i,t} x_{j,(t+1) mod N}
+    converted exactly to THRML's IsingEBM convention E = -beta (sum b_u s_u + sum_{u<v} J_uv s_u s_v) via
+    x = (s + 1) / 2:   J_uv = -Q_uv / 2,   b_u = -Q_uu / 2 - (1/2) sum_{v != u} Q_uv.
     """
     n = dist_mat.shape[0]
     n_vars = n * n
@@ -61,221 +111,230 @@ def build_tsp_qubo_ising(dist_mat: np.ndarray, penalty_lambda: float = 2.8, dist
     def idx(city: int, step: int) -> int:
         return city * n + step
 
-    # 1. Row constraints: each city i visited exactly once across steps t
-    for i in range(n):
+    for i in range(n):  # each city visited exactly once
         for t1 in range(n):
-            u = idx(i, t1)
-            q_mat[u, u] += -penalty_lambda
+            q_mat[idx(i, t1), idx(i, t1)] += -penalty_lambda
             for t2 in range(t1 + 1, n):
-                v = idx(i, t2)
-                q_mat[u, v] += penalty_lambda
-                q_mat[v, u] += penalty_lambda
-
-    # 2. Column constraints: each step t visits exactly one city i
-    for t in range(n):
+                q_mat[idx(i, t1), idx(i, t2)] += penalty_lambda
+                q_mat[idx(i, t2), idx(i, t1)] += penalty_lambda
+    for t in range(n):  # each step hosts exactly one city
         for i1 in range(n):
-            u = idx(i1, t)
-            q_mat[u, u] += -penalty_lambda
+            q_mat[idx(i1, t), idx(i1, t)] += -penalty_lambda
             for i2 in range(i1 + 1, n):
-                v = idx(i2, t)
-                q_mat[u, v] += penalty_lambda
-                q_mat[v, u] += penalty_lambda
-
-    # 3. Distance couplings between step t and step (t + 1) % N
-    for t in range(n):
+                q_mat[idx(i1, t), idx(i2, t)] += penalty_lambda
+                q_mat[idx(i2, t), idx(i1, t)] += penalty_lambda
+    for t in range(n):  # tour distance between consecutive steps
         t_next = (t + 1) % n
         for i in range(n):
             for j in range(n):
                 if i != j:
-                    u = idx(i, t)
-                    v = idx(j, t_next)
-                    w_dist = 0.5 * dist_scale * dist_mat[i, j]
-                    q_mat[u, v] += w_dist
-                    q_mat[v, u] += w_dist
+                    w = 0.5 * dist_scale * dist_mat[i, j]
+                    q_mat[idx(i, t), idx(j, t_next)] += w
+                    q_mat[idx(j, t_next), idx(i, t)] += w
 
-    # Exact QUBO-to-Ising transformation: x_u = (s_u + 1)/2
-    biases = np.zeros(n_vars, dtype=np.float32)
-    edges_idx = []
-    weights = []
-
+    off_diag_sums = q_mat.sum(axis=1) - np.diag(q_mat)
+    biases = (-0.5 * np.diag(q_mat) - 0.5 * off_diag_sums).astype(np.float32)
+    edges, weights = [], []
     for u in range(n_vars):
-        off_diag_sum = np.sum(q_mat[u, :]) - q_mat[u, u]
-        biases[u] = float(-0.5 * q_mat[u, u] - 0.5 * off_diag_sum)
         for v in range(u + 1, n_vars):
-            j_val = float(-0.5 * q_mat[u, v])
-            if abs(j_val) > 1e-9:
-                edges_idx.append((u, v))
-                weights.append(j_val)
-
-    return biases, edges_idx, np.array(weights, dtype=np.float32), q_mat
+            if abs(q_mat[u, v]) > 1e-9:
+                edges.append((u, v))
+                weights.append(-0.5 * q_mat[u, v])
+    return biases, edges, np.array(weights, dtype=np.float32)
 
 
-def build_tsp_program(n_vars: int, biases: np.ndarray, edges_idx: list, weights: np.ndarray, beta_val: float):
-    """Partitions the 100-spin TSP graph via greedy chromatic coloring for parallel Block Gibbs."""
-    G = nx.Graph()
-    G.add_nodes_from(range(n_vars))
-    G.add_edges_from(edges_idx)
+def build_tsp_program(n_vars: int, biases, edges_idx, weights, beta_val: float):
+    """Greedy chromatic colouring of the interaction graph -> conditionally independent free blocks."""
+    graph = nx.Graph()
+    graph.add_nodes_from(range(n_vars))
+    graph.add_edges_from(edges_idx)
+    coloring = nx.coloring.greedy_color(graph, strategy="largest_first")
+    n_colors = max(coloring.values()) + 1
 
-    spin_nodes = [SpinNode() for _ in range(n_vars)]
-    coloring = nx.coloring.greedy_color(G, strategy="largest_first")
-    num_colors = max(coloring.values()) + 1
-
-    free_blocks = []
-    for c in range(num_colors):
-        block_nodes = [spin_nodes[u] for u in range(n_vars) if coloring[u] == c]
-        if block_nodes:
-            free_blocks.append(Block(block_nodes))
-
-    edges = [(spin_nodes[u], spin_nodes[v]) for u, v in edges_idx]
+    nodes = [SpinNode() for _ in range(n_vars)]
+    free_blocks = [Block([nodes[u] for u in range(n_vars) if coloring[u] == c]) for c in range(n_colors)]
     ebm = IsingEBM(
-        nodes=spin_nodes,
-        edges=edges,
-        biases=jnp.array(biases, dtype=jnp.float32),
-        weights=jnp.array(weights, dtype=jnp.float32),
-        beta=jnp.array(beta_val, dtype=jnp.float32),
+        nodes,
+        [(nodes[u], nodes[v]) for u, v in edges_idx],
+        jnp.asarray(biases),
+        jnp.asarray(weights),
+        jnp.array(beta_val, dtype=jnp.float32),
     )
-    program = IsingSamplingProgram(ebm, free_blocks=free_blocks, clamped_blocks=[])
-    return program, ebm, free_blocks, spin_nodes, num_colors
+    program = IsingSamplingProgram(ebm, free_blocks, clamped_blocks=[])
+    return program, free_blocks, nodes, n_colors
 
 
-def decode_valid_tour(x_mat: np.ndarray, dist_mat: np.ndarray) -> tuple[list[int], bool]:
-    """
-    Checks if x_mat (N x N) is an exact permutation matrix; if not, projects the thermal
-    marginal assignment matrix onto the nearest valid tour via greedy maximum-likelihood decoding.
-    """
-    n = x_mat.shape[0]
-    is_exact_perm = bool(
-        np.all(np.sum(x_mat, axis=0) == 1) and np.all(np.sum(x_mat, axis=1) == 1)
+def build_stages(dist_mat: np.ndarray, ramped: bool):
+    """Pre-build one sampling program per (beta, lambda) stage; they are reused across restarts."""
+    betas = np.geomspace(*BETA_RANGE, N_STAGES)
+    lams = np.geomspace(*LAMBDA_RAMP, N_STAGES) if ramped else np.full(N_STAGES, LAMBDA_FIXED)
+    n_vars = dist_mat.shape[0] ** 2
+    stages = []
+    for beta, lam in zip(betas, lams):
+        biases, edges, weights = build_tsp_qubo_ising(dist_mat, float(lam))
+        program, free_blocks, nodes, n_colors = build_tsp_program(n_vars, biases, edges, weights, float(beta))
+        stages.append(
+            {
+                "beta": float(beta),
+                "lam": float(lam),
+                "program": program,
+                "free_blocks": free_blocks,
+                "nodes": nodes,
+                "n_colors": n_colors,
+            }
+        )
+    return stages
+
+
+def valid_permutation_mask(x_samples: np.ndarray, n: int) -> np.ndarray:
+    """Boolean mask of samples whose N x N assignment matrix is an exact permutation matrix."""
+    x = x_samples.reshape(-1, n, n)  # [sample, city, step]
+    return (x.sum(axis=2) == 1).all(axis=1) & (x.sum(axis=1) == 1).all(axis=1)
+
+
+def anneal_once(stages, dist_mat: np.ndarray, restart: int):
+    """One annealing run. Returns the best exact-permutation tour sampled (no repair), and per-stage statistics."""
+    n = dist_mat.shape[0]
+    rng = np.random.default_rng(1000 + restart)
+    start_tour = [int(c) for c in rng.permutation(n)]
+    current = np.zeros((n, n), dtype=bool)
+    for t, city in enumerate(start_tour):
+        current[city, t] = True
+    current = current.flatten()
+
+    key = jax.random.key(909 + restart)
+    best_tour, best_len = None, np.inf
+    stage_stats = []
+    for stage in stages:
+        key, subkey = jax.random.split(key)
+        position = {node: u for u, node in enumerate(stage["nodes"])}
+        init_state = [
+            jnp.array([bool(current[position[node]]) for node in block], dtype=jnp.bool_)
+            for block in stage["free_blocks"]
+        ]
+        schedule = SamplingSchedule(n_warmup=N_WARMUP, n_samples=N_SAMPLES, steps_per_sample=1)
+        raw = sample_states(subkey, stage["program"], schedule, init_state, [], [Block(stage["nodes"])])
+        samples = np.array(raw[0], dtype=np.int32)
+        current = samples[-1].astype(bool)  # pure annealing: next stage continues from the last state
+
+        valid = valid_permutation_mask(samples, n)
+        stage_best = np.inf
+        for x in samples[valid]:
+            tour = [int(np.argmax(x.reshape(n, n)[:, t])) for t in range(n)]
+            length = tour_length(tour, dist_mat)
+            stage_best = min(stage_best, length)
+            if length < best_len:
+                best_tour, best_len = tour, length
+        stage_stats.append({"valid_rate": 100.0 * float(valid.mean()), "best": stage_best})
+    return start_tour, best_tour, best_len, stage_stats
+
+
+def run_schedule(name: str, stages, dist_mat: np.ndarray):
+    print(f"\n--- Schedule: {name} (pure block Gibbs, no 2-opt) ---")
+    for s in stages:
+        print(f"  stage beta = {s['beta']:5.2f}, lambda = {s['lam']:4.2f}, colour blocks = {s['n_colors']}")
+    runs = []
+    for r in range(N_RESTARTS):
+        start_tour, tour, length, stats = anneal_once(stages, dist_mat, r)
+        final = stats[-1]
+        status = f"L_pure = {length:.3f}" if tour is not None else "no exact permutation ever sampled"
+        print(f"  restart {r}: {status} | final-stage valid-permutation rate = {final['valid_rate']:5.1f}%")
+        runs.append({"start": start_tour, "tour": tour, "len": length, "final_valid": final["valid_rate"]})
+    return runs
+
+
+def summarize(name: str, runs, dist_mat: np.ndarray, l_opt: float):
+    found = [r for r in runs if r["tour"] is not None]
+    summary = {"name": name, "n_found": len(found), "n_runs": len(runs)}
+    if not found:
+        summary.update(pure_best=None, pure_mean=None, hyb_best=None, hyb_mean=None, valid=0.0)
+        return summary, None
+    pure = np.array([r["len"] for r in found])
+    hybrid_tours = [two_opt(r["tour"], dist_mat) for r in found]
+    hybrid = np.array([tour_length(t, dist_mat) for t in hybrid_tours])
+    best_idx = int(np.argmin(pure))
+    summary.update(
+        pure_best=float(pure.min()),
+        pure_mean=float(pure.mean()),
+        hyb_best=float(hybrid.min()),
+        hyb_mean=float(hybrid.mean()),
+        valid=float(np.mean([r["final_valid"] for r in runs])),
+        hyb_hits_opt=int(np.sum(hybrid <= l_opt + 1e-6)),
+        pure_hits_opt=int(np.sum(pure <= l_opt + 1e-6)),
+        best_pure_tour=found[best_idx]["tour"],
+        best_hybrid_tour=hybrid_tours[best_idx],
+        best_start=found[best_idx]["start"],
     )
-    if is_exact_perm:
-        tour = [int(np.argmax(x_mat[:, t])) for t in range(n)]
-        return tour, True
-
-    # Greedy projection from spin activations
-    visited = set()
-    tour = []
-    for t in range(n):
-        col_scores = x_mat[:, t]
-        candidates = [i for i in np.argsort(-col_scores) if i not in visited]
-        chosen = int(candidates[0])
-        visited.add(chosen)
-        tour.append(chosen)
-    return tour, False
+    return summary, summary
 
 
 def main():
-    n_cities = 10
-    n_vars = n_cities * n_cities
-    print(f"[*] Initializing {n_cities}-City TSP on {n_cities}x{n_cities} Permutation Spin Lattice ({n_vars} spins)...")
+    n = N_CITIES
+    print(f"[*] {n}-city TSP on a {n}x{n} permutation spin lattice ({n * n} spins), {N_RESTARTS} restarts per schedule")
+    coords, dist_mat, ring_tour = generate_cities(n)
+    l_opt = held_karp(dist_mat)
+    l_ring = tour_length(ring_tour, dist_mat)
+    l_naive = tour_length(list(range(n)), dist_mat)
+    rand_mean = float(np.mean([tour_length(list(np.random.default_rng(s).permutation(n)), dist_mat) for s in range(200)]))
+    print(f"[*] Exact optimum (Held-Karp): {l_opt:.3f} (angular ring tour: {l_ring:.3f})")
+    print(f"[*] Naive tour [0..9]: {l_naive:.3f} | mean random tour: {rand_mean:.3f}")
 
-    coords, dist_mat, exact_tour = generate_cities(n_cities=n_cities, seed=42)
-    naive_tour = list(range(n_cities))
-    naive_len = tour_length(naive_tour, dist_mat)
-    exact_len = tour_length(exact_tour, dist_mat)
+    t0 = time.perf_counter()
+    results = {}
+    for name, ramped in (("fixed lambda = 2.8", False), ("ramped lambda 0.5 -> 5.0", True)):
+        stages = build_stages(dist_mat, ramped)
+        runs = run_schedule(name, stages, dist_mat)
+        results[name] = summarize(name, runs, dist_mat, l_opt)[0]
+    elapsed = time.perf_counter() - t0
 
-    print(f"[*] Unoptimized Crossing Tour [0..9] Length: {naive_len:.3f}")
-    print(f"[*] Analytical Global Optimal Ring Tour Length: {exact_len:.3f}")
-
-    biases, edges_idx, weights, q_mat = build_tsp_qubo_ising(
-        dist_mat, penalty_lambda=2.8, dist_scale=0.85
-    )
-
-    # Annealing schedule across inverse temperatures
-    betas = [0.3, 1.0, 2.5, 6.0]
-    key = jax.random.key(909)
-
-    # Start from the tangled naive permutation state so THRML visually untangles crossings
-    current_mat = np.zeros((n_cities, n_cities), dtype=bool)
-    for t, city in enumerate(naive_tour):
-        current_mat[city, t] = True
-    current_bits = current_mat.flatten()
-
-    best_tour = naive_tour
-    best_len = naive_len
-    stage_tours = {}
-
-    print("\n--- Running THRML Chromatic Block Gibbs TSP Annealing ---")
-    start_time = time.perf_counter()
-
-    for b in betas:
-        key, k_samp = jax.random.split(key)
-        program, ebm, free_blocks, spin_nodes, n_colors = build_tsp_program(
-            n_vars, biases, edges_idx, weights, beta_val=b
-        )
-        node_to_idx = {spin_nodes[u]: u for u in range(n_vars)}
-        init_state = [
-            jnp.array([bool(current_bits[node_to_idx[node]]) for node in blk], dtype=jnp.bool_)
-            for blk in free_blocks
-        ]
-        schedule = SamplingSchedule(n_warmup=60, n_samples=250, steps_per_sample=1)
-        raw = sample_states(k_samp, program, schedule, init_state, [], [Block(spin_nodes)])
-        x_samples = np.array(raw[0], dtype=np.float32)  # (n_samples, 100)
-
-        # Evaluate sampled states and thermal empirical marginal matrix
-        mean_mat = np.mean(x_samples[-80:], axis=0).reshape((n_cities, n_cities))
-        cand_tour, _ = decode_valid_tour(mean_mat, dist_mat)
-
-        # Also apply 2-opt local thermal swap refinement on the decoded permutation when beta >= 1.0
-        if b >= 1.0:
-            improved = True
-            while improved:
-                improved = False
-                for i in range(n_cities - 1):
-                    for j in range(i + 2, n_cities):
-                        if i == 0 and j == n_cities - 1:
-                            continue
-                        new_t = cand_tour[: i + 1] + cand_tour[i + 1 : j + 1][::-1] + cand_tour[j + 1 :]
-                        if tour_length(new_t, dist_mat) < tour_length(cand_tour, dist_mat) - 1e-6:
-                            cand_tour = new_t
-                            improved = True
-                            if b < 2.0:
-                                break
-
-        c_len = tour_length(cand_tour, dist_mat)
-        stage_tours[b] = (list(cand_tour), c_len)
-        if c_len < best_len:
-            best_len = c_len
-            best_tour = list(cand_tour)
-
-        # Encode best_tour back into 100-spin permutation matrix for the next colder stage
-        next_mat = np.zeros((n_cities, n_cities), dtype=bool)
-        for t, city in enumerate(best_tour):
-            next_mat[city, t] = True
-        current_bits = next_mat.flatten()
-
-        reduction = (1.0 - c_len / naive_len) * 100.0
+    print(f"\n=== Pure sampling vs. hybrid (+2-opt); exact optimum L_opt = {l_opt:.3f} ===")
+    for name, s in results.items():
+        if s["pure_best"] is None:
+            print(f"{name}: no restart produced an exact permutation sample")
+            continue
+        gap_p = 100.0 * (s["pure_best"] / l_opt - 1.0)
+        gap_h = 100.0 * (s["hyb_best"] / l_opt - 1.0)
         print(
-            f"beta = {b:3.1f} (Colors={n_colors}) | Tour Length: {c_len:.3f} ({reduction:4.1f}% shorter than naive)"
+            f"{name}: pure best {s['pure_best']:.3f} (+{gap_p:.1f}%), mean {s['pure_mean']:.3f}, hit optimum {s['pure_hits_opt']}/{s['n_found']} | "
+            f"hybrid best {s['hyb_best']:.3f} (+{gap_h:.1f}%), mean {s['hyb_mean']:.3f}, hit optimum {s['hyb_hits_opt']}/{s['n_found']} | "
+            f"restarts with a valid tour {s['n_found']}/{s['n_runs']}, final-stage valid rate {s['valid']:.1f}%"
         )
+    print(f"[+] Total time: {elapsed:.1f}s")
 
-    elapsed = time.perf_counter() - start_time
-    opt_ratio = (exact_len / best_len) * 100.0
-    total_reduction = (1.0 - best_len / naive_len) * 100.0
-    print(f"\n[+] Total TSP Optimization Time: {elapsed:.3f}s")
+    ramped = results["ramped lambda 0.5 -> 5.0"]
+    fixed = results["fixed lambda = 2.8"]
     print(
-        f"[+] THRML Converged Tour Length: {best_len:.3f} vs Exact: {exact_len:.3f} ({opt_ratio:.1f}% Optimality | {total_reduction:.1f}% Route Reduction)"
+        "RESULT "
+        f"opt={l_opt:.3f} naive={l_naive:.3f} "
+        f"ramped_pure_best={ramped['pure_best'] if ramped['pure_best'] is not None else float('nan'):.3f} "
+        f"ramped_pure_mean={ramped['pure_mean'] if ramped['pure_mean'] is not None else float('nan'):.3f} "
+        f"ramped_hybrid_best={ramped['hyb_best'] if ramped['hyb_best'] is not None else float('nan'):.3f} "
+        f"ramped_valid={ramped['valid']:.1f} "
+        f"fixed_pure_best={fixed['pure_best'] if fixed['pure_best'] is not None else float('nan'):.3f} "
+        f"fixed_valid={fixed['valid']:.1f}"
     )
 
-    # Visualization: 3-Panel Untangling Progression (Hot Tangled -> Mid Annealing -> Cold Optimal Loop)
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-
+    # Figure: random start -> best pure-sampled tour -> hybrid, for the best schedule that produced a valid tour.
+    chosen = ramped if ramped["pure_best"] is not None else fixed
+    if chosen["pure_best"] is None:
+        return
+    start = chosen["best_start"]
     panels = [
-        (naive_tour, naive_len, "Initial Tangled Route (β = 0.0)", "#f43f5e"),
-        (stage_tours[0.3][0], stage_tours[0.3][1], "Mid-Annealing Untangling (β = 0.3)", "#f59e0b"),
-        (best_tour, best_len, f"Ground-State Closed Loop (β = 6.0, {opt_ratio:.0f}% Opt)", "#10b981"),
+        (start, "Random start (permutation state)", "#f43f5e"),
+        (chosen["best_pure_tour"], f"PURE sampling ({chosen['name']})", "#f59e0b"),
+        (chosen["best_hybrid_tour"], "HYBRID: pure + 2-opt", "#10b981"),
     ]
-
-    for ax, (t_order, t_len, title, col) in zip(axes, panels):
-        loop_coords = np.vstack([coords[t_order], coords[t_order[0]]])
-        ax.plot(loop_coords[:, 0], loop_coords[:, 1], "-o", color=col, lw=2.4, markersize=9, markeredgecolor="black")
-        for city_id, (x_c, y_c) in enumerate(coords):
-            ax.text(x_c * 1.13, y_c * 1.13, f"C{city_id}", ha="center", va="center", fontsize=9, fontweight="bold")
-        ax.set_title(f"{title}\nTour Distance = {t_len:.3f}")
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    for ax, (order, title, color) in zip(axes, panels):
+        loop = np.vstack([coords[order], coords[order[0]]])
+        ax.plot(loop[:, 0], loop[:, 1], "-o", color=color, lw=2.4, markersize=9, markeredgecolor="black")
+        for city, (x_c, y_c) in enumerate(coords):
+            ax.text(x_c * 1.13, y_c * 1.13, f"C{city}", ha="center", va="center", fontsize=9, fontweight="bold")
+        ax.set_title(f"{title}\nL = {tour_length(order, dist_mat):.3f} (optimum {l_opt:.3f})")
         ax.set_xlim(-1.35, 1.35)
         ax.set_ylim(-1.35, 1.35)
         ax.set_aspect("equal")
         ax.grid(True, alpha=0.25)
-
     plt.tight_layout()
     plt.savefig("thrml_tsp_solution.png", dpi=200)
     print("[+] Saved visualization artifact: thrml_tsp_solution.png")
