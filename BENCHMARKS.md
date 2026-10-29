@@ -13,7 +13,7 @@
 | **Exp 7** | QUBO Portfolio Optimizer | Finance (Constrained QUBO) | N = 20 Assets, K = 5 Budget (190 edges) | `14.868s` | 99.1% Budget Feasibility \| 94.1% Pareto Match | — | — | [`qubo_portfolio.py`](qubo_portfolio.py) |
 | **Exp 8** | Continuous Double-Well Chain | Analog Physics (ContinuousNode) | N = 32 Coupled Analog Oscillators (x in R) | `2.692s` | Hop Rate: 38.4% (beta=0.35) -> 0.9% (beta=4.0) | — | — | [`run_continuous_double_well.py`](run_continuous_double_well.py) |
 | **Exp 9** | 10-City TSP QUBO Router | NP-Complete Routing (TSP) | 10 x 10 Permutation Lattice (100 spins, 28 colors) | `285.0s` | 100.0% Pure Opt (6.296 pure / 6.296 hyb vs 6.296) | — | — | [`solve_tsp.py`](solve_tsp.py) |
-| **Exp 10** | SK Frustrated Spin Glass | Physics (Spin Glass) | N = 24 Dense All-to-All (276 edges) | `10.55s` | 100.0% Exact Ground State Match ($E_0 = -18.4120$) | 438.6 / 13000 | 14.82 | [`experiments/exp10_sk_spin_glass.py`](experiments/exp10_sk_spin_glass.py) |
+| **Exp 10** | SK Frustrated Spin Glass | Physics (Spin Glass) | N = 24 Dense All-to-All (276 edges) | `10.57s` | 100.0% Exact Ground State Match ($E_0 = -15.4266$) | 438.6 / 13000 | 14.82 | [`experiments/exp10_sk_spin_glass.py`](experiments/exp10_sk_spin_glass.py) |
 
 ESS / τ_int are reported for the sampling experiments with a meaningful scalar observable (Exp 2, Exp 6); `—` means not measured. Exp 2 uses the critical point β = 0.4407; Exp 6 uses the benchmark setting β = 2.2.
 
@@ -63,13 +63,26 @@ Under fixed penalty $\lambda = 2.8$, pure sampling explores a constrained space 
 ### Overview
 Evaluates thermodynamic Gibbs sampling against the canonical dense spin glass problem with Gaussian quenched disorder $J_{ij} \sim \mathcal{N}(0, 1/N)$. Unlike 2D planar Ising systems, the SK model features dense $O(N^2)$ non-planar couplings and high frustration, inducing a rugged free-energy landscape with exponentially many metastable states.
 
-### Benchmark Results ($N=24$, $\beta = 2.5$)
-* **Exact Ground-State Energy ($2^{24}$ Brute-Force):** $E_0 = -18.4120$ ($E_0/N = -0.7672$)
-* **Best Sampled Energy:** $E_{\text{best}} = -18.4120$ (**100.0% Exact Ground State Match**)
+### Benchmark Results ($N=24$)
+* **Exact Ground-State Energy ($2^{24}$ Brute-Force):** $E_0 = -15.4266$ ($E_0/N = -0.6428$)
+* **Best Sampled Energy:** $E_{\text{best}} = -15.4266$ (**100.0% Exact Ground State Match**)
 * **Sokal Autocorrelation Time ($\tau_{\text{int}}$):** 14.82 steps
 * **Effective Sample Size (ESS):** 438.6 uncorrelated samples / 13,000 recorded iterations
-* **Mean Absolute Overlap $\langle |q| \rangle$:** 0.6124 (demonstrating cluster condensation in low-lying Parisi valleys)
-* **Overlap Variance $\text{Var}(q)$:** 0.1841 (broad bimodal support indicating multi-valley exploration)
+* **Mean Absolute Overlap $\langle |q| \rangle$ (Low $T$):** 0.5215 (cluster condensation in low-lying Parisi valleys)
+* **Overlap Variance $\text{Var}(q)$ (Low $T$):** 0.3345 (broad bimodal support indicating multi-valley RSB exploration)
+
+### High-$T$ vs. Low-$T$ Phase Contrast & Classical SA Comparison ($N=24$, Seed 42)
+
+| Method | Temp / Schedule | Best Energy | Rel Gap | $\langle \|q\| \rangle$ | Wall Time |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Exact Brute-Force** | All $2^{24}$ States | $-15.4266$ | $0.0000$ | N/A | $10.57\text{s}$ |
+| **Gibbs Sampler (Low $T$)** | $\beta = 2.5$ ($T = 0.40$) | $-15.4266$ | $0.0000$ | $0.5215$ | $0.27\text{s}$ |
+| **Gibbs Sampler (High $T$)** | $\beta = 0.5$ ($T = 2.00$) | $-14.5404$ | $0.8862$ | $0.1629$ | $0.26\text{s}$ |
+| **Simulated Annealing (SA)** | $\beta: 0.1 \to 3.0$ | $-15.4266$ | $0.0000$ | N/A | $0.055\text{s}$ |
+
+* **Replica Symmetry Breaking (Low $T$, $\beta=2.5$):** $\langle |q| \rangle = 0.5215, \text{Var}(q) = 0.3345$ reveals multi-valley Parisi structures.
+* **Paramagnetic Collapse (High $T$, $\beta=0.5$):** $\langle |q| \rangle = 0.1629, \text{Var}(q) = 0.0430 \ll 0.1$ confirms single-basin Gaussian collapse around $q = 0$.
+* **Classical SA Baseline:** Converges to the global minimum ($E = -15.4266$) within 0.055s over 30,000 single-spin Metropolis updates with incremental local field updates.
 
 ## CLI Usage
 
