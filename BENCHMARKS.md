@@ -11,16 +11,27 @@
 | **Exp 5** | Discrete Image Denoiser | CV (Clamped Conditioning) | 28 x 28 Grid (784 free + 784 clamped spins) | `0.575s` | 22.07% Noise -> 4.97% Error (77.5% reduction) | [`image_denoiser.py`](image_denoiser.py) |
 | **Exp 6** | RBM Associative Memory | PGM (Bipartite Memory) | 64 Visible x 32 Hidden (2,048 bipartite edges) | `0.612s` | 100.0% Recall Overlap (100.0% occluded recovery) | [`rbm_associative_memory.py`](rbm_associative_memory.py) |
 | **Exp 7** | QUBO Portfolio Optimizer | Finance (Constrained QUBO) | N = 20 Assets, K = 5 Budget (190 edges) | `15.315s` | 99.1% Budget Feasibility \| 94.1% Pareto Match | [`qubo_portfolio.py`](qubo_portfolio.py) |
+| **Exp 8** | Continuous Double-Well Chain | Analog Physics (ContinuousNode) | N = 32 Coupled Analog Oscillators (x in R) | `2.805s` | Hop Rate: 38.4% (beta=0.35) -> 0.9% (beta=4.0) | [`run_continuous_double_well.py`](run_continuous_double_well.py) |
+| **Exp 9** | 10-City TSP QUBO Router | NP-Complete Routing (TSP) | 10 x 10 Permutation Lattice (100 spins, 28 colors) | `20.110s` | 100.0% Optimal Tour (6.296 len, -65.0% vs naive) | [`solve_tsp.py`](solve_tsp.py) |
+
+## Hardware Performance & Multi-Scale Lattice Throughput (`run_scaling_benchmark.py`)
+
+| Lattice Size ($L \times L$) | Total Spins ($N$) | XLA JIT Compile (s) | Pure Sampling Exec (500 Sweeps) | Throughput (Sweeps/s) | Spin-Flip Rate (M Updates/s) | Parallel Clock Speedup ($N/2$) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| $16 \times 16$ | $256$ | `0.188s` | `0.383s` | `1,304.4 /s` | `0.33 MSU/s` | `128x` |
+| $32 \times 32$ | $1,024$ | `0.031s` | `0.394s` | `1,270.4 /s` | `1.30 MSU/s` | `512x` |
+| $64 \times 64$ | $4,096$ | `0.021s` | `0.299s` | `1,673.9 /s` | `6.86 MSU/s` | `2,048x` |
+| $128 \times 128$ | $16,384$ | `0.052s` | `0.406s` | `1,231.6 /s` | **`20.18 MSU/s`** | **`8,192x`** |
 
 ## CLI Usage
 
 ```bash
-# List all 7 thermodynamic computing experiments
+# List all 9 thermodynamic computing experiments
 uv run thrml-bench list
 
-# Run a single experiment (1-7) and update BENCHMARKS.md
-uv run thrml-bench run --exp 2
+# Run a single experiment (1-9)
+uv run thrml-bench run --exp 8
 
-# Run all 7 experiments end-to-end and regenerate BENCHMARKS.md
+# Run all 9 experiments end-to-end and regenerate BENCHMARKS.md
 uv run thrml-bench run-all
 ```

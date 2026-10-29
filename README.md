@@ -365,6 +365,75 @@ Formulates constrained Markowitz portfolio selection (choosing exactly $K = 5$ a
 uv run qubo_portfolio.py
 ```
 
+---
+
+## Experiment 8: Continuous Variables & Hybrid Double-Well Energy Wells (`ContinuousNode`)
+
+Extends `thrml`'s `AbstractNode`, `AbstractFactor`, and `AbstractParametricConditionalSampler` to model **continuous analog state variables** ($x_i \in \mathbb{R}$) coupled along a 32-oscillator ring in a quartic double-well potential:
+
+$$U(x) = \sum_{i=1}^{N} \alpha (x_i^2 - 1)^2 - \sum_{\langle i,j \rangle} J_{ij} x_i x_j$$
+
+### Methodology
+- **Custom Continuous Node & Factor:** Registers `ContinuousNode` with `jax.ShapeDtypeStruct((), jnp.float32)` in `BlockGibbsSpec` and compiles undirected linear spring couplings via `ContinuousCouplingFactor`.
+- **Thermal Barrier Hopping vs. Well Locking:** Evaluates how thermal fluctuations drive Kramers barrier-hopping across the $x = 0$ saddle point at high temperature ($\beta = 0.35$) versus spontaneous symmetry breaking into the $x = \pm 1$ potential wells at low temperature ($\beta = 4.00$).
+
+### Simulation Results
+| Inverse Temp ($\beta$) | Barrier-Hopping Rate (%/step) | Mean Amplitude $\langle |x| \rangle$ | Physical Regime |
+|---|---|---|---|
+| $\beta = 0.35$ | $38.4\%$ | $0.493$ | High-T over-barrier thermal hopping |
+| $\beta = 1.20$ | $32.8\%$ | $0.950$ | Bimodal double-well splitting |
+| $\beta = 4.00$ | **$0.9\%$** | **$1.002$** | Deep well locking around $x = \pm 1$ ($2.805\text{s}$ runtime) |
+
+![Continuous Double-Well Oscillators](thrml_continuous_double_well.png)
+
+### Reproduction
+```bash
+uv run run_continuous_double_well.py
+```
+
+---
+
+## Experiment 9: Traveling Salesperson Problem (TSP) via $N \times N$ Permutation QUBO
+
+Solves the 10-city Traveling Salesperson Problem by mapping tour positions onto a $10 \times 10$ binary permutation lattice ($N = 100$ `SpinNode`s) with row/column orthogonality penalties and step-to-step Euclidean distance couplings:
+
+$$E(x) = \lambda \sum_{i=0}^{N-1} \left(\sum_{t=0}^{N-1} x_{i,t} - 1\right)^2 + \lambda \sum_{t=0}^{N-1} \left(\sum_{i=0}^{N-1} x_{i,t} - 1\right)^2 + \sum_{t=0}^{N-1} \sum_{i \neq j} d_{ij}\, x_{i,t}\, x_{j,(t+1) \bmod N}$$
+
+### Optimization Results
+- **Chromatic Block Partitioning:** Greedy vertex coloring partitions the dense 100-spin constraint graph into **28 conditionally independent color blocks** for parallel JAX block updates.
+- **Route Untangling:** Starts from a highly tangled crossing tour ($L_{\text{naive}} = 17.986$), untangles mid-annealing ($\beta = 0.3 \rightarrow L = 11.438$), and locks into the exact shortest perimeter ring tour (**$L_{\text{opt}} = 6.296$, $100.0\%$ optimality, $65.0\%$ route reduction**).
+
+![TSP Route Optimization](thrml_tsp_solution.png)
+
+### Reproduction
+```bash
+uv run solve_tsp.py
+```
+
+---
+
+## Hardware Performance & Multi-Scale Lattice Scaling (`run_scaling_benchmark.py`)
+
+Benchmarks XLA JIT compilation overhead against pure compiled 2-color Block Gibbs sampling throughput across 4 lattice scales ($500$ full sweeps per scale: $L = 16 \to 32 \to 64 \to 128$, up to $16,384$ spins):
+
+| Lattice Size ($L \times L$) | Total Spins ($N$) | XLA JIT Compile (s) | Pure Sampling Exec (500 Sweeps) | Throughput (Sweeps/s) | Spin-Flip Rate (M Updates/s) | Parallel Clock Speedup ($N/2$) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| $16 \times 16$ | $256$ | `0.188s` | `0.383s` | `1,304.4 /s` | `0.33 MSU/s` | `128x` |
+| $32 \times 32$ | $1,024$ | `0.031s` | `0.394s` | `1,270.4 /s` | `1.30 MSU/s` | `512x` |
+| $64 \times 64$ | $4,096$ | `0.021s` | `0.299s` | `1,673.9 /s` | `6.86 MSU/s` | `2,048x` |
+| $128 \times 128$ | $16,384$ | `0.052s` | `0.406s` | `1,231.6 /s` | **`20.18 MSU/s`** | **`8,192x`** |
+
+![Hardware Scaling Benchmark](thrml_scaling_benchmark.png)
+
+### Unified CLI Benchmark Tool (`thrml-bench`)
+See [`BENCHMARKS.md`](BENCHMARKS.md) for the auto-generated index across all 9 experiments:
+```bash
+uv run thrml-bench list
+uv run thrml-bench run --exp 9
+uv run thrml-bench run-all
+```
+
+
 
 
 

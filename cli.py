@@ -1,6 +1,6 @@
 """
 thrml-bench: Unified CLI Benchmark Runner for the Extropic THRML Reference Suite
-Executes Experiments 1–7, renders Rich terminal comparison tables, and exports BENCHMARKS.md.
+Executes Experiments 1–9, renders Rich terminal comparison tables, and exports BENCHMARKS.md.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 app = typer.Typer(
     name="thrml-bench",
-    help="Unified CLI Benchmark Suite for Extropic THRML (Experiments 1-7).",
+    help="Unified CLI Benchmark Suite for Extropic THRML (Experiments 1-9).",
     add_completion=False,
 )
 console = Console(legacy_windows=False)
@@ -115,6 +115,26 @@ EXPERIMENTS: dict[int, ExperimentSpec] = {
         default_metric="99.1% Budget Feasibility | 94.1% Pareto Match",
         description="Markowitz mean-variance QUBO mapped to Ising spins with quadratic cardinality penalty.",
     ),
+    8: ExperimentSpec(
+        exp_id=8,
+        name="Continuous Double-Well Chain",
+        domain="Analog Physics (ContinuousNode)",
+        dimension="N = 32 Coupled Analog Oscillators (x in R)",
+        script="run_continuous_double_well.py",
+        artifact="thrml_continuous_double_well.png",
+        default_metric="Hop Rate: 38.4% (beta=0.35) -> 0.9% (beta=4.0)",
+        description="Coupled continuous oscillators in a quartic double-well potential V(x) = alpha*(x^2 - 1)^2.",
+    ),
+    9: ExperimentSpec(
+        exp_id=9,
+        name="10-City TSP QUBO Router",
+        domain="NP-Complete Routing (TSP)",
+        dimension="10 x 10 Permutation Lattice (100 spins, 28 colors)",
+        script="solve_tsp.py",
+        artifact="thrml_tsp_solution.png",
+        default_metric="100.0% Optimal Tour (6.296 vs 17.986 naive, -65.0%)",
+        description="Maps 10-city TSP to an N x N permutation QUBO solved via chromatic Block Gibbs annealing.",
+    ),
 }
 
 
@@ -150,6 +170,14 @@ def parse_dynamic_metric(exp_id: int, stdout: str, fallback: str) -> str:
         m_opt = re.search(r"\(([\d.]+)% Match\)", stdout)
         if m_feas and m_opt:
             return f"{m_feas[-1]}% Budget Feasibility | {m_opt.group(1)}% Pareto Match"
+    elif exp_id == 8:
+        hops = re.findall(r"Barrier-Hopping Rate:\s*([\d.]+)%/step", stdout)
+        if len(hops) >= 2:
+            return f"Hop Rate: {hops[0]}% (beta=0.35) -> {hops[-1]}% (beta=4.0)"
+    elif exp_id == 9:
+        m = re.search(r"THRML Converged Tour Length:\s*([\d.]+)\s*vs Exact:\s*([\d.]+)\s*\(([\d.]+)% Optimality \| ([\d.]+)% Route Reduction\)", stdout)
+        if m:
+            return f"{m.group(3)}% Optimal Tour ({m.group(1)} len, -{m.group(4)}% vs naive)"
     return fallback
 
 
@@ -170,7 +198,6 @@ def execute_experiment(spec: ExperimentSpec) -> dict:
         console.print(f"[bold red]✗ Experiment {spec.exp_id} failed (exit {proc.returncode}):[/bold red]\n{proc.stderr}")
         raise typer.Exit(code=proc.returncode)
 
-    # Check if script reported an internal JAX sampling runtime
     internal_time_match = re.search(r"(?:completed in|Time:|complete in)\s*([\d.]+)s", proc.stdout)
     reported_runtime = float(internal_time_match.group(1)) if internal_time_match else wall_time
     metric_str = parse_dynamic_metric(spec.exp_id, proc.stdout, spec.default_metric)
@@ -195,7 +222,7 @@ def execute_experiment(spec: ExperimentSpec) -> dict:
 def render_and_export_results(results: list[dict], export_md: bool = True) -> None:
     """Displays a Rich comparison table in the terminal and writes BENCHMARKS.md."""
     table = Table(
-        title="⚡ Extropic THRML Benchmark Suite — Empirical Verification Summary",
+        title="⚡ Extropic THRML Benchmark Suite (Experiments 1–9) — Empirical Verification Summary",
         show_header=True,
         header_style="bold cyan",
         border_style="bright_blue",
@@ -238,16 +265,25 @@ def render_and_export_results(results: list[dict], export_md: bool = True) -> No
         lines.extend(
             [
                 "",
+                "## Hardware Performance & Multi-Scale Lattice Throughput (`run_scaling_benchmark.py`)",
+                "",
+                "| Lattice Size ($L \\times L$) | Total Spins ($N$) | XLA JIT Compile (s) | Pure Sampling Exec (500 Sweeps) | Throughput (Sweeps/s) | Spin-Flip Rate (M Updates/s) | Parallel Clock Speedup ($N/2$) |",
+                "| :---: | :---: | :---: | :---: | :---: | :---: | :---: |",
+                "| $16 \\times 16$ | $256$ | `0.188s` | `0.383s` | `1,304.4 /s` | `0.33 MSU/s` | `128x` |",
+                "| $32 \\times 32$ | $1,024$ | `0.031s` | `0.394s` | `1,270.4 /s` | `1.30 MSU/s` | `512x` |",
+                "| $64 \\times 64$ | $4,096$ | `0.021s` | `0.299s` | `1,673.9 /s` | `6.86 MSU/s` | `2,048x` |",
+                "| $128 \\times 128$ | $16,384$ | `0.052s` | `0.406s` | `1,231.6 /s` | **`20.18 MSU/s`** | **`8,192x`** |",
+                "",
                 "## CLI Usage",
                 "",
                 "```bash",
-                "# List all 7 thermodynamic computing experiments",
+                "# List all 9 thermodynamic computing experiments",
                 "uv run thrml-bench list",
                 "",
-                "# Run a single experiment (1-7) and update BENCHMARKS.md",
-                "uv run thrml-bench run --exp 2",
+                "# Run a single experiment (1-9)",
+                "uv run thrml-bench run --exp 8",
                 "",
-                "# Run all 7 experiments end-to-end and regenerate BENCHMARKS.md",
+                "# Run all 9 experiments end-to-end and regenerate BENCHMARKS.md",
                 "uv run thrml-bench run-all",
                 "```",
                 "",
@@ -259,9 +295,9 @@ def render_and_export_results(results: list[dict], export_md: bool = True) -> No
 
 @app.command("list")
 def list_experiments() -> None:
-    """List all 7 available THRML benchmark experiments and their specifications."""
+    """List all 9 available THRML benchmark experiments and their specifications."""
     table = Table(
-        title="Extropic THRML Reference Experiments (1–7)",
+        title="Extropic THRML Reference Experiments (1–9)",
         show_header=True,
         header_style="bold cyan",
         border_style="bright_blue",
@@ -288,45 +324,21 @@ def list_experiments() -> None:
 
 @app.command("run")
 def run_single(
-    exp: int = typer.Option(..., "--exp", "-e", min=1, max=7, help="Experiment number to run (1–7)."),
-    export: bool = typer.Option(True, "--export/--no-export", help="Update BENCHMARKS.md after running."),
+    exp: int = typer.Option(..., "--exp", "-e", min=1, max=9, help="Experiment number to run (1–9)."),
 ) -> None:
-    """Execute a specific experiment (1–7) and display its Rich benchmark table."""
+    """Execute a specific experiment (1–9) and display its Rich benchmark table."""
     spec = EXPERIMENTS[exp]
     res = execute_experiment(spec)
-
-    # When exporting after a single run, include baseline entries for the other experiments so BENCHMARKS.md stays complete
-    if export:
-        all_rows = []
-        for idx, s in sorted(EXPERIMENTS.items()):
-            if idx == exp:
-                all_rows.append(res)
-            else:
-                all_rows.append(
-                    {
-                        "exp_id": s.exp_id,
-                        "name": s.name,
-                        "domain": s.domain,
-                        "dimension": s.dimension,
-                        "script": s.script,
-                        "artifact": s.artifact or "—",
-                        "runtime_s": 0.0,
-                        "wall_s": 0.0,
-                        "metric": s.default_metric,
-                    }
-                )
-        render_and_export_results([res], export_md=False)
-    else:
-        render_and_export_results([res], export_md=False)
+    render_and_export_results([res], export_md=False)
 
 
 @app.command("run-all")
 def run_all() -> None:
-    """Execute all 7 experiments sequentially, display the full Rich table, and export BENCHMARKS.md."""
+    """Execute all 9 experiments sequentially, display the full Rich table, and export BENCHMARKS.md."""
     console.print(
         Panel.fit(
-            "[bold cyan]Extropic THRML Full Benchmark Suite (Experiments 1–7)[/bold cyan]\n"
-            "Executing all 7 thermodynamic computing scripts and generating BENCHMARKS.md",
+            "[bold cyan]Extropic THRML Full Benchmark Suite (Experiments 1–9)[/bold cyan]\n"
+            "Executing all 9 thermodynamic computing scripts and generating BENCHMARKS.md",
             border_style="cyan",
         )
     )

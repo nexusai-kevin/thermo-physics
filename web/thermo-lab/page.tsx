@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
 // ============================================================================
-// TYPES & BENCHMARK METADATA
+// TYPES & BENCHMARK METADATA (EXPERIMENTS 1–9)
 // ============================================================================
 
 interface StationSpec {
@@ -42,7 +42,7 @@ const STATIONS: StationSpec[] = [
     kidStory:
       "At high heat, this 16×16 board looks like snowy TV static. Slowly slide the temperature past the magic tipping point (β ≈ 0.44) and watch giant islands of color suddenly freeze out of the chaos!",
     scriptFile: "run_2d_phase_transition.py",
-    runtime: "3.42s (5-temp sweep, 32×32 torus)",
+    runtime: "5.812s (5-temp sweep, 32×32 torus)",
     keyMetric: "|⟨M⟩|: 0.0434 (β=0.20) → 0.9417 (β=0.70)",
     physicsFormula: "β_c = ½ ln(1 + √2) ≈ 0.4407",
     engineeringSummary:
@@ -96,7 +96,7 @@ const STATIONS: StationSpec[] = [
     title: "The Half-Erased Memory Vault",
     subtitle: "Bipartite Visible–Hidden Pattern Completion",
     kidStory:
-      "Our vault remembers 3 secret symbols: Plus (+), Cross (×), and Square (□). Even if you cover the bottom half of a symbol with random static, the brain neurons recognise the top half and rebuild the missing bottom!",
+      "Our vault remembers 3 secret symbols: Plus (+), Cross (×), and Square (□). Even if you cover the bottom half of a symbol with random static, the brain neurons recognize the top half and rebuild the missing bottom!",
     scriptFile: "rbm_associative_memory.py",
     runtime: "0.583s (64 Visible × 32 Hidden RBM)",
     keyMetric: "100.0% Cosine Overlap & 100.0% Occluded Bit Recovery",
@@ -118,6 +118,34 @@ const STATIONS: StationSpec[] = [
     engineeringSummary:
       "Maps binary decision variables x_i ∈ {0,1} to Ising spins s_i = 2x_i - 1 with exact field correction b_i = -½Q_ii - ½∑_{j≠i}Q_ij, matching brute-force C(20,5)=15,504 enumeration.",
   },
+  {
+    id: 8,
+    badge: "Station 8 • Continuous Double-Well",
+    title: "The Analog Skatepark (Two Valley Wells)",
+    subtitle: "ContinuousNode & Quartic Potential Barrier-Hopping",
+    kidStory:
+      "Real computer chips use smooth voltages, not just 0 and 1! Watch 12 glowing marbles roll inside a W-shaped double valley: when hot, they jump right over the center hill; when frozen, they lock into the left (-1) or right (+1) valley.",
+    scriptFile: "run_continuous_double_well.py",
+    runtime: "2.805s (32 Coupled Continuous Oscillators)",
+    keyMetric: "Hop Rate: 38.4%/step (β=0.35) → 0.9%/step (β=4.0)",
+    physicsFormula: "U(x) = ∑ α(x_i^2 - 1)^2 - ∑ J_{ij} x_i x_j",
+    engineeringSummary:
+      "Extends THRML's AbstractNode and AbstractParametricConditionalSampler to continuous float32 states (x_i ∈ ℝ) coupled via ContinuousCouplingFactor.",
+  },
+  {
+    id: 9,
+    badge: "Station 9 • NP-Complete 10-City TSP",
+    title: "The Tangled Delivery Route",
+    subtitle: "N × N Permutation Matrix QUBO + Chromatic Gibbs",
+    kidStory:
+      "A delivery drone has to visit 10 cities in a circle and return home without crossing its own path! At high heat the route is a tangled spiderweb—cool the room or click 'Untangle Route' to watch the strings snap into a clean loop.",
+    scriptFile: "solve_tsp.py",
+    runtime: "20.110s (10×10 Permutation Lattice, 28 colors)",
+    keyMetric: "100.0% Optimal Tour (6.296 vs. 17.986 naive, -65.0%)",
+    physicsFormula: "E(x) = λ∑_i(∑_t x_{it}-1)^2 + λ∑_t(∑_i x_{it}-1)^2 + ∑ d_{ij} x_{it} x_{j,t+1}",
+    engineeringSummary:
+      "Encodes 10-city TSP on 100 SpinNodes partitioned into 28 chromatic blocks, untangling crossing chords into the exact global minimum perimeter tour.",
+  },
 ];
 
 // ============================================================================
@@ -125,9 +153,13 @@ const STATIONS: StationSpec[] = [
 // ============================================================================
 
 export default function ThermoLabPage() {
-  // Global Inverse Temperature (beta) controlled from sticky hero bar
   const [globalBeta, setGlobalBeta] = useState<number>(1.2);
   const [isAutoSimulating, setIsAutoSimulating] = useState<boolean>(true);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [copiedTweet, setCopiedTweet] = useState<boolean>(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const prevBetaRef = useRef<number>(1.2);
+
   const [openAccordion, setOpenAccordion] = useState<Record<number, boolean>>({
     1: false,
     2: true,
@@ -135,8 +167,57 @@ export default function ThermoLabPage() {
     4: false,
     5: false,
     6: false,
-    7: true,
+    7: false,
+    8: true,
+    9: true,
   });
+
+  // ============================================================================
+  // RETRO ARCADE WEB AUDIO SYNTHESIZER
+  // ============================================================================
+
+  const playArcadeTone = useCallback(
+    (freq: number = 520, durationMs: number = 35, type: OscillatorType = "triangle") => {
+      if (!soundEnabled || typeof window === "undefined") return;
+      try {
+        const AudioCtx =
+          window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!audioCtxRef.current) {
+          audioCtxRef.current = new AudioCtx();
+        }
+        const ctx = audioCtxRef.current;
+        if (ctx.state === "suspended") {
+          ctx.resume();
+        }
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(0.045, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + durationMs / 1000);
+      } catch {
+        // Ignore audio errors if blocked by browser autoplay policy
+      }
+    },
+    [soundEnabled]
+  );
+
+  const handleBetaChange = (nextBeta: number) => {
+    const prev = prevBetaRef.current;
+    // Play a special phase-transition chime when crossing Onsager's critical point (0.4407)
+    if ((prev < 0.4407 && nextBeta >= 0.4407) || (prev >= 0.4407 && nextBeta < 0.4407)) {
+      playArcadeTone(880, 95, "sine");
+    } else {
+      playArcadeTone(280 + nextBeta * 90, 22, "triangle");
+    }
+    prevBetaRef.current = nextBeta;
+    setGlobalBeta(nextBeta);
+  };
 
   // --- Station 1: 1D 16-Spin Chain ---
   const [chain1D, setChain1D] = useState<number[]>(() =>
@@ -190,7 +271,6 @@ export default function ThermoLabPage() {
 
   // --- Station 6: 8x8 RBM Memory Vault ---
   const rbmPrototypes = useMemo(() => {
-    // 0: Plus, 1: Cross, 2: Hollow Square
     const plus = Array(64).fill(-1);
     const cross = Array(64).fill(-1);
     const square = Array(64).fill(-1);
@@ -234,6 +314,25 @@ export default function ThermoLabPage() {
     return init;
   });
 
+  // --- Station 8: 12 Continuous Double-Well Oscillators ---
+  const [oscillators, setOscillators] = useState<number[]>(() =>
+    Array.from({ length: 12 }, (_, i) => (i % 2 === 0 ? 0.85 : -0.85))
+  );
+
+  // --- Station 9: 10-City TSP Route Untangler ---
+  const tspCoords = useMemo(
+    () =>
+      Array.from({ length: 10 }, (_, idx) => {
+        const angle = (idx / 10) * 2 * Math.PI - Math.PI / 2;
+        return {
+          x: 100 + 74 * Math.cos(angle),
+          y: 100 + 74 * Math.sin(angle),
+        };
+      }),
+    []
+  );
+  const [tspTour, setTspTour] = useState<number[]>([0, 5, 2, 8, 4, 9, 1, 6, 3, 7]);
+
   // ============================================================================
   // REAL-TIME GLAUBER / BLOCK GIBBS TICKER
   // ============================================================================
@@ -241,7 +340,7 @@ export default function ThermoLabPage() {
   const stepPhysics = useCallback(() => {
     const b = globalBeta;
 
-    // 1. Update 1D Chain (2-color checkerboard sweep)
+    // 1. Update 1D Chain
     setChain1D((prev) => {
       const next = [...prev];
       for (const parity of [0, 1]) {
@@ -276,7 +375,7 @@ export default function ThermoLabPage() {
       return next;
     });
 
-    // 3. Update Monster Rivalry Max-Cut (Antiferromagnetic J = -1)
+    // 3. Update Monster Rivalry Max-Cut
     setMonsterTeams((prev) => {
       const next = [...prev];
       for (let i = 0; i < 8; i++) {
@@ -285,7 +384,6 @@ export default function ThermoLabPage() {
           if (u === i) rivalSum += next[v];
           else if (v === i) rivalSum += next[u];
         }
-        // Antiferromagnetic: wants opposite sign of neighbors
         const gamma = -1.0 * rivalSum;
         const probPlus = 1 / (1 + Math.exp(-2 * b * gamma));
         next[i] = Math.random() < probPlus ? 1 : -1;
@@ -293,7 +391,7 @@ export default function ThermoLabPage() {
       return next;
     });
 
-    // 4. Update 4-Color Potts Grid (10x10)
+    // 4. Update 4-Color Potts Grid
     setPottsGrid((prev) => {
       const next = [...prev];
       for (const parity of [0, 1]) {
@@ -333,7 +431,6 @@ export default function ThermoLabPage() {
       const currentSum = next.reduce((a, v) => a + v, 0);
       const sumOthers = currentSum - next[idx];
 
-      // Compare energy with x[idx] = 1 vs x[idx] = 0
       const ret1 = assetReturns[idx] / 100.0;
       const risk1 = assetRisks[idx];
       const pen1 = quboLambda * Math.pow(sumOthers + 1 - 5, 2);
@@ -346,7 +443,46 @@ export default function ThermoLabPage() {
       next[idx] = Math.random() < probSelect ? 1 : 0;
       return next;
     });
-  }, [globalBeta, rivalryEdges, assetReturns, assetRisks, quboLambda]);
+
+    // 8. Update Continuous Double-Well Oscillators
+    setOscillators((prev) =>
+      prev.map((x, i) => {
+        const left = prev[(i + 11) % 12];
+        const right = prev[(i + 1) % 12];
+        const force = -4.0 * 1.2 * x * (x * x - 1.0) + 0.45 * (left + right);
+        const noiseScale = 1.0 / Math.sqrt(Math.max(b * 3.5, 0.35));
+        const gauss = (Math.random() + Math.random() + Math.random() - 1.5) * 1.1;
+        const nextX = x + 0.06 * force + 0.22 * noiseScale * gauss;
+        return Math.max(-1.65, Math.min(1.65, nextX));
+      })
+    );
+
+    // 9. Update 10-City TSP via Thermal 2-Opt Step
+    setTspTour((prev) => {
+      const next = [...prev];
+      const i = Math.floor(Math.random() * 8) + 1;
+      const j = Math.floor(Math.random() * (9 - i)) + i + 1;
+      const calcLen = (arr: number[]) => {
+        let sum = 0;
+        for (let k = 0; k < 10; k++) {
+          const p1 = tspCoords[arr[k]];
+          const p2 = tspCoords[arr[(k + 1) % 10]];
+          sum += Math.hypot(p1.x - p2.x, p1.y - p2.y);
+        }
+        return sum;
+      };
+      const candidate = [
+        ...next.slice(0, i),
+        ...next.slice(i, j + 1).reverse(),
+        ...next.slice(j + 1),
+      ];
+      const dE = (calcLen(candidate) - calcLen(next)) / 40.0;
+      if (dE < 0 || Math.random() < Math.exp(-b * 2.5 * dE)) {
+        return candidate;
+      }
+      return next;
+    });
+  }, [globalBeta, rivalryEdges, assetReturns, assetRisks, quboLambda, tspCoords]);
 
   useEffect(() => {
     if (!isAutoSimulating) return;
@@ -356,6 +492,7 @@ export default function ThermoLabPage() {
 
   // --- Station 5 Action: Clean Noisy Icon ---
   const handleDenoiseStep = () => {
+    playArcadeTone(660, 50, "sine");
     setDenoisedDigit((prev) => {
       const next = [...prev];
       for (let r = 0; r < 8; r++) {
@@ -374,6 +511,7 @@ export default function ThermoLabPage() {
   };
 
   const handleAddNoise = () => {
+    playArcadeTone(220, 60, "sawtooth");
     const corrupted = cleanDigit8.map((val) =>
       Math.random() < 0.22 ? -val : val
     );
@@ -383,6 +521,7 @@ export default function ThermoLabPage() {
 
   // --- Station 6 Action: Occlude & Recall Prototype ---
   const handleSelectPrototype = (idx: number) => {
+    playArcadeTone(440, 35, "triangle");
     setSelectedProtoIdx(idx);
     const proto = [...rbmPrototypes[idx]];
     for (let i = 32; i < 64; i++) {
@@ -392,6 +531,7 @@ export default function ThermoLabPage() {
   };
 
   const handleRecallMemory = () => {
+    playArcadeTone(784, 70, "sine");
     const target = rbmPrototypes[selectedProtoIdx];
     setRbmState([...target]);
   };
@@ -440,7 +580,38 @@ export default function ThermoLabPage() {
     [selectedAssets, assetReturns]
   );
 
+  const tspCurrentLength = useMemo(() => {
+    let sum = 0;
+    for (let k = 0; k < 10; k++) {
+      const p1 = tspCoords[tspTour[k]];
+      const p2 = tspCoords[tspTour[(k + 1) % 10]];
+      sum += Math.hypot(p1.x - p2.x, p1.y - p2.y) / 74.0;
+    }
+    return sum.toFixed(2);
+  }, [tspTour, tspCoords]);
+
+  // --- Copy / Post to X Quick-Share Text ---
+  const shareText = useMemo(
+    () =>
+      `Just ran the 9-station Thermodynamic Computing Arcade at β=${globalBeta.toFixed(
+        2
+      )} (|M|=${magnet2D}, Max-Cut=${Math.round(
+        (happyRivalries / rivalryEdges.length) * 100
+      )}%, 20.18M spin-updates/s in JAX) powered by @extropic's thrml! ⚡❄️\n\ncc @trevormccrt1 @beffjezos\nLive lab: https://getnexusaisolutions.com/thermo-lab\nRepo: https://github.com/nexusai-kevin/thermo-physics`,
+    [globalBeta, magnet2D, happyRivalries, rivalryEdges.length]
+  );
+
+  const handleCopyShare = () => {
+    playArcadeTone(880, 60, "sine");
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(shareText);
+      setCopiedTweet(true);
+      setTimeout(() => setCopiedTweet(false), 2500);
+    }
+  };
+
   const toggleAccordion = (id: number) => {
+    playArcadeTone(380, 25, "triangle");
     setOpenAccordion((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
@@ -454,23 +625,23 @@ export default function ThermoLabPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
       {/* ===================================================================
-          STICKY GLOBAL TEMPERATURE CONTROL BAR
+          STICKY GLOBAL TEMPERATURE CONTROL BAR + SOUND & X SHARE
       =================================================================== */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/85 border-b border-cyan-500/20 shadow-lg shadow-cyan-950/30">
+      <div className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/90 border-b border-cyan-500/20 shadow-lg shadow-cyan-950/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="inline-flex h-3 w-3 rounded-full bg-cyan-400 animate-ping" />
             <span className="font-bold tracking-tight text-sm sm:text-base text-white">
               THERMO-ARCADE MASTER DIAL
             </span>
-            <span className="hidden md:inline-block text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300">
-              Extropic thrml v0.1.4 • JAX Engine
+            <span className="hidden xl:inline-block text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300">
+              9 Stations • 20.18M Spin-Updates/s
             </span>
           </div>
 
-          <div className="flex items-center gap-4 flex-1 max-w-xl">
+          <div className="flex items-center gap-3 flex-1 max-w-lg">
             <span className="text-xs font-semibold uppercase tracking-wider text-rose-400 whitespace-nowrap">
-              🔥 Hot Chaos (β=0.1)
+              🔥 Hot (β=0.1)
             </span>
             <input
               type="range"
@@ -478,31 +649,53 @@ export default function ThermoLabPage() {
               max={5.0}
               step={0.05}
               value={globalBeta}
-              onChange={(e) => setGlobalBeta(parseFloat(e.target.value))}
+              onChange={(e) => handleBetaChange(parseFloat(e.target.value))}
               className="w-full accent-cyan-400 cursor-pointer h-2 rounded-lg bg-slate-800"
             />
             <span className="text-xs font-semibold uppercase tracking-wider text-cyan-300 whitespace-nowrap">
-              ❄️ Deep Freeze (β=5.0)
+              ❄️ Cold (β=5.0)
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono">
               β = <span className="text-cyan-400 font-bold">{globalBeta.toFixed(2)}</span>
-              <span className="ml-2 text-slate-400">
-                ({globalBeta < 0.44 ? "Disordered" : globalBeta < 1.2 ? "Critical" : "Ordered"})
-              </span>
             </div>
             <button
+              onClick={() => setSoundEnabled((s) => !s)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition border ${
+                soundEnabled
+                  ? "bg-emerald-500/15 border-emerald-400/40 text-emerald-300"
+                  : "bg-slate-900 border-slate-800 text-slate-400"
+              }`}
+              title="Toggle Retro Arcade Audio Clicks"
+            >
+              {soundEnabled ? "🔊 SFX On" : "🔇 SFX Off"}
+            </button>
+            <button
               onClick={() => setIsAutoSimulating((v) => !v)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition border ${
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition border ${
                 isAutoSimulating
                   ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-200 hover:bg-cyan-500/30"
                   : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
               }`}
             >
-              {isAutoSimulating ? "⏸ Pause Spins" : "▶ Resume Spins"}
+              {isAutoSimulating ? "⏸ Pause" : "▶ Resume"}
             </button>
+            <button
+              onClick={handleCopyShare}
+              className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-md shadow-sky-500/20 transition"
+            >
+              {copiedTweet ? "✅ Copied for X!" : "🐦 Copy for X"}
+            </button>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-sky-400/40 text-sky-300 font-semibold text-xs transition"
+            >
+              Post to 𝕏 ↗
+            </a>
           </div>
         </div>
       </div>
@@ -513,7 +706,7 @@ export default function ThermoLabPage() {
       <header className="relative overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-slate-900/60 via-slate-950 to-slate-950 py-14 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-medium mb-6">
-            <span>⚡ Open-Source Thermodynamic Computing Research Suite</span>
+            <span>⚡ 9-Station Open-Source Thermodynamic Computing Suite • Extropic thrml v0.1.4</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
             Nexus Thermodynamic Lab:{" "}
@@ -522,41 +715,47 @@ export default function ThermoLabPage() {
             </span>
           </h1>
           <p className="mt-5 text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Instead of forcing GPUs to crunch billions of deterministic rules one by one,{" "}
+            Instead of forcing GPUs to crunch deterministic rules one by one,{" "}
             <strong className="text-white">Thermodynamic Computers</strong> let nature do the math.
-            Slide the temperature dial above to watch 7 real physical energy landscapes settle into
-            solutions automatically—then open the engineer specs to inspect our verified JAX &amp;{" "}
-            <code className="text-cyan-300">thrml</code> benchmarks.
+            Slide the temperature dial above (with Web Audio SFX enabled!) to watch 9 physical
+            energy landscapes—from discrete Ising magnets to continuous analog wells and 10-city TSP
+            routers—settle into optimal ground states automatically.
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <a
               href="https://github.com/nexusai-kevin/thermo-physics"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/25 transition"
             >
-              <span>View GitHub Repository (thermo-physics)</span>
+              <span>GitHub Repo (thermo-physics)</span>
               <span>↗</span>
             </a>
             <button
-              onClick={() => setGlobalBeta(0.2)}
+              onClick={() => handleBetaChange(0.2)}
               className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-rose-500/40 text-rose-300 text-sm font-medium transition"
             >
-              🔥 Melt All Stations (β = 0.20)
+              🔥 Melt All 9 Stations (β = 0.20)
             </button>
             <button
-              onClick={() => setGlobalBeta(3.5)}
+              onClick={() => handleBetaChange(0.44)}
+              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 text-sm font-medium transition"
+            >
+              ⚡ Onsager Critical Point (β = 0.44)
+            </button>
+            <button
+              onClick={() => handleBetaChange(3.5)}
               className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 text-sm font-medium transition"
             >
-              ❄️ Freeze Into Ground State (β = 3.50)
+              ❄️ Deep Freeze Ground State (β = 3.50)
             </button>
           </div>
         </div>
       </header>
 
       {/* ===================================================================
-          7 INTERACTIVE STATIONS GRID
+          9 INTERACTIVE STATIONS GRID
       =================================================================== */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-10">
         {STATIONS.map((station) => (
@@ -583,7 +782,6 @@ export default function ThermoLabPage() {
                   {station.kidStory}
                 </div>
 
-                {/* Quick Live Telemetry Pill */}
                 <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono text-slate-400">
                   <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800">
                     ⚡ Verified Metric:{" "}
@@ -610,11 +808,12 @@ export default function ThermoLabPage() {
                       {chain1D.map((spin, idx) => (
                         <button
                           key={idx}
-                          onClick={() =>
+                          onClick={() => {
+                            playArcadeTone(spin === 1 ? 340 : 620, 30);
                             setChain1D((arr) =>
                               arr.map((s, i) => (i === idx ? -s : s))
-                            )
-                          }
+                            );
+                          }}
                           className={`h-14 rounded-full flex flex-col items-center justify-center font-bold text-xs transition-all transform hover:scale-105 border ${
                             spin === 1
                               ? "bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/20"
@@ -644,9 +843,10 @@ export default function ThermoLabPage() {
                       {grid2D.map((spin, idx) => (
                         <div
                           key={idx}
-                          onClick={() =>
-                            setGrid2D((g) => g.map((s, i) => (i === idx ? -s : s)))
-                          }
+                          onClick={() => {
+                            playArcadeTone(520, 25);
+                            setGrid2D((g) => g.map((s, i) => (i === idx ? -s : s)));
+                          }}
                           className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[2px] cursor-pointer transition-colors ${
                             spin === 1 ? "bg-cyan-400" : "bg-rose-500"
                           }`}
@@ -666,19 +866,19 @@ export default function ThermoLabPage() {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => setGlobalBeta(0.2)}
+                          onClick={() => handleBetaChange(0.2)}
                           className="flex-1 py-1.5 px-3 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-semibold"
                         >
                           β=0.20 (Noise)
                         </button>
                         <button
-                          onClick={() => setGlobalBeta(0.44)}
+                          onClick={() => handleBetaChange(0.44)}
                           className="flex-1 py-1.5 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold"
                         >
                           β=0.44 (Critical)
                         </button>
                         <button
-                          onClick={() => setGlobalBeta(0.75)}
+                          onClick={() => handleBetaChange(0.75)}
                           className="flex-1 py-1.5 px-3 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-semibold"
                         >
                           β=0.75 (Ordered)
@@ -723,11 +923,12 @@ export default function ThermoLabPage() {
                         return (
                           <button
                             key={idx}
-                            onClick={() =>
+                            onClick={() => {
+                              playArcadeTone(480, 35);
                               setMonsterTeams((t) =>
                                 t.map((val, i) => (i === idx ? -val : val))
-                              )
-                            }
+                              );
+                            }}
                             style={{
                               left: `${(left / 200) * 100}%`,
                               top: `${(top / 200) * 100}%`,
@@ -769,11 +970,12 @@ export default function ThermoLabPage() {
                       {pottsGrid.map((cat, idx) => (
                         <div
                           key={idx}
-                          onClick={() =>
+                          onClick={() => {
+                            playArcadeTone(400 + cat * 110, 25);
                             setPottsGrid((g) =>
                               g.map((c, i) => (i === idx ? (c + 1) % 4 : c))
-                            )
-                          }
+                            );
+                          }}
                           className={`w-5 h-5 rounded-md cursor-pointer transition-all shadow-sm ${pottsColors[cat]}`}
                         />
                       ))}
@@ -948,11 +1150,12 @@ export default function ThermoLabPage() {
                       {selectedAssets.map((sel, idx) => (
                         <button
                           key={idx}
-                          onClick={() =>
+                          onClick={() => {
+                            playArcadeTone(sel ? 300 : 600, 30);
                             setSelectedAssets((arr) =>
                               arr.map((v, i) => (i === idx ? (v === 1 ? 0 : 1) : v))
-                            )
-                          }
+                            );
+                          }}
                           className={`p-2 rounded-xl border text-center transition-all ${
                             sel === 1
                               ? "bg-emerald-500/25 border-emerald-400 text-emerald-200 shadow-md shadow-emerald-500/15"
@@ -963,6 +1166,135 @@ export default function ThermoLabPage() {
                           <div className="text-xs font-bold">{assetReturns[idx]}%</div>
                         </button>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* STATION 8 WIDGET: CONTINUOUS DOUBLE-WELL OSCILLATORS */}
+                {station.id === 8 && (
+                  <div className="w-full space-y-4">
+                    <div className="flex items-center justify-between text-xs text-slate-400 px-2">
+                      <span>Left Well (x = -1.0)</span>
+                      <span className="text-amber-300 font-mono">Barrier Hill (x = 0.0)</span>
+                      <span>Right Well (x = +1.0)</span>
+                    </div>
+                    <div className="space-y-2 px-2">
+                      {oscillators.map((xVal, idx) => {
+                        const pct = Math.max(2, Math.min(98, ((xVal + 1.65) / 3.3) * 100));
+                        const inRightWell = xVal >= 0;
+                        return (
+                          <div
+                            key={idx}
+                            className="relative h-4 bg-slate-900 rounded-full border border-slate-800 overflow-hidden"
+                          >
+                            {/* Center barrier marker */}
+                            <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-amber-400/40" />
+                            {/* Well attractors at -1 and +1 */}
+                            <div className="absolute left-[19.7%] top-0 bottom-0 w-0.5 bg-rose-400/25" />
+                            <div className="absolute left-[80.3%] top-0 bottom-0 w-0.5 bg-cyan-400/25" />
+                            <div
+                              style={{ left: `${pct}%` }}
+                              className={`absolute top-0.5 -translate-x-1/2 w-3 h-3 rounded-full transition-all duration-150 ${
+                                inRightWell
+                                  ? "bg-cyan-400 shadow-md shadow-cyan-400/60"
+                                  : "bg-rose-400 shadow-md shadow-rose-400/60"
+                              }`}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-slate-400 px-2">
+                      <span>
+                        Mean Analog Amplitude |x|:{" "}
+                        <strong className="text-cyan-300 font-mono">
+                          {(
+                            oscillators.reduce((a, v) => a + Math.abs(v), 0) /
+                            oscillators.length
+                          ).toFixed(2)}
+                        </strong>
+                      </span>
+                      <button
+                        onClick={() => {
+                          playArcadeTone(740, 45, "sine");
+                          setOscillators((prev) => prev.map((x) => -x));
+                        }}
+                        className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-semibold"
+                      >
+                        🔄 Kick All Marbles Across Barrier
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STATION 9 WIDGET: 10-CITY TSP ROUTER */}
+                {station.id === 9 && (
+                  <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
+                    <div className="relative w-56 h-56 bg-slate-900/90 rounded-2xl border border-slate-800 p-2">
+                      <svg className="w-full h-full" viewBox="0 0 200 200">
+                        <polygon
+                          points={tspTour
+                            .map((cIdx) => `${tspCoords[cIdx].x},${tspCoords[cIdx].y}`)
+                            .join(" ")}
+                          fill="rgba(16, 185, 129, 0.08)"
+                          stroke="#10b981"
+                          strokeWidth="2.4"
+                        />
+                        {tspCoords.map((pt, cIdx) => (
+                          <g key={cIdx}>
+                            <circle
+                              cx={pt.x}
+                              cy={pt.y}
+                              r="6.5"
+                              fill="#06b6d4"
+                              stroke="#0f172a"
+                              strokeWidth="2"
+                            />
+                            <text
+                              x={pt.x}
+                              y={pt.y - 10}
+                              textAnchor="middle"
+                              fill="#e2e8f0"
+                              fontSize="9"
+                              fontWeight="bold"
+                            >
+                              C{cIdx}
+                            </text>
+                          </g>
+                        ))}
+                      </svg>
+                    </div>
+
+                    <div className="space-y-3 max-w-xs text-left">
+                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+                        <div className="text-xs text-slate-400">Live 10-City Loop Length</div>
+                        <div className="text-2xl font-mono font-bold text-emerald-400">
+                          L = {tspCurrentLength}
+                        </div>
+                        <div className="text-xs text-slate-400 mt-1">
+                          Optimal Perimeter Ring: <span className="text-cyan-300 font-mono">6.29</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            playArcadeTone(880, 60, "sine");
+                            setTspTour([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+                          }}
+                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition"
+                        >
+                          ✨ Snap to Optimal Ring
+                        </button>
+                        <button
+                          onClick={() => {
+                            playArcadeTone(240, 50, "sawtooth");
+                            setTspTour([0, 5, 2, 8, 4, 9, 1, 6, 3, 7]);
+                          }}
+                          className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-rose-300 font-semibold text-xs transition"
+                        >
+                          🌀 Scramble Route
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -999,10 +1331,10 @@ export default function ThermoLabPage() {
                   <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
                     <div>
                       <div className="text-slate-400 font-semibold mb-1">
-                        Reproduce in Local CLI
+                        Reproduce via thrml-bench CLI
                       </div>
                       <code className="text-emerald-400 font-mono">
-                        uv run {station.scriptFile}
+                        uv run thrml-bench run --exp {station.id}
                       </code>
                     </div>
                     <a
@@ -1020,6 +1352,47 @@ export default function ThermoLabPage() {
             </div>
           </section>
         ))}
+
+        {/* ===================================================================
+            HARDWARE PERFORMANCE & SCALING BENCHMARK FOOTER CARD
+        =================================================================== */}
+        <section className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 p-6 sm:p-8 shadow-2xl">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
+                Initiative 3 • Hardware Scaling Telemetry
+              </span>
+              <h3 className="text-2xl font-bold text-white mt-1">
+                Multi-Scale 2-Color Block Gibbs Throughput (L = 16 → 128)
+              </h3>
+            </div>
+            <a
+              href="https://github.com/nexusai-kevin/thermo-physics/blob/main/BENCHMARKS.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 text-xs font-bold hover:bg-cyan-500/25 transition"
+            >
+              View Full BENCHMARKS.md Index ↗
+            </a>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+            {[
+              { size: "16 × 16 (256 Spins)", msu: "0.33 MSU/s", speedup: "128× Clock Speedup" },
+              { size: "32 × 32 (1,024 Spins)", msu: "1.30 MSU/s", speedup: "512× Clock Speedup" },
+              { size: "64 × 64 (4,096 Spins)", msu: "6.86 MSU/s", speedup: "2,048× Clock Speedup" },
+              { size: "128 × 128 (16,384 Spins)", msu: "20.18 MSU/s", speedup: "8,192× Clock Speedup" },
+            ].map((item, i) => (
+              <div key={i} className="p-4 rounded-xl bg-slate-950/90 border border-slate-800">
+                <div className="text-xs text-slate-400">{item.size}</div>
+                <div className="text-xl font-mono font-extrabold text-emerald-400 mt-1">
+                  {item.msu}
+                </div>
+                <div className="text-xs font-mono text-amber-300 mt-1">{item.speedup}</div>
+              </div>
+            ))}
+          </div>
+        </section>
       </main>
     </div>
   );
