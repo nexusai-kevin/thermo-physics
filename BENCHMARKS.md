@@ -87,6 +87,12 @@ Evaluates thermodynamic Gibbs sampling against the canonical dense spin glass pr
 
 ## Experiment 11: Thermodynamic RNA Secondary-Structure Conformational Ensemble
 
+> [!NOTE]
+> ### Biophysical Model Scope & Scientific Caveats
+> * **Simplified Energy Model:** Nearest-neighbor stacking ($\sigma = -2.0\text{ kcal/mol}$) and base-pairing binding affinities ($\epsilon_{\text{GC}} = -3.0, \epsilon_{\text{AU}} = -2.0, \epsilon_{\text{GU}} = -1.0\text{ kcal/mol}$) are coarse order-of-magnitude approximations. They do not implement the complete Turner 2004 nearest-neighbor parameter set (sequence-dependent 16-parameter stacking tables, loop length entropies, dangling ends, or coaxial stacking).
+> * **Curated Small Instance ($N=24, M=24$):** Selected deliberately to permit exact $2^{24} = 16,777,216$ state brute-force ground-state proof. It serves as an ensemble proof-of-concept for thermodynamic sampling, not a drop-in replacement for production ViennaRNA/RNAfold tools.
+> * **Pseudoknot Formulation:** The topological cross-pairing penalty ($\lambda_{\text{pseudo}} = +5.0\text{ kcal/mol}$) provides baseline steric crossing suppression; this does not claim general-purpose 3D tertiary structure prediction.
+
 ### Overview
 Models RNA secondary-structure folding as an energy-based quadratic formulation over candidate base pairs $x_k \in \{0, 1\}$ ($s_k = 2x_k - 1$) sampled according to the Boltzmann distribution $P(x) \propto e^{-\beta H(x)}$. Rather than predicting a single minimum free energy (MFE) structure via classical dynamic programming (Zuker algorithm), this experiment samples the complete thermodynamic conformational ensemble, quantifying structural switching, marginal base-pairing probabilities ($P_{ij} = \langle x_{ij} \rangle$), and conformational Shannon entropy ($S$).
 
@@ -97,37 +103,61 @@ $$H(x) = \sum_{k} \epsilon_k x_k - \sum_{(k, l) \text{ adjacent}} \sigma_{kl} x_
 * **Steric Clash Penalty ($\lambda_{\text{conflict}}$):** $+15.0\text{ kcal/mol}$ hard penalty enforcing that each nucleotide pairs with at most one partner.
 * **Pseudoknot Penalty ($\lambda_{\text{pseudo}}$):** $+5.0\text{ kcal/mol}$ for crossing contacts ($i < i' < j < j'$).
 
-### Benchmark Results ($N = 24\text{ nt}$ Bistable Switch, $M = 24$ Candidate Contacts)
+### Two-Tier Comparative Benchmark Summary
+
+#### Tier 1: Curated Bistable Switch ($N=24\text{ nt}, M=24$)
 * **Sequence:** `GGCUAAAAAAACCAAAAAACCGAA`
-* **Exact Ground-State Energy ($2^{24} = 16.7\text{M}$ Brute-Force):** $E_0 = -10.0000\text{ kcal/mol}$ [Solved in $3.71\text{s}$]
-* **Ground-State Dot-Bracket Structure:** `((.(...)...))...........` (Active pairs: `[(0, 12), (1, 11), (3, 7)]`)
+* **Exact Ground-State Energy ($2^{24} = 16.7\text{M}$ Brute-Force):** $E_0 = -10.0000\text{ kcal/mol}$ [Solved in $3.09\text{s}$]
+* **Ground-State Structure:** `((.(...)...))...........` (Active pairs: `[(0, 12), (1, 11), (3, 7)]`)
 * **Best Gibbs Sampled Energy:** $E_{\text{best}} = -10.0000\text{ kcal/mol}$ (**100.0% Exact Ground State Match**)
-* **Sokal Autocorrelation Time ($\tau_{\text{int}}$):** $38.22\text{ sweeps}$ at $\beta = 1.0$ (ESS: $654.1 / 25,000$)
-* **Physiological Shannon Entropy ($37^\circ\text{C}, \beta = 1.0$):** $S = 5.13\text{ bits}$ ($290$ distinct configurations)
-* **Thermal Melting Shannon Entropy ($T_{\text{melt}}, \beta = 0.2$):** $S = 10.66\text{ bits}$ ($4,264$ distinct configurations)
+* **Sokal Autocorrelation ($\tau_{\text{int}}$):** $38.22\text{ sweeps}$ at $\beta = 1.0$ (ESS: $654.1 / 25,000$)
+* **Physiological Shannon Entropy ($37^\circ\text{C}$):** $S = 5.13\text{ bits}$ ($290$ distinct states)
+* **Thermal Melting Shannon Entropy ($T_{\text{melt}}$):** $S = 10.66\text{ bits}$ ($4,264$ distinct states)
 
-### Comparative Benchmark Summary ($N=24\text{ nt}, M=24$)
+#### Tier 2: Scalable Riboswitch Aptamer Core ($N=50\text{ nt}, M=72$)
+* **Sequence:** `CUCGUCGUAGCAGUCGCAAGUCGGCAGUCGAAUUAAACGCUACGACGAGG`
+* **Combinatorial State Space:** $2^{72} \approx 4.72 \times 10^{21}$ states (exact brute-force mathematically intractable, skipped)
+* **Best Gibbs Sampled Energy:** $E_{\text{best}} = -66.0000\text{ kcal/mol}$ [Mean: $-64.96\text{ kcal/mol}$, Sampled in $0.31\text{s}$]
+* **Ground-State Structure:** `(((((((((((..(......((((...)))))......))))))))))).`
+* **Sokal Autocorrelation ($\tau_{\text{int}}$):** $7.32\text{ sweeps}$ at $\beta = 1.0$ (ESS: $3,413.0 / 25,000$)
+* **Physiological Shannon Entropy ($37^\circ\text{C}$):** $S = 3.06\text{ bits}$ ($206$ distinct states)
+* **Thermal Melting Shannon Entropy ($T_{\text{melt}}$):** $S = 14.56\text{ bits}$ ($24,443$ distinct states)
 
-| Method | Condition / Schedule | Best E (kcal/mol) | Mean E | Entropy | Wall Time |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **Exact Brute-Force** | All $2^{24}$ States | $-10.0000$ | N/A | $0.00\text{ b}$ | $3.71\text{s}$ |
-| **Gibbs (Physiological $37^\circ\text{C}$)** | $\beta = 1.0$ ($T = 310\text{K}$) | $-10.0000$ | $-9.30$ | $5.13\text{ b}$ | $0.27\text{s}$ |
-| **Gibbs (Thermal Melt)** | $\beta = 0.2$ ($T_{\text{melt}}$) | $-10.0000$ | $+0.93$ | $10.66\text{ b}$ | $0.19\text{s}$ |
-| **Simulated Annealing (SA)** | $\beta: 0.1 \to 3.0$ | $-10.0000$ | N/A | N/A | $0.101\text{s}$ |
+| Tier | Method | Condition / Schedule | Best E (kcal/mol) | Mean E | Entropy | Wall Time |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **Tier 1 ($N=24, M=24$)** | **Exact Brute-Force** | All $2^{24}$ States | $-10.0000$ | N/A | $0.00\text{ b}$ | $3.09\text{s}$ |
+| Tier 1 ($N=24, M=24$) | **Gibbs (Physiological $37^\circ\text{C}$)** | $\beta = 1.0$ ($T = 310\text{K}$) | $-10.0000$ | $-9.30$ | $5.13\text{ b}$ | $0.21\text{s}$ |
+| Tier 1 ($N=24, M=24$) | **Gibbs (Thermal Melt)** | $\beta = 0.2$ ($T_{\text{melt}}$) | $-10.0000$ | $+0.93$ | $10.66\text{ b}$ | $0.17\text{s}$ |
+| Tier 1 ($N=24, M=24$) | **Simulated Annealing (SA)** | $\beta: 0.1 \to 3.0$ | $-10.0000$ | N/A | N/A | $0.056\text{s}$ |
+| **Tier 2 ($N=50, M=72$)** | **Exact Brute-Force** | $2^{72}$ States (Skip) | N/A | N/A | $0.00\text{ b}$ | N/A |
+| Tier 2 ($N=50, M=72$) | **Gibbs (Physiological $37^\circ\text{C}$)** | $\beta = 1.0$ ($T = 310\text{K}$) | $-66.0000$ | $-64.96$ | $3.06\text{ b}$ | $0.31\text{s}$ |
+| Tier 2 ($N=50, M=72$) | **Gibbs (Thermal Melt)** | $\beta = 0.2$ ($T_{\text{melt}}$) | $-66.0000$ | $-23.30$ | $14.56\text{ b}$ | $0.29\text{s}$ |
+| Tier 2 ($N=50, M=72$) | **Simulated Annealing (SA)** | $\beta: 0.1 \to 3.0$ | $-66.0000$ | N/A | N/A | $0.052\text{s}$ |
 
-### Dominant Base-Pairing Marginal Probabilities ($P_{ij} = \langle x_{ij} \rangle$)
+### Dominant Base-Pairing Marginal Probabilities ($P_{ij} = \langle x_{ij} \rangle \ge 0.30$)
 
+#### Tier 1 ($N=24$ Bistable Switch)
 | Pair $(i, j)$ | Interacting Bases | Type | $P(i, j)$ at $37^\circ\text{C}$ ($\beta = 1.0$) | $P(i, j)$ at $T_{\text{melt}}$ ($\beta = 0.2$) |
 | :---: | :---: | :---: | :---: | :---: |
 | **$(0, 20)$** | $\text{G}_0 \leftrightarrow \text{C}_{20}$ | G-C | $0.4873$ | $0.2834$ |
 | **$(1, 11)$** | $\text{G}_1 \leftrightarrow \text{C}_{11}$ | G-C | $0.4572$ | $0.2139$ |
 | **$(1, 19)$** | $\text{G}_1 \leftrightarrow \text{C}_{19}$ | G-C | $0.4178$ | $0.2212$ |
 | **$(0, 12)$** | $\text{G}_0 \leftrightarrow \text{C}_{12}$ | G-C | $0.3389$ | $0.1200$ |
-| **$(3, 9)$** | $\text{U}_3 \leftrightarrow \text{A}_9$ | U-A | $0.1936$ | $0.1488$ |
-| **$(3, 7)$** | $\text{U}_3 \leftrightarrow \text{A}_7$ | U-A | $0.1851$ | $0.1483$ |
 
-* **Bistable Conformational Switching:** Base $\text{G}_0$ actively partitions between $\text{C}_{20}$ ($48.7\%$) in the extended distal hairpin and $\text{C}_{12}$ ($33.9\%$) in the proximal hairpin, demonstrating thermodynamic multi-state equilibrium.
-* **Thermal Denaturation:** As temperature increases to the melting regime ($\beta = 0.2$), native contact probabilities drop and conformational entropy doubles from $5.13\text{ bits}$ to $10.66\text{ bits}$, recovering the open-coil statistical ensemble.
+#### Tier 2 ($N=50$ Riboswitch Aptamer Core)
+| Pair $(i, j)$ | Interacting Bases | Type | $P(i, j)$ at $37^\circ\text{C}$ ($\beta = 1.0$) | $P(i, j)$ at $T_{\text{melt}}$ ($\beta = 0.2$) |
+| :---: | :---: | :---: | :---: | :---: |
+| **$(3, 45)$** | $\text{G}_3 \leftrightarrow \text{C}_{45}$ | G-C | $0.9993$ | $0.5244$ |
+| **$(5, 43)$** | $\text{C}_5 \leftrightarrow \text{G}_{43}$ | C-G | $0.9993$ | $0.4899$ |
+| **$(6, 42)$** | $\text{G}_6 \leftrightarrow \text{C}_{42}$ | G-C | $0.9990$ | $0.4891$ |
+| **$(2, 46)$** | $\text{C}_2 \leftrightarrow \text{G}_{46}$ | C-G | $0.9990$ | $0.5930$ |
+| **$(7, 41)$** | $\text{U}_7 \leftrightarrow \text{A}_{41}$ | U-A | $0.9981$ | $0.5238$ |
+| **$(8, 40)$** | $\text{A}_8 \leftrightarrow \text{U}_{40}$ | A-U | $0.9977$ | $0.5923$ |
+| **$(1, 47)$** | $\text{U}_1 \leftrightarrow \text{A}_{47}$ | U-A | $0.9976$ | $0.6216$ |
+| **$(9, 39)$** | $\text{G}_9 \leftrightarrow \text{C}_{39}$ | G-C | $0.9972$ | $0.4856$ |
+
+* **Multi-Scale Native Stabilization:** The 50-nt aptamer core forms an 11-bp outer stem with near-unity occupancy ($>99.7\%$ at $37^\circ\text{C}$), protecting an internal hairpin loop.
+* **Thermal Denaturation:** As temperature increases to $T_{\text{melt}}$, the outer stem melts to $\approx 50\%$ occupancy and conformational entropy jumps to $14.56\text{ bits}$ across $24,443$ sampled states.
 
 ## CLI Usage
 
