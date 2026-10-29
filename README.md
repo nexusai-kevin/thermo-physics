@@ -454,6 +454,27 @@ python experiments/exp10_sk_spin_glass.py
 
 ---
 
+## Experiment 11: Thermodynamic RNA Secondary-Structure Conformational Ensemble
+
+Models RNA folding as an energy-based quadratic formulation where candidate base pairs are sampled according to the Boltzmann distribution $P(s) \propto e^{-\beta H(s)}$ at physiological temperature ($37^\circ\text{C}$, $T=310.15\text{K}$, scaled $\beta \approx 1.0$), capturing multi-valley conformational equilibria and riboswitch bistability rather than a single static MFE structure.
+
+### Benchmark Results
+* **Tier 1 (24-nt Bistable Switch, $M=24$ Contacts):**
+  - **Exact Ground State ($2^{24}$ Brute-Force):** $E_0 = -10.0000\text{ kcal/mol}$
+  - **Empirical MFE Discovered:** $E_0 = -10.0000\text{ kcal/mol}$ (**100.0% Exact MFE Match**)
+  - **Bistable Conformational Switching:** Discovers both competing stems: $G_0 \leftrightarrow C_{20}$ ($48.7\%$ occupancy) and $G_0 \leftrightarrow C_{12}$ ($33.9\%$ occupancy)
+  - **Sokal Autocorrelation Time ($\tau_{\text{int}}$):** $38.22\text{ steps}$ ($\text{ESS} = 654.1$)
+* **Tier 2 (50-nt Aptamer Core, $M=72$ Contacts):**
+  - **Dominant Native Stems Discovered:** $-66.0000\text{ kcal/mol}$
+  - **Conformational Shannon Entropy:** Native ($T=37^\circ\text{C}$): $3.06\text{ bits}$ vs. Thermal Melting ($T=95^\circ\text{C}$): $14.56\text{ bits}$ (captures cooperative denaturation)
+
+### Reproduction
+```bash
+python experiments/exp11_rna_folding.py
+```
+
+---
+
 ## Hardware Performance & Multi-Scale Lattice Scaling (`run_scaling_benchmark.py`)
 
 Benchmarks XLA JIT compilation overhead against pure compiled 2-color Block Gibbs sampling throughput across 4 lattice scales ($500$ full sweeps per scale: $L = 16 \to 32 \to 64 \to 128$, up to $16,384$ spins):
@@ -477,9 +498,22 @@ uv run thrml-bench run-all
 
 ---
 
+## Applications & Forward Roadmap
+
+For the formal mathematical transition of this suite from statistical physics baselines into applied computational frontiers (dense spin glasses, macromolecular biophysics / RNA ensembles, and microgrid unit commitment), see:
+
+* **Comprehensive Applications Roadmap:** [`docs/APPLICATIONS_ROADMAP.md`](docs/APPLICATIONS_ROADMAP.md)
+  - **Layer 1:** Foundational Baselines (Exp 1–9) — 1D/2D Ising, Potts ($q=4$), RBM associative memory, Max-Cut, Portfolio QUBO (Upstream PR #79).
+  - **Layer 2:** Dense Frustrated Systems (Exp 10) — Sherrington-Kirkpatrick (SK) Spin Glass with exact ground-state validation and Parisi $P(q)$ replica overlap.
+  - **Layer 3:** Applied Macromolecular Biophysics (Exp 11) — Boltzmann ensemble sampling of RNA secondary structures and riboswitch bistability ($N=24$ exact, $N=50$ scalable).
+  - **Layer 4:** Frontier Expansions — ViennaRNA McCaskill parity, antimicrobial peptide (AMP) rotamer packing, and Security-Constrained Unit Commitment (SCUC) microgrid QUBO.
+
+---
+
 ## Research Application & Executive Brief
 - **Printable 1-Page Executive Summary:** [`docs/one_pager.html`](docs/one_pager.html) (designed for direct PDF export and physical submission)
 - **Application Memo:** [`docs/EXTROPIC_APPLICATION_MEMO.md`](docs/EXTROPIC_APPLICATION_MEMO.md)
+- **Forward Applications Roadmap:** [`docs/APPLICATIONS_ROADMAP.md`](docs/APPLICATIONS_ROADMAP.md)
 - **Upstream Contribution:** [PR #79 on extropic-ai/thrml](https://github.com/extropic-ai/thrml/pull/79)
 
 
