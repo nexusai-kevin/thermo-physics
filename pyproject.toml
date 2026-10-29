@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "thermo-repro"
+version = "0.1.0"
+description = "Reference Implementations and Reproducibility Suite for Thermodynamic Computing (EBMs, Factor Graphs, Block Gibbs, and DTM)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26.0",
+]
+
+[project.optional-dependencies]
+thrml = [
+    "jax>=0.4.20",
+    "jaxlib>=0.4.20",
+    "thrml",
+]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[project.scripts]
+thermo-suite = "thermo_repro.benchmark_runner:main"

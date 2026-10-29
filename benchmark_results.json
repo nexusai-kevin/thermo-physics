@@ -1,0 +1,196 @@
+{
+  "using_native_thrml": false,
+  "bipartite_benchmark": {
+    "samples_shape": [
+      500,
+      96
+    ],
+    "mean_energy": -20.337514877319336,
+    "min_energy": -32.05659866333008,
+    "max_energy": -8.726394653320312,
+    "wall_time_sec": 0.02542910003103316,
+    "hardware_efficiency_profile": {
+      "problem_scale": {
+        "n_nodes": 96,
+        "n_edges": 2048,
+        "n_blocks": 2,
+        "total_sweeps": 1100,
+        "total_spin_updates": 105600
+      },
+      "classical_hardware_measured": {
+        "wall_time_sec": 0.02542910003103316,
+        "sweeps_per_sec": 43257.527740171,
+        "assumed_power_watts": 300.0,
+        "total_energy_joules": 7.6287300093099475,
+        "joules_per_sweep": 0.00693520909937268,
+        "nanojoules_per_spin_update": 72241.76145179875
+      },
+      "tsu_projected": {
+        "relaxation_time_sec": 1.1e-05,
+        "sweeps_per_sec": 100000000.0,
+        "active_power_watts": 0.001,
+        "total_energy_joules": 1.1e-08,
+        "joules_per_sweep": 1e-11,
+        "femtojoules_per_spin_update": 104.16666666666666
+      },
+      "tsu_vs_classical_ratios": {
+        "latency_speedup_x": 2311.73636645756,
+        "energy_reduction_x": 693520909.937268
+      }
+    }
+  },
+  "boltzmann_verification": {
+    "n_nodes": 8,
+    "n_edges": 10,
+    "n_blocks": 2,
+    "beta": 0.85,
+    "n_samples": 12000,
+    "exact_Z": 554.0621999100531,
+    "exact_log_Z": 6.317276954650879,
+    "exact_mean_energy": -1.7699272632598877,
+    "empirical_mean_energy": -1.752576470375061,
+    "energy_abs_error": 0.01735079288482666,
+    "total_variation_distance": 0.04655241349492523,
+    "kl_divergence": 0.010160702215969628,
+    "tau_int_energy": 0.525602791019235,
+    "effective_sample_size": 11415.464496231001,
+    "energy_trajectory_head": [
+      -2.9242162704467773,
+      -2.1575169563293457,
+      -1.1994954347610474,
+      -2.9242162704467773,
+      0.9163004159927368,
+      -0.650418758392334,
+      -0.4895091950893402,
+      -1.323970079421997,
+      -2.8633856773376465,
+      -2.8633856773376465,
+      -3.2752766609191895,
+      -3.3361077308654785,
+      -3.3361077308654785,
+      -2.3162426948547363,
+      -3.603267192840576,
+      -3.603267192840576,
+      -2.470587730407715,
+      -2.1804094314575195,
+      -3.603267192840576,
+      -2.1804094314575195,
+      -2.50895094871521,
+      -2.1933398246765137,
+      -1.5302139520645142,
+      -0.21380983293056488,
+      -3.603267192840576,
+      -0.7903320789337158,
+      -1.9648090600967407,
+      1.0861541032791138,
+      -0.3009190559387207,
+      -1.3762714862823486,
+      -1.4028091430664062,
+      -4.088497638702393,
+      2.4992828369140625,
+      1.0759059190750122,
+      -1.8352687358856201,
+      -3.4105589389801025,
+      -2.1706368923187256,
+      -0.21795031428337097,
+      -1.4010088443756104,
+      -3.2752766609191895,
+      -2.3508384227752686,
+      -1.0270307064056396,
+      -2.1575169563293457,
+      -2.8633856773376465,
+      -2.50895094871521,
+      0.26836493611335754,
+      -2.8633856773376465,
+      -3.603267192840576,
+      -0.2746404707431793,
+      -2.409757137298584
+    ]
+  },
+  "mixing_time_comparison": {
+    "n_nodes": 36,
+    "n_edges": 60,
+    "block_gibbs": {
+      "n_blocks_colors": 2,
+      "wall_time_sec": 0.04627260006964207,
+      "tau_int_energy_sweeps": 0.984696989754964,
+      "tau_int_magnetization_sweeps": 3.7996978655078224,
+      "ess_energy": 1015.5408317525619,
+      "hardware_clock_cycles_per_sweep": 2,
+      "hardware_cycles_per_independent_sample": 3.938787959019856,
+      "mean_energy": -7.434000015258789
+    },
+    "sequential_gibbs": {
+      "n_blocks_colors": 36,
+      "wall_time_sec": 0.7113952999934554,
+      "tau_int_energy_sweeps": 0.9399159475450172,
+      "tau_int_magnetization_sweeps": 3.5311661791820237,
+      "ess_energy": 1063.924920746283,
+      "hardware_clock_cycles_per_sweep": 36,
+      "hardware_cycles_per_independent_sample": 67.67394822324124,
+      "mean_energy": -7.46584939956665
+    },
+    "parallel_cycle_speedup_factor": 18.0,
+    "decorrelation_cycle_speedup_factor": 17.181414416652554,
+    "software_wall_time_speedup": 15.374007488725029
+  },
+  "project_a_associative_classifier": {
+    "project": "Project A: Associative Memory & Robust EBM Classification",
+    "architecture": {
+      "n_visible": 16,
+      "n_hidden": 16,
+      "n_labels": 4,
+      "n_total_nodes": 36,
+      "n_total_edges": 320,
+      "bipartite_blocks": 2
+    },
+    "training": {
+      "method": "Contrastive Divergence (CD-3)",
+      "initial_recon_mse": 1.1800831705331802,
+      "final_recon_mse": 0.0004681935934058856
+    },
+    "classification_metrics": {
+      "clean_accuracy": 1.0,
+      "noise_flip_probability": 0.2,
+      "noisy_accuracy": 0.9375,
+      "n_noisy_trials": 32
+    },
+    "associative_memory_metrics": {
+      "masked_fraction": 0.375,
+      "occluded_bit_recovery_accuracy": 1.0,
+      "occluded_classification_accuracy": 1.0
+    },
+    "wall_time_sec": 0.1764738999772817
+  },
+  "project_b_dtm_denoising": {
+    "project": "Project B: Denoising Thermodynamic Model (DTM) 2D Lattice Suite",
+    "lattice_shape": [
+      12,
+      12
+    ],
+    "n_spins": 144,
+    "noise_flip_prob": 0.25,
+    "initial_noisy_accuracy": 0.75,
+    "dtm_checkerboard_block_gibbs": {
+      "n_parallel_blocks": 2,
+      "total_sweeps": 54,
+      "hardware_clock_cycles": 108,
+      "wall_time_sec": 0.002515499945729971,
+      "initial_energy": -87.74008178710938,
+      "final_energy": -95.39950561523438,
+      "denoised_accuracy": 0.8333333333333334,
+      "bit_error_reduction_pct": 33.33333333333335
+    },
+    "classical_sequential_mcmc": {
+      "n_parallel_blocks": 144,
+      "total_sweeps": 54,
+      "hardware_clock_cycles": 7776,
+      "wall_time_sec": 0.07651330018416047,
+      "initial_energy": -87.74008178710938,
+      "final_energy": -94.91950988769531,
+      "denoised_accuracy": 0.8055555555555556,
+      "bit_error_reduction_pct": 22.222222222222232
+    },
+    "hardware_cycle_advantage_x": 72.0
+  }
+}
