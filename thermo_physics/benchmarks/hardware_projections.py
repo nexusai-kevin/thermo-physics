@@ -67,6 +67,7 @@ class ProjectionResult:
             f"  - Classical GPU Baseline : {self.gpu_joules_per_1k_ess:,.4f} Joules\n"
             f"  - Extropic TSU Substrate : {self.tsu_joules_per_1k_ess:,.6f} Joules\n"
             f"Net Energy Efficiency Gain: {self.energy_efficiency_multiplier:,.0f}x\n"
+            f"Audit Reference: docs/METHODOLOGY.md#6-hardware-projections-assumptions--limitations\n"
         )
 
 
