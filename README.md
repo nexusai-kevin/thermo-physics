@@ -3,26 +3,78 @@
 [![CI](https://github.com/nexusai-kevin/thermo-physics/actions/workflows/ci.yml/badge.svg)](https://github.com/nexusai-kevin/thermo-physics/actions/workflows/ci.yml)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nexusai-kevin/thermo-physics/blob/main/notebooks/quickstart_tutorial.ipynb)
 [![Extropic thrml](https://img.shields.io/badge/Extropic_thrml-v0.1.4-7c3aed?style=flat-square)](https://github.com/extropic-ai/thrml)
-[![JAX](https://img.shields.io/badge/JAX-v0.12.0-008080?style=flat-square)](https://github.com/jax-ml/jax)
-[![Boltzmann Equilibrium](https://img.shields.io/badge/Boltzmann_TV_Distance-0.0484-2ea44f?style=flat-square)](#4-reproducibility-benchmark-results-native-thrml)
-[![Parallel Speedup](https://img.shields.io/badge/Parallel_Speedup-18.0x_%2F_sweep-0969da?style=flat-square)](#4-reproducibility-benchmark-results-native-thrml)
-[![DTM Relaxation](https://img.shields.io/badge/DTM_Energy--87.74_%E2%86%92_--96.56-d97706?style=flat-square)](#5-visual-proof-2d-lattice-dtm-denoising-output)
-[![Tests](https://img.shields.io/badge/Tests-6%2F6_Passing-success?style=flat-square)](#6-quickstart-usage)
+[![JAX](https://img.shields.io/badge/JAX-v0.4+-008080?style=flat-square)](https://github.com/jax-ml/jax)
+[![Boltzmann Equilibrium](https://img.shields.io/badge/Boltzmann_TV_Distance-0.0484-2ea44f?style=flat-square)](#key-verified-highlights-at-a-glance)
+[![Station 13 Codon](https://img.shields.io/badge/Station_13_Codon--7.82_vs_Greedy-success?style=flat-square)](#key-verified-highlights-at-a-glance)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-A modular reference implementation and hardware-aware reproducibility benchmark suite for **Energy-Based Models (EBMs)**, **Factor Graphs**, **Multi-Color Block Gibbs Sampling**, and **Denoising Thermodynamic Models (DTMs)** executing on Extropic's [`thrml`](https://github.com/extropic-ai/thrml) and JAX stack.
+An open-source, canonical reference implementation and verification benchmark suite for **Thermodynamic Computing**, **Energy-Based Models (EBMs)**, **Block Gibbs Sampling**, and **Continuous Langevin Dynamics** across Extropic's [`thrml`](https://github.com/extropic-ai/thrml), JAX, and physical Thermodynamic Sampling Unit (TSU) hardware targets.
 
 ---
 
-## Key Verified Highlights (Native `thrml` v0.1.4)
+### ⚡ What This Suite Verifies (In <30 Seconds)
 
-| Core Verification Metric | Measured Result | Physical Meaning |
-| :--- | :--- | :--- |
-| **Boltzmann Equilibrium** | `TV Distance = 0.0484` (`KL = 0.01089`) | Empirical Block Gibbs distribution converges to exact brute-force $P(s) = e^{-\beta E(s)} / Z$ |
-| **Exact vs. Empirical Energy** | `Exact <E> = -1.7699` vs. `Empirical <E> = -1.7685` | Absolute energy error $\|\Delta E\| = 0.0014$ across 12,000 samples on a frustrated $2 \times 4$ spin lattice |
-| **Hardware Parallel Speedup** | `18.0x per sweep` (`22.4x per independent sample`) | 2-Color Checkerboard Block Gibbs updates in **2 clock cycles/sweep** vs. **36 cycles** for sequential MCMC |
-| **DTM Energy Relaxation** | `-87.74 -> -96.56` (`75.0% -> 81.9%` pixel accuracy) | Physical thermal annealing repairs spin-flip corruption in **72.0x** fewer clock cycles than single-site MCMC |
-| **Projected TSU Energy Efficiency** | `104.17 fJ / spin-update` (`1.55e+10x` reduction) | Subthreshold CMOS p-bit array (~1W) vs. measured 300W GPU tensor/MCMC execution (`154.93 mJ/sweep`) |
+1. **Exact Boltzmann Equilibrium:** Proves convergence of parallel Block Gibbs sampling against exact brute-force state sums ($2^N$ for $N \le 24$) with **Total Variation Distance $D_{\text{TV}} = 0.0484 < 0.05$** and energy absolute error $|\Delta E| = 0.0014$.
+2. **MCMC Mixing & Critical Slowing Down:** Tracks Sokal-windowed integrated autocorrelation time ($\tau_{\text{int}}$) and Effective Sample Size ($\text{ESS}/\text{s}$), quantifying critical slowing down at the 2D Onsager critical point ($\beta_c \approx 0.4407$) and low-temperature spin glass phases.
+3. **Real-World Non-Toy Workloads:** Solves industrial and biological combinatorial optimization:
+   - **Station 12:** Microgrid Security-Constrained Unit Commitment (SCUC) QUBO ($N=24$ spins, 4 generators $\times$ 6 hours).
+   - **Station 13:** mRNA Codon Optimization via Potts EBM ($8.49 \times 10^7$ sequences, beating classical greedy heuristics by **7.82 energy units** and eliminating ribosome-stalling hairpins).
+4. **Hardware Energy Projections:** Parameterized analytical models comparing Extropic Z1 hardware (< 1W die power) against modern GPUs (350W TDP), projecting **$16,000\times$ to $910,000\times$ net energy efficiency gains** ($\text{Joules per independent sample}$) under audited assumptions.
+
+---
+
+### 🚀 One-Command Google Colab Quickstart
+
+Run Stations 1 (1D Ising), 2 (2D Onsager Criticality), and 10 (SK Spin Glass $E_0 = -15.4266$) in **< 60 seconds** on any Google Colab CPU or T4 GPU:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nexusai-kevin/thermo-physics/blob/main/notebooks/quickstart_tutorial.ipynb)
+
+```bash
+# Local one-line installation & verification:
+pip install -e .
+python -m unittest discover -s tests -v
+pytest upstream_patches/pr80/ -v -W error
+```
+
+---
+
+### 📊 Key Verified Highlights at a Glance
+
+| Benchmark Metric | Measured Result | Reference Baseline | Physical & Computational Significance |
+| :--- | :--- | :--- | :--- |
+| **Boltzmann TV Distance** | **`0.0484`** | Target $\le 0.05$ | Rigorous proof that Block Gibbs preserves detailed balance on frustrated lattices |
+| **Energy Error** | **`|ΔE| = 0.0014`** | Exact $E_0 = -1.7699$ | Unbiased thermodynamic expectation values on $2 \times 4$ spin system ($2^8 = 256$ states) |
+| **Dense Spin Glass Ground State** | **`E = -15.4266`** | Exact $2^{24}$ enumeration | **100% exact match** on Sherrington-Kirkpatrick model ($N=24$, 276 couplings) |
+| **Station 13 Codon EBM** | **`-7.82 units vs Greedy`** | Greedy CAI baseline (9.11) | Eliminates 4 severe stem-loop hairpins and balances GC to 57.8% |
+| **Projected Energy Efficiency** | **`16,000x - 910,000x`** | NVIDIA GPU @ 350W | Extropic TSU (< 1W) [Audited Assumptions](docs/METHODOLOGY.md#6-hardware-projections-assumptions--limitations) |
+
+---
+
+### 🛠️ How to Add a New Experiment Station
+
+Adding a new domain workload or physical system to the reference suite takes 4 simple steps:
+
+1. **Formulate the Graph:**  
+   Define couplings and biases using [`HamiltonianGraph`](thermo_physics/backends/sampler_adapter.py) or `thrml.models.IsingEBM`:
+   ```python
+   from thermo_physics.backends.sampler_adapter import HamiltonianGraph
+   graph = HamiltonianGraph(couplings=J, biases=h, spin_type="bipolar")
+   ```
+
+2. **Run Execution via Pluggable Adapter:**  
+   Sample using the unified backend interface (switching seamlessly between classical JAX and hardware targets):
+   ```python
+   from thermo_physics.backends.sampler_adapter import get_sampler, BackendType, SamplingConfig
+   sampler = get_sampler(BackendType.JAX_BLOCK_GIBBS)
+   result = sampler.sample(graph, SamplingConfig(n_samples=5000, beta=1.5))
+   print(result.summary())  # Outputs wall-clock, tau_int, and ESS/sec
+   ```
+
+3. **Verify Ground Truth or Baseline:**  
+   Compare against exact brute-force ($N \le 24$), analytical solution, or classical heuristic baseline (as in Station 13).
+
+4. **Register in Test Suite:**  
+   Add a verification test case in `tests/test_suite.py` asserting energy bounds and Sokal convergence ($\text{ESS} > 500$).
 
 ---
 

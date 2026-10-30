@@ -9,6 +9,12 @@ ribosome-stalling RNA secondary structure hairpins and maintaining physiological
 
 Target Peptide: Human GLP-1 bioactive 15-mer ("HAEGTFTSDVSSYLE")
 Search Space: ~8.49 x 10^7 synonymous mRNA sequence candidates.
+
+Methodological Note:
+The inverted-repeat stem-loop detector (L_stem >= 3, loop 3-8 nt) provides an efficient,
+zero-dependency first-order approximation of ribosome-stalling hairpins. Future iterations
+can incorporate ViennaRNA / NUPACK nearest-neighbor partition functions for detailed free-energy
+conformational matrices while preserving this exact Potts EBM sampler interface.
 """
 
 from __future__ import annotations
