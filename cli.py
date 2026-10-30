@@ -592,5 +592,12 @@ def dossier_command() -> None:
     run_unified_suite(verbose=True)
 
 
+@app.command("dispatch")
+def dispatch_command() -> None:
+    """Run the Nexus AI Thermodynamic Agent & LLM Task Dispatcher benchmark simulation across 40 burst tasks."""
+    from thermo_physics.dispatch.benchmark_dispatch import run_dispatch_benchmark
+    run_dispatch_benchmark(verbose=True)
+
+
 if __name__ == "__main__":
     app()

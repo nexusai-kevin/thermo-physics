@@ -1,0 +1,1539 @@
+{
+  "benchmark_metadata": {
+    "title": "Nexus AI Thermodynamic Task Dispatcher Simulation",
+    "task_count": 40,
+    "total_burst_tokens": 97841,
+    "endpoints": [
+      {
+        "name": "Claude-3.5-Sonnet",
+        "provider": "Anthropic",
+        "cost_per_1k_tokens": 0.015,
+        "latency_p50_ms": 800.0,
+        "rpm_limit": 500,
+        "tpm_limit": 50000,
+        "active_tpm": 5000,
+        "active_rpm": 40,
+        "context_window": 200000,
+        "supported_capabilities": [
+          "code",
+          "reasoning",
+          "analysis",
+          "creative"
+        ]
+      },
+      {
+        "name": "GPT-4o",
+        "provider": "OpenAI",
+        "cost_per_1k_tokens": 0.01,
+        "latency_p50_ms": 600.0,
+        "rpm_limit": 800,
+        "tpm_limit": 80000,
+        "active_tpm": 10000,
+        "active_rpm": 80,
+        "context_window": 128000,
+        "supported_capabilities": [
+          "code",
+          "reasoning",
+          "analysis",
+          "multilingual"
+        ]
+      },
+      {
+        "name": "Gemini-1.5-Flash",
+        "provider": "Google",
+        "cost_per_1k_tokens": 0.000375,
+        "latency_p50_ms": 300.0,
+        "rpm_limit": 2000,
+        "tpm_limit": 200000,
+        "active_tpm": 20000,
+        "active_rpm": 120,
+        "context_window": 1000000,
+        "supported_capabilities": [
+          "multilingual",
+          "fast_chat",
+          "extraction",
+          "summary"
+        ]
+      },
+      {
+        "name": "Local-Ollama-RTX5080",
+        "provider": "On-Premise",
+        "cost_per_1k_tokens": 0.0,
+        "latency_p50_ms": 150.0,
+        "rpm_limit": 10000,
+        "tpm_limit": 35000,
+        "active_tpm": 0,
+        "active_rpm": 0,
+        "context_window": 16384,
+        "supported_capabilities": [
+          "fast_chat",
+          "extraction",
+          "summary",
+          "privacy"
+        ]
+      }
+    ]
+  },
+  "results": {
+    "baseline_1_naive_high_capability": {
+      "strategy": "Baseline 1: Naive High-Capability (Claude-Heavy)",
+      "total_tasks": 40,
+      "total_cost": 1.4219,
+      "max_batch_latency_ms": 800.0,
+      "avg_latency_ms": 725.0,
+      "sla_violation_count": 20,
+      "capability_mismatch_count": 22,
+      "tpm_load": {
+        "Claude-3.5-Sonnet": 93689,
+        "GPT-4o": 19152,
+        "Gemini-1.5-Flash": 20000,
+        "Local-Ollama-RTX5080": 0
+      },
+      "rpm_load": {
+        "Claude-3.5-Sonnet": 65,
+        "GPT-4o": 95,
+        "Gemini-1.5-Flash": 120,
+        "Local-Ollama-RTX5080": 0
+      },
+      "tpm_utilization": {
+        "Claude-3.5-Sonnet": 1.8738,
+        "GPT-4o": 0.2394,
+        "Gemini-1.5-Flash": 0.1,
+        "Local-Ollama-RTX5080": 0.0
+      },
+      "tpm_violations": {
+        "Claude-3.5-Sonnet": 43689,
+        "GPT-4o": 0,
+        "Gemini-1.5-Flash": 0,
+        "Local-Ollama-RTX5080": 0
+      },
+      "headroom_tpm": {
+        "Claude-3.5-Sonnet": 0,
+        "GPT-4o": 60848,
+        "Gemini-1.5-Flash": 180000,
+        "Local-Ollama-RTX5080": 35000
+      },
+      "solve_time_ms": 0.01,
+      "mcmc_tau_int": null,
+      "mcmc_ess": null,
+      "assignments": [
+        {
+          "task_id": "task-reason-01",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3857,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.057855,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-02",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6595,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.098925,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-03",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6118,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.09177,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-04",
+          "complexity_tier": "reasoning",
+          "est_tokens": 5255,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.078825,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-05",
+          "complexity_tier": "reasoning",
+          "est_tokens": 5232,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.07848,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-06",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6934,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.10401,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-07",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3843,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.057645,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-08",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6289,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.094335,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-09",
+          "complexity_tier": "reasoning",
+          "est_tokens": 4305,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.064575,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-10",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3876,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.05814,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-01",
+          "complexity_tier": "medium",
+          "est_tokens": 2252,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.03378,
+          "latency_ms": 800.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-02",
+          "complexity_tier": "medium",
+          "est_tokens": 3151,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.047265,
+          "latency_ms": 800.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-03",
+          "complexity_tier": "medium",
+          "est_tokens": 2671,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.040065,
+          "latency_ms": 800.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-04",
+          "complexity_tier": "medium",
+          "est_tokens": 2722,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.04083,
+          "latency_ms": 800.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-05",
+          "complexity_tier": "medium",
+          "est_tokens": 2634,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.03951,
+          "latency_ms": 800.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-06",
+          "complexity_tier": "medium",
+          "est_tokens": 2772,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.04158,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-07",
+          "complexity_tier": "medium",
+          "est_tokens": 2226,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.03339,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-08",
+          "complexity_tier": "medium",
+          "est_tokens": 1456,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.02184,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-09",
+          "complexity_tier": "medium",
+          "est_tokens": 2879,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.043185,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-10",
+          "complexity_tier": "medium",
+          "est_tokens": 2100,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.0315,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-11",
+          "complexity_tier": "medium",
+          "est_tokens": 2200,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.033,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-12",
+          "complexity_tier": "medium",
+          "est_tokens": 1941,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.029115,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-13",
+          "complexity_tier": "medium",
+          "est_tokens": 1565,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.023475,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-14",
+          "complexity_tier": "medium",
+          "est_tokens": 3053,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.045795,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-15",
+          "complexity_tier": "medium",
+          "est_tokens": 2763,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.041445,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-01",
+          "complexity_tier": "simple",
+          "est_tokens": 700,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.007,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-02",
+          "complexity_tier": "simple",
+          "est_tokens": 531,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00531,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-03",
+          "complexity_tier": "simple",
+          "est_tokens": 825,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00825,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-04",
+          "complexity_tier": "simple",
+          "est_tokens": 631,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00631,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-05",
+          "complexity_tier": "simple",
+          "est_tokens": 560,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.0056,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-06",
+          "complexity_tier": "simple",
+          "est_tokens": 565,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00565,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-07",
+          "complexity_tier": "simple",
+          "est_tokens": 409,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00409,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-08",
+          "complexity_tier": "simple",
+          "est_tokens": 314,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00314,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-09",
+          "complexity_tier": "simple",
+          "est_tokens": 638,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00638,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-10",
+          "complexity_tier": "simple",
+          "est_tokens": 871,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00871,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-11",
+          "complexity_tier": "simple",
+          "est_tokens": 294,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00294,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-12",
+          "complexity_tier": "simple",
+          "est_tokens": 850,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.0085,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-13",
+          "complexity_tier": "simple",
+          "est_tokens": 829,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00829,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-14",
+          "complexity_tier": "simple",
+          "est_tokens": 443,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00443,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-15",
+          "complexity_tier": "simple",
+          "est_tokens": 692,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.00692,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": false
+        }
+      ]
+    },
+    "baseline_2_cheapest_first": {
+      "strategy": "Baseline 2: Greedy Cheapest-First (Ollama/Flash-Heavy)",
+      "total_tasks": 40,
+      "total_cost": 0.0153,
+      "max_batch_latency_ms": 300.0,
+      "avg_latency_ms": 176.2,
+      "sla_violation_count": 0,
+      "capability_mismatch_count": 18,
+      "tpm_load": {
+        "Claude-3.5-Sonnet": 5000,
+        "GPT-4o": 10000,
+        "Gemini-1.5-Flash": 60728,
+        "Local-Ollama-RTX5080": 57113
+      },
+      "rpm_load": {
+        "Claude-3.5-Sonnet": 40,
+        "GPT-4o": 80,
+        "Gemini-1.5-Flash": 127,
+        "Local-Ollama-RTX5080": 33
+      },
+      "tpm_utilization": {
+        "Claude-3.5-Sonnet": 0.1,
+        "GPT-4o": 0.125,
+        "Gemini-1.5-Flash": 0.3036,
+        "Local-Ollama-RTX5080": 1.6318
+      },
+      "tpm_violations": {
+        "Claude-3.5-Sonnet": 0,
+        "GPT-4o": 0,
+        "Gemini-1.5-Flash": 0,
+        "Local-Ollama-RTX5080": 22113
+      },
+      "headroom_tpm": {
+        "Claude-3.5-Sonnet": 45000,
+        "GPT-4o": 70000,
+        "Gemini-1.5-Flash": 139272,
+        "Local-Ollama-RTX5080": 0
+      },
+      "solve_time_ms": 0.0,
+      "mcmc_tau_int": null,
+      "mcmc_ess": null,
+      "assignments": [
+        {
+          "task_id": "task-reason-01",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3857,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-02",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6595,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.002473,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-03",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6118,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.002294,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-04",
+          "complexity_tier": "reasoning",
+          "est_tokens": 5255,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.001971,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-05",
+          "complexity_tier": "reasoning",
+          "est_tokens": 5232,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.001962,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-06",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6934,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.0026,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-07",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3843,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-08",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6289,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.002358,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-09",
+          "complexity_tier": "reasoning",
+          "est_tokens": 4305,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.001614,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-reason-10",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3876,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-01",
+          "complexity_tier": "medium",
+          "est_tokens": 2252,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-02",
+          "complexity_tier": "medium",
+          "est_tokens": 3151,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-03",
+          "complexity_tier": "medium",
+          "est_tokens": 2671,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-04",
+          "complexity_tier": "medium",
+          "est_tokens": 2722,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-05",
+          "complexity_tier": "medium",
+          "est_tokens": 2634,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-06",
+          "complexity_tier": "medium",
+          "est_tokens": 2772,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-07",
+          "complexity_tier": "medium",
+          "est_tokens": 2226,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-08",
+          "complexity_tier": "medium",
+          "est_tokens": 1456,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-09",
+          "complexity_tier": "medium",
+          "est_tokens": 2879,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-10",
+          "complexity_tier": "medium",
+          "est_tokens": 2100,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-11",
+          "complexity_tier": "medium",
+          "est_tokens": 2200,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-12",
+          "complexity_tier": "medium",
+          "est_tokens": 1941,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-13",
+          "complexity_tier": "medium",
+          "est_tokens": 1565,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-analysis-14",
+          "complexity_tier": "medium",
+          "est_tokens": 3053,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-15",
+          "complexity_tier": "medium",
+          "est_tokens": 2763,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": false
+        },
+        {
+          "task_id": "task-fast-01",
+          "complexity_tier": "simple",
+          "est_tokens": 700,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-02",
+          "complexity_tier": "simple",
+          "est_tokens": 531,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-03",
+          "complexity_tier": "simple",
+          "est_tokens": 825,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-04",
+          "complexity_tier": "simple",
+          "est_tokens": 631,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-05",
+          "complexity_tier": "simple",
+          "est_tokens": 560,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-06",
+          "complexity_tier": "simple",
+          "est_tokens": 565,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-07",
+          "complexity_tier": "simple",
+          "est_tokens": 409,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-08",
+          "complexity_tier": "simple",
+          "est_tokens": 314,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-09",
+          "complexity_tier": "simple",
+          "est_tokens": 638,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-10",
+          "complexity_tier": "simple",
+          "est_tokens": 871,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-11",
+          "complexity_tier": "simple",
+          "est_tokens": 294,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-12",
+          "complexity_tier": "simple",
+          "est_tokens": 850,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-13",
+          "complexity_tier": "simple",
+          "est_tokens": 829,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-14",
+          "complexity_tier": "simple",
+          "est_tokens": 443,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-15",
+          "complexity_tier": "simple",
+          "est_tokens": 692,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        }
+      ]
+    },
+    "thermodynamic_dispatcher": {
+      "strategy": "Nexus Thermodynamic Potts/QUBO Dispatcher",
+      "total_tasks": 40,
+      "total_cost": 0.905,
+      "max_batch_latency_ms": 800.0,
+      "avg_latency_ms": 423.8,
+      "sla_violation_count": 3,
+      "capability_mismatch_count": 0,
+      "tpm_load": {
+        "Claude-3.5-Sonnet": 42387,
+        "GPT-4o": 44107,
+        "Gemini-1.5-Flash": 28455,
+        "Local-Ollama-RTX5080": 17892
+      },
+      "rpm_load": {
+        "Claude-3.5-Sonnet": 49,
+        "GPT-4o": 89,
+        "Gemini-1.5-Flash": 127,
+        "Local-Ollama-RTX5080": 15
+      },
+      "tpm_utilization": {
+        "Claude-3.5-Sonnet": 0.8477,
+        "GPT-4o": 0.5513,
+        "Gemini-1.5-Flash": 0.1423,
+        "Local-Ollama-RTX5080": 0.5112
+      },
+      "tpm_violations": {
+        "Claude-3.5-Sonnet": 0,
+        "GPT-4o": 0,
+        "Gemini-1.5-Flash": 0,
+        "Local-Ollama-RTX5080": 0
+      },
+      "headroom_tpm": {
+        "Claude-3.5-Sonnet": 7613,
+        "GPT-4o": 35893,
+        "Gemini-1.5-Flash": 171545,
+        "Local-Ollama-RTX5080": 17108
+      },
+      "solve_time_ms": 4.65,
+      "mcmc_tau_int": 0.5,
+      "mcmc_ess": 45.0,
+      "assignments": [
+        {
+          "task_id": "task-reason-01",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3857,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.057855,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-02",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6595,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.098925,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-03",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6118,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.06118,
+          "latency_ms": 600.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-04",
+          "complexity_tier": "reasoning",
+          "est_tokens": 5255,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.05255,
+          "latency_ms": 600.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-05",
+          "complexity_tier": "reasoning",
+          "est_tokens": 5232,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.05232,
+          "latency_ms": 600.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-06",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6934,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.10401,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-07",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3843,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.03843,
+          "latency_ms": 600.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-08",
+          "complexity_tier": "reasoning",
+          "est_tokens": 6289,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.094335,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-09",
+          "complexity_tier": "reasoning",
+          "est_tokens": 4305,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.064575,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-reason-10",
+          "complexity_tier": "reasoning",
+          "est_tokens": 3876,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.03876,
+          "latency_ms": 600.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-01",
+          "complexity_tier": "medium",
+          "est_tokens": 2252,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.02252,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-02",
+          "complexity_tier": "medium",
+          "est_tokens": 3151,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-03",
+          "complexity_tier": "medium",
+          "est_tokens": 2671,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.02671,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-04",
+          "complexity_tier": "medium",
+          "est_tokens": 2722,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-05",
+          "complexity_tier": "medium",
+          "est_tokens": 2634,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.02634,
+          "latency_ms": 600.0,
+          "sla_satisfied": false,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-06",
+          "complexity_tier": "medium",
+          "est_tokens": 2772,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-07",
+          "complexity_tier": "medium",
+          "est_tokens": 2226,
+          "endpoint": "GPT-4o",
+          "provider": "OpenAI",
+          "estimated_cost": 0.02226,
+          "latency_ms": 600.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-08",
+          "complexity_tier": "medium",
+          "est_tokens": 1456,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.000546,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-09",
+          "complexity_tier": "medium",
+          "est_tokens": 2879,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.043185,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-10",
+          "complexity_tier": "medium",
+          "est_tokens": 2100,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.000788,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-11",
+          "complexity_tier": "medium",
+          "est_tokens": 2200,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.033,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-12",
+          "complexity_tier": "medium",
+          "est_tokens": 1941,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-13",
+          "complexity_tier": "medium",
+          "est_tokens": 1565,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.023475,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-14",
+          "complexity_tier": "medium",
+          "est_tokens": 3053,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.001145,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-analysis-15",
+          "complexity_tier": "medium",
+          "est_tokens": 2763,
+          "endpoint": "Claude-3.5-Sonnet",
+          "provider": "Anthropic",
+          "estimated_cost": 0.041445,
+          "latency_ms": 800.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-01",
+          "complexity_tier": "simple",
+          "est_tokens": 700,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-02",
+          "complexity_tier": "simple",
+          "est_tokens": 531,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-03",
+          "complexity_tier": "simple",
+          "est_tokens": 825,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-04",
+          "complexity_tier": "simple",
+          "est_tokens": 631,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-05",
+          "complexity_tier": "simple",
+          "est_tokens": 560,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-06",
+          "complexity_tier": "simple",
+          "est_tokens": 565,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-07",
+          "complexity_tier": "simple",
+          "est_tokens": 409,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.000153,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-08",
+          "complexity_tier": "simple",
+          "est_tokens": 314,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.000118,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-09",
+          "complexity_tier": "simple",
+          "est_tokens": 638,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-10",
+          "complexity_tier": "simple",
+          "est_tokens": 871,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-11",
+          "complexity_tier": "simple",
+          "est_tokens": 294,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.00011,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-12",
+          "complexity_tier": "simple",
+          "est_tokens": 850,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-13",
+          "complexity_tier": "simple",
+          "est_tokens": 829,
+          "endpoint": "Gemini-1.5-Flash",
+          "provider": "Google",
+          "estimated_cost": 0.000311,
+          "latency_ms": 300.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-14",
+          "complexity_tier": "simple",
+          "est_tokens": 443,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        },
+        {
+          "task_id": "task-fast-15",
+          "complexity_tier": "simple",
+          "est_tokens": 692,
+          "endpoint": "Local-Ollama-RTX5080",
+          "provider": "On-Premise",
+          "estimated_cost": 0.0,
+          "latency_ms": 150.0,
+          "sla_satisfied": true,
+          "capabilities_satisfied": true
+        }
+      ]
+    }
+  },
+  "comparative_metrics": {
+    "cost_reduction_vs_baseline_1": 36.3,
+    "cost_inflation_factor_baseline_1": 1.6,
+    "sla_violations_resolved": -3,
+    "tpm_overage_baseline_1": 43689,
+    "tpm_overage_thermodynamic": 0,
+    "thermodynamic_solve_time_ms": 4.654600001231302
+  }
+}
