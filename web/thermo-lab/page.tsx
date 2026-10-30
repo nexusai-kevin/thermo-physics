@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { DispatcherRoiBenchmark } from "@/components/sections/DispatcherRoiBenchmark";
 
 // ============================================================================
 // TYPES & BENCHMARK METADATA (EXPERIMENTS 1–11)
@@ -1494,6 +1495,10 @@ export default function ThermoLabPage() {
             <span className="font-mono text-cyan-400 text-[11px] font-semibold">{backendTelemetry.advantage}</span>
           </div>
         </div>
+
+        {/* NEXUS AI THERMODYNAMIC TASK DISPATCHER & INTERACTIVE ROI BENCHMARK */}
+        <DispatcherRoiBenchmark />
+
         {STATIONS.map((station) => (
           <section
             key={station.id}
