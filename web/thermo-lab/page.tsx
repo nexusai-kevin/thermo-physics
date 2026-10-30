@@ -1329,6 +1329,16 @@ export default function ThermoLabPage() {
             >
               Post to 𝕏 ↗
             </a>
+            <a
+              href="/BENCHMARK_DOSSIER.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition"
+              title="View & Download Full 14-Station Technical Whitepaper"
+            >
+              <span>📄 Whitepaper (PDF)</span>
+              <span>↗</span>
+            </a>
           </div>
         </div>
       </div>
@@ -1356,6 +1366,15 @@ export default function ThermoLabPage() {
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <a
+              href="/BENCHMARK_DOSSIER.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/25 transition"
+            >
+              <span>📄 Download 14-Station Whitepaper (HTML/PDF)</span>
+              <span>↗</span>
+            </a>
             <a
               href="https://github.com/nexusai-kevin/thermo-physics"
               target="_blank"
@@ -3432,6 +3451,20 @@ export default function ThermoLabPage() {
             </div>
 
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+              {/* Benchmark Dossier Whitepaper */}
+              <a
+                href="/BENCHMARK_DOSSIER.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 px-4 py-3 rounded-xl bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/25 transition text-xs font-bold shadow-lg"
+              >
+                <span className="text-cyan-400 text-sm">📄</span>
+                <div className="text-left">
+                  <div className="text-[10px] text-cyan-400/80 uppercase tracking-wider">Audit Whitepaper</div>
+                  <div>14-Station Dossier (HTML/PDF) ↗</div>
+                </div>
+              </a>
+
               {/* Upstream PR #79 */}
               <a
                 href="https://github.com/extropic-ai/thrml/pull/79"
