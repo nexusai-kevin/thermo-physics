@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import Link from "next/link";
 import { DispatcherRoiBenchmark } from "@/components/sections/DispatcherRoiBenchmark";
 
 // ============================================================================
@@ -1502,7 +1503,8 @@ export default function ThermoLabPage() {
         {STATIONS.map((station) => (
           <section
             key={station.id}
-            className="rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-xl overflow-hidden"
+            id={`station-${station.id}`}
+            className="rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-xl overflow-hidden scroll-mt-24"
           >
             <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Left Column: Story & Explanation */}
@@ -1731,6 +1733,14 @@ export default function ThermoLabPage() {
                         <span className="text-cyan-300 font-mono">βc = ln(3) ≈ 1.10</span>, matching
                         color territories lock together.
                       </p>
+                      <div className="pt-2">
+                        <Link
+                          href="/lol-draft"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-semibold text-xs transition"
+                        >
+                          <span>🎮 Play with LoL Draft Solver ↗</span>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -3337,6 +3347,25 @@ export default function ThermoLabPage() {
                               ))}
                             </tbody>
                           </table>
+                        </div>
+
+                        {/* Interactive LoL Draft Solver Cross-Link Showcase */}
+                        <div className="p-4 rounded-xl bg-gradient-to-r from-purple-950/40 via-slate-900 to-cyan-950/40 border border-purple-500/30 flex flex-wrap items-center justify-between gap-3 mt-4">
+                          <div className="space-y-1">
+                            <div className="text-xs font-bold text-white flex items-center gap-2">
+                              <span>🎮 Combinatorial Potts in Action: 5v5 LoL Thermodynamic Draft Solver</span>
+                              <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-[10px]">Station 4 + 14</span>
+                            </div>
+                            <p className="text-[11px] text-slate-300">
+                              Apply discrete categorical Potts spin optimization to competitive League of Legends drafting: zero steric role clashes, multi-champion wombo combos, and counter-pick equilibration.
+                            </p>
+                          </div>
+                          <Link
+                            href="/lol-draft"
+                            className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/20 transition flex items-center gap-1.5 shrink-0"
+                          >
+                            <span>Play with LoL Draft Solver ↗</span>
+                          </Link>
                         </div>
                       </div>
                     </div>
