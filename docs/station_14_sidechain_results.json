@@ -1,0 +1,48 @@
+{
+  "station": 14,
+  "name": "Protein Side-Chain Rotamer Packing via Potts EBM",
+  "peptide_backbone": "24-residue Antiparallel Beta-Hairpin",
+  "num_residues": 24,
+  "total_rotamer_spins": 96,
+  "search_space_size": 101559956668416,
+  "baselines": {
+    "greedy": {
+      "total_energy": 309.1118,
+      "self_energy": 3.3,
+      "lj_energy": 294.973,
+      "coulomb_energy": 10.8388,
+      "clash_count": 6,
+      "min_distance_angstrom": 0.5,
+      "status": "Severely Clashed (Ribosome / Folding Lethal)"
+    },
+    "random": {
+      "mean_energy": 161.4519,
+      "std_energy": 49.7495,
+      "mean_clashes": 0.72
+    },
+    "thermodynamic_potts": {
+      "total_energy": 13.5718,
+      "self_energy": 12.8,
+      "lj_energy": -8.745,
+      "coulomb_energy": 9.5168,
+      "clash_count": 0,
+      "min_distance_angstrom": 3.6783,
+      "status": "Optimal Clash-Free Ground State",
+      "energy_reduction_delta": 295.5399,
+      "sokal_tau_int": 76.7727,
+      "effective_sample_size": 97.69,
+      "ess_per_sec": 18.12,
+      "wall_clock_sec": 5.391,
+      "sample_rate_hz": 2782.42
+    }
+  },
+  "hardware_projection": {
+    "gpu_ess_per_sec": 18.12,
+    "tsu_ess_per_sec": 520833.33,
+    "throughput_speedup": 28741.77,
+    "gpu_joules_per_1k_ess": 19314.466254,
+    "tsu_joules_per_1k_ess": 0.00192,
+    "energy_efficiency_multiplier": 10059617.8,
+    "reference": "docs/METHODOLOGY.md#6"
+  }
+}
