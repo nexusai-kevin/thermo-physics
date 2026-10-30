@@ -1979,6 +1979,14 @@ export default function ThermoLabPage() {
                         🔄 Kick All Marbles Across Barrier
                       </button>
                     </div>
+                    <div className="pt-2 text-center">
+                      <Link
+                        href="/middle-earth"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-semibold text-xs transition shadow-sm"
+                      >
+                        <span>🏔️ Open Middle-earth Atlas (Kramers Escape) ↗</span>
+                      </Link>
+                    </div>
                   </div>
                 )}
 
@@ -2049,6 +2057,14 @@ export default function ThermoLabPage() {
                         >
                           🌀 Scramble Route
                         </button>
+                      </div>
+                      <div className="pt-2">
+                        <Link
+                          href="/middle-earth"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-semibold text-xs transition shadow-sm"
+                        >
+                          <span>🗺️ Open Middle-earth Routing Engine ↗</span>
+                        </Link>
                       </div>
                     </div>
                   </div>
