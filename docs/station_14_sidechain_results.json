@@ -31,18 +31,18 @@
       "energy_reduction_delta": 295.5399,
       "sokal_tau_int": 76.7727,
       "effective_sample_size": 97.69,
-      "ess_per_sec": 18.12,
-      "wall_clock_sec": 5.391,
-      "sample_rate_hz": 2782.42
+      "ess_per_sec": 17.93,
+      "wall_clock_sec": 5.4491,
+      "sample_rate_hz": 2752.76
     }
   },
   "hardware_projection": {
-    "gpu_ess_per_sec": 18.12,
+    "gpu_ess_per_sec": 17.93,
     "tsu_ess_per_sec": 520833.33,
-    "throughput_speedup": 28741.77,
-    "gpu_joules_per_1k_ess": 19314.466254,
+    "throughput_speedup": 29051.37,
+    "gpu_joules_per_1k_ess": 19522.522712,
     "tsu_joules_per_1k_ess": 0.00192,
-    "energy_efficiency_multiplier": 10059617.8,
+    "energy_efficiency_multiplier": 10167980.6,
     "reference": "docs/METHODOLOGY.md#6"
   }
 }

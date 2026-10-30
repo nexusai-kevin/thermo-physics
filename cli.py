@@ -578,5 +578,19 @@ def diagnose() -> None:
     console.print(table)
 
 
+@app.command("suite")
+def suite_command() -> None:
+    """Execute the Unified 14-Station Benchmark Suite across Layers 1, 2, and 3, and export the Benchmark Dossier."""
+    from thermo_physics.benchmarks.run_suite import run_unified_suite
+    run_unified_suite(verbose=True)
+
+
+@app.command("dossier")
+def dossier_command() -> None:
+    """Compile and regenerate docs/BENCHMARK_DOSSIER.md and docs/BENCHMARK_DOSSIER.html across all 14 stations."""
+    from thermo_physics.benchmarks.run_suite import run_unified_suite
+    run_unified_suite(verbose=True)
+
+
 if __name__ == "__main__":
     app()
