@@ -1,0 +1,16 @@
+# Core dependencies for thermo-physics
+networkx>=3.0
+numpy>=1.26.0
+typer>=0.9.0
+rich>=13.0.0
+matplotlib>=3.8.0
+
+# JAX accelerated backends (default CPU; for CUDA 12 GPU, run: pip install -U "jax[cuda12]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html)
+jax>=0.4.20
+jaxlib>=0.4.20
+
+# Thermodynamic modeling framework
+thrml>=0.1.0
+
+# Development & test harness
+pytest>=8.0.0

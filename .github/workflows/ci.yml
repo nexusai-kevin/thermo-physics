@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: Unit & Verification Tests (Python 3.11)
+    name: Thermodynamic Verification & Physics Smoke Tests (Python 3.11)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,6 +25,15 @@ jobs:
         run: |
           uv sync --extra thrml --extra dev
 
-      - name: Run unit and statistical tests
+      - name: Physics Smoke Tests & Core Statistical Mechanics Suite
         run: |
           uv run python -m unittest discover -s tests -v
+
+      - name: Upstream PR #80 Exact Ground Truth & Sokal Autocorrelation Tests
+        run: |
+          uv run pytest upstream_patches/pr80/ -v -W error
+
+      - name: Hardware Projections & Station 12 SCUC Optimization Smoke Check
+        run: |
+          uv run python -m thermo_physics.benchmarks.hardware_projections
+          uv run python -m thermo_physics.experiments.station_12_grid_scuc

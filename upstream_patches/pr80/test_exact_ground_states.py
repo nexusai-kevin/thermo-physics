@@ -18,12 +18,28 @@ import math
 import numpy as np
 import pytest
 
-from upstream_patches.pr80.sokal_diagnostics import (
-    SokalConvergenceObserver,
-    compute_multivariate_tau_int,
-    compute_normalized_autocorrelation,
-    compute_sokal_tau_int,
-)
+try:
+    from sokal_diagnostics import (
+        SokalConvergenceObserver,
+        compute_multivariate_tau_int,
+        compute_normalized_autocorrelation,
+        compute_sokal_tau_int,
+    )
+except ImportError:
+    try:
+        from .sokal_diagnostics import (
+            SokalConvergenceObserver,
+            compute_multivariate_tau_int,
+            compute_normalized_autocorrelation,
+            compute_sokal_tau_int,
+        )
+    except ImportError:
+        from upstream_patches.pr80.sokal_diagnostics import (
+            SokalConvergenceObserver,
+            compute_multivariate_tau_int,
+            compute_normalized_autocorrelation,
+            compute_sokal_tau_int,
+        )
 
 
 # ============================================================================

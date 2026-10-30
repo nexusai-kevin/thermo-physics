@@ -66,6 +66,29 @@ class TestThermodynamicSuite(unittest.TestCase):
         self.assertLess(res["energy_abs_error"], 0.08)
         self.assertGreater(res["effective_sample_size"], 500.0)
 
+    def test_2x4_lattice_physics_smoke_test(self) -> None:
+        """Lightweight physics smoke test on 2x4 lattice (8 spins) verifying TV distance < 0.08."""
+        nodes, edges, blocks = build_2d_lattice_topology(2, 4, periodic=False)
+        self.assertEqual(len(nodes), 8)
+        self.assertEqual(len(blocks), 2)
+        biases = np.zeros(len(nodes), dtype=np.float32)
+        weights = np.ones(len(edges), dtype=np.float32) * 0.4
+        res = verify_boltzmann_equilibrium(
+            nodes,
+            edges,
+            biases,
+            weights,
+            beta=0.8,
+            free_blocks=blocks,
+            n_warmup=300,
+            n_samples=8000,
+            steps_per_sample=2,
+            seed=42,
+        )
+        self.assertLess(res["total_variation_distance"], 0.08)
+        self.assertLess(res["energy_abs_error"], 0.12)
+        self.assertGreater(res["effective_sample_size"], 500.0)
+
     def test_autocorrelation_and_hardware_profile(self) -> None:
         rng = np.random.default_rng(0)
         # Construct AR(1) process with known autocorrelation decay
