@@ -11,6 +11,9 @@ Verifies:
 
 from __future__ import annotations
 
+import os
+import shutil
+import tempfile
 import unittest
 import numpy as np
 
@@ -20,6 +23,7 @@ from thermo_physics.si_core import (
     PottsGoalArbiter,
     MetabolicHomeostasis,
     ThermodynamicSICore,
+    CoraThermodynamicBridge,
 )
 
 
@@ -139,6 +143,86 @@ class TestThermodynamicSICore(unittest.TestCase):
 
         print(f"\n[Cognitive Core Benchmark] Mean: {mean_latency:.2f}ms | P95: {p95_latency:.2f}ms | Max: {max_latency:.2f}ms")
         self.assertLess(max_latency, 15.0, f"Max cognitive tick latency {max_latency}ms exceeded 15ms SLA target!")
+
+    def test_hopfield_disk_persistence_roundtrip(self) -> None:
+        """Verifies exact pattern and label persistence to disk in compressed .npz archive."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            archive_path = os.path.join(tmp_dir, "test_cora_memory.npz")
+            mem = HopfieldAssociativeMemory(dim=768, beta=10.0)
+
+            # Store 4 distinct 768-D patterns
+            labels = ["Attractor_Alpha", "Attractor_Beta", "Attractor_Gamma", "Attractor_Delta"]
+            for label in labels:
+                vec = self.rng.standard_normal(768).astype(np.float32)
+                mem.store(vec, label)
+
+            # Save to disk
+            mem.save(archive_path)
+            self.assertTrue(os.path.exists(archive_path))
+
+            # Load into fresh instance
+            loaded_mem = HopfieldAssociativeMemory.load_from_file(archive_path)
+
+            self.assertEqual(loaded_mem.dim, 768)
+            self.assertEqual(loaded_mem.labels, labels)
+            self.assertEqual(loaded_mem.patterns.shape, (4, 768))
+            np.testing.assert_allclose(loaded_mem.patterns, mem.patterns, rtol=1e-5, atol=1e-6)
+
+            # Test corrupted recall on loaded memory
+            target_p = mem.patterns[0]
+            corrupted = target_p + 0.15 * self.rng.standard_normal(768).astype(np.float32)
+            _, recalled_label, _ = loaded_mem.retrieve(corrupted, steps=5)
+            self.assertEqual(recalled_label, "Attractor_Alpha")
+
+    def test_cora_ollama_bridge_offline_cognitive_tick(self) -> None:
+        """Verifies CoraThermodynamicBridge executes end-to-end cognitive tick under offline/fallback mode."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            mem_path = os.path.join(tmp_dir, "cora_offline_memory.npz")
+            # Connect to unreachable port to force offline fallback
+            bridge = CoraThermodynamicBridge(
+                ollama_url="http://localhost:59999",
+                memory_path=mem_path,
+                embedding_dim=768,
+                seed=42,
+            )
+            self.assertFalse(bridge.ollama_online)
+            self.assertIn("Local_Fast_3B", bridge.tier_mapping)
+
+            # Cognitive Tick
+            prompt = "Verify cryptographic invariance across distributed node boundaries"
+            telemetry = bridge.cognitive_tick(prompt, seed=42)
+
+            self.assertLess(telemetry["tick_latency_ms"], 20.0)
+            self.assertIn(telemetry["organ_2_drive_mode"], ["EXPLOIT_KNOWN", "EXPLORE_NOVELTY"])
+            self.assertIn(telemetry["organ_3_stance"], ["VERIFY", "FAST_HEURISTIC", "DEEP_REASONING", "AUTONOMOUS_EXEC"])
+            self.assertGreater(telemetry["organ_4_live_vram_gb"], 0.0)
+
+            # Offline Chat Query
+            reply, telem = bridge.chat(prompt, seed=42)
+            self.assertIn("[Cora SI Core", reply)
+            self.assertIn("Thermodynamic", bridge.format_grounded_system_prompt(telem))
+
+    def test_cora_episodic_consolidation_on_novelty(self) -> None:
+        """Verifies high-novelty inputs (>0.45) trigger automatic memory storage & disk save."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            mem_path = os.path.join(tmp_dir, "cora_consolidation_memory.npz")
+            bridge = CoraThermodynamicBridge(
+                ollama_url="http://localhost:59999",
+                memory_path=mem_path,
+                embedding_dim=768,
+                seed=42,
+            )
+            initial_count = len(bridge.memory.patterns)
+
+            # Send a completely foreign/novel instruction
+            novel_prompt = "Zxywvu-Quantum-Cosmic-Alien-Architecture-Superstring-Phase-Shift"
+            telemetry = bridge.cognitive_tick(novel_prompt, seed=42)
+
+            # Novelty should be high and triggered consolidation
+            self.assertGreater(telemetry["novelty_score"], 0.45)
+            self.assertTrue(telemetry["episodic_consolidated"])
+            self.assertEqual(len(bridge.memory.patterns), initial_count + 1)
+            self.assertTrue(os.path.exists(mem_path))
 
 
 if __name__ == "__main__":

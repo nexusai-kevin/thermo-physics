@@ -9,7 +9,9 @@ Coupled 4-Organ Architecture:
 
 from __future__ import annotations
 
+import os
 import time
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 
@@ -68,6 +70,60 @@ class HopfieldAssociativeMemory:
         best_idx = int(np.argmax(self.patterns @ xi))
         e = self.energy(xi)
         return xi, self.labels[best_idx], e
+
+    def compute_novelty(self, query_vec: np.ndarray) -> Tuple[float, float]:
+        """Calculates novelty score 1.0 - max_cosine_similarity.
+
+        Returns:
+            (novelty_score, max_cosine_similarity)
+        """
+        if len(self.patterns) == 0:
+            return 1.0, 0.0
+
+        xi = np.asarray(query_vec, dtype=np.float32).ravel()
+        norm_xi = xi / (np.linalg.norm(xi) + 1e-8)
+        sims = self.patterns @ norm_xi
+        max_sim = float(np.max(sims))
+        novelty = float(np.clip(1.0 - max_sim, 0.0, 1.0))
+        return novelty, max_sim
+
+    def save(self, filepath: str | Path) -> None:
+        """Persists patterns, labels, and parameters to a compressed .npz archive."""
+        path_str = str(filepath)
+        expanded = os.path.expanduser(path_str)
+        if not expanded.endswith(".npz"):
+            expanded += ".npz"
+        dir_name = os.path.dirname(os.path.abspath(expanded))
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
+        np.savez_compressed(
+            expanded,
+            patterns=self.patterns,
+            labels=np.array(self.labels, dtype=object),
+            dim=np.int32(self.dim),
+            beta=np.float32(self.beta),
+        )
+
+    def load(self, filepath: str | Path) -> None:
+        """Loads patterns, labels, and parameters from a compressed .npz archive."""
+        path_str = str(filepath)
+        expanded = os.path.expanduser(path_str)
+        if not expanded.endswith(".npz"):
+            expanded += ".npz"
+        if not os.path.exists(expanded):
+            raise FileNotFoundError(f"Hopfield episodic memory archive not found: {expanded}")
+        with np.load(expanded, allow_pickle=True) as data:
+            self.patterns = np.asarray(data["patterns"], dtype=np.float32)
+            self.labels = [str(x) for x in data["labels"]]
+            self.dim = int(data["dim"])
+            self.beta = float(data["beta"])
+
+    @classmethod
+    def load_from_file(cls, filepath: str | Path) -> HopfieldAssociativeMemory:
+        """Factory constructor loading memory from disk."""
+        mem = cls(dim=64)
+        mem.load(filepath)
+        return mem
 
 
 # ============================================================================
@@ -226,22 +282,36 @@ class MetabolicHomeostasis:
 class ThermodynamicSICore:
     """Master controller that orchestrates the 4 thermodynamic organs in a unified cognitive tick."""
 
-    def __init__(self, seed: Optional[int] = 42) -> None:
-        self.memory = HopfieldAssociativeMemory(dim=64, beta=8.0)
+    def __init__(
+        self,
+        seed: Optional[int] = 42,
+        dim: int = 64,
+        memory_filepath: Optional[str | Path] = None,
+    ) -> None:
+        self.dim = dim
+        self.memory = HopfieldAssociativeMemory(dim=dim, beta=8.0)
         self.curiosity = KramersCuriosityDrive(barrier_height=2.5, damping=0.4)
         self.arbiter = PottsGoalArbiter(num_modules=6, num_states=4, coupling_strength=1.2)
         self.metabolism = MetabolicHomeostasis(vram_limit_gb=16.0)
 
-        # Seed initial episodic attractors
-        rng = np.random.default_rng(seed)
-        self.memory.store(rng.standard_normal(64), "System_Architecture_Optimization")
-        self.memory.store(rng.standard_normal(64), "Security_Boundary_Verification")
-        self.memory.store(rng.standard_normal(64), "Novel_Research_Synthesis")
+        # Load from disk if memory archive exists
+        if memory_filepath and os.path.exists(str(memory_filepath)):
+            self.memory.load(memory_filepath)
+        else:
+            # Seed initial episodic attractors
+            rng = np.random.default_rng(seed)
+            self.memory.store(rng.standard_normal(dim), "System_Architecture_Optimization")
+            self.memory.store(rng.standard_normal(dim), "Security_Boundary_Verification")
+            self.memory.store(rng.standard_normal(dim), "Novel_Research_Synthesis")
+
+    def save_memory(self, filepath: str | Path) -> None:
+        """Saves episodic Hopfield memory to disk."""
+        self.memory.save(filepath)
 
     def cognitive_tick(
         self,
         sensory_embedding: np.ndarray,
-        novelty_score: float,
+        novelty_score: Optional[float] = None,
         current_vram: float = 4.0,
         seed: Optional[int] = None,
     ) -> Dict[str, Any]:
@@ -253,6 +323,9 @@ class ThermodynamicSICore:
 
         # 1. Associative Memory Recall (Hopfield Attractor Basin Convergence)
         recalled_vec, memory_label, mem_energy = self.memory.retrieve(sensory_embedding)
+        if novelty_score is None:
+            auto_nov, _ = self.memory.compute_novelty(sensory_embedding)
+            novelty_score = auto_nov
 
         # 2. Intrinsic Drive & Temperature Modulation (Kramers Double-Well)
         drive_mode, bath_temp = self.curiosity.step(novelty_score, seed=seed)
@@ -280,6 +353,7 @@ class ThermodynamicSICore:
 
         return {
             "tick_latency_ms": round(elapsed_ms, 3),
+            "novelty_score": round(novelty_score, 4),
             "organ_1_hopfield_attractor": memory_label,
             "organ_1_energy": round(mem_energy, 4),
             "organ_2_kramers_drive": drive_mode,

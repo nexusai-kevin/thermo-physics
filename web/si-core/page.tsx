@@ -982,13 +982,23 @@ export default function SICorePage() {
 
         {/* BOTTOM NAVIGATION FOOTER */}
         <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-400">
-          <div className="flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-cyan-400" />
-            <span>Python SI Engine: <code className="text-slate-200">thermo_physics.si_core.cognitive_engine</code></span>
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-cyan-400" />
+              <span>SI Core: <code className="text-slate-200">thermo_physics.si_core.cognitive_engine</code></span>
+            </div>
+            <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <span>Cora Bridge: <code className="text-slate-200">thermo_physics.si_core.cora_ollama_bridge</code></span>
+            </div>
+            <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
+              <Database className="w-4 h-4 text-emerald-400" />
+              <span>Episodic Store: <code className="text-emerald-300">data/cora_memory.npz</code></span>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/thermo-lab" className="text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1">
-              Station 1–14 Benchmarks <ArrowRight className="w-3.5 h-3.5" />
+              Station 1–15 Benchmarks <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
