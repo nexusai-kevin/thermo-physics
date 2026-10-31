@@ -21,6 +21,10 @@ import {
   Sparkles,
   GitCommit,
   Terminal,
+  Send,
+  Wifi,
+  WifiOff,
+  BookOpen,
 } from "lucide-react";
 
 // ============================================================================
@@ -43,11 +47,11 @@ const COGNITIVE_MODULES = [
   { id: 5, name: "Metabolic Monitor", role: "Monitors RTX 5080 VRAM & thermals" },
 ];
 
-const MEMORY_ATTRACTORS = [
-  { name: "System_Architecture_Optimization", basinCoord: [-0.65, 0.45], color: "#38bdf8", tag: "Station 6" },
-  { name: "Security_Boundary_Verification", basinCoord: [0.55, 0.60], color: "#34d399", tag: "Invariants" },
-  { name: "Novel_Research_Synthesis", basinCoord: [0.40, -0.55], color: "#c084fc", tag: "Epistemic" },
-  { name: "Autonomous_Execution_Policy", basinCoord: [-0.50, -0.50], color: "#fbbf24", tag: "Dispatch" },
+const DEFAULT_ATTRACTORS = [
+  { name: "Station_15_SI_Cognitive_Core", basinCoord: [-0.65, 0.45], color: "#38bdf8", tag: "Station 15" },
+  { name: "Nexus_Thermodynamic_Dispatcher", basinCoord: [0.55, 0.60], color: "#34d399", tag: "Dispatcher" },
+  { name: "Station_13_GLP_1_Codon_Optimization", basinCoord: [0.40, -0.55], color: "#c084fc", tag: "Codon EBM" },
+  { name: "Local_Workstation_Architecture", basinCoord: [-0.50, -0.50], color: "#fbbf24", tag: "RTX 5080" },
 ];
 
 const INFERENCE_TIERS = [
@@ -56,22 +60,51 @@ const INFERENCE_TIERS = [
   { name: "Local_Deep_14B", vramGb: 11.5, latencyMs: 900, capability: 0.95, desc: "Full cognitive depth engine" },
 ];
 
+const PRESET_QUERIES = [
+  {
+    label: "GLP-1 Codon Hairpins",
+    query: "Explain how our Station 13 GLP-1 codon optimizer avoids hairpin traps.",
+    expectedStance: "VERIFY",
+  },
+  {
+    label: "Nexus Dispatcher Quotas",
+    query: "How does the 40-task Nexus Dispatcher prevent HTTP 429 rate limits?",
+    expectedStance: "FAST_HEURISTIC",
+  },
+  {
+    label: "Kramers Swarm Routing",
+    query: "Propose a novel coupling between Kramers barrier escape and autonomous drone swarm routing.",
+    expectedStance: "DEEP_REASONING",
+  },
+];
+
 export default function SICorePage() {
+  // --------------------------------------------------------------------------
+  // CONNECTION MODE & AUTO-PROBE (localhost:8090)
+  // --------------------------------------------------------------------------
+  const [connectionMode, setConnectionMode] = useState<"local" | "simulation">("simulation");
+  const [localServerAvailable, setLocalServerAvailable] = useState<boolean>(false);
+  const [isProbing, setIsProbing] = useState<boolean>(false);
+  const [isSeeding, setIsSeeding] = useState<boolean>(false);
+  const [seedNotification, setSeedNotification] = useState<string | null>(null);
+  const [memoryCount, setMemoryCount] = useState<number>(62);
+  const [coraModels, setCoraModels] = useState<string[]>([]);
+
   // --------------------------------------------------------------------------
   // USER CONTROLS & PARAMS
   // --------------------------------------------------------------------------
-  const [isRunning, setIsRunning] = useState<boolean>(true);
-  const [tickSpeedMs, setTickSpeedMs] = useState<number>(200);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [tickSpeedMs, setTickSpeedMs] = useState<number>(300);
   const [noveltyInjection, setNoveltyInjection] = useState<number>(0.25);
-  const [currentVramBaseline, setCurrentVramBaseline] = useState<number>(3.8);
+  const [currentVramBaseline, setCurrentVramBaseline] = useState<number>(2.96);
   const [activeStage, setActiveStage] = useState<number>(1);
   const [tickCount, setTickCount] = useState<number>(0);
-  const [lastTickLatency, setLastTickLatency] = useState<number>(4.82);
+  const [lastTickLatency, setLastTickLatency] = useState<number>(5.12);
 
   // --------------------------------------------------------------------------
   // ORGAN 1 STATE: Continuous Hopfield Memory
   // --------------------------------------------------------------------------
-  const [selectedAttractor, setSelectedAttractor] = useState<string>("System_Architecture_Optimization");
+  const [selectedAttractor, setSelectedAttractor] = useState<string>("Station_15_SI_Cognitive_Core");
   const [hopfieldEnergy, setHopfieldEnergy] = useState<number>(-2.84);
   const [retrievalTrajectory, setRetrievalTrajectory] = useState<{ x: number; y: number }[]>([
     { x: -0.1, y: 0.1 },
@@ -79,7 +112,12 @@ export default function SICorePage() {
     { x: -0.5, y: 0.38 },
     { x: -0.65, y: 0.45 },
   ]);
-  const [attractorOverlaps, setAttractorOverlaps] = useState<number[]>([0.91, 0.24, 0.18, 0.35]);
+  const [hopfieldTopMatches, setHopfieldTopMatches] = useState<{ label: string; score: number }[]>([
+    { label: "Station_15_SI_Cognitive_Core", score: 0.94 },
+    { label: "Station_13_GLP_1_Codon_Optimization", score: 0.38 },
+    { label: "Nexus_Thermodynamic_Dispatcher", score: 0.29 },
+    { label: "Local_Workstation_Architecture", score: 0.21 },
+  ]);
 
   // --------------------------------------------------------------------------
   // ORGAN 2 STATE: Kramers Double-Well Curiosity & Drive
@@ -88,7 +126,6 @@ export default function SICorePage() {
   const [particleV, setParticleV] = useState<number>(0.0);
   const [bathTempT, setBathTempT] = useState<number>(0.82);
   const [driveMode, setDriveMode] = useState<"EXPLOIT_KNOWN" | "EXPLORE_NOVELTY">("EXPLOIT_KNOWN");
-  const [particleHistory, setParticleHistory] = useState<number[]>([-1.0, -0.98, -1.02, -0.95]);
 
   // --------------------------------------------------------------------------
   // ORGAN 3 STATE: Multistate Potts Goal Arbiter (N=6, K=4)
@@ -102,9 +139,20 @@ export default function SICorePage() {
   // ORGAN 4 STATE: Metabolic Homeostasis QUBO (RTX 5080 + 128GB DDR5)
   // --------------------------------------------------------------------------
   const [selectedTier, setSelectedTier] = useState<string>("Local_Fast_3B");
+  const [dispatchedModel, setDispatchedModel] = useState<string>("llama3.1:8b");
   const [metabolicEnergy, setMetabolicEnergy] = useState<number>(4.2);
   const [vramAllocated, setVramAllocated] = useState<number>(2.2);
-  const [vramHeadroom, setVramHeadroom] = useState<number>(10.0);
+  const [vramHeadroom, setVramHeadroom] = useState<number>(10.84);
+
+  // --------------------------------------------------------------------------
+  // CHAT CONSOLE STATE
+  // --------------------------------------------------------------------------
+  const [chatPrompt, setChatPrompt] = useState<string>("");
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [chatResponse, setChatResponse] = useState<string>("");
+  const [lastStreamTelemetry, setLastStreamTelemetry] = useState<Record<string, unknown> | null>(null);
+  const [tokensPerSec, setTokensPerSec] = useState<number>(0);
+  const [tokenCount, setTokenCount] = useState<number>(0);
 
   // Audio synthesizer ref
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -135,23 +183,85 @@ export default function SICorePage() {
   }, []);
 
   // --------------------------------------------------------------------------
-  // FULL COUPLED COGNITIVE TICK FUNCTION
+  // AUTO-PROBE LOCAL CORA SERVER (http://127.0.0.1:8090/health)
   // --------------------------------------------------------------------------
-  const runCognitiveTick = useCallback(
+  const probeLocalServer = useCallback(async () => {
+    setIsProbing(true);
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 1800);
+      const res = await fetch("http://127.0.0.1:8090/health", { signal: controller.signal });
+      clearTimeout(timer);
+
+      if (res.ok) {
+        const data = await res.json();
+        setLocalServerAvailable(true);
+        setConnectionMode("local");
+        setMemoryCount(data.memory_count || 62);
+        setCurrentVramBaseline(data.vram_used_gb || 2.96);
+        setCoraModels(data.models || []);
+        playSynthesizerBlip(580, 0.08);
+      } else {
+        setLocalServerAvailable(false);
+        setConnectionMode("simulation");
+      }
+    } catch {
+      setLocalServerAvailable(false);
+      setConnectionMode("simulation");
+    } finally {
+      setIsProbing(false);
+    }
+  }, [playSynthesizerBlip]);
+
+  useEffect(() => {
+    probeLocalServer();
+  }, [probeLocalServer]);
+
+  // Handle re-seed knowledge action
+  const handleReSeedKnowledge = async () => {
+    setIsSeeding(true);
+    setSeedNotification(null);
+    try {
+      if (connectionMode === "local") {
+        const res = await fetch("http://127.0.0.1:8090/memory/seed", { method: "POST" });
+        if (res.ok) {
+          const data = await res.json();
+          setMemoryCount(data.memory_count);
+          setSeedNotification(`Successfully consolidated ${data.memory_count} episodic attractors into data/cora_memory.npz!`);
+          playSynthesizerBlip(640, 0.1);
+        }
+      } else {
+        await new Promise((r) => setTimeout(r, 600));
+        setMemoryCount(62);
+        setSeedNotification("Re-seeded 62 canonical and markdown attractors (Simulation Mode).");
+        playSynthesizerBlip(520, 0.08);
+      }
+    } catch (e) {
+      setSeedNotification(`Seeding error: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setIsSeeding(false);
+      setTimeout(() => setSeedNotification(null), 5000);
+    }
+  };
+
+  // --------------------------------------------------------------------------
+  // LOCAL SIMULATION TICK
+  // --------------------------------------------------------------------------
+  const runSimulationTick = useCallback(
     (forcedNovelty?: number) => {
       const t0 = performance.now();
       const nov = forcedNovelty !== undefined ? forcedNovelty : noveltyInjection;
 
-      // STAGE 1: Hopfield Attractor Basin Recall
+      // 1. Hopfield Attractor Basin Recall
       setActiveStage(1);
       const isExplore = nov > 0.6;
       let targetIdx = 0;
       if (isExplore) {
-        targetIdx = Math.random() > 0.4 ? 2 : 3; // Novel Research or Autonomous Execution
+        targetIdx = Math.random() > 0.4 ? 2 : 3;
       } else {
-        targetIdx = Math.random() > 0.3 ? 0 : 1; // System Optimization or Security Boundary
+        targetIdx = Math.random() > 0.3 ? 0 : 1;
       }
-      const targetAttractor = MEMORY_ATTRACTORS[targetIdx];
+      const targetAttractor = DEFAULT_ATTRACTORS[targetIdx];
       setSelectedAttractor(targetAttractor.name);
 
       const targetX = targetAttractor.basinCoord[0];
@@ -159,23 +269,22 @@ export default function SICorePage() {
       const startX = targetX + (Math.random() - 0.5) * 0.7;
       const startY = targetY + (Math.random() - 0.5) * 0.7;
 
-      const traj = [
+      setRetrievalTrajectory([
         { x: startX, y: startY },
         { x: startX * 0.66 + targetX * 0.34, y: startY * 0.66 + targetY * 0.34 },
         { x: startX * 0.33 + targetX * 0.67, y: startY * 0.33 + targetY * 0.67 },
         { x: targetX, y: targetY },
-      ];
-      setRetrievalTrajectory(traj);
+      ]);
 
-      const overlaps = [0.1, 0.1, 0.1, 0.1];
-      overlaps[targetIdx] = 0.88 + Math.random() * 0.1;
-      for (let i = 0; i < 4; i++) {
-        if (i !== targetIdx) overlaps[i] = Math.random() * 0.3;
-      }
-      setAttractorOverlaps(overlaps);
+      const simulatedMatches = DEFAULT_ATTRACTORS.map((att, i) => ({
+        label: att.name,
+        score: i === targetIdx ? 0.88 + Math.random() * 0.08 : Math.random() * 0.35,
+      })).sort((a, b) => b.score - a.score);
+
+      setHopfieldTopMatches(simulatedMatches);
       setHopfieldEnergy(-(2.5 + Math.random() * 0.8));
 
-      // STAGE 2: Kramers Double-Well Modulation
+      // 2. Kramers Double-Well Modulation
       const dt = 0.05;
       const barrier = 2.5;
       const gamma = 0.4;
@@ -184,29 +293,21 @@ export default function SICorePage() {
 
       let curX = particleX;
       let curV = particleV;
-
-      // Double-well force: -4 * barrier * x * (x^2 - 1) + tilt
       const force = -4.0 * barrier * curX * (curX * curX - 1.0) + 0.6 * nov;
       const noise = Math.sqrt((2.0 * gamma * temp) / dt) * (Math.random() * 2 - 1) * 0.7;
 
       curV = curV + (-gamma * curV + force + noise) * dt;
       curX = Math.min(Math.max(curX + curV * dt, -1.8), 1.8);
 
-      // Deterministic nudge if high novelty injected
-      if (nov > 0.8 && curX < 0) {
-        curX += 0.45;
-      } else if (nov < 0.15 && curX > 0) {
-        curX -= 0.45;
-      }
+      if (nov > 0.8 && curX < 0) curX += 0.45;
+      else if (nov < 0.15 && curX > 0) curX -= 0.45;
 
       setParticleX(curX);
       setParticleV(curV);
-
       const mode = curX > 0 ? "EXPLORE_NOVELTY" : "EXPLOIT_KNOWN";
       setDriveMode(mode);
-      setParticleHistory((prev) => [...prev.slice(-30), curX]);
 
-      // STAGE 3: Potts Goal Arbiter Equilibrating
+      // 3. Potts Goal Arbiter Equilibrating
       const beta = 1.0 / temp;
       const newSpins = [...moduleSpins];
       const favoredStances = mode === "EXPLORE_NOVELTY" ? [2, 3] : [0, 1];
@@ -220,7 +321,6 @@ export default function SICorePage() {
       }
       setModuleSpins(newSpins);
 
-      // Count dominant stance
       const counts = [0, 0, 0, 0];
       newSpins.forEach((s) => counts[s]++);
       let maxStance = 0;
@@ -236,7 +336,7 @@ export default function SICorePage() {
       setStanceConsensusPct(Math.round((maxC / 6) * 1000) / 10);
       setPottsEnergy(-(12 + maxC * 1.8 + Math.random()));
 
-      // STAGE 4: Metabolic QUBO Scheduling for RTX 5080
+      // 4. Metabolic QUBO Scheduling
       const reqCap = maxStance === 2 ? 0.95 : maxStance === 3 ? 0.8 : 0.5;
       let bestEp = INFERENCE_TIERS[0];
       let bestH = Infinity;
@@ -252,6 +352,7 @@ export default function SICorePage() {
       }
 
       setSelectedTier(bestEp.name);
+      setDispatchedModel(bestEp.name === "Local_Deep_14B" ? "qwen2.5:14b" : "llama3.1:8b");
       setMetabolicEnergy(Math.round(bestH * 100) / 100);
       setVramAllocated(bestEp.vramGb);
       setVramHeadroom(Math.max(0, Math.round((16.0 - (currentVramBaseline + bestEp.vramGb)) * 10) / 10));
@@ -260,7 +361,6 @@ export default function SICorePage() {
       setLastTickLatency(Math.max(2.1, elapsed));
       setTickCount((prev) => prev + 1);
 
-      // Audio feedback
       if (mode === "EXPLORE_NOVELTY") {
         playSynthesizerBlip(540, 0.06);
       } else {
@@ -270,14 +370,157 @@ export default function SICorePage() {
     [noveltyInjection, particleX, particleV, moduleSpins, currentVramBaseline, playSynthesizerBlip]
   );
 
-  // Auto Cognitive Loop Timer
+  // Auto-tick effect
   useEffect(() => {
     if (!isRunning) return;
     const interval = setInterval(() => {
-      runCognitiveTick();
+      runSimulationTick();
     }, tickSpeedMs);
     return () => clearInterval(interval);
-  }, [isRunning, tickSpeedMs, runCognitiveTick]);
+  }, [isRunning, tickSpeedMs, runSimulationTick]);
+
+  // --------------------------------------------------------------------------
+  // LIVE CORA CHAT & SSE / SIMULATION STREAMING
+  // --------------------------------------------------------------------------
+  const handleSendPrompt = async (promptToSend?: string) => {
+    const text = (promptToSend || chatPrompt).trim();
+    if (!text || isStreaming) return;
+
+    setIsStreaming(true);
+    setChatResponse("");
+    setLastStreamTelemetry(null);
+    setTokenCount(0);
+    setTokensPerSec(0);
+    const streamStart = performance.now();
+
+    playSynthesizerBlip(440, 0.05);
+
+    // MODE A: LIVE LOCAL FASTAPI + SSE SERVER (:8090)
+    if (connectionMode === "local" && localServerAvailable) {
+      try {
+        const response = await fetch("http://127.0.0.1:8090/chat/stream", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to reach local Cora stream`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("ReadableStream not supported by response");
+
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let tokensReceived = 0;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+            const jsonStr = trimmed.slice(5).trim();
+            if (!jsonStr) continue;
+
+            try {
+              const event = JSON.parse(jsonStr);
+
+              // 1. Initial Telemetry Event: Immediately update all 4 physical quadrants!
+              if (event.type === "telemetry" && event.data) {
+                const telem = event.data;
+                setLastStreamTelemetry(telem);
+                setLastTickLatency(telem.tick_latency_ms);
+                setSelectedAttractor(telem.organ_1_attractor);
+                setHopfieldEnergy(telem.organ_1_energy);
+                if (telem.hopfield_top_matches) {
+                  setHopfieldTopMatches(telem.hopfield_top_matches);
+                }
+                setParticleX(telem.kramers_x);
+                setBathTempT(telem.bath_temp_T);
+                setDriveMode(telem.drive_mode);
+                setNoveltyInjection(telem.novelty_score);
+                if (telem.potts_spins) {
+                  setModuleSpins(telem.potts_spins);
+                }
+                setDominantStance(telem.potts_stance);
+                setPottsEnergy(telem.potts_energy_H);
+                setSelectedTier(telem.metabolic_tier);
+                setDispatchedModel(telem.dispatched_model);
+                setCurrentVramBaseline(telem.vram_used_gb);
+                if (telem.vram_headroom_gb !== undefined) {
+                  setVramHeadroom(telem.vram_headroom_gb);
+                }
+                setTickCount((prev) => prev + 1);
+                playSynthesizerBlip(620, 0.08);
+              }
+
+              // 2. Token Stream Chunks
+              if (event.type === "token" && event.content) {
+                tokensReceived++;
+                setTokenCount(tokensReceived);
+                setChatResponse((prev) => prev + event.content);
+                const elapsedSec = (performance.now() - streamStart) / 1000.0;
+                if (elapsedSec > 0.1) {
+                  setTokensPerSec(Math.round((tokensReceived / elapsedSec) * 10) / 10);
+                }
+              }
+
+              // 3. Completion Event
+              if (event.type === "done") {
+                playSynthesizerBlip(520, 0.05);
+              }
+            } catch {
+              // Parse error on malformed chunk
+            }
+          }
+        }
+      } catch (err) {
+        // Fallback to simulation if network dropped
+        setChatResponse(`[Local Stream Notice] Offline fallback activated: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        setIsStreaming(false);
+      }
+      return;
+    }
+
+    // MODE B: BROWSER SIMULATION STREAMING
+    // 1. Run local thermodynamic tick
+    const isExplorationQuery = text.toLowerCase().includes("novel") || text.toLowerCase().includes("drone") || text.toLowerCase().includes("quantum");
+    const nov = isExplorationQuery ? 0.88 : 0.22;
+    setNoveltyInjection(nov);
+    runSimulationTick(nov);
+
+    // 2. Stream simulated grounded response word by word
+    const simulatedText = isExplorationQuery
+      ? `[Cora SI Core • qwen2.5:14b (Browser Grounded Stream)]\nUnder stance [DEEP_REASONING] with intrinsic curiosity [EXPLORE_NOVELTY], the system hopped the Kramers potential barrier (x=+0.92, T=2.40K) into episodic basin [Station_15_SI_Cognitive_Core].\n\nThermodynamic synthesis for "${text}":\nCoupling Kramers barrier hopping with drone swarm routing enables stochastic multi-agent obstacle evasion without centralized gradient descent. By scaling the effective kinetic temperature T with local obstacle density, drones naturally tunnel through local minima and converge to the global lowest-action flight path across complex topologies.`
+      : `[Cora SI Core • llama3.1:8b (Browser Grounded Stream)]\nUnder stance [VERIFY] with intrinsic drive [EXPLOIT_KNOWN], the system settled stably in potential well (x=-1.00, T=0.75K) aligning with [Station_13_GLP_1_Codon_Optimization].\n\nAnalysis for "${text}":\nAll 24 residue positions preserve physiological GC balance (48.2%) while categorical Potts EBM penalties eliminate inverted-repeat Watson-Crick stems, preventing ribosomal stalling obstacles on RTX 5080 (3.0/16.0GB VRAM headroom).`;
+
+    const words = simulatedText.split(" ");
+    let curIdx = 0;
+    const streamInterval = setInterval(() => {
+      if (curIdx >= words.length) {
+        clearInterval(streamInterval);
+        setIsStreaming(false);
+        playSynthesizerBlip(540, 0.05);
+        return;
+      }
+      const word = words[curIdx];
+      setChatResponse((prev) => prev + (curIdx > 0 ? " " : "") + word);
+      curIdx++;
+      setTokenCount(curIdx);
+      const elapsedSec = (performance.now() - streamStart) / 1000.0;
+      if (elapsedSec > 0.05) {
+        setTokensPerSec(Math.round((curIdx / elapsedSec) * 10) / 10);
+      }
+    }, 28);
+  };
 
   // --------------------------------------------------------------------------
   // CANVASES: Quadrant 1 (Hopfield Basins) & Quadrant 2 (Kramers Double-Well)
@@ -313,18 +556,16 @@ export default function SICorePage() {
       ctx.stroke();
     }
 
-    // Coordinate mapping helper
     const toScreen = (nx: number, ny: number) => ({
       x: w / 2 + nx * (w * 0.42),
       y: h / 2 - ny * (h * 0.42),
     });
 
     // Draw Attractor Basins as soft energy contours
-    MEMORY_ATTRACTORS.forEach((attractor) => {
+    DEFAULT_ATTRACTORS.forEach((attractor) => {
       const pos = toScreen(attractor.basinCoord[0], attractor.basinCoord[1]);
-      const isTarget = attractor.name === selectedAttractor;
+      const isTarget = attractor.name === selectedAttractor || attractor.tag === selectedAttractor;
 
-      // Glow rings
       const grad = ctx.createRadialGradient(pos.x, pos.y, 4, pos.x, pos.y, isTarget ? 65 : 40);
       grad.addColorStop(0, attractor.color + (isTarget ? "66" : "25"));
       grad.addColorStop(1, "transparent");
@@ -333,16 +574,14 @@ export default function SICorePage() {
       ctx.arc(pos.x, pos.y, isTarget ? 65 : 40, 0, Math.PI * 2);
       ctx.fill();
 
-      // Basin Core
       ctx.fillStyle = attractor.color;
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, isTarget ? 7 : 5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Label
       ctx.font = "10px ui-monospace, SFMono-Regular, Menlo, monospace";
       ctx.fillStyle = isTarget ? "#ffffff" : "#94a3b8";
-      ctx.fillText(attractor.name.replace(/_/g, " "), pos.x - 30, pos.y + 18);
+      ctx.fillText(attractor.tag, pos.x - 20, pos.y + 18);
     });
 
     // Draw Retrieval Relaxation Trajectory
@@ -360,13 +599,11 @@ export default function SICorePage() {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Start perturbation point
       ctx.fillStyle = "#f43f5e";
       ctx.beginPath();
       ctx.arc(p0.x, p0.y, 4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Final relaxed attractor convergence ping
       const pLast = toScreen(
         retrievalTrajectory[retrievalTrajectory.length - 1].x,
         retrievalTrajectory[retrievalTrajectory.length - 1].y
@@ -390,7 +627,6 @@ export default function SICorePage() {
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    // Double-well function: U(x) = barrier * (x^2 - 1)^2 - tilt * x
     const barrier = 2.5;
     const tilt = 0.5 * noveltyInjection;
     const calcU = (x: number) => barrier * Math.pow(x * x - 1, 2) - tilt * x;
@@ -403,7 +639,6 @@ export default function SICorePage() {
     const toCanvasX = (x: number) => ((x - xMin) / (xMax - xMin)) * (w - 40) + 20;
     const toCanvasY = (u: number) => h - 25 - ((u - uMin) / (uMax - uMin)) * (h - 50);
 
-    // Background potential fill
     ctx.beginPath();
     ctx.moveTo(toCanvasX(xMin), h);
     for (let px = xMin; px <= xMax; px += 0.05) {
@@ -418,7 +653,6 @@ export default function SICorePage() {
     ctx.fillStyle = bgGrad;
     ctx.fill();
 
-    // Potential curve line
     ctx.strokeStyle = "#60a5fa";
     ctx.lineWidth = 3;
     ctx.beginPath();
@@ -431,7 +665,6 @@ export default function SICorePage() {
     }
     ctx.stroke();
 
-    // Barrier peak line
     const barrierPeakU = calcU(0);
     ctx.strokeStyle = "rgba(244, 63, 94, 0.5)";
     ctx.setLineDash([3, 3]);
@@ -441,7 +674,6 @@ export default function SICorePage() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Well labels
     ctx.font = "bold 11px ui-monospace, SFMono-Regular, Menlo, monospace";
     ctx.fillStyle = "#34d399";
     ctx.fillText("EXPLOIT (-1.0)", toCanvasX(-1.3), h - 8);
@@ -449,12 +681,9 @@ export default function SICorePage() {
     ctx.fillStyle = "#f59e0b";
     ctx.fillText("EXPLORE (+1.0)", toCanvasX(0.7), h - 8);
 
-    // Particle rendering
-    const particleU = calcU(particleX);
     const pxCanvas = toCanvasX(particleX);
-    const pyCanvas = toCanvasY(particleU);
+    const pyCanvas = toCanvasY(calcU(particleX));
 
-    // Particle thermal halo
     const haloRadius = Math.max(10, Math.min(30, 10 + bathTempT * 6));
     const pGrad = ctx.createRadialGradient(pxCanvas, pyCanvas, 2, pxCanvas, pyCanvas, haloRadius);
     pGrad.addColorStop(0, driveMode === "EXPLORE_NOVELTY" ? "#fb7185" : "#38bdf8");
@@ -464,7 +693,6 @@ export default function SICorePage() {
     ctx.arc(pxCanvas, pyCanvas, haloRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Particle core
     ctx.fillStyle = driveMode === "EXPLORE_NOVELTY" ? "#f43f5e" : "#0284c7";
     ctx.beginPath();
     ctx.arc(pxCanvas, pyCanvas, 7, 0, Math.PI * 2);
@@ -473,21 +701,6 @@ export default function SICorePage() {
     ctx.lineWidth = 2;
     ctx.stroke();
   }, [particleX, bathTempT, driveMode, noveltyInjection]);
-
-  // --------------------------------------------------------------------------
-  // ACTIONS: Sensory Novelty / Contradiction Injection
-  // --------------------------------------------------------------------------
-  const handleInjectNovelty = () => {
-    setNoveltyInjection(0.92);
-    runCognitiveTick(0.92);
-    playSynthesizerBlip(680, 0.12);
-  };
-
-  const handleInjectPredictable = () => {
-    setNoveltyInjection(0.08);
-    runCognitiveTick(0.08);
-    playSynthesizerBlip(320, 0.08);
-  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
@@ -499,15 +712,49 @@ export default function SICorePage() {
               <Cpu className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="px-2 py-0.5 rounded text-[11px] font-mono tracking-wider font-semibold uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                   Station 15 • Non-von-Neumann Core
                 </span>
-                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                  RTX 5080 Calibrated
+
+                {/* CONNECTION MODE TOGGLE PILL */}
+                <button
+                  onClick={() => {
+                    if (localServerAvailable) {
+                      setConnectionMode((m) => (m === "local" ? "simulation" : "local"));
+                    } else {
+                      probeLocalServer();
+                    }
+                  }}
+                  className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold border flex items-center gap-1.5 transition ${
+                    connectionMode === "local"
+                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30 shadow-sm shadow-emerald-500/20"
+                      : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30 hover:bg-cyan-500/25"
+                  }`}
+                  title="Click to toggle or probe local Cora server at http://127.0.0.1:8090"
+                >
+                  {connectionMode === "local" ? (
+                    <>
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      <Wifi className="w-3 h-3 text-emerald-400" />
+                      <span>LIVE LOCAL CORA (:8090)</span>
+                    </>
+                  ) : (
+                    <>
+                      <WifiOff className="w-3 h-3 text-cyan-400" />
+                      <span>BROWSER SIMULATION</span>
+                      {isProbing ? <RefreshCw className="w-2.5 h-2.5 animate-spin" /> : null}
+                    </>
+                  )}
+                </button>
+
+                {/* MEMORY COUNT BADGE */}
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                  <Database className="w-3 h-3 text-purple-400" />
+                  <span>{memoryCount} Attractors</span>
                 </span>
               </div>
+
               <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2 mt-0.5">
                 Thermodynamic Synthetic Intelligence (SI) Cognitive Core
               </h1>
@@ -517,31 +764,25 @@ export default function SICorePage() {
           {/* REAL-TIME CONTROLS STRIP */}
           <div className="flex flex-wrap items-center gap-2.5">
             <button
+              onClick={handleReSeedKnowledge}
+              disabled={isSeeding}
+              className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-purple-600/20 text-purple-300 border border-purple-500/40 hover:bg-purple-600/30 transition flex items-center gap-1.5 disabled:opacity-50"
+              title="Runs seed_cora_memory across README.md and docs/*.md"
+            >
+              <BookOpen className={`w-3.5 h-3.5 ${isSeeding ? "animate-spin" : ""}`} />
+              <span>{isSeeding ? "SEEDING..." : "RE-SEED KNOWLEDGE"}</span>
+            </button>
+
+            <button
               onClick={() => setIsRunning(!isRunning)}
               className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold flex items-center gap-1.5 transition ${
                 isRunning
                   ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30"
-                  : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30"
+                  : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
               }`}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRunning ? "animate-spin" : ""}`} />
-              {isRunning ? "PAUSE LOOP" : "RESUME LOOP"}
-            </button>
-
-            <button
-              onClick={() => runCognitiveTick()}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition flex items-center gap-1.5"
-            >
-              <Zap className="w-3.5 h-3.5 text-cyan-400" />
-              TICK NOW
-            </button>
-
-            <button
-              onClick={handleInjectNovelty}
-              className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-gradient-to-r from-rose-500/30 to-amber-500/30 text-rose-300 border border-rose-500/50 hover:from-rose-500/40 hover:to-amber-500/40 transition shadow-lg shadow-rose-500/20 flex items-center gap-1.5"
-            >
-              <Flame className="w-3.5 h-3.5 text-rose-400" />
-              INJECT NOVELTY / CONTRADICTION
+              {isRunning ? "PAUSE TICKER" : "AUTO TICKER"}
             </button>
 
             <Link
@@ -554,6 +795,14 @@ export default function SICorePage() {
           </div>
         </div>
       </header>
+
+      {/* SEED NOTIFICATION TOAST */}
+      {seedNotification && (
+        <div className="bg-purple-950/80 border-b border-purple-800/80 px-6 py-2 text-center text-xs font-mono text-purple-300 animate-fade-in flex items-center justify-center gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+          <span>{seedNotification}</span>
+        </div>
+      )}
 
       {/* SLA TELEMETRY BANNER */}
       <section className="bg-slate-900 border-b border-slate-800 px-6 py-2.5">
@@ -590,51 +839,124 @@ export default function SICorePage() {
           </div>
 
           <div className="flex flex-col">
-            <span className="text-slate-400 text-[10px] uppercase tracking-wider">VRAM Headroom</span>
-            <span className="text-blue-400 font-bold mt-0.5">{vramHeadroom} GB / 16.0 GB</span>
+            <span className="text-slate-400 text-[10px] uppercase tracking-wider">RTX 5080 VRAM</span>
+            <span className="text-blue-400 font-bold mt-0.5">{currentVramBaseline.toFixed(2)} / 16.0 GB</span>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-slate-400 text-[10px] uppercase tracking-wider">Total Ticks</span>
-            <span className="text-slate-300 font-bold mt-0.5">#{tickCount.toLocaleString()}</span>
+            <span className="text-slate-400 text-[10px] uppercase tracking-wider">Dispatched Model</span>
+            <span className="text-emerald-400 font-bold mt-0.5 truncate">{dispatchedModel}</span>
           </div>
         </div>
       </section>
 
-      {/* SEQUENTIAL ORGAN ACTIVATION FLOW INDICATOR */}
-      <section className="bg-slate-950/70 border-b border-slate-800/80 px-6 py-2">
-        <div className="max-w-7xl mx-auto flex items-center justify-between overflow-x-auto text-xs font-mono py-1">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-500 uppercase tracking-widest text-[10px]">Sequential Firing Pipeline:</span>
+      {/* MAIN CONTAINER */}
+      <main className="max-w-7xl mx-auto w-full px-6 py-6 flex-1 flex flex-col gap-6">
+
+        {/* ===================================================================
+            INTERACTIVE CORA SI COMMAND & CHAT CONSOLE
+        =================================================================== */}
+        <section className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-blue-950/30 border border-cyan-500/30 shadow-2xl flex flex-col gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+                <Terminal className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                  Cora SI Live Transduction &amp; Chat Console
+                </h2>
+                <p className="text-[11px] text-slate-400 font-mono">
+                  Input directly drives the 4 physical organs (Hopfield recall, Kramers Langevin hopping, Potts consensus, &amp; RTX 5080 metabolism)
+                </p>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 font-semibold flex items-center gap-1.5 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                1. Hopfield Memory
-              </span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-600" />
-              <span className="px-2.5 py-1 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40 font-semibold flex items-center gap-1.5 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
-                2. Kramers Curiosity
-              </span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-600" />
-              <span className="px-2.5 py-1 rounded bg-purple-500/20 text-purple-400 border border-purple-500/40 font-semibold flex items-center gap-1.5 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-                3. Potts Consensus
-              </span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-600" />
-              <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-semibold flex items-center gap-1.5 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                4. RTX 5080 QUBO
+              <span className={`text-[11px] font-mono px-2.5 py-1 rounded-full border ${
+                connectionMode === "local"
+                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                  : "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+              }`}>
+                {connectionMode === "local" ? "Target: http://127.0.0.1:8090" : "Target: In-Browser Transducer"}
               </span>
             </div>
           </div>
-          <span className="text-[11px] text-slate-400">Total non-von-Neumann loop &lt; 6.0ms</span>
-        </div>
-      </section>
 
-      {/* MAIN 4-QUADRANT DASHBOARD */}
-      <main className="max-w-7xl mx-auto w-full px-6 py-6 flex-1 flex flex-col gap-6">
-        {/* TOP ROW: ORGAN 1 & ORGAN 2 */}
+          {/* Quick Preset Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-mono text-slate-400">Quick Prompts:</span>
+            {PRESET_QUERIES.map((preset) => (
+              <button
+                key={preset.label}
+                onClick={() => {
+                  setChatPrompt(preset.query);
+                  handleSendPrompt(preset.query);
+                }}
+                disabled={isStreaming}
+                className="px-2.5 py-1 rounded-lg text-xs font-mono bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 hover:text-white transition flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <span>⚡ {preset.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Input Bar */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendPrompt();
+            }}
+            className="flex items-center gap-2"
+          >
+            <input
+              type="text"
+              value={chatPrompt}
+              onChange={(e) => setChatPrompt(e.target.value)}
+              placeholder="Ask Cora a technical prompt or inject sensory novelty..."
+              disabled={isStreaming}
+              className="flex-1 bg-slate-950/90 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60 font-mono"
+            />
+            <button
+              type="submit"
+              disabled={isStreaming || !chatPrompt.trim()}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 transition flex items-center gap-1.5 disabled:opacity-50"
+            >
+              {isStreaming ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Send className="w-3.5 h-3.5" />
+              )}
+              <span>{isStreaming ? "EQUILIBRATING..." : "DISPATCH"}</span>
+            </button>
+          </form>
+
+          {/* Streaming Response Console */}
+          {(chatResponse || isStreaming) && (
+            <div className="p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3 font-mono">
+              <div className="flex flex-wrap items-center justify-between text-xs border-b border-slate-800 pb-2">
+                <span className="text-cyan-400 font-bold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                  Cora Response Output
+                </span>
+                <div className="flex items-center gap-3 text-[11px] text-slate-400">
+                  <span>Tick SLA: <strong className="text-emerald-400">{lastTickLatency}ms</strong></span>
+                  {tokensPerSec > 0 && <span>Tokens: <strong className="text-cyan-300">{tokenCount} ({tokensPerSec} tok/s)</strong></span>}
+                </div>
+              </div>
+
+              {/* Streaming Response Text */}
+              <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">
+                {chatResponse}
+                {isStreaming && <span className="inline-block w-2 h-3.5 bg-cyan-400 ml-1 animate-pulse" />}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* ===================================================================
+            TOP ROW: ORGAN 1 & ORGAN 2
+        =================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* QUADRANT 1: CONTINUOUS HOPFIELD ASSOCIATIVE MEMORY */}
           <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl flex flex-col gap-4">
@@ -647,7 +969,7 @@ export default function SICorePage() {
                   <h2 className="text-sm font-bold text-white flex items-center gap-2">
                     Organ 1: Continuous Hopfield Memory
                   </h2>
-                  <p className="text-[11px] text-slate-400 font-mono">128GB DDR5 RAM Episodic Basin Pool</p>
+                  <p className="text-[11px] text-slate-400 font-mono">128GB DDR5 RAM Episodic Basin Pool ({memoryCount} Attractors)</p>
                 </div>
               </div>
               <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-blue-500/20 text-blue-300 border border-blue-500/40">
@@ -663,13 +985,13 @@ export default function SICorePage() {
               </div>
             </div>
 
-            {/* Attractor Confidence Bars */}
+            {/* Attractor Confidence Bars (Live from Hopfield cosine similarities) */}
             <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-              {MEMORY_ATTRACTORS.map((att, idx) => {
-                const isWinner = att.name === selectedAttractor;
+              {hopfieldTopMatches.map((match) => {
+                const isWinner = match.label === selectedAttractor;
                 return (
                   <div
-                    key={att.name}
+                    key={match.label}
                     className={`p-2 rounded-lg border transition ${
                       isWinner
                         ? "bg-blue-500/10 border-blue-500/40 text-blue-300"
@@ -677,16 +999,13 @@ export default function SICorePage() {
                     }`}
                   >
                     <div className="flex items-center justify-between text-[11px] mb-1">
-                      <span className="truncate">{att.name.replace(/_/g, " ")}</span>
-                      <span>{(attractorOverlaps[idx] * 100).toFixed(0)}%</span>
+                      <span className="truncate max-w-[160px]">{match.label.replace(/_/g, " ")}</span>
+                      <span>{(match.score * 100).toFixed(0)}%</span>
                     </div>
                     <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                       <div
-                        className="h-1.5 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${Math.round(attractorOverlaps[idx] * 100)}%`,
-                          backgroundColor: att.color,
-                        }}
+                        className="h-1.5 rounded-full bg-cyan-400 transition-all duration-300"
+                        style={{ width: `${Math.min(100, Math.max(5, Math.round(match.score * 100)))}%` }}
                       />
                     </div>
                   </div>
@@ -728,25 +1047,27 @@ export default function SICorePage() {
               </div>
             </div>
 
-            {/* Drive Telemetry & Sliders */}
+            {/* Drive Telemetry */}
             <div className="grid grid-cols-3 gap-2 text-xs font-mono">
               <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800">
                 <span className="text-[10px] text-slate-400 block">Coordinate (x)</span>
                 <span className="text-white font-bold text-sm">{particleX.toFixed(3)}</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">Velocity (v)</span>
-                <span className="text-white font-bold text-sm">{particleV.toFixed(3)}</span>
+                <span className="text-[10px] text-slate-400 block">Bath Temp (T)</span>
+                <span className="text-amber-400 font-bold text-sm">{bathTempT.toFixed(2)} K</span>
               </div>
               <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="text-[10px] text-slate-400 block">Novelty Input</span>
-                <span className="text-amber-400 font-bold text-sm">{noveltyInjection.toFixed(2)}</span>
+                <span className="text-[10px] text-slate-400 block">Novelty Score</span>
+                <span className="text-cyan-400 font-bold text-sm">{noveltyInjection.toFixed(2)}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* BOTTOM ROW: ORGAN 3 & ORGAN 4 */}
+        {/* ===================================================================
+            BOTTOM ROW: ORGAN 3 & ORGAN 4
+        =================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* QUADRANT 3: MULTISTATE POTTS GOAL ARBITER (N=6, K=4) */}
           <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl flex flex-col gap-4">
@@ -770,8 +1091,8 @@ export default function SICorePage() {
             {/* 6-Node Module Lattice Visualization */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
               {COGNITIVE_MODULES.map((mod, idx) => {
-                const spin = moduleSpins[idx];
-                const stance = STANCE_CONFIG[spin];
+                const spin = moduleSpins[idx] || 0;
+                const stance = STANCE_CONFIG[spin] || STANCE_CONFIG[0];
                 return (
                   <div
                     key={mod.id}
@@ -829,13 +1150,11 @@ export default function SICorePage() {
                 </span>
               </div>
               <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden flex">
-                {/* Baseline OS/UI */}
                 <div
                   className="bg-slate-600 h-3"
                   style={{ width: `${(currentVramBaseline / 16.0) * 100}%` }}
                   title="Base VRAM"
                 />
-                {/* Model Tier */}
                 <div
                   className="bg-emerald-500 h-3 transition-all duration-300"
                   style={{ width: `${(vramAllocated / 16.0) * 100}%` }}
@@ -843,7 +1162,7 @@ export default function SICorePage() {
                 />
               </div>
               <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
-                <span>Base: {currentVramBaseline.toFixed(1)} GB</span>
+                <span>Base: {currentVramBaseline.toFixed(2)} GB</span>
                 <span>Tier: +{vramAllocated.toFixed(1)} GB</span>
                 <span>Headroom: {vramHeadroom.toFixed(1)} GB free</span>
               </div>
@@ -875,111 +1194,6 @@ export default function SICorePage() {
           </div>
         </div>
 
-        {/* INTERACTIVE CONTROLS & EXPERIMENTATION PANEL */}
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col gap-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div className="flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-cyan-400" />
-              <h3 className="text-sm font-bold text-white">Thermodynamic Perturbation Chamber</h3>
-            </div>
-            <span className="text-xs font-mono text-slate-400">Real-time sensory injection parameter tuning</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Slider 1: Novelty / Prediction Error */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-300">Sensory Novelty / Error:</span>
-                <span className="text-amber-400 font-bold">{noveltyInjection.toFixed(2)}</span>
-              </div>
-              <input
-                type="range"
-                min="0.0"
-                max="1.0"
-                step="0.05"
-                value={noveltyInjection}
-                onChange={(e) => setNoveltyInjection(parseFloat(e.target.value))}
-                className="w-full accent-amber-500 bg-slate-800 rounded-lg cursor-pointer h-2"
-              />
-              <div className="flex justify-between text-[10px] font-mono text-slate-500">
-                <span>0.0 (Predictable)</span>
-                <span>0.5 (Curious)</span>
-                <span>1.0 (Contradiction)</span>
-              </div>
-            </div>
-
-            {/* Slider 2: Baseline VRAM */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-300">Active Baseline VRAM:</span>
-                <span className="text-cyan-400 font-bold">{currentVramBaseline.toFixed(1)} GB</span>
-              </div>
-              <input
-                type="range"
-                min="1.0"
-                max="10.0"
-                step="0.5"
-                value={currentVramBaseline}
-                onChange={(e) => setCurrentVramBaseline(parseFloat(e.target.value))}
-                className="w-full accent-cyan-500 bg-slate-800 rounded-lg cursor-pointer h-2"
-              />
-              <div className="flex justify-between text-[10px] font-mono text-slate-500">
-                <span>1.0 GB</span>
-                <span>5.0 GB</span>
-                <span>10.0 GB (Constrained)</span>
-              </div>
-            </div>
-
-            {/* Slider 3: Loop Frequency */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-300">Cognitive Loop Interval:</span>
-                <span className="text-purple-400 font-bold">{tickSpeedMs} ms</span>
-              </div>
-              <input
-                type="range"
-                min="50"
-                max="1000"
-                step="50"
-                value={tickSpeedMs}
-                onChange={(e) => setTickSpeedMs(parseInt(e.target.value))}
-                className="w-full accent-purple-500 bg-slate-800 rounded-lg cursor-pointer h-2"
-              />
-              <div className="flex justify-between text-[10px] font-mono text-slate-500">
-                <span>50 ms (20 Hz)</span>
-                <span>200 ms (5 Hz)</span>
-                <span>1000 ms (1 Hz)</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Preset Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-800/60">
-            <span className="text-xs font-mono text-slate-400">Cognitive Presets:</span>
-            <button
-              onClick={handleInjectNovelty}
-              className="px-3 py-1 rounded-lg text-xs font-mono bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 transition"
-            >
-              High Epistemic Shock (Novelty = 0.92)
-            </button>
-            <button
-              onClick={handleInjectPredictable}
-              className="px-3 py-1 rounded-lg text-xs font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition"
-            >
-              Equilibrated Steady-State (Novelty = 0.08)
-            </button>
-            <button
-              onClick={() => {
-                setCurrentVramBaseline(9.5);
-                runCognitiveTick();
-              }}
-              className="px-3 py-1 rounded-lg text-xs font-mono bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition"
-            >
-              VRAM Pressure Test (9.5 GB baseline)
-            </button>
-          </div>
-        </div>
-
         {/* BOTTOM NAVIGATION FOOTER */}
         <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-400">
           <div className="flex flex-wrap items-center gap-4">
@@ -993,7 +1207,7 @@ export default function SICorePage() {
             </div>
             <div className="flex items-center gap-2 border-l border-slate-800 pl-4">
               <Database className="w-4 h-4 text-emerald-400" />
-              <span>Episodic Store: <code className="text-emerald-300">data/cora_memory.npz</code></span>
+              <span>Episodic Store: <code className="text-emerald-300">data/cora_memory.npz ({memoryCount})</code></span>
             </div>
           </div>
           <div className="flex items-center gap-4">
