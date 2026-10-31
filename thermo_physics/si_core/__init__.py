@@ -15,6 +15,8 @@ from thermo_physics.si_core.cognitive_engine import (
     ThermodynamicSICore,
 )
 from thermo_physics.si_core.cora_ollama_bridge import CoraThermodynamicBridge
+from thermo_physics.si_core.seed_cora_memory import seed_cora_memory
+from thermo_physics.si_core.cora_server import app
 
 __all__ = [
     "HopfieldAssociativeMemory",
@@ -23,4 +25,6 @@ __all__ = [
     "MetabolicHomeostasis",
     "ThermodynamicSICore",
     "CoraThermodynamicBridge",
+    "seed_cora_memory",
+    "app",
 ]

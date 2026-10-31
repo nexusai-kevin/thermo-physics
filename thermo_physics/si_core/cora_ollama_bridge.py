@@ -16,12 +16,18 @@ import os
 import sys
 import time
 import json
+import asyncio
 import hashlib
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, AsyncGenerator
 
 import numpy as np
+
+try:
+    import httpx
+except ImportError:
+    httpx = None
 
 try:
     import urllib.request
@@ -261,24 +267,46 @@ class CoraThermodynamicBridge:
         # Robust deterministic fallback
         return deterministic_hash_embedding(prompt, dim=self.dim)
 
-    def cognitive_tick(
+    def embed_sensory_input(self, text: str) -> np.ndarray:
+        """Alias for embed_prompt to convert sensory text to a normalized spin vector."""
+        return self.embed_prompt(text)
+
+    def pre_equilibrate(
         self,
         user_prompt: str,
+        store_as_memory: Optional[str] = None,
         seed: Optional[int] = None,
         live_vram: Optional[float] = None,
     ) -> Dict[str, Any]:
-        """Executes a single coupled non-von-Neumann cognitive tick for the prompt.
-
-        Returns full thermodynamic telemetry across all 4 organs.
-        """
+        """Runs the 4-organ physical tick and returns system prompt, model, temp, and rich telemetry."""
         t0 = time.perf_counter()
 
         # Sensory Transduction to 768-D Spin Vector
-        spin_vector = self.embed_prompt(user_prompt)
+        spin_vector = self.embed_sensory_input(user_prompt)
+
+        # Optional manual memory storage
+        if store_as_memory:
+            self.memory.store(spin_vector, store_as_memory)
+            try:
+                self.memory.save(self.memory_path)
+            except Exception:
+                pass
 
         # Organ 1: Hopfield Memory Recall & Novelty Detection
         recalled_vec, memory_label, mem_energy = self.memory.retrieve(spin_vector, steps=5)
         novelty, max_sim = self.memory.compute_novelty(spin_vector)
+
+        # Top-4 Attractor matches
+        top_matches: List[Dict[str, Any]] = []
+        if len(self.memory.patterns) > 0:
+            norm_v = spin_vector / (np.linalg.norm(spin_vector) + 1e-8)
+            sims = self.memory.patterns @ norm_v
+            k_top = min(4, len(sims))
+            top_idxs = np.argsort(sims)[::-1][:k_top]
+            top_matches = [
+                {"label": self.memory.labels[idx], "score": round(float(sims[idx]), 4)}
+                for idx in top_idxs
+            ]
 
         # Organ 2: Kramers Double-Well Curiosity & Drive
         drive_mode, bath_temp = self.curiosity.step(novelty, seed=seed)
@@ -306,12 +334,11 @@ class CoraThermodynamicBridge:
 
         # Scale Ollama sampling temperature from physical bath temperature
         ollama_temp = float(np.clip(bath_temp * 0.35, 0.1, 1.2))
-
         elapsed_ms = (time.perf_counter() - t0) * 1000.0
 
-        # Episodic Consolidation: Automatically store novel insights (novelty > 0.45)
+        # Automatic episodic consolidation if novel
         consolidated = False
-        if novelty > 0.45:
+        if novelty > 0.45 and not store_as_memory:
             clean_snippet = "".join(c if c.isalnum() else "_" for c in user_prompt[:24]).strip("_")
             new_label = f"Episodic_{int(time.time())}_{clean_snippet}"
             self.memory.store(spin_vector, new_label)
@@ -321,12 +348,27 @@ class CoraThermodynamicBridge:
             except Exception:
                 pass
 
-        return {
+        telemetry = {
             "tick_latency_ms": round(elapsed_ms, 2),
             "user_prompt": user_prompt,
             "novelty_score": round(novelty, 3),
             "max_cosine_sim": round(max_sim, 3),
+            "hopfield_top_matches": top_matches,
+            "kramers_x": round(self.curiosity.x, 3),
+            "kramers_v": round(self.curiosity.v, 3),
+            "bath_temp_T": round(bath_temp, 3),
+            "potts_spins": goal_spins.tolist(),
+            "potts_stance": dominant_stance,
+            "potts_energy_H": round(potts_energy, 3),
+            "vram_used_gb": vram_to_use,
+            "vram_headroom_gb": metabolic_choice["vram_headroom_gb"],
+            "dispatched_model": mapped_model,
+            "metabolic_tier": selected_tier,
+            "memory_count": len(self.memory.patterns),
+            "drive_mode": drive_mode,
             "episodic_consolidated": consolidated,
+            "ollama_online": self.ollama_online,
+            "ollama_temperature": round(ollama_temp, 3),
             "organ_1_attractor": memory_label,
             "organ_1_energy": round(mem_energy, 4),
             "organ_1_total_patterns": len(self.memory.patterns),
@@ -338,10 +380,100 @@ class CoraThermodynamicBridge:
             "organ_4_tier": selected_tier,
             "organ_4_model": mapped_model,
             "organ_4_live_vram_gb": vram_to_use,
-            "organ_4_headroom_gb": metabolic_choice["vram_headroom_gb"],
-            "ollama_temperature": round(ollama_temp, 3),
-            "ollama_online": self.ollama_online,
         }
+
+        system_prompt = self.format_grounded_system_prompt(telemetry)
+
+        return {
+            "system_prompt": system_prompt,
+            "ollama_model": mapped_model,
+            "llm_temp": round(ollama_temp, 3),
+            "telemetry": telemetry,
+        }
+
+    async def stream_step(
+        self,
+        user_prompt: str,
+        seed: Optional[int] = None,
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """Async generator yielding immediate telemetry (<10ms), token stream, and completion event."""
+        t0 = time.perf_counter()
+        pre = self.pre_equilibrate(user_prompt, seed=seed)
+        telemetry = pre["telemetry"]
+
+        # 1. Immediately yield equilibrated thermodynamic telemetry
+        yield {"type": "telemetry", "data": telemetry}
+
+        # 2. Stream tokens from live local Ollama if online
+        stream_succeeded = False
+        if self.ollama_online and httpx is not None:
+            chat_url = f"{self.ollama_url}/api/chat"
+            payload = {
+                "model": pre["ollama_model"],
+                "messages": [
+                    {"role": "system", "content": pre["system_prompt"]},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "stream": True,
+                "options": {
+                    "temperature": pre["llm_temp"],
+                },
+            }
+            try:
+                async with httpx.AsyncClient(timeout=120.0) as client:
+                    async with client.stream("POST", chat_url, json=payload) as response:
+                        if response.status_code == 200:
+                            stream_succeeded = True
+                            async for line in response.aiter_lines():
+                                if not line:
+                                    continue
+                                try:
+                                    chunk_data = json.loads(line)
+                                    token = chunk_data.get("message", {}).get("content", "")
+                                    if token:
+                                        yield {"type": "token", "content": token}
+                                    if chunk_data.get("done", False):
+                                        break
+                                except Exception:
+                                    continue
+            except Exception:
+                stream_succeeded = False
+
+        # 3. Deterministic offline fallback streaming if Ollama is unreachable
+        if not stream_succeeded:
+            model_name = pre["ollama_model"]
+            stance = telemetry["potts_stance"]
+            drive = telemetry["drive_mode"]
+            attractor = telemetry["organ_1_attractor"]
+            simulated_reply = (
+                f"[Cora SI Core • {model_name} (Offline Grounded Stream)]\n"
+                f"Under stance [{stance}] with intrinsic drive [{drive}], the system settled into "
+                f"episodic basin [{attractor}] (H={telemetry['potts_energy_H']}).\n"
+                f"Thermal bath settled at T={telemetry['bath_temp_T']}K. VRAM usage: {telemetry['vram_used_gb']}/16.0GB.\n"
+                f"Analysis of query: \"{user_prompt}\" satisfies all thermodynamic boundary constraints."
+            )
+            words = simulated_reply.split(" ")
+            for i, word in enumerate(words):
+                suffix = " " if i < len(words) - 1 else ""
+                yield {"type": "token", "content": word + suffix}
+                await asyncio.sleep(0.01)
+
+        # 4. Yield done event
+        total_ms = round((time.perf_counter() - t0) * 1000.0, 2)
+        yield {"type": "done", "total_ms": total_ms}
+
+    def cognitive_tick(
+        self,
+        user_prompt: str,
+        seed: Optional[int] = None,
+        live_vram: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """Executes a single coupled non-von-Neumann cognitive tick for the prompt.
+
+        Returns full thermodynamic telemetry across all 4 organs.
+        """
+        pre = self.pre_equilibrate(user_prompt, seed=seed, live_vram=live_vram)
+        return pre["telemetry"]
 
     def format_grounded_system_prompt(self, telemetry: Dict[str, Any]) -> str:
         """Injects thermodynamic ground state telemetry into Cora's system prompt."""

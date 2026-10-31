@@ -12,10 +12,12 @@ Verifies:
 from __future__ import annotations
 
 import os
+import json
 import shutil
 import tempfile
 import unittest
 import numpy as np
+from fastapi.testclient import TestClient
 
 from thermo_physics.si_core import (
     HopfieldAssociativeMemory,
@@ -24,6 +26,8 @@ from thermo_physics.si_core import (
     MetabolicHomeostasis,
     ThermodynamicSICore,
     CoraThermodynamicBridge,
+    seed_cora_memory,
+    app,
 )
 
 
@@ -223,6 +227,102 @@ class TestThermodynamicSICore(unittest.TestCase):
             self.assertTrue(telemetry["episodic_consolidated"])
             self.assertEqual(len(bridge.memory.patterns), initial_count + 1)
             self.assertTrue(os.path.exists(mem_path))
+
+    def test_seed_cora_memory_population(self) -> None:
+        """Verifies seed_cora_memory populates archive with canonical attractors and docs."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            mem_path = os.path.join(tmp_dir, "test_seed_cora_memory.npz")
+            count = seed_cora_memory(memory_path=mem_path)
+
+            self.assertGreaterEqual(count, 10)
+            self.assertTrue(os.path.exists(mem_path))
+
+            mem = HopfieldAssociativeMemory.load_from_file(mem_path)
+            labels = mem.labels
+            self.assertIn("Station_1_to_9_Foundations", labels)
+            self.assertIn("Station_15_SI_Cognitive_Core", labels)
+            self.assertIn("Nexus_Thermodynamic_Dispatcher", labels)
+            self.assertIn("Local_Workstation_Architecture", labels)
+
+    def test_cora_server_endpoints(self) -> None:
+        """Verifies FastAPI REST and SSE streaming endpoints for Cora SI Core."""
+        client = TestClient(app)
+
+        # 1. Health check
+        res_health = client.get("/health")
+        self.assertEqual(res_health.status_code, 200)
+        data_health = res_health.json()
+        self.assertEqual(data_health["status"], "online")
+        self.assertIn("vram_used_gb", data_health)
+        self.assertGreater(data_health["memory_count"], 0)
+
+        # 2. Resting telemetry state
+        res_state = client.get("/telemetry/state")
+        self.assertEqual(res_state.status_code, 200)
+        data_state = res_state.json()
+        self.assertIn("organ_1_memory_count", data_state)
+        self.assertIn("organ_2_kramers_x", data_state)
+        self.assertIn("organ_3_stances", data_state)
+
+        # 3. Store new attractor
+        res_store = client.post("/memory/store", json={
+            "text": "Stochastic p-bit thermodynamic hardware acceleration",
+            "label": "Test_PBit_Hardware",
+        })
+        self.assertEqual(res_store.status_code, 200)
+        data_store = res_store.json()
+        self.assertEqual(data_store["status"], "stored")
+        self.assertEqual(data_store["label"], "Test_PBit_Hardware")
+
+        # 4. Sync chat
+        res_chat = client.post("/chat/sync", json={
+            "prompt": "Evaluate ground-state energy relaxation for N=24 SK model",
+            "seed": 42,
+        })
+        self.assertEqual(res_chat.status_code, 200)
+        data_chat = res_chat.json()
+        self.assertIn("reply", data_chat)
+        self.assertIn("telemetry", data_chat)
+        self.assertIn("organ_3_stance", data_chat["telemetry"])
+
+        # 5. SSE stream chat
+        res_stream = client.post("/chat/stream", json={
+            "prompt": "Stream thermodynamic telemetry",
+            "seed": 42,
+        })
+        self.assertEqual(res_stream.status_code, 200)
+        self.assertIn("text/event-stream", res_stream.headers["content-type"])
+        body = res_stream.text
+        self.assertIn('"type": "telemetry"', body)
+        self.assertIn('"type": "token"', body)
+        self.assertIn('"type": "done"', body)
+
+    def test_cora_server_websocket(self) -> None:
+        """Verifies full-duplex WebSocket streaming of telemetry frames and tokens."""
+        client = TestClient(app)
+        with client.websocket_connect("/ws/cora") as ws:
+            ws.send_text(json.dumps({"prompt": "Assess thermodynamic boundary safety", "seed": 42}))
+
+            # Expect telemetry event first
+            first_msg = ws.receive_text()
+            data_first = json.loads(first_msg)
+            self.assertEqual(data_first["type"], "telemetry")
+            self.assertIn("tick_latency_ms", data_first["data"])
+
+            # Expect token events until done
+            has_token = False
+            has_done = False
+            for _ in range(80):
+                msg = ws.receive_text()
+                data = json.loads(msg)
+                if data["type"] == "token":
+                    has_token = True
+                elif data["type"] == "done":
+                    has_done = True
+                    break
+
+            self.assertTrue(has_token)
+            self.assertTrue(has_done)
 
 
 if __name__ == "__main__":

@@ -12,5 +12,11 @@ jaxlib>=0.4.20
 # Thermodynamic modeling framework
 thrml>=0.1.0
 
+# Synthetic Intelligence (SI) Core & API Server
+fastapi>=0.115.0
+uvicorn>=0.30.0
+httpx>=0.27.0
+websockets>=13.0
+
 # Development & test harness
 pytest>=8.0.0
