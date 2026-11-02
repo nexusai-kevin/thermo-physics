@@ -78,6 +78,14 @@ class NonConvexIsingSAT:
         self.clauses: List[Tuple[int, int, int]] = clauses or []
         self._parsed_clauses = self._precompute_clauses(self.clauses)
 
+    @property
+    def j(self) -> np.ndarray:
+        return self.j_matrix
+
+    @property
+    def h(self) -> np.ndarray:
+        return self.h_bias
+
     def _precompute_clauses(
         self, clauses: List[Tuple[int, int, int]]
     ) -> Tuple[np.ndarray, np.ndarray]:

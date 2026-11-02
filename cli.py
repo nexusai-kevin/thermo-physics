@@ -630,5 +630,12 @@ def tpu_boss_command() -> None:
     run_phase_3_final_boss()
 
 
+@app.command("tpu-silicon")
+def tpu_silicon_command() -> None:
+    """Execute Phase-4 Silicon Realism & Hardware Imperfections stress-test (DAC, Op-Amp rails, 1/f noise)."""
+    from experiments.exp18_silicon_realism import run_phase_4_silicon_realism
+    run_phase_4_silicon_realism()
+
+
 if __name__ == "__main__":
     app()

@@ -32,6 +32,12 @@ from thermo_physics.tpu.monitors import (
     ErgodicityTrapWarning,
     FDTViolationWarning,
 )
+from thermo_physics.tpu.hardware import (
+    DACQuantizer,
+    OpAmpVoltageClipper,
+    OrnsteinUhlenbeckNoise,
+    SiliconRealismConfig,
+)
 from thermo_physics.tpu.solver import (
     HybridTPUSolver,
     ClassicalSimulatedAnnealing,
@@ -64,4 +70,8 @@ __all__ = [
     "TPUSolutionResult",
     "BenchmarkComparison",
     "run_tpu_vs_classical_benchmark",
+    "SiliconRealismConfig",
+    "DACQuantizer",
+    "OpAmpVoltageClipper",
+    "OrnsteinUhlenbeckNoise",
 ]

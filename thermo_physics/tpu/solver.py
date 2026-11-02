@@ -17,6 +17,12 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 
 from thermo_physics.tpu.hamiltonian import NonConvexIsingSAT
+from thermo_physics.tpu.hardware import (
+    DACQuantizer,
+    OpAmpVoltageClipper,
+    OrnsteinUhlenbeckNoise,
+    SiliconRealismConfig,
+)
 from thermo_physics.tpu.integrator import (
     BAOABIntegrator,
     EulerMaruyamaIntegrator,
@@ -70,6 +76,9 @@ class TPUSolverConfig:
     resample_threshold: float = 0.50  # Kish N_eff / B trigger threshold
     resample_interval: int = 25       # Step frequency to audit resampling
 
+    # Silicon Realism & Hardware Imperfections (DAC quantization, Op-Amp rails, 1/f noise)
+    silicon_config: Optional[SiliconRealismConfig] = None
+
     monitor_diagnostics: bool = True
     track_thermodynamics: bool = True
     seed: Optional[int] = None
@@ -91,6 +100,7 @@ class TPUSolutionResult:
     jarzynski_analysis: Optional[JarzynskiAnalysis] = None
     diagnostic_report: Optional[DiagnosticReport] = None
     energy_history: List[float] = field(default_factory=list)
+    silicon_metrics: Optional[Dict[str, Any]] = None
 
 
 class HybridTPUSolver:
@@ -122,6 +132,42 @@ class HybridTPUSolver:
         # Initialize scheduler
         scheduler = AdaptiveThermalScheduler(self.config.schedule)
 
+        # Silicon Realism & Hardware Imperfections setup
+        sil_cfg = self.config.silicon_config
+        sim_hamiltonian = hamiltonian
+        j_quant_rms = 0.0
+        h_quant_rms = 0.0
+
+        clipper: Optional[OpAmpVoltageClipper] = None
+        ou_noise: Optional[OrnsteinUhlenbeckNoise] = None
+
+        if sil_cfg is not None:
+            if sil_cfg.dac_bits is not None and sil_cfg.quantize_hamiltonian:
+                sim_hamiltonian = DACQuantizer.quantize_hamiltonian(
+                    hamiltonian, bits=sil_cfg.dac_bits, max_val=sil_cfg.dac_w_max
+                )
+                j_norm = np.linalg.norm(hamiltonian.j)
+                if j_norm > 1e-12:
+                    j_quant_rms = float(np.linalg.norm(sim_hamiltonian.j - hamiltonian.j) / j_norm)
+                h_norm = np.linalg.norm(hamiltonian.h)
+                if h_norm > 1e-12:
+                    h_quant_rms = float(np.linalg.norm(sim_hamiltonian.h - hamiltonian.h) / h_norm)
+
+            if sil_cfg.enable_rail_clipping:
+                clipper = OpAmpVoltageClipper(
+                    v_rail=sil_cfg.v_rail,
+                    v_max=sil_cfg.v_max,
+                    y_max=sil_cfg.y_max,
+                    lambda_0=self.config.lambda_0_aux,
+                )
+
+            if sil_cfg.enable_colored_noise:
+                ou_noise = OrnsteinUhlenbeckNoise(
+                    shape=(b, n),
+                    tau_color=sil_cfg.tau_color,
+                    use_pink_noise_bank=sil_cfg.use_pink_noise_bank,
+                )
+
         # Initialize physical state: positions near origin (delocalized) and Maxwell-Boltzmann velocities
         init_temp = self.config.schedule.get_temperature(0)
         x = self.rng.normal(0.0, 0.3, size=(b, n))
@@ -148,7 +194,7 @@ class HybridTPUSolver:
                 resample_threshold=self.config.resample_threshold,
             )
             thermo_tracker.initialize(
-                x, v, hamiltonian, cur_alpha, cur_lam,
+                x, v, sim_hamiltonian, cur_alpha, cur_lam,
                 initial_temperature=cur_t, clause_weights=y_aux
             )
 
@@ -158,7 +204,7 @@ class HybridTPUSolver:
             diagnostic_monitor = DiagnosticMonitor(
                 num_variables=n,
                 batch_size=b,
-                hamiltonian=hamiltonian,
+                hamiltonian=sim_hamiltonian,
                 mass=mass,
                 kb=kb,
             )
@@ -174,38 +220,59 @@ class HybridTPUSolver:
             dw_hk: Optional[np.ndarray] = None
             y_aux_old = y_aux.copy() if y_aux is not None else None
             if y_aux is not None:
-                c_violation = hamiltonian.clause_violations(x)  # shape (B, M)
+                c_violation = sim_hamiltonian.clause_violations(x)  # shape (B, M)
                 dy = (self.config.kappa_aux * c_violation - self.config.eta_aux * (y_aux - self.config.lambda_0_aux)) * dt
-                y_aux = np.maximum(self.config.lambda_0_aux, y_aux + dy)
+                y_aux = y_aux + dy
+                if clipper is not None:
+                    y_aux = clipper.clip_multiplier(y_aux)
+                else:
+                    y_aux = np.maximum(self.config.lambda_0_aux, y_aux)
+
+                if sil_cfg is not None and sil_cfg.dac_bits is not None and sil_cfg.quantize_dynamic_multipliers:
+                    y_aux = DACQuantizer.quantize(
+                        y_aux,
+                        bits=sil_cfg.dac_bits,
+                        w_min=self.config.lambda_0_aux,
+                        w_max=sil_cfg.y_max if sil_cfg.enable_rail_clipping else float(np.max(y_aux)),
+                    )
 
                 delta_y = y_aux - self.config.lambda_0_aux
                 if np.max(delta_y) > 1e-4:
-                    f_aux = -hamiltonian.gradient(x, alpha_well=0.0, lambda_sat=0.0, clause_weights=delta_y)
+                    f_aux = -sim_hamiltonian.gradient(x, alpha_well=0.0, lambda_sat=0.0, clause_weights=delta_y)
                     dw_hk = np.sum(f_aux * v * dt, axis=1)
+
+            # Evolve colored noise if enabled
+            step_noise: Optional[np.ndarray] = None
+            if ou_noise is not None:
+                step_noise = ou_noise.step(dt=dt, temperature=cur_t, gamma=gamma, kb=kb, rng=self.rng)
 
             # Step integrator
             if isinstance(integrator, BAOABIntegrator):
                 x, v, cached_force, _ = integrator.step(
                     x=x,
                     v=v,
-                    hamiltonian=hamiltonian,
+                    hamiltonian=sim_hamiltonian,
                     temperature=cur_t,
                     alpha_well=cur_alpha,
                     lambda_sat=cur_lam,
                     rng=self.rng,
                     f_cached=cached_force,
                     clause_weights=y_aux,
+                    colored_noise=step_noise,
+                    clipper=clipper,
                 )
             else:
                 x, v, cached_force, _ = integrator.step(
                     x=x,
                     v=v,
-                    hamiltonian=hamiltonian,
+                    hamiltonian=sim_hamiltonian,
                     temperature=cur_t,
                     alpha_well=cur_alpha,
                     lambda_sat=cur_lam,
                     rng=self.rng,
                     clause_weights=y_aux,
+                    colored_noise=step_noise,
+                    clipper=clipper,
                 )
 
             # Record non-equilibrium thermodynamic work, heat dissipation, and non-isothermal Sigma
@@ -213,7 +280,7 @@ class HybridTPUSolver:
                 thermo_tracker.record_step(
                     x=x,
                     v=v,
-                    hamiltonian=hamiltonian,
+                    hamiltonian=sim_hamiltonian,
                     alpha_old=cur_alpha,
                     lambda_old=cur_lam,
                     alpha_new=next_alpha,
@@ -291,6 +358,21 @@ class HybridTPUSolver:
         best_violated = int(final_violated[best_idx])
         success = (best_violated == 0)
 
+        silicon_metrics: Optional[Dict[str, Any]] = None
+        if sil_cfg is not None:
+            silicon_metrics = {
+                "dac_bits": sil_cfg.dac_bits,
+                "j_quantization_rms_error": j_quant_rms,
+                "h_quantization_rms_error": h_quant_rms,
+                "enable_rail_clipping": sil_cfg.enable_rail_clipping,
+                "position_clips": clipper.position_clips if clipper is not None else 0,
+                "velocity_clips": clipper.velocity_clips if clipper is not None else 0,
+                "multiplier_clips": clipper.multiplier_clips if clipper is not None else 0,
+                "enable_colored_noise": sil_cfg.enable_colored_noise,
+                "tau_color": sil_cfg.tau_color if sil_cfg.enable_colored_noise else 0.0,
+                "use_pink_noise_bank": sil_cfg.use_pink_noise_bank,
+            }
+
         return TPUSolutionResult(
             best_spins=best_spins,
             best_continuous_x=best_continuous_x,
@@ -305,6 +387,7 @@ class HybridTPUSolver:
             jarzynski_analysis=jarzynski_res,
             diagnostic_report=diag_report,
             energy_history=energy_history,
+            silicon_metrics=silicon_metrics,
         )
 
 

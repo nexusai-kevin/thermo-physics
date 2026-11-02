@@ -136,6 +136,8 @@ class BAOABIntegrator:
         rng: np.random.Generator,
         f_cached: Optional[np.ndarray] = None,
         clause_weights: Optional[np.ndarray] = None,
+        colored_noise: Optional[np.ndarray] = None,
+        clipper: Optional[Any] = None,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Perform a single BAOAB step for single state or batch of states (B, N)."""
         dt = self.dt
@@ -150,24 +152,40 @@ class BAOABIntegrator:
             f = f_cached
 
         v_b1 = v + (half_dt / m) * f
+        if clipper is not None:
+            v_b1 = clipper.clip_velocity(v_b1)
 
         # A step: half-step position update
         x_a1 = x + half_dt * v_b1
+        if clipper is not None:
+            x_a1 = clipper.clip_position(x_a1)
 
-        # O step: exact Ornstein-Uhlenbeck fluctuation-dissipation
+        # O step: exact Ornstein-Uhlenbeck fluctuation-dissipation (or colored noise bath)
         c1 = np.exp(-gamma * dt / m)
-        variance_factor = max(0.0, 1.0 - c1**2)
-        c2 = np.sqrt((self.kb * max(0.0, temperature) / m) * variance_factor)
+        if colored_noise is not None:
+            # Under colored noise eta(t), integration of dv = (-gamma*v + eta) dt / m
+            coeff_eta = (1.0 - c1) / gamma if gamma > 1e-12 else (dt / m)
+            v_o = c1 * v_b1 + coeff_eta * colored_noise
+            noise = colored_noise
+        else:
+            variance_factor = max(0.0, 1.0 - c1**2)
+            c2 = np.sqrt((self.kb * max(0.0, temperature) / m) * variance_factor)
+            noise = rng.standard_normal(size=x.shape)
+            v_o = c1 * v_b1 + c2 * noise
 
-        noise = rng.standard_normal(size=x.shape)
-        v_o = c1 * v_b1 + c2 * noise
+        if clipper is not None:
+            v_o = clipper.clip_velocity(v_o)
 
         # A step: second half-step position update
         x_next = x_a1 + half_dt * v_o
+        if clipper is not None:
+            x_next = clipper.clip_position(x_next)
 
         # B step: second half-step velocity update using force at x_next
         f_next = -hamiltonian.gradient(x_next, alpha_well=alpha_well, lambda_sat=lambda_sat, clause_weights=clause_weights)
         v_next = v_o + (half_dt / m) * f_next
+        if clipper is not None:
+            v_next = clipper.clip_velocity(v_next)
 
         return x_next, v_next, f_next, noise
 
@@ -197,6 +215,8 @@ class EulerMaruyamaIntegrator:
         lambda_sat: float,
         rng: np.random.Generator,
         clause_weights: Optional[np.ndarray] = None,
+        colored_noise: Optional[np.ndarray] = None,
+        clipper: Optional[Any] = None,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Perform Euler-Maruyama step."""
         dt = self.dt
@@ -204,11 +224,18 @@ class EulerMaruyamaIntegrator:
         gamma = self.gamma
 
         f = -hamiltonian.gradient(x, alpha_well=alpha_well, lambda_sat=lambda_sat, clause_weights=clause_weights)
-        noise = rng.standard_normal(size=x.shape)
-        diffusion = np.sqrt(2.0 * gamma * self.kb * max(0.0, temperature) * dt) / m
+        if colored_noise is not None:
+            noise = colored_noise
+            v_next = v + (dt / m) * (f - gamma * v + colored_noise)
+        else:
+            noise = rng.standard_normal(size=x.shape)
+            diffusion = np.sqrt(2.0 * gamma * self.kb * max(0.0, temperature) * dt) / m
+            v_next = v + (dt / m) * (f - gamma * v) + diffusion * noise
 
         x_next = x + v * dt
-        v_next = v + (dt / m) * (f - gamma * v) + diffusion * noise
+        if clipper is not None:
+            x_next = clipper.clip_position(x_next)
+            v_next = clipper.clip_velocity(v_next)
 
         f_next = -hamiltonian.gradient(x_next, alpha_well=alpha_well, lambda_sat=lambda_sat, clause_weights=clause_weights)
         return x_next, v_next, f_next, noise

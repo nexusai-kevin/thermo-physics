@@ -1,0 +1,199 @@
+{
+  "num_variables": 100,
+  "num_clauses": 400,
+  "total_wall_time_sec": 700.6047094999813,
+  "benchmark_1_dac_quantization": [
+    {
+      "label": "32-bit Float (Ideal)",
+      "dac_bits": null,
+      "levels": 0,
+      "rms_error": 0.0,
+      "best_violated_clauses": 1,
+      "best_energy": 3.876982000560338,
+      "wall_time_sec": 45.92173200001707,
+      "success": false
+    },
+    {
+      "label": "8-bit DAC (255 levels)",
+      "dac_bits": 8,
+      "levels": 255,
+      "rms_error": 0.00818299063528142,
+      "best_violated_clauses": 0,
+      "best_energy": -0.27277483719802365,
+      "wall_time_sec": 42.55381300003501,
+      "success": true
+    },
+    {
+      "label": "6-bit DAC (63 levels)",
+      "dac_bits": 6,
+      "levels": 63,
+      "rms_error": 0.032879236157917095,
+      "best_violated_clauses": 1,
+      "best_energy": 3.65005376143211,
+      "wall_time_sec": 47.25904080003966,
+      "success": false
+    },
+    {
+      "label": "4-bit DAC (15 levels)",
+      "dac_bits": 4,
+      "levels": 15,
+      "rms_error": 0.13876870800523267,
+      "best_violated_clauses": 3,
+      "best_energy": 12.413322982652812,
+      "wall_time_sec": 46.59083619999001,
+      "success": false
+    }
+  ],
+  "benchmark_2_opamp_rails": [
+    {
+      "label": "Unbounded Rails (Ideal)",
+      "enable_rail_clipping": false,
+      "v_rail": 1.5,
+      "v_clips": 0,
+      "y_clips": 0,
+      "housekeeping_heat_j": 2675.9947651527623,
+      "best_violated_clauses": 1,
+      "best_energy": 3.876982000560338
+    },
+    {
+      "label": "Op-Amp Rails (+/-1.5V, Slew=10V/s)",
+      "enable_rail_clipping": true,
+      "v_rail": 1.5,
+      "v_clips": 260734,
+      "y_clips": 5425,
+      "housekeeping_heat_j": 2132.144358925304,
+      "best_violated_clauses": 1,
+      "best_energy": 3.934018107997921
+    },
+    {
+      "label": "Stiff Rails (+/-1.2V, Slew=5V/s)",
+      "enable_rail_clipping": true,
+      "v_rail": 1.2,
+      "v_clips": 1132279,
+      "y_clips": 98494,
+      "housekeeping_heat_j": 1102.3494870506165,
+      "best_violated_clauses": 0,
+      "best_energy": -0.6885171628693791
+    }
+  ],
+  "benchmark_3_colored_noise": [
+    {
+      "label": "White Wiener Bath (Ideal)",
+      "enable_colored_noise": false,
+      "tau_color": 0.0,
+      "use_pink_noise_bank": false,
+      "mean_dissipated_heat_j": 3936.1981954077028,
+      "best_violated_clauses": 1,
+      "best_energy": 3.876982000560338
+    },
+    {
+      "label": "Colored OU Bath (tau=0.05)",
+      "enable_colored_noise": true,
+      "tau_color": 0.05,
+      "use_pink_noise_bank": false,
+      "mean_dissipated_heat_j": 4285.296987141601,
+      "best_violated_clauses": 0,
+      "best_energy": 0.1209803478342385
+    },
+    {
+      "label": "Colored OU Bath (tau=0.20, Stiff)",
+      "enable_colored_noise": true,
+      "tau_color": 0.2,
+      "use_pink_noise_bank": false,
+      "mean_dissipated_heat_j": 4144.532034119737,
+      "best_violated_clauses": 1,
+      "best_energy": 2.2378151227969156
+    },
+    {
+      "label": "3-Pole Pink Noise (Multi-Decade 1/f)",
+      "enable_colored_noise": true,
+      "tau_color": 0.05,
+      "use_pink_noise_bank": true,
+      "mean_dissipated_heat_j": 2696.5617093438877,
+      "best_violated_clauses": 0,
+      "best_energy": -0.9562312648229983
+    }
+  ],
+  "benchmark_4_full_silicon_stack": [
+    {
+      "label": "Ideal Floating Point Baseline",
+      "dac_bits": null,
+      "rail_clipping": false,
+      "colored_noise": false,
+      "best_violated_clauses": 1,
+      "best_energy": 3.876982000560338,
+      "silicon_metrics": {
+        "dac_bits": null,
+        "j_quantization_rms_error": 0.0,
+        "h_quantization_rms_error": 0.0,
+        "enable_rail_clipping": false,
+        "position_clips": 0,
+        "velocity_clips": 0,
+        "multiplier_clips": 0,
+        "enable_colored_noise": false,
+        "tau_color": 0.0,
+        "use_pink_noise_bank": false
+      }
+    },
+    {
+      "label": "Realistic 8-bit Silicon Stack",
+      "dac_bits": 8,
+      "rail_clipping": true,
+      "colored_noise": true,
+      "best_violated_clauses": 0,
+      "best_energy": -1.068238605579513,
+      "silicon_metrics": {
+        "dac_bits": 8,
+        "j_quantization_rms_error": 0.00818299063528142,
+        "h_quantization_rms_error": 0.008653878019735745,
+        "enable_rail_clipping": true,
+        "position_clips": 55959,
+        "velocity_clips": 0,
+        "multiplier_clips": 172,
+        "enable_colored_noise": true,
+        "tau_color": 0.05,
+        "use_pink_noise_bank": true
+      }
+    },
+    {
+      "label": "Realistic 6-bit Silicon Stack",
+      "dac_bits": 6,
+      "rail_clipping": true,
+      "colored_noise": true,
+      "best_violated_clauses": 0,
+      "best_energy": -2.4220734175771264,
+      "silicon_metrics": {
+        "dac_bits": 6,
+        "j_quantization_rms_error": 0.032879236157917095,
+        "h_quantization_rms_error": 0.03645904620908808,
+        "enable_rail_clipping": true,
+        "position_clips": 58661,
+        "velocity_clips": 0,
+        "multiplier_clips": 257,
+        "enable_colored_noise": true,
+        "tau_color": 0.05,
+        "use_pink_noise_bank": true
+      }
+    },
+    {
+      "label": "Aggressive 4-bit Silicon Stack",
+      "dac_bits": 4,
+      "rail_clipping": true,
+      "colored_noise": true,
+      "best_violated_clauses": 2,
+      "best_energy": 7.50194326223051,
+      "silicon_metrics": {
+        "dac_bits": 4,
+        "j_quantization_rms_error": 0.13876870800523267,
+        "h_quantization_rms_error": 0.15750216547747212,
+        "enable_rail_clipping": true,
+        "position_clips": 66448,
+        "velocity_clips": 0,
+        "multiplier_clips": 1188,
+        "enable_colored_noise": true,
+        "tau_color": 0.05,
+        "use_pink_noise_bank": true
+      }
+    }
+  ]
+}
