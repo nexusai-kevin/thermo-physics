@@ -527,6 +527,94 @@ python experiments/exp11_rna_folding.py
 
 ---
 
+## Experiment 12: Microgrid Security-Constrained Unit Commitment (SCUC) QUBO
+
+Schedules 4 heterogeneous thermal generation units across 6 operational time intervals ($N=24$ spins) subject to continuous linear heat-rate costs, operational capacity limits, and quadratic generation-load equilibrium constraints. Resolves grid deficits with zero unmet demand while beating naive heuristic dispatch.
+
+### Reproduction
+```bash
+python experiments/station_12_grid_scuc.py
+```
+
+---
+
+## Experiment 13: Synonymous mRNA Codon Optimization via Potts EBM
+
+Formulates mRNA translation kinetics over 15 residue positions ($8.49 \times 10^7$ candidate sequences) as a categorical Potts spin-glass. Simultaneously balances codon adaptation index (CAI = 0.9326), human GC content homeostasis (57.8%), and eliminates all 4 ribosome-stalling inverted-repeat hairpin secondary structures.
+
+### Reproduction
+```bash
+python experiments/station_13_codon_optimization.py
+```
+
+---
+
+## Experiment 14: Protein Side-Chain Rotamer Packing via Potts EBM
+
+Resolves non-convex Lennard-Jones (12-6) and electrostatic steric clashes on a 24-residue beta-hairpin fragment across $1.02 \times 10^{14}$ conformations using a 96-spin categorical Potts model. Eliminates all 6 severe steric clashes (&Delta;E = -295.54 kcal/mol) and relaxes into the interdigitated dispersion well.
+
+### Reproduction
+```bash
+python experiments/station_14_sidechain_packing.py
+```
+
+---
+
+## Experiment 15 / Station 15: 4-Organ Synthetic Intelligence (SI) Core
+
+Implements an autonomous, non-von-Neumann thermodynamic cognitive architecture coupling 4 specialized organs:
+1. **Continuous Hopfield Associative Memory:** Exponential attractor basin storage in 128GB DDR5 RAM for episodic memory recall.
+2. **Kramers Double-Well Curiosity:** Bistable Langevin potential modulating thermal bath temperature $T(t)$ between exploit ($x \approx -1$) and explore ($x \approx +1$).
+3. **Potts Goal Arbiter ($N=6, K=4$):** Categorical spin glass network equilibrating competing agent stances (Verify, Fast Heuristic, Deep Reasoning, Autonomous Exec) in $< 2\text{ms}$.
+4. **RTX 5080 Metabolic Scheduler:** Homeostasis QUBO governing 16GB VRAM bounds, model latency, and hardware power budgets.
+
+### Reproduction
+```bash
+python -m thermo_physics.si_core.cognitive_engine
+```
+
+---
+
+## Experiment 16 / Station 16: Non-Equilibrium Hybrid TPU & Frustration Breaking
+
+Models an array of continuous analog double-well oscillators ($x_i \in \mathbb{R}$) coupled to discrete 3-SAT spin-glass clauses ($s_i = \text{sgn}(x_i)$). Executes underdamped Langevin dynamics with dynamic auxiliary memory multipliers and Sequential Monte Carlo (SMC) population resampling to solve non-convex optimization problems and eliminate topological frustration.
+
+### Physical Architecture
+$$dx_i = v_i \, dt$$
+$$m \, dv_i = \left( -\frac{\partial H_{\text{base}}}{\partial x_i} - \sum_{m=1}^M y_m \frac{\partial C_m(x)}{\partial x_i} - \gamma v_i \right) dt + \sqrt{2 \gamma k_B T(t)} \, dW_i$$
+$$dy_m = \left( \kappa C_m(x) - \eta (y_m - \lambda_0) \right) dt$$
+
+### Key Empirical Breakthroughs
+1. **Phase 1 (Integrator Stability & First Law Conservation):**
+   - **BAOAB Symplectic Splitting:** Under stiff potential barriers ($\alpha_{\text{well}} = 6.0, dt = 0.03$), BAOAB holds energy at $7.01$, preserves the First Law of Thermodynamics ($|\Delta E - (W - Q)| < 10^{-10}$), and bounds FDT equipartition error to $17.3\%$.
+   - **Euler-Maruyama Runaway:** Diverges violently at **step 277** with $\|v\| = 80.35$ and an FDT error of $82.4\%$.
+   - **Second Law Compliance:** Tracks stochastic path integrals of work $dW = (\partial H / \partial t) dt$, verifying $\langle W_{\text{diss}} \rangle = 0.9210 > 0$ and Jarzynski equality compliance $\langle e^{-\beta W} \rangle = e^{-\beta \Delta F}$.
+
+2. **Phase 2 (Thermometers & Continuous Relaxation):**
+   - **Configurational Temperature ($T_{\text{conf}}$):** Force-gradient thermometer $k_B T_{\text{conf}} = \langle \|\nabla H\|^2 \rangle / \langle \Delta H \rangle$ holds rock-solid at **$0.4\%$ error** under severe stiffness ($\alpha_{\text{well}} = 10.0, dt=0.035$) where kinetic temperature $T_{\text{kin}}$ lags with $2.2\%$ error.
+   - **Smooth Softplus Relaxation:** Cures the catastrophic $\text{sech}^2(x_i) \to 0$ gradient starvation of saturating $\tanh$, dropping unsatisfied clauses at $N=100, M=426$ from $5$ down to $1$.
+
+3. **Phase 3 (Non-Conservative Memory & SMC Population Resampling):**
+   - **Auxiliary Clause Memory Multipliers ($y_m(t)$):** Dynamically injects **$3,697.40\text{ J}$ of housekeeping heat ($Q_{\text{hk}}$)** into persistent violations, warping the energy barrier and ejecting trapped oscillators to achieve **0 violated clauses (100% SAT, ground energy $-1.83$)** at $N=100, M=400$.
+   - **Jarzynski-Neal SMC Resampling:** Eliminates exponential trajectory weight collapse ($N_{\text{eff}} \to 1.55 / 48$, $3.2\%$) under steep non-isothermal annealing. A 22-stage SMC systematic resampler resuscitates mean Kish $N_{\text{eff}} / B$ to **$63.8\%$** ($30.63 / 48$) at $N=128$, yielding $\Delta(\beta F) = -1773.18$.
+
+### Reproduction Commands
+```bash
+# Phase 1: BAOAB Symplectic vs. Euler-Maruyama & Jarzynski Fluctuation Test
+uv run python cli.py tpu-langevin
+
+# Phase 2: Configurational Temperature & Smooth Softplus Stress Audit
+uv run python cli.py tpu-audit
+
+# Phase 3: Non-Conservative Frustration Breaking & SMC Population Resampling
+uv run python cli.py tpu-boss
+
+# Regenerate Full 16-Station Benchmark Dossier (HTML, MD, and Manifest JSON)
+uv run python cli.py dossier
+```
+
+---
+
 ## Hardware Performance & Multi-Scale Lattice Scaling (`run_scaling_benchmark.py`)
 
 Benchmarks XLA JIT compilation overhead against pure compiled 2-color Block Gibbs sampling throughput across 4 lattice scales ($500$ full sweeps per scale: $L = 16 \to 32 \to 64 \to 128$, up to $16,384$ spins):

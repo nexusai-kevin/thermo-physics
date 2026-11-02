@@ -1,0 +1,24 @@
+{
+  "num_variables": 16,
+  "num_clauses": 68,
+  "num_trajectories": 32,
+  "steps": 2000,
+  "tpu_best_energy": 5.257330100428934,
+  "tpu_best_violated": 2,
+  "tpu_wall_time": 1.5831988000136334,
+  "sa_best_energy": 1.3704510414824003,
+  "sa_best_violated": 1,
+  "sa_wall_time": 0.30352220000349917,
+  "speedup_ratio": 0.00037378006211927483,
+  "jarzynski": {
+    "mean_work": 31.813988729264736,
+    "delta_f": 30.89297972507116,
+    "dissipated_work": 0.921009004193575,
+    "second_law": true
+  },
+  "diagnostics": {
+    "divergence": false,
+    "fdt_error": 0.07940798507513533,
+    "ergodicity_traps": 0
+  }
+}

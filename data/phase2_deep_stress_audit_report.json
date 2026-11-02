@@ -1,0 +1,75 @@
+{
+  "audit_1_configurational_temperature": {
+    "audit": "configurational_temperature",
+    "results": [
+      {
+        "dt": 0.01,
+        "omega_dt": 0.08944271909999159,
+        "t_kin": 1.022793820968922,
+        "t_conf": 1.0229938738545485,
+        "err_kin": 0.02279382096892202,
+        "err_conf": 0.02299387385454854
+      },
+      {
+        "dt": 0.02,
+        "omega_dt": 0.17888543819998318,
+        "t_kin": 0.9962804972406388,
+        "t_conf": 1.0035217832831744,
+        "err_kin": 0.0037195027593611707,
+        "err_conf": 0.003521783283174429
+      },
+      {
+        "dt": 0.035,
+        "omega_dt": 0.3130495168499706,
+        "t_kin": 0.9782559884004265,
+        "t_conf": 1.0038296131861122,
+        "err_kin": 0.02174401159957351,
+        "err_conf": 0.0038296131861121907
+      }
+    ]
+  },
+  "audit_2_non_isothermal_collapse": {
+    "audit": "non_isothermal_collapse",
+    "results": [
+      {
+        "N": 16,
+        "M": 68,
+        "mean_sigma": 43.8149997642545,
+        "delta_beta_f": -466.35137524648917,
+        "n_eff": 1.0,
+        "collapse_ratio": 0.020833333333333332
+      },
+      {
+        "N": 32,
+        "M": 136,
+        "mean_sigma": 82.30924252587273,
+        "delta_beta_f": -563.6932482422441,
+        "n_eff": 1.0000018866726677,
+        "collapse_ratio": 0.02083337263901391
+      },
+      {
+        "N": 64,
+        "M": 273,
+        "mean_sigma": 167.77645602174016,
+        "delta_beta_f": -1158.0520068420567,
+        "n_eff": 1.0,
+        "collapse_ratio": 0.020833333333333332
+      },
+      {
+        "N": 128,
+        "M": 545,
+        "mean_sigma": 334.91408162327906,
+        "delta_beta_f": -2010.7621327393267,
+        "n_eff": 1.0,
+        "collapse_ratio": 0.020833333333333332
+      }
+    ]
+  },
+  "audit_3_vanishing_gradient_sat": {
+    "audit": "vanishing_gradient_sat",
+    "tanh_best_violated": 5,
+    "softplus_best_violated": 1,
+    "tanh_best_energy": 27.563184941122078,
+    "softplus_best_energy": 5.567095594603329
+  }
+}

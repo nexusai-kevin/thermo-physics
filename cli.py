@@ -580,14 +580,14 @@ def diagnose() -> None:
 
 @app.command("suite")
 def suite_command() -> None:
-    """Execute the Unified 14-Station Benchmark Suite across Layers 1, 2, and 3, and export the Benchmark Dossier."""
+    """Execute the Unified 16-Station Benchmark Suite across Layers 1, 2, 3, and 4, and export the Benchmark Dossier."""
     from thermo_physics.benchmarks.run_suite import run_unified_suite
     run_unified_suite(verbose=True)
 
 
 @app.command("dossier")
 def dossier_command() -> None:
-    """Compile and regenerate docs/BENCHMARK_DOSSIER.md and docs/BENCHMARK_DOSSIER.html across all 14 stations."""
+    """Compile and regenerate docs/BENCHMARK_DOSSIER.md and docs/BENCHMARK_DOSSIER.html across all 16 stations."""
     from thermo_physics.benchmarks.run_suite import run_unified_suite
     run_unified_suite(verbose=True)
 
@@ -597,6 +597,37 @@ def dispatch_command() -> None:
     """Run the Nexus AI Thermodynamic Agent & LLM Task Dispatcher benchmark simulation across 40 burst tasks."""
     from thermo_physics.dispatch.benchmark_dispatch import run_dispatch_benchmark
     run_dispatch_benchmark(verbose=True)
+
+
+@app.command("tpu-langevin")
+def tpu_langevin_command(
+    variables: int = typer.Option(16, "--variables", "-n", help="Number of spins/variables"),
+    trajectories: int = typer.Option(32, "--trajectories", "-b", help="Number of parallel Langevin trajectories"),
+    steps: int = typer.Option(2000, "--steps", "-s", help="Number of integration steps"),
+    seed: int = typer.Option(42, "--seed", help="Random seed"),
+) -> None:
+    """Run Hybrid Thermodynamic Processing Unit (TPU) Non-Equilibrium Langevin Dynamics stress-test."""
+    from experiments.exp15_tpu_langevin_solver import run_experiment_15
+    run_experiment_15(
+        num_variables=variables,
+        num_trajectories=trajectories,
+        steps=steps,
+        seed=seed,
+    )
+
+
+@app.command("tpu-audit")
+def tpu_audit_command() -> None:
+    """Execute Phase-2 Deep Stress Audit on TPU: Configurational Temp, Non-Isothermal Jarzynski, and Vanishing Gradients."""
+    from experiments.exp16_phase2_deep_stress_audit import run_phase_2_audit
+    run_phase_2_audit()
+
+
+@app.command("tpu-boss")
+def tpu_boss_command() -> None:
+    """Execute Phase-3 'Final Boss' Stress Test: Non-Conservative Clause Memory & SMC Population Resampling."""
+    from experiments.exp17_phase3_final_boss import run_phase_3_final_boss
+    run_phase_3_final_boss()
 
 
 if __name__ == "__main__":

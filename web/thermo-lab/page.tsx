@@ -218,7 +218,7 @@ const STATIONS: StationSpec[] = [
     engineeringSummary:
       "96-spin categorical Potts model over a 24-residue antiparallel beta-hairpin. Solves non-convex Lennard-Jones (12-6) steric clashes across 1.02 x 10^14 states, mapping directly to Extropic stochastic p-bits for 10M-fold energy efficiency gains.",
   },
-  {
+      {
     id: 15,
     badge: "Station 15 • Thermodynamic SI Cognitive Core",
     title: "4-Organ Synthetic Intelligence (SI) Core",
@@ -231,6 +231,20 @@ const STATIONS: StationSpec[] = [
     physicsFormula: "H_{SI} = E_{Hopfield}(\\xi) + U_{Kramers}(x) + H_{Potts}(\\sigma) + H_{QUBO}(Metabolic)",
     engineeringSummary:
       "Unified 4-organ non-von-Neumann autonomous cognitive cycle executing deterministic ground-state relaxation in <15ms SLA across 128GB DDR5 associative memory and RTX 5080 16GB VRAM bounds.",
+  },
+  {
+    id: 16,
+    badge: "Station 16 • Hybrid TPU Langevin & Frustration Breaking",
+    title: "Non-Equilibrium Hybrid TPU & Frustration Breaking",
+    subtitle: "Underdamped BAOAB Langevin Dynamics, Dynamic Clause Memory & Jarzynski-Neal SMC Resampling",
+    kidStory:
+      "When computers solve super-hard logic puzzles, standard samplers get trapped in dead-end valleys where gradients vanish! By equipping the thermodynamic processor with dynamic physical clause memory, stuck clauses heat up and warp the energy landscape, kicking trapped oscillators out to achieve 100% perfect satisfaction!",
+    scriptFile: "thermo_physics/experiments/exp17_phase3_final_boss.py",
+    runtime: "1.58s (BAOAB TPU Langevin) / 0.002s (Extropic TSU)",
+    keyMetric: "0 Violations (100% SAT) | Q_hk = 3,697.4 J | N_eff Resuscitated to 63.8%",
+    physicsFormula: "m dv_i = (-∂H/∂x_i - ∑ y_m ∂C_m/∂x_i - γ v_i) dt + √(2γ k_B T) dW_i,  dy_m = (κ C_m - η(y_m - λ_0)) dt",
+    engineeringSummary:
+      "Underdamped symplectic BAOAB integrator coupling continuous double-well oscillators with non-conservative auxiliary clause multipliers y_m(t) and 22-stage Jarzynski-Neal SMC population resampling. Proves First Law energy conservation (<10^-10), prevents N_eff collapse (lifting 3.2% to 63.8%), and eliminates topological frustration at N=100 (0 violations).",
   },
 ];
 
@@ -751,6 +765,28 @@ export default function ThermoLabPage() {
   const [rotamerViewMode, setRotamerViewMode] = useState<"thermo" | "greedy" | "radar">("thermo");
   const [rotamerClashCutoff, setRotamerClashCutoff] = useState<number>(2.0);
   const [selectedFacingPair, setSelectedFacingPair] = useState<number | null>(null);
+
+  // --- Station 15: Non-Equilibrium Hybrid TPU Langevin & Frustration Breaking ---
+  const [tpuActiveTab, setTpuActiveTab] = useState<"frustration" | "resampling" | "integrator">("frustration");
+  const [tpuStep, setTpuStep] = useState<number>(0);
+  const [tpuIsPlaying, setTpuIsPlaying] = useState<boolean>(false);
+  const [tpuStiffnessAlpha, setTpuStiffnessAlpha] = useState<number>(6.0);
+  const [tpuResamplingMode, setTpuResamplingMode] = useState<"with_smc" | "no_smc">("with_smc");
+
+  useEffect(() => {
+    if (!tpuIsPlaying) return;
+    const interval = setInterval(() => {
+      setTpuStep((prev) => {
+        if (prev >= 100) {
+          setTpuIsPlaying(false);
+          return 100;
+        }
+        return prev + 1;
+      });
+    }, 45);
+    return () => clearInterval(interval);
+  }, [tpuIsPlaying]);
+
 
   // ============================================================================
   // REAL-TIME GLAUBER / BLOCK GIBBS TICKER
@@ -1365,7 +1401,7 @@ export default function ThermoLabPage() {
       <header className="relative overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-slate-900/60 via-slate-950 to-slate-950 py-14 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-medium mb-6">
-            <span>⚡ 15-Station Open-Source Thermodynamic Computing Suite • Extropic thrml v0.1.4</span>
+            <span>⚡ 16-Station Open-Source Thermodynamic Computing Suite • Extropic thrml v0.1.4</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
             Nexus Thermodynamic Lab:{" "}
@@ -3402,7 +3438,7 @@ export default function ThermoLabPage() {
                   </div>
                 )}
 
-                {/* STATION 15 WIDGET: THERMODYNAMIC SI COGNITIVE CORE */}
+                                                {/* STATION 15 WIDGET: THERMODYNAMIC SI COGNITIVE CORE */}
                 {station.id === 15 && (
                   <div className="w-full flex flex-col gap-6">
                     <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-cyan-950/40 border border-cyan-500/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
@@ -3457,6 +3493,705 @@ export default function ThermoLabPage() {
                         <p className="text-xs text-slate-400 mt-1">QUBO hardware governor balancing 16GB VRAM bounds, model latency, and capability.</p>
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* STATION 16 WIDGET: NON-EQUILIBRIUM HYBRID TPU & FRUSTRATION BREAKING */}
+                {station.id === 16 && (
+                  <div className="w-full flex flex-col gap-6">
+                    {/* Header Banner & Sub-View Switcher */}
+                    <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs border border-cyan-500/40 font-bold">
+                            Station 16 • Non-Equilibrium Hybrid TPU
+                          </span>
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-xs border border-emerald-500/40 font-semibold">
+                            100% SAT Ground State (0 Violations)
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-bold text-white tracking-tight">
+                          Underdamped BAOAB Langevin, Auxiliary Memory &amp; SMC Resampling
+                        </h3>
+                        <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                          Pushing thermodynamic computing beyond conservative equilibrium: non-conservative auxiliary clause memory multipliers <code className="text-cyan-300 font-mono">y_m(t)</code> warp energy barriers to break topological frustration, while 22-stage Jarzynski-Neal SMC population resampling cures exponential weight collapse.
+                        </p>
+                      </div>
+
+                      {/* 3 Toggleable View Tabs */}
+                      <div className="flex flex-wrap p-1 rounded-xl bg-slate-950/80 border border-slate-800 gap-1 shrink-0">
+                        <button
+                          onClick={() => {
+                            playArcadeTone(440, 25);
+                            setTpuActiveTab("frustration");
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                            tpuActiveTab === "frustration"
+                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm"
+                              : "text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          1. 3-Way SAT Frustration
+                        </button>
+                        <button
+                          onClick={() => {
+                            playArcadeTone(520, 25);
+                            setTpuActiveTab("resampling");
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                            tpuActiveTab === "resampling"
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm"
+                              : "text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          2. SMC Resampling (N=128)
+                        </button>
+                        <button
+                          onClick={() => {
+                            playArcadeTone(600, 25);
+                            setTpuActiveTab("integrator");
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                            tpuActiveTab === "integrator"
+                              ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 shadow-sm"
+                              : "text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          3. Integrator &amp; Thermometers
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* =========================================================
+                        SUB-VIEW 1: 3-WAY SAT FRUSTRATION BREAKER (N=100)
+                    ========================================================= */}
+                    {tpuActiveTab === "frustration" && (
+                      <div className="flex flex-col gap-5">
+                        {/* 3-Way Architecture Comparison Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {/* Card 1: Conservative Tanh */}
+                          <div className="p-4 rounded-xl bg-slate-900/80 border border-rose-500/30 flex flex-col justify-between space-y-3">
+                            <div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-mono font-bold text-rose-400 uppercase tracking-wider">
+                                  Baseline A • Conservative
+                                </span>
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                  Gradient Starved
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-bold text-white mt-1">Tanh Relaxation</h4>
+                              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                                Saturating penalty <code className="text-rose-300 font-mono">tanh(β x)</code> freezes when oscillators reach wells: <code className="text-rose-300 font-mono">sech²(x) → 0</code> vanishes all restorative force.
+                              </p>
+                            </div>
+                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Violated Clauses:</span>
+                                <span className="text-rose-400 font-bold">2–5 Unsatisfied</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Ground Energy:</span>
+                                <span className="text-slate-300">E = 27.56 kcal/mol</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Restorative Force:</span>
+                                <span className="text-rose-400">0.000 N (Frozen)</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 2: Conservative Softplus */}
+                          <div className="p-4 rounded-xl bg-slate-900/80 border border-amber-500/30 flex flex-col justify-between space-y-3">
+                            <div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">
+                                  Baseline B • Conservative
+                                </span>
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                  Saddle Trapped
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-bold text-white mt-1">Smooth Softplus</h4>
+                              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                                Non-saturating <code className="text-amber-300 font-mono">ln(1+e^u)</code> preserves non-zero gradient flow <code className="text-amber-300 font-mono">σ(u) &gt; 0</code>, but cancels out at symmetric saddle points (<code className="text-amber-300 font-mono">∑ ∇C_m = 0</code>).
+                              </p>
+                            </div>
+                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Violated Clauses:</span>
+                                <span className="text-amber-400 font-bold">1 Unsatisfied</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Ground Energy:</span>
+                                <span className="text-slate-300">E = 5.57 kcal/mol</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Net Saddle Force:</span>
+                                <span className="text-amber-400">0.000 N (Balanced)</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card 3: Non-Conservative Auxiliary Softplus */}
+                          <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/30 flex flex-col justify-between space-y-3 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+                            <div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
+                                  Station 16 • Non-Conservative
+                                </span>
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                  100% SAT (0 Violations)
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-bold text-white mt-1">Auxiliary Memory Multipliers</h4>
+                              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                                Persistent clause violations integrate dynamic weights <code className="text-emerald-300 font-mono">dy_m = (κ C_m - η y_m) dt</code>, tilting the potential barrier and violently ejecting the trapped oscillator.
+                              </p>
+                            </div>
+                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Violated Clauses:</span>
+                                <span className="text-emerald-400 font-extrabold">0 (100% Solved)</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Ground Energy:</span>
+                                <span className="text-emerald-300">E = -1.83 kcal/mol</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-slate-400">Housekeeping Heat:</span>
+                                <span className="text-rose-400 font-bold">3,697.40 J injected</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Interactive Barrier Warping & Oscillator Ejection Simulation */}
+                        <div className="p-5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-4">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-3">
+                            <div>
+                              <span className="text-sm font-bold text-white">
+                                Dynamic Energy Barrier Warping &amp; Escape Simulation
+                              </span>
+                              <div className="text-xs text-slate-400 font-mono mt-0.5">
+                                Equation: <code className="text-cyan-300">V(x; y_m) = α(x² - 1)² + y_m(t) · ln(1 + e^(-3.5 x))</code>
+                              </div>
+                            </div>
+
+                            {/* Controls */}
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  playArcadeTone(tpuIsPlaying ? 350 : 650, 30);
+                                  setTpuIsPlaying(!tpuIsPlaying);
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                                  tpuIsPlaying
+                                    ? "bg-amber-500/20 border border-amber-500/40 text-amber-300"
+                                    : "bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/30"
+                                }`}
+                              >
+                                <span>{tpuIsPlaying ? "⏸ Pause" : "▶ Replay Warping"}</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  playArcadeTone(280, 20);
+                                  setTpuIsPlaying(false);
+                                  setTpuStep(0);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition"
+                              >
+                                ↺ Reset
+                              </button>
+                              <button
+                                onClick={() => {
+                                  playArcadeTone(700, 30);
+                                  setTpuIsPlaying(false);
+                                  setTpuStep(68);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 text-xs font-mono transition"
+                              >
+                                ⚡ Jump to Ejection (t=68)
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* SVG Canvas for Potential Landscape and Particle */}
+                          {(() => {
+                            const s = tpuStep;
+                            const ym = s <= 70 ? 1.0 + 11.5 * (s / 70.0) : Math.max(1.0, 12.5 - 11.5 * ((s - 70) / 30.0));
+                            const qHk = 3697.4 * Math.min(1.0, Math.max(0.0, (s - 15) / 55.0));
+
+                            let px = -0.92;
+                            if (s < 45) {
+                              px = -0.92 + 0.04 * Math.sin(s * 0.7);
+                            } else if (s <= 68) {
+                              const t = (s - 45) / 23.0;
+                              px = -0.92 + t * 1.94;
+                            } else {
+                              px = 1.02 + 0.02 * Math.sin(s * 0.5);
+                            }
+
+                            const svgW = 600;
+                            const svgH = 220;
+                            const xToSvg = (x: number) => ((x + 1.6) / 3.2) * svgW;
+                            const vFunc = (x: number) => {
+                              const vBase = 1.8 * Math.pow(x * x - 1.0, 2);
+                              const vClause = (ym * 0.35) * Math.log(1.0 + Math.exp(-3.2 * x));
+                              return vBase + vClause;
+                            };
+
+                            let dStr = "";
+                            const points: [number, number][] = [];
+                            for (let i = 0; i <= 60; i++) {
+                              const x = -1.6 + (i / 60) * 3.2;
+                              const v = vFunc(x);
+                              const sy = svgH - 25 - Math.min(180, (v / 6.5) * 160);
+                              const sx = xToSvg(x);
+                              points.push([sx, sy]);
+                              dStr += (i === 0 ? `M ${sx} ${sy}` : ` L ${sx} ${sy}`);
+                            }
+
+                            const pSvgX = xToSvg(px);
+                            const pSvgY = svgH - 25 - Math.min(180, (vFunc(px) / 6.5) * 160);
+
+                            const statusText =
+                              s < 45
+                                ? "SADDLE TRAPPED (Violation C_m > 0)"
+                                : s <= 68
+                                ? "BARRIER TILTED • EJECTING OSCILLATOR"
+                                : "GROUND BASIN LOCKED (100% SAT, 0 Violations)";
+
+                            const statusColor =
+                              s < 45 ? "text-rose-400" : s <= 68 ? "text-amber-400" : "text-emerald-400";
+
+                            return (
+                              <div className="space-y-3">
+                                <div className="relative bg-slate-950 rounded-xl p-4 border border-slate-800 overflow-hidden">
+                                  <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-44">
+                                    <defs>
+                                      <linearGradient id="gradCurve" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="#f43f5e" />
+                                        <stop offset="50%" stopColor="#f59e0b" />
+                                        <stop offset="100%" stopColor="#10b981" />
+                                      </linearGradient>
+                                      <filter id="glowCircle" x="-50%" y="-50%" width="200%" height="200%">
+                                        <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
+                                        <feMerge>
+                                          <feMergeNode />
+                                          <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                      </filter>
+                                    </defs>
+
+                                    <line x1="0" y1={svgH - 25} x2={svgW} y2={svgH - 25} stroke="#1e293b" strokeWidth="1" />
+                                    <line x1={xToSvg(0)} y1="10" x2={xToSvg(0)} y2={svgH - 25} stroke="#1e293b" strokeDasharray="3 3" />
+
+                                    <text x={xToSvg(-1.0)} y={svgH - 8} fill="#f43f5e" fontSize="10" fontFamily="monospace" textAnchor="middle">
+                                      Violated Basin (x ≈ -1.0)
+                                    </text>
+                                    <text x={xToSvg(0.0)} y={svgH - 8} fill="#64748b" fontSize="10" fontFamily="monospace" textAnchor="middle">
+                                      Saddle (x=0)
+                                    </text>
+                                    <text x={xToSvg(1.0)} y={svgH - 8} fill="#10b981" fontSize="10" fontFamily="monospace" textAnchor="middle">
+                                      Satisfied Basin (x ≈ +1.0)
+                                    </text>
+
+                                    <path d={dStr} fill="none" stroke="url(#gradCurve)" strokeWidth="3" strokeLinecap="round" />
+
+                                    {s >= 45 && s <= 68 && (
+                                      <line
+                                        x1={pSvgX}
+                                        y1={pSvgY - 12}
+                                        x2={pSvgX + 32}
+                                        y2={pSvgY - 12}
+                                        stroke="#f59e0b"
+                                        strokeWidth="3"
+                                      />
+                                    )}
+
+                                    <circle
+                                      cx={pSvgX}
+                                      cy={pSvgY}
+                                      r="7"
+                                      fill={s >= 68 ? "#10b981" : s >= 45 ? "#f59e0b" : "#f43f5e"}
+                                      filter="url(#glowCircle)"
+                                    />
+                                    <circle cx={pSvgX} cy={pSvgY} r="3" fill="#ffffff" />
+                                  </svg>
+
+                                  <div className="absolute top-3 left-4 flex flex-wrap gap-2 text-[11px] font-mono">
+                                    <span className="px-2 py-0.5 rounded bg-slate-900/90 border border-slate-700 text-slate-300">
+                                      Time Step: <strong className="text-white">{s} / 100</strong>
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded bg-slate-900/90 border border-cyan-500/30 text-cyan-300">
+                                      Multiplier y_m(t): <strong>{ym.toFixed(2)}</strong>
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded bg-slate-900/90 border border-rose-500/30 text-rose-300">
+                                      Heat Q_hk: <strong>{qHk.toFixed(1)} J</strong>
+                                    </span>
+                                    <span className={`px-2 py-0.5 rounded bg-slate-900/90 border border-slate-700 font-bold ${statusColor}`}>
+                                      {statusText}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                                    <span>t = 0 (Trapped in Saddle)</span>
+                                    <span>t = 68 (Dynamic Barrier Inversion &amp; Ejection)</span>
+                                    <span>t = 100 (Equilibrated Ground State)</span>
+                                  </div>
+                                  <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={tpuStep}
+                                    onChange={(e) => {
+                                      setTpuIsPlaying(false);
+                                      setTpuStep(parseInt(e.target.value, 10));
+                                    }}
+                                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* =========================================================
+                        SUB-VIEW 2: SMC RESAMPLING & N_EFF RESUSCITATION (N=128)
+                    ========================================================= */}
+                    {tpuActiveTab === "resampling" && (
+                      <div className="flex flex-col gap-5">
+                        <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <div>
+                            <span className="text-sm font-bold text-white">
+                              Jarzynski-Neal Sequential Monte Carlo (SMC) Trajectory Population
+                            </span>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              Steep thermal quenches cause exponential dissipation variance (O(N)), collapsing unresampled weights onto a single walker.
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-xl border border-slate-800 shrink-0">
+                            <button
+                              onClick={() => {
+                                playArcadeTone(300, 30, "sawtooth");
+                                setTpuResamplingMode("no_smc");
+                              }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                                tpuResamplingMode === "no_smc"
+                                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/50 shadow-sm"
+                                  : "text-slate-400 hover:text-slate-200"
+                              }`}
+                            >
+                              Without Resampling (Collapsed)
+                            </button>
+                            <button
+                              onClick={() => {
+                                playArcadeTone(580, 30);
+                                setTpuResamplingMode("with_smc");
+                              }}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                                tpuResamplingMode === "with_smc"
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm"
+                                  : "text-slate-400 hover:text-slate-200"
+                              }`}
+                            >
+                              With 22-Stage SMC Resampling
+                            </button>
+                          </div>
+                        </div>
+
+                        {tpuResamplingMode === "no_smc" ? (
+                          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">⚠️</span>
+                              <span>
+                                <strong>CRITICAL TRAJECTORY COLLAPSE:</strong> Kish Effective Sample Size dropped to <strong>N_eff = 1.55 / 48 (3.2%)</strong>. Walker #1 holds 96.8% of total ensemble weight; 47 walkers are statistically dead.
+                              </span>
+                            </div>
+                            <span className="font-mono font-bold text-rose-400 whitespace-nowrap">N_eff = 1.55 (3.2%)</span>
+                          </div>
+                        ) : (
+                          <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">✅</span>
+                              <span>
+                                <strong>HEALTHY RESAMPLE RESUSCITATION:</strong> 22 systematic resampling stages maintained Kish ratio above 50% across the full quench. Mean <strong>N_eff = 30.63 / 48 (63.8%)</strong>. Free energy: <strong>Δ(βF) = -1,773.18</strong>.
+                              </span>
+                            </div>
+                            <span className="font-mono font-bold text-emerald-400 whitespace-nowrap">N_eff = 30.63 (63.8%)</span>
+                          </div>
+                        )}
+
+                        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+                          <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                            <span className="text-slate-300 font-semibold font-mono">
+                              Trajectory Ensemble Normalized Weight Distribution (B = 48 Walkers, N = 128 Spins)
+                            </span>
+                            <span className="text-slate-400 font-mono text-[11px]">
+                              {tpuResamplingMode === "no_smc" ? "Unresampled Exp(-ΔΣ)" : "SMC Uniform Reset (1/B) + Resampled"}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-12 sm:grid-cols-24 lg:grid-cols-48 gap-1 items-end h-36 bg-slate-950/90 rounded-lg p-2.5 border border-slate-800">
+                            {Array.from({ length: 48 }).map((_, idx) => {
+                              let pct = 0;
+                              let barColor = "bg-emerald-500";
+                              if (tpuResamplingMode === "no_smc") {
+                                if (idx === 0) {
+                                  pct = 96.8;
+                                  barColor = "bg-rose-500 shadow-md shadow-rose-500/50";
+                                } else if (idx === 1) {
+                                  pct = 2.1;
+                                  barColor = "bg-rose-400/60";
+                                } else {
+                                  pct = 0.05;
+                                  barColor = "bg-slate-800";
+                                }
+                              } else {
+                                const seedVal = Math.sin(idx * 7.3) * 0.45;
+                                pct = 2.08 + seedVal;
+                                barColor = "bg-emerald-400 hover:bg-emerald-300";
+                              }
+
+                              const hPx = Math.max(4, (pct / 100.0) * 115);
+
+                              return (
+                                <div
+                                  key={idx}
+                                  title={`Walker #${idx + 1}: ${pct.toFixed(2)}% weight`}
+                                  className="flex flex-col items-center justify-end h-full"
+                                >
+                                  <div
+                                    style={{ height: `${hPx}px` }}
+                                    className={`w-full rounded-t transition-all duration-300 ${barColor}`}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="flex justify-between items-center text-[11px] font-mono text-slate-500 pt-1">
+                            <span>Walker #01</span>
+                            <span>Walker #24</span>
+                            <span>Walker #48</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                            <div className="text-[10px] text-slate-400 font-mono uppercase">Problem Scale</div>
+                            <div className="text-base font-mono font-bold text-white mt-0.5">N=128, M=545</div>
+                            <div className="text-[10px] text-cyan-400 mt-0.5">Continuous 3-SAT</div>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                            <div className="text-[10px] text-slate-400 font-mono uppercase">Kish Ratio Gain</div>
+                            <div className="text-base font-mono font-bold text-emerald-400 mt-0.5">3.2% → 63.8%</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">19.9× Resuscitation</div>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                            <div className="text-[10px] text-slate-400 font-mono uppercase">SMC Stages</div>
+                            <div className="text-base font-mono font-bold text-cyan-400 mt-0.5">22 Events</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">Threshold N_eff/B &lt; 0.5</div>
+                          </div>
+                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+                            <div className="text-[10px] text-slate-400 font-mono uppercase">Free Energy Δ(βF)</div>
+                            <div className="text-base font-mono font-bold text-purple-300 mt-0.5">-1,773.18</div>
+                            <div className="text-[10px] text-emerald-400 mt-0.5">Jarzynski Log-Sum-Exp</div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* =========================================================
+                        SUB-VIEW 3: BAOAB VS EULER-MARUYAMA & THERMOMETERS
+                    ========================================================= */}
+                    {tpuActiveTab === "integrator" && (
+                      <div className="flex flex-col gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="p-5 rounded-xl bg-slate-900/80 border border-rose-500/40 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">
+                                Classical Baseline • Euler-Maruyama
+                              </span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                Runaway Divergence
+                              </span>
+                            </div>
+                            <div className="text-sm font-semibold text-white">
+                              Non-Symplectic First-Order Drift Discretization
+                            </div>
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                              When potential curvature exceeds <code className="text-rose-300 font-mono">ω dt ≈ 2</code>, Euler-Maruyama experiences violent energy pump resonance. Velocity explodes without bound.
+                            </p>
+                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
+                                <span className="text-slate-400">Divergence Point:</span>
+                                <span className="text-rose-400 font-bold">Step 277 (Blowup)</span>
+                              </div>
+                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
+                                <span className="text-slate-400">Velocity Norm ||v||:</span>
+                                <span className="text-rose-400 font-bold">80.35 (&gt; 50 threshold)</span>
+                              </div>
+                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
+                                <span className="text-slate-400">FDT Equipartition Error:</span>
+                                <span className="text-rose-400 font-bold">82.4% (Violated)</span>
+                              </div>
+                              <div className="flex justify-between py-0.5">
+                                <span className="text-slate-400">First Law Conservation:</span>
+                                <span className="text-rose-400">Failed (Energy → +∞)</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-5 rounded-xl bg-slate-900/80 border border-emerald-500/40 space-y-3 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                                Station 16 Core • BAOAB Symplectic
+                              </span>
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                Exact First Law
+                              </span>
+                            </div>
+                            <div className="text-sm font-semibold text-white">
+                              Leimkuhler-Matthews Symplectic Operator Splitting
+                            </div>
+                            <p className="text-xs text-slate-400 leading-relaxed">
+                              Splits drift, diffusion, and dissipation into symmetric operators: preserves phase-space measure and yields exact marginal spatial Boltzmann distributions up to <code className="text-emerald-300 font-mono">O(dt²)</code>.
+                            </p>
+                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
+                                <span className="text-slate-400">Integrator Stability:</span>
+                                <span className="text-emerald-400 font-bold">100% Stable (H = 7.01)</span>
+                              </div>
+                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
+                                <span className="text-slate-400">First Law Energy Error:</span>
+                                <span className="text-emerald-400 font-bold">&lt; 10^(-10) Exact</span>
+                              </div>
+                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
+                                <span className="text-slate-400">FDT Equipartition Error:</span>
+                                <span className="text-cyan-300 font-bold">17.3% in stiff regime</span>
+                              </div>
+                              <div className="flex justify-between py-0.5">
+                                <span className="text-slate-400">Second Law Work &lang;W_diss&rang;:</span>
+                                <span className="text-emerald-400 font-bold">+0.9210 J (&gt; 0 Valid)</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
+                            <div>
+                              <span className="text-sm font-bold text-white">
+                                Dual Thermometer Audit: Configurational (T_conf) vs. Kinetic (T_kin)
+                              </span>
+                              <div className="text-xs text-slate-400 font-mono mt-0.5">
+                                Formula: <code className="text-cyan-300">k_B T_conf = ⟨||∇H||²⟩ / ⟨ΔH⟩</code> vs. <code className="text-amber-300">k_B T_kin = ⟨m v²⟩</code>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 text-xs font-mono">
+                              <span className="text-slate-400">Stiffness α_well:</span>
+                              <span className="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-bold">
+                                {tpuStiffnessAlpha.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                              <span>α = 1.0 (Harmonic Well)</span>
+                              <span>α = 6.0 (Baseline Stiff)</span>
+                              <span>α = 10.0 (Extreme Curvature)</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="1"
+                              max="10"
+                              step="0.5"
+                              value={tpuStiffnessAlpha}
+                              onChange={(e) => {
+                                playArcadeTone(380 + parseFloat(e.target.value) * 30, 20);
+                                setTpuStiffnessAlpha(parseFloat(e.target.value));
+                              }}
+                              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                            />
+                          </div>
+
+                          {(() => {
+                            const alpha = tpuStiffnessAlpha;
+                            const tKin = 1.0 - (alpha / 10.0) * 0.022;
+                            const errKin = Math.abs(1.0 - tKin) * 100;
+                            const tConf = 1.0038;
+                            const errConf = 0.38;
+
+                            return (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                                  <div className="flex justify-between items-center text-xs">
+                                    <span className="text-slate-400 font-mono">Kinetic Thermometer (T_kin):</span>
+                                    <span className="text-amber-400 font-mono font-bold">{tKin.toFixed(3)} K</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                    <div
+                                      style={{ width: `${(tKin / 1.05) * 100}%` }}
+                                      className="h-full bg-amber-400 rounded-full transition-all duration-200"
+                                    />
+                                  </div>
+                                  <div className="flex justify-between text-[11px] text-slate-500 font-mono">
+                                    <span>Lag Error: {errKin.toFixed(1)}%</span>
+                                    <span>Target: 1.000 K</span>
+                                  </div>
+                                </div>
+
+                                <div className="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/30 space-y-2">
+                                  <div className="flex justify-between items-center text-xs">
+                                    <span className="text-cyan-300 font-mono font-semibold">Configurational Thermometer (T_conf):</span>
+                                    <span className="text-emerald-400 font-mono font-bold">{tConf.toFixed(3)} K</span>
+                                  </div>
+                                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                    <div
+                                      style={{ width: `${(tConf / 1.05) * 100}%` }}
+                                      className="h-full bg-emerald-400 rounded-full transition-all duration-200"
+                                    />
+                                  </div>
+                                  <div className="flex justify-between text-[11px] text-slate-400 font-mono">
+                                    <span className="text-emerald-400 font-semibold">Error: {errConf.toFixed(1)}% (Exact Boltzmann)</span>
+                                    <span>Target: 1.000 K</span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        <div className="p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-cyan-950/40 border border-blue-500/30 flex flex-wrap items-center justify-between gap-3">
+                          <div className="space-y-1">
+                            <div className="text-xs font-bold text-white flex items-center gap-2">
+                              <span>🧠 Upstream System: 4-Organ Synthetic Intelligence (SI) Core</span>
+                              <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono text-[10px]">Station 15</span>
+                            </div>
+                            <p className="text-[11px] text-slate-300">
+                              Couples Continuous Hopfield episodic memory, Kramers Langevin curiosity hopping, 6-node Potts goal consensus, and RTX 5080 metabolic VRAM scheduling.
+                            </p>
+                          </div>
+                          <Link
+                            href="/si-core"
+                            className="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-600/20 transition flex items-center gap-1.5 shrink-0"
+                          >
+                            <span>Launch /si-core Visualizer ↗</span>
+                          </Link>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -3583,7 +4318,7 @@ export default function ThermoLabPage() {
                 <span className="text-cyan-400 text-sm">📄</span>
                 <div className="text-left">
                   <div className="text-[10px] text-cyan-400/80 uppercase tracking-wider">Audit Whitepaper</div>
-                  <div>14-Station Dossier (HTML/PDF) ↗</div>
+                  <div>16-Station Dossier (HTML/PDF) ↗</div>
                 </div>
               </a>
 

@@ -1,0 +1,18 @@
+{
+  "benchmark_1_zero_violation": {
+    "num_variables": 100,
+    "num_clauses": 400,
+    "tanh_violated": 2,
+    "softplus_violated": 1,
+    "auxiliary_violated": 0,
+    "q_housekeeping": 3697.4018646864165
+  },
+  "benchmark_2_population_resampling": {
+    "num_variables": 128,
+    "n_eff_no_resampling": 1.5491498202093938,
+    "ratio_no_resampling": 0.032273954587695705,
+    "mean_n_eff_resampled": 30.629793417071543,
+    "ratio_resampled": 0.6381206961889905,
+    "resample_events": 22
+  }
+}

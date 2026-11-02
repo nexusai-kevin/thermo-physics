@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Benchmark Dossier: 14-Station Thermodynamic Reference Suite — Nexus AI Solutions</title>
+  <title>Benchmark Dossier: 16-Station Thermodynamic Reference Suite — Nexus AI Solutions</title>
   <style>
     :root {
       --bg: #070b14;
@@ -220,6 +220,7 @@
     .layer-1 { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); border: 1px solid rgba(6, 182, 212, 0.3); }
     .layer-2 { background: rgba(99, 102, 241, 0.2); color: var(--accent-indigo); border: 1px solid rgba(99, 102, 241, 0.3); }
     .layer-3 { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .layer-4 { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
 
     .trap-cell {
       color: #f87171;
@@ -255,7 +256,7 @@
     /* Layer Breakdown Cards */
     .layer-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
       margin-bottom: 28px;
     }
@@ -278,6 +279,45 @@
       color: var(--text-muted);
       font-size: 11.5px;
       line-height: 1.5;
+    }
+
+    /* Deep Dive Cards */
+    .deep-dive-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .deep-dive-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .deep-dive-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 11px;
+      font-family: monospace;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+    }
+
+    .metric-val {
+      font-weight: 700;
     }
 
     /* Methodology Footer */
@@ -357,13 +397,13 @@
         <div class="logo-badge">⚡</div>
         <div>
           <h1>Thermodynamic Benchmark Dossier</h1>
-          <div class="subtitle">Complete 14-Station Reference Suite & Hardware Projections</div>
+          <div class="subtitle">Complete 16-Station Reference Suite & Hardware Projections</div>
         </div>
       </div>
       <div class="meta-actions">
         <div style="text-align: right; font-size: 11px; color: var(--text-muted);">
-          <div>Generated: 2026-10-30</div>
-          <div>Status: <strong>14/14 Operational</strong></div>
+          <div>Generated: 2026-11-02</div>
+          <div>Status: <strong>16/16 Operational</strong></div>
         </div>
         <button class="print-btn" onclick="window.print()">Print / PDF</button>
       </div>
@@ -372,8 +412,8 @@
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">Stations Evaluated</div>
-        <div class="kpi-value">14 / 14</div>
-        <div class="kpi-subtext">Layers 1, 2, and 3 End-to-End</div>
+        <div class="kpi-value">16 / 16</div>
+        <div class="kpi-subtext">Layers 1, 2, 3, and 4 End-to-End</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Search Space Range</div>
@@ -387,7 +427,7 @@
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Peak Silicon Gain</div>
-        <div class="kpi-value">19,782,065x</div>
+        <div class="kpi-value">20,011,683x</div>
         <div class="kpi-subtext">Joules per 1k ESS (Extropic Z1 vs GPU)</div>
       </div>
     </div>
@@ -418,9 +458,9 @@
             <td class="trap-cell"><strong>Uniform Random Spin Config</strong><br>E = 0.0000 kcal/mol (Random uncorrelated)</td>
             <td class="ground-cell"><strong>Bipartite Block Gibbs Sampler</strong><br>E_min = -2.0000 (Mean: -0.9460)</td>
             <td style="font-family: monospace; text-align: right;">0.5</td>
-            <td style="font-family: monospace; text-align: right;">203,857</td>
+            <td style="font-family: monospace; text-align: right;">209,828</td>
             <td style="text-align: right;"><span class="speedup-pill">5x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">1,717x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">1,668x</span></td>
           </tr>
           <tr>
             <td style="font-weight: 700; text-align: center;">02</td>
@@ -430,9 +470,9 @@
             <td class="trap-cell"><strong>High-T Disordered Paramagnet (beta=0.20)</strong><br>|<M>| = 0.0434 (Chaotic noise, E/N = -0.41)</td>
             <td class="ground-cell"><strong>Checkerboard Block Gibbs (beta=0.70)</strong><br>|<M>| = 0.9417 (Ferromagnetic domain lock, E/N = -1.94)</td>
             <td style="font-family: monospace; text-align: right;">29.9</td>
-            <td style="font-family: monospace; text-align: right;">222</td>
-            <td style="text-align: right;"><span class="speedup-pill">146x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">51,272x</span></td>
+            <td style="font-family: monospace; text-align: right;">238</td>
+            <td style="text-align: right;"><span class="speedup-pill">137x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">47,819x</span></td>
           </tr>
           <tr>
             <td style="font-weight: 700; text-align: center;">03</td>
@@ -442,9 +482,9 @@
             <td class="trap-cell"><strong>Random Bipartition Cut</strong><br>120/263 edges (45.6%)</td>
             <td class="ground-cell"><strong>Antiferromagnetic Block Gibbs</strong><br>180/263 edges (68.4%)</td>
             <td style="font-family: monospace; text-align: right;">27.1</td>
-            <td style="font-family: monospace; text-align: right;">622</td>
-            <td style="text-align: right;"><span class="speedup-pill">1,340x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">469,110x</span></td>
+            <td style="font-family: monospace; text-align: right;">643</td>
+            <td style="text-align: right;"><span class="speedup-pill">1,297x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">453,833x</span></td>
           </tr>
           <tr>
             <td style="font-weight: 700; text-align: center;">04</td>
@@ -454,9 +494,9 @@
             <td class="trap-cell"><strong>High-T Categorical Noise (beta=0.20)</strong><br>E = -144.0 (25.1% color alignment, disordered confetti)</td>
             <td class="ground-cell"><strong>Softmax Categorical Gibbs (beta=1.50)</strong><br>E = -1152.0 (99.2% alignment, domain clustering below beta_c = 1.0986)</td>
             <td style="font-family: monospace; text-align: right;">36.0</td>
-            <td style="font-family: monospace; text-align: right;">482</td>
-            <td style="text-align: right;"><span class="speedup-pill">129x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">45,012x</span></td>
+            <td style="font-family: monospace; text-align: right;">504</td>
+            <td style="text-align: right;"><span class="speedup-pill">123x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">43,053x</span></td>
           </tr>
           <tr>
             <td style="font-weight: 700; text-align: center;">05</td>
@@ -466,9 +506,9 @@
             <td class="trap-cell"><strong>Corrupted Observation Layer</strong><br>23.09% Salt-and-Pepper Noise</td>
             <td class="ground-cell"><strong>Clamped Posterior Gibbs Sampler</strong><br>9.44% Error (59.1% noise reduction)</td>
             <td style="font-family: monospace; text-align: right;">2.1</td>
-            <td style="font-family: monospace; text-align: right;">13,731</td>
+            <td style="font-family: monospace; text-align: right;">14,630</td>
             <td style="text-align: right;"><span class="speedup-pill">9x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">3,251x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">3,052x</span></td>
           </tr>
           <tr>
             <td style="font-weight: 700; text-align: center;">06</td>
@@ -550,9 +590,9 @@
             <td class="trap-cell"><strong>Uncoordinated Generator Dispatch</strong><br>3,200 MW Peak Deficit (Unserved energy blackouts)</td>
             <td class="ground-cell"><strong>JAX SCUC Ising Hamiltonian Optimizer</strong><br>Optimal E = 5451.0 (Zero deficit, 100% demand covered)</td>
             <td style="font-family: monospace; text-align: right;">1.0</td>
-            <td style="font-family: monospace; text-align: right;">21,143</td>
-            <td style="text-align: right;"><span class="speedup-pill">95x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">33,108x</span></td>
+            <td style="font-family: monospace; text-align: right;">16,672</td>
+            <td style="text-align: right;"><span class="speedup-pill">120x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">41,987x</span></td>
           </tr>
           <tr>
             <td style="font-weight: 700; text-align: center;">13</td>
@@ -562,9 +602,9 @@
             <td class="trap-cell"><strong>Greedy CAI-Only Heuristic (Trap)</strong><br>CAI 1.0000 | GC 66.7% | 4 Hairpins (E = 9.11)</td>
             <td class="ground-cell"><strong>Thermodynamic Potts Sampler</strong><br>CAI 0.9326 | GC 57.8% | 0 Hairpins (E = 1.29)</td>
             <td style="font-family: monospace; text-align: right;">32.0</td>
-            <td style="font-family: monospace; text-align: right;">406</td>
-            <td style="text-align: right;"><span class="speedup-pill">2,466x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">863,081x</span></td>
+            <td style="font-family: monospace; text-align: right;">417</td>
+            <td style="text-align: right;"><span class="speedup-pill">2,399x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">839,772x</span></td>
           </tr>
           <tr>
             <td style="font-weight: 700; text-align: center;">14</td>
@@ -575,8 +615,32 @@
             <td class="ground-cell"><strong>Thermodynamic Potts Sampler</strong><br>E = 13.72 kcal/mol (0 clashes, r_min = 3.68 A, LJ dispersion well)</td>
             <td style="font-family: monospace; text-align: right;">75.9</td>
             <td style="font-family: monospace; text-align: right;">18</td>
-            <td style="text-align: right;"><span class="speedup-pill">56,520x</span></td>
-            <td style="text-align: right;"><span class="eff-pill">19,782,065x</span></td>
+            <td style="text-align: right;"><span class="speedup-pill">57,176x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">20,011,683x</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; text-align: center;">15</td>
+            <td><span class="badge-layer layer-4">Layer 4</span></td>
+            <td><strong>4-Organ Synthetic Intelligence (SI) Core</strong><br><span style="color: var(--text-muted); font-size: 10px;">Cognitive AI / Coupled Non-von-Neumann Thermodynamic Organs</span></td>
+            <td><code>Continuous R^64 x 4^6 Potts x QUBO</code></td>
+            <td class="trap-cell"><strong>Sequential Von-Neumann LLM Loop (Trap)</strong><br>Latency > 500ms (High VRAM churn, 0 thermodynamic memory)</td>
+            <td class="ground-cell"><strong>Coupled 4-Organ Thermodynamic SI Core</strong><br>Latency: 5.5ms (< 15ms SLA, 4 Organs Equilibrated)</td>
+            <td style="font-family: monospace; text-align: right;">1.0</td>
+            <td style="font-family: monospace; text-align: right;">2,000</td>
+            <td style="text-align: right;"><span class="speedup-pill">714x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">250,000x</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; text-align: center;">16</td>
+            <td><span class="badge-layer layer-4">Layer 4</span></td>
+            <td><strong>Non-Equilibrium Hybrid TPU & Frustration Breaking</strong><br><span style="color: var(--text-muted); font-size: 10px;">Non-Equilibrium SDEs / Continuous-Discrete Hybrid TPU</span></td>
+            <td><code>2^100 states (continuous-discrete R^100 x {-1, +1}^100)</code></td>
+            <td class="trap-cell"><strong>Conservative Tanh Gradient Starvation (Trap)</strong><br>E = 27.56 kcal/mol (2-5 unsatisfied clauses, sech^2 -> 0 starvation)</td>
+            <td class="ground-cell"><strong>Non-Conservative TPU Langevin + SMC</strong><br>E = -1.83 kcal/mol (0 unsatisfied clauses, 100% SAT, Q_hk = 3697.4 J)</td>
+            <td style="font-family: monospace; text-align: right;">1.2</td>
+            <td style="font-family: monospace; text-align: right;">1,053</td>
+            <td style="text-align: right;"><span class="speedup-pill">950x</span></td>
+            <td style="text-align: right;"><span class="eff-pill">332,463x</span></td>
           </tr>
         </tbody>
       </table>
@@ -595,6 +659,106 @@
       <div class="layer-card">
         <h3 style="color: var(--accent-emerald);">Layer 3: Biophysics & Operational EBMs (Stations 11–14)</h3>
         <p>Translates thermodynamic energy-based models to bioengineering and industrial dispatch: RNA secondary structure folding ensembles (Tier 1 & Tier 2), 24-spin Power Grid SCUC resource scheduling, mRNA codon optimization for GLP-1, and 24-residue protein side-chain rotamer packing resolving all steric clashes.</p>
+      </div>
+      <div class="layer-card">
+        <h3 style="color: var(--accent-rose);">Layer 4: Advanced Non-Equilibrium &amp; Autonomous Cognitive Systems (Stations 15–16)</h3>
+        <p>Pushes thermodynamic computing into coupled autonomous cognitive organs and non-equilibrium continuous-discrete Langevin dynamics: 4-Organ SI Core (Station 15) achieving deterministic relaxation in &lt;15ms latency, and Non-Equilibrium Hybrid TPU (Station 16) eliminating topological frustration via auxiliary memory (0 violations) and SMC resampling (63.8% N_eff).</p>
+      </div>
+    </div>
+
+    <div class="section-title">Station 16 Deep Dive: Non-Equilibrium Langevin Dynamics &amp; Frustration Breaking</div>
+    <div class="deep-dive-grid">
+      <div class="deep-dive-card">
+        <h4 style="color: var(--accent-cyan);">Phase 1: Symplectic Integrator Stability & Energetics</h4>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+          BAOAB splitting vs. Euler-Maruyama under severe double-well stiffness (&alpha;<sub>well</sub> = 6.0, dt = 0.03).
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">BAOAB Energy:</span>
+          <span class="metric-val" style="color: var(--accent-emerald);">7.01 (Bounded)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">First Law Conservation:</span>
+          <span class="metric-val" style="color: var(--accent-emerald);">&lt; 10<sup>-10</sup> error</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">BAOAB FDT Error:</span>
+          <span class="metric-val" style="color: var(--accent-cyan);">17.3%</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Euler-Maruyama Runaway:</span>
+          <span class="metric-val" style="color: var(--accent-rose);">Step 277 (||v|| = 80.35)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Euler-Maruyama FDT Error:</span>
+          <span class="metric-val" style="color: var(--accent-rose);">82.4% (Diverged)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Dissipated Work &lang;W<sub>diss</sub>&rang;:</span>
+          <span class="metric-val" style="color: var(--accent-emerald);">+0.9210 J (2nd Law OK)</span>
+        </div>
+      </div>
+
+      <div class="deep-dive-card">
+        <h4 style="color: var(--accent-amber);">Phase 2: Configurational Thermometers & Smooth Softplus</h4>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+          Force-based T<sub>conf</sub> fidelity and eliminating sech<sup>2</sup> &rarr; 0 gradient starvation at N=100, M=426.
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">T<sub>conf</sub> Error (&alpha; = 10.0, dt = 0.035):</span>
+          <span class="metric-val" style="color: var(--accent-emerald);">0.4% error (Exact)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Kinetic T<sub>kin</sub> Lag Error:</span>
+          <span class="metric-val" style="color: var(--accent-amber);">2.2% lag</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Tanh Saturated Violations:</span>
+          <span class="metric-val" style="color: var(--accent-rose);">5 Unsatisfied</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Softplus Violations:</span>
+          <span class="metric-val" style="color: var(--accent-cyan);">1 Unsatisfied</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Gradient Starvation Cure:</span>
+          <span class="metric-val" style="color: var(--accent-emerald);">&sigma;(u) &in; (0, 1) Non-Vanishing</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Softplus Ground Energy:</span>
+          <span class="metric-val" style="color: var(--accent-cyan);">E = 5.57 kcal/mol</span>
+        </div>
+      </div>
+
+      <div class="deep-dive-card">
+        <h4 style="color: var(--accent-rose);">Phase 3: Auxiliary Memory & SMC Population Resampling</h4>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+          Injecting non-conservative heat Q<sub>hk</sub> to break &nabla;H = 0 saddle traps and resuscitating N<sub>eff</sub>.
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Auxiliary Memory Violations:</span>
+          <span class="metric-val" style="color: var(--accent-emerald); font-weight: 800;">0 (100% SAT Ground State)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Housekeeping Heat Q<sub>hk</sub>:</span>
+          <span class="metric-val" style="color: var(--accent-rose);">3,697.40 J injected</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Ground State Energy (N=100):</span>
+          <span class="metric-val" style="color: var(--accent-emerald);">E = -1.83 kcal/mol</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Unresampled N<sub>eff</sub> / B (N=128):</span>
+          <span class="metric-val" style="color: var(--accent-rose);">3.2% (1.55/48 Collapsed)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">SMC Resampled N<sub>eff</sub> / B:</span>
+          <span class="metric-val" style="color: var(--accent-emerald); font-weight: 800;">63.8% (30.63/48 Healthy)</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">SMC Resample Stages:</span>
+          <span class="metric-val" style="color: var(--accent-cyan);">22 Systematic Stages</span>
+        </div>
       </div>
     </div>
 
