@@ -1,0 +1,57 @@
+[
+  {
+    "company_name": "Bronx Master Emergency Plumbing",
+    "trade": "Plumbing & Drain",
+    "phone": "718-555-0144",
+    "website": "bronxmasterplumbing.com",
+    "borough": "The Bronx",
+    "claims_24_7": true,
+    "negative_review_snippet": "Called at 10 PM for a sewer backup, nobody answered and got voicemail.",
+    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
+    "personalized_hook": "Even though your site lists 24/7 plumbing & drain coverage in The Bronx, a recent caller noted: \"Called at 10 PM for a sewer backup, nobody answered and got voicemail.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+  },
+  {
+    "company_name": "Kings County Heat & Cool",
+    "trade": "HVAC",
+    "phone": "718-555-0182",
+    "website": "kingscountyhvac.com",
+    "borough": "Brooklyn",
+    "claims_24_7": true,
+    "negative_review_snippet": "Furnace failed during freeze, waited 4 hours for a call back.",
+    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
+    "personalized_hook": "Even though your site lists 24/7 hvac coverage in Brooklyn, a recent caller noted: \"Furnace failed during freeze, waited 4 hours for a call back.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+  },
+  {
+    "company_name": "Astoria Rapid Rooters & Mechanical",
+    "trade": "Plumbing",
+    "phone": "718-555-0193",
+    "website": "astoriarapidrooters.com",
+    "borough": "Queens",
+    "claims_24_7": true,
+    "negative_review_snippet": "Website says 24hr emergency plumber but phone rang 8 times and disconnected.",
+    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
+    "personalized_hook": "Even though your site lists 24/7 plumbing coverage in Queens, a recent caller noted: \"Website says 24hr emergency plumber but phone rang 8 times and disconnected.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+  },
+  {
+    "company_name": "Midtown Commercial Electric Corp",
+    "trade": "Electrical",
+    "phone": "212-555-0167",
+    "website": "midtownelectricnyc.com",
+    "borough": "Manhattan",
+    "claims_24_7": false,
+    "negative_review_snippet": "Left two voicemails about a tripped main panel in our restaurant, ended up calling someone else.",
+    "audit_risk": "Standard After-Hours Leakage",
+    "personalized_hook": "Noticed you handle electrical across Manhattan, where a recent review flagged: \"Left two voicemails about a tripped main panel in our restaurant, ended up calling someone else.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+  },
+  {
+    "company_name": "Verrazzano Storm Roofing & Siding",
+    "trade": "Roofing",
+    "phone": "718-555-0129",
+    "website": "verrazzanoroofing.com",
+    "borough": "Staten Island",
+    "claims_24_7": true,
+    "negative_review_snippet": "Active roof leak during Sunday storm, answering service took a message and nobody ever texted back.",
+    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
+    "personalized_hook": "Even though your site lists 24/7 roofing coverage in Staten Island, a recent caller noted: \"Active roof leak during Sunday storm, answering service took a message and nobody ever texted back.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+  }
+]

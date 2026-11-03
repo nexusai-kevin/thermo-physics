@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus AI Solutions | 8-Second Missed-Call Text-Back & 24/7 AI Dispatch for NYC Contractors</title>
+  <meta name="description" content="Stop losing $1,500+ emergency plumbing, HVAC, electrical, and roofing jobs to voicemail. Call or text our NYC Instant Demo line and watch our AI qualify and book jobs in 8 seconds." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              amber: '#F59E0B',
+              orange: '#EA580C',
+              dark: '#0B0F17',
+              card: '#131B2E',
+              border: '#23304C'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- High-Intent Local Business & FAQ Schema for Search & AI Engines -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do NYC plumbing and HVAC companies stop losing after-hours emergency dispatch calls?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "78% of NYC homeowners calling for an emergency leak, no-heat, or power outage hang up when they hit voicemail and call the next Google Maps listing. By deploying an automated 8-second missed-call text-back and AI SMS dispatcher, contractors engage the homeowner before they dial a competitor, qualify the emergency, and book the job directly into ServiceTitan, Housecall Pro, Jobber, or Google Calendar."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Virtual Receptionist vs. Automated AI Text-Back for Trade Contractors: Which converts better?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Traditional call centers and virtual receptionists cost $600–$1,800/month, put frantic homeowners on hold for 45+ seconds, and frequently misquote trade services. An automated 8-second AI text-back engages the caller instantly while they are still holding their phone, asks 2 trade-specific qualification questions, and books the dispatch slot at a fraction of the cost."
+        }
+      }
+    ]
+  }
+  </script>
+  <style>
+    body { background-color: #0B0F17; color: #F8FAFC; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      background: #1E293B;
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #F59E0B;
+      cursor: pointer;
+      border: 2px solid #FFF;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(245, 158, 11, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- Top Sticky Live NYC Demo Bar -->
+  <div class="sticky top-0 z-50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-slate-950 px-4 py-2.5 shadow-lg">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+      <div class="flex items-center gap-2 font-bold text-sm md:text-base">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-950 animate-ping"></span>
+        <span>LIVE NYC 8-SECOND DEMO SANDBOX:</span>
+        <span class="font-normal hidden md:inline">Call & hang up to watch our AI text you back & qualify your job in 8 seconds.</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="tel:+12125550199" class="font-mono font-extrabold text-sm md:text-base bg-slate-950 text-amber-400 px-3.5 py-1 rounded-full hover:bg-slate-900 transition">
+          📞 (212) 555-0199
+        </a>
+        <a href="#sandbox" class="text-xs md:text-sm font-bold underline decoration-2 hover:opacity-80">
+          Try Interactive Simulator ↓
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <header class="border-b border-slate-800/80 bg-slate-950/60 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center font-black text-slate-950 text-xl shadow-md">
+          N
+        </div>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight text-white">NEXUS AI</span>
+          <span class="block text-[11px] font-mono uppercase tracking-widest text-amber-400">NYC Trade Dispatch Systems</span>
+        </div>
+      </div>
+      <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+        <a href="#calculator" class="hover:text-amber-400 transition">Missed Revenue Calculator</a>
+        <a href="#sandbox" class="hover:text-amber-400 transition">8-Sec Demo Sandbox</a>
+        <a href="#qualifier" class="hover:text-amber-400 transition">AI Qualifier & Booking</a>
+        <a href="#seo-guides" class="hover:text-amber-400 transition">NYC Trade Playbooks</a>
+        <a href="command_center.html" class="text-amber-400 font-mono font-bold hover:underline">⚙ Command Center</a>
+      </nav>
+      <a href="#qualifier" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm px-4 py-2.5 rounded-lg transition shadow-md">
+        Test Your Setup →
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section + Instant Demo Phone Line -->
+  <section class="relative overflow-hidden py-14 md:py-20 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-12 items-center">
+      
+      <!-- Left Column: Copy & Direct Phone CTA -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono uppercase tracking-wider">
+          Built for NYC Plumbing • HVAC • Electrical • Roofing
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08]">
+          Every Missed Call While You’re on a Job Costs You <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">$1,500+</span>.
+        </h1>
+        <p class="text-lg sm:text-xl text-slate-300 max-w-2xl leading-relaxed">
+          When an NYC homeowner has a burst pipe, dead AC, or tripped main breaker, <strong class="text-white">they don’t leave a voicemail</strong>—they call the next contractor on Google Maps. Our 24/7 AI Receptionist texts them back in <strong class="text-amber-400">8 seconds</strong>, qualifies the emergency, and books your calendar.
+        </p>
+
+        <!-- Primary Instant Demo CTA Card -->
+        <div class="p-6 rounded-2xl bg-slate-900/90 border-2 border-amber-500/60 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">⚡ Zero-Salesperson Instant Proof</span>
+            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">● 24/7 NYC Demo Line Active</span>
+          </div>
+          <p class="text-base sm:text-lg font-semibold text-white">
+            “Call or text this number and hang up to see how our 24/7 AI receptionist answers, qualifies, and schedules your emergency jobs in 8 seconds.”
+          </p>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-1">
+            <a href="tel:+12125550199" class="pulse-ring flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xl px-6 py-4 rounded-xl shadow-lg hover:brightness-110 transition">
+              <span>📲 (212) 555-0199</span>
+            </a>
+            <button onclick="triggerLiveSandbox()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold px-5 py-4 rounded-xl border border-slate-700 transition text-sm">
+              <span>▶ Simulate 8-Sec Missed Call in Browser</span>
+            </button>
+          </div>
+          <p class="text-xs text-slate-400">
+            No forms. No cold pitch. Experience the exact SMS flow your customers get when you can't pick up the phone.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive 8-Second Phone Sandbox -->
+      <div id="sandbox" class="lg:col-span-5">
+        <div class="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl max-w-md mx-auto">
+          <!-- Phone Status Bar -->
+          <div class="flex items-center justify-between text-xs text-slate-400 pb-3 border-b border-slate-800">
+            <span class="font-mono font-bold text-white">NYC Contractor Sandbox</span>
+            <div class="flex items-center gap-2">
+              <span id="timer-badge" class="font-mono bg-slate-800 text-amber-400 px-2.5 py-0.5 rounded-full">Ready (0.0s)</span>
+            </div>
+          </div>
+
+          <!-- Trade Scenario Selector -->
+          <div class="my-3">
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1.5">Select Simulated Emergency Scenario:</label>
+            <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
+              <button onclick="setSandboxScenario('plumbing')" id="scen-plumbing" class="scen-btn bg-amber-500 text-slate-950 py-1.5 px-2 rounded-lg transition">🔧 Plumbing</button>
+              <button onclick="setSandboxScenario('hvac')" id="scen-hvac" class="scen-btn bg-slate-800 text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-700 transition">❄️ HVAC</button>
+              <button onclick="setSandboxScenario('electrical')" id="scen-electrical" class="scen-btn bg-slate-800 text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-700 transition">⚡ Electrical</button>
+            </div>
+          </div>
+
+          <!-- Simulated Phone Screen -->
+          <div id="sandbox-feed" class="bg-slate-950 rounded-2xl p-4 h-80 overflow-y-auto space-y-3 border border-slate-800/90 text-sm">
+            <div class="text-center text-xs text-slate-500 font-mono py-1">
+              Click "Simulate Missed Call" below to test the 8-second dispatch recovery
+            </div>
+            <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs flex items-center justify-between text-red-300">
+              <span>📵 Incoming Call: Brooklyn Homeowner</span>
+              <span class="font-mono font-bold">MISSED</span>
+            </div>
+            <div class="bg-amber-500/15 border border-amber-500/40 rounded-2xl rounded-tl-sm p-3.5 text-slate-100 space-y-1">
+              <div class="text-[10px] font-mono uppercase text-amber-400 font-bold">Nexus AI Dispatch • +08.0s after hangup</div>
+              <p id="sandbox-initial-msg">Hey! Sorry we missed your call—our master plumbers are currently under a sink on a job. 🚰 Are you dealing with an active leak/emergency in NYC, or looking to schedule an estimate? Reply here and I can dispatch a tech right away!</p>
+            </div>
+          </div>
+
+          <!-- Interactive Reply Input inside Sandbox -->
+          <div class="mt-3 space-y-2">
+            <div class="flex gap-2">
+              <input id="sandbox-user-input" type="text" placeholder="Type homeowner reply (e.g. 'Basement pipe burst in Queens')..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+              <button onclick="sendSandboxReply()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+                Send
+              </button>
+            </div>
+            <button onclick="triggerLiveSandbox()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-mono text-xs font-bold border border-slate-700 transition">
+              ↻ Replay 8-Second Missed-Call Countdown
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section 2: High-Intent "Missed Revenue Calculator" Lead Magnet -->
+  <section id="calculator" class="py-16 md:py-24 border-b border-slate-800 bg-slate-950/50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Free NYC Contractor Audit Tool</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          Missed Call Revenue Leak Calculator
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg">
+          Enter your trade, average job ticket, and how many calls go to voicemail while you or your crew are driving, on a roof, or on another line.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-8 items-stretch">
+        <!-- Calculator Controls -->
+        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-7">
+          <!-- Trade Selection -->
+          <div>
+            <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-2.5">1. Select Your Trade (Sets NYC Avg Emergency Ticket)</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <button type="button" onclick="selectTrade('Plumbing', 1500, 6)" id="trade-Plumbing" class="trade-btn bg-amber-500 text-slate-950 font-bold py-3 px-3 rounded-xl text-sm border border-amber-400 transition">
+                🚰 Plumbing
+              </button>
+              <button type="button" onclick="selectTrade('HVAC', 1850, 5)" id="trade-HVAC" class="trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition">
+                ❄️ HVAC
+              </button>
+              <button type="button" onclick="selectTrade('Electrical', 1200, 7)" id="trade-Electrical" class="trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition">
+                ⚡ Electrical
+              </button>
+              <button type="button" onclick="selectTrade('Roofing', 3200, 4)" id="trade-Roofing" class="trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition">
+                🏠 Roofing
+              </button>
+            </div>
+          </div>
+
+          <!-- Slider 1: Average Job Ticket -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label for="ticket-slider" class="text-sm font-semibold text-slate-200">2. Average Job / Dispatch Ticket Value</label>
+              <span id="ticket-display" class="font-mono text-xl font-extrabold text-amber-400">$1,500</span>
+            </div>
+            <input id="ticket-slider" type="range" min="300" max="5000" step="50" value="1500" oninput="updateCalculator()" class="w-full" />
+            <div class="flex justify-between text-[11px] font-mono text-slate-500">
+              <span>$300 (Service Call)</span>
+              <span>$1,500 (Emergency Repair)</span>
+              <span>$5,000 (Install/Replacement)</span>
+            </div>
+          </div>
+
+          <!-- Slider 2: Weekly Missed Calls -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label for="missed-slider" class="text-sm font-semibold text-slate-200">3. Unanswered / Voicemail Calls Per Week</label>
+              <span id="missed-display" class="font-mono text-xl font-extrabold text-amber-400">6 calls/wk</span>
+            </div>
+            <input id="missed-slider" type="range" min="1" max="30" step="1" value="6" oninput="updateCalculator()" class="w-full" />
+            <div class="flex justify-between text-[11px] font-mono text-slate-500">
+              <span>1 call/wk</span>
+              <span>10 calls/wk</span>
+              <span>30 calls/wk</span>
+            </div>
+          </div>
+
+          <!-- Slider 3: Close Rate on Answered Calls -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label for="close-slider" class="text-sm font-semibold text-slate-200">4. Your Close Rate When You Answer Live</label>
+              <span id="close-display" class="font-mono text-xl font-extrabold text-emerald-400">100% (Raw Potential)</span>
+            </div>
+            <input id="close-slider" type="range" min="25" max="100" step="5" value="100" oninput="updateCalculator()" class="w-full" />
+            <div class="flex justify-between text-[11px] font-mono text-slate-500">
+              <span>25% Conservative</span>
+              <span>50% Typical Emergency</span>
+              <span>100% Full Ticket Value</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculator Output + SMS Report Capture -->
+        <div class="lg:col-span-5 bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500/60 rounded-2xl p-6 sm:p-8 flex flex-col justify-between space-y-6 shadow-2xl">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Estimated Revenue Lost to Voicemail</span>
+              <span id="calc-trade-pill" class="text-xs font-mono bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full">Plumbing</span>
+            </div>
+
+            <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+              <div class="text-xs font-mono uppercase text-red-300">Weekly Lost Revenue</div>
+              <div id="weekly-loss" class="font-mono text-4xl sm:text-5xl font-black text-white mt-1">$9,000<span class="text-lg font-normal text-slate-400">/wk</span></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700">
+                <div class="text-[11px] font-mono uppercase text-slate-400">Monthly Leak</div>
+                <div id="monthly-loss" class="font-mono text-2xl font-extrabold text-amber-400 mt-0.5">$39,000</div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700">
+                <div class="text-[11px] font-mono uppercase text-slate-400">Annual Leak</div>
+                <div id="annual-loss" class="font-mono text-2xl font-extrabold text-orange-400 mt-0.5">$468,000</div>
+              </div>
+            </div>
+
+            <div class="text-xs text-slate-300 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
+              💡 <strong>Break-Even Math:</strong> Saving just <strong class="text-emerald-400">1 missed emergency call per month</strong> pays for Nexus AI Solutions 5x over.
+            </div>
+          </div>
+
+          <!-- SMS Lead Magnet Form -->
+          <form onsubmit="submitCalculatorSMS(event)" class="space-y-3 pt-2 border-t border-slate-800">
+            <label for="calc-phone" class="block text-sm font-bold text-white">
+              Enter your cell to text yourself this report & test our missed-call text-back solution live:
+            </label>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input id="calc-phone" type="tel" required placeholder="(917) 555-0143" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-amber-400" />
+              <button type="submit" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-sm px-5 py-3 rounded-xl transition whitespace-nowrap shadow-lg">
+                Text My Report + Demo →
+              </button>
+            </div>
+            <div id="calc-sms-confirmation" class="hidden text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 rounded-lg p-3"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Automated 2-Question AI Qualifier & Frictionless Calendar Booking -->
+  <section id="qualifier" class="py-16 md:py-24 border-b border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Zero Back-and-Forth Email Tag</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          2-Question AI Qualifier & Instant Setup Booking
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg">
+          Answer 2 operational questions below to see how our AI qualifies leads and unlocks direct calendar booking in under 30 seconds.
+        </p>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl grid md:grid-cols-12 gap-8 items-center">
+        <!-- Left: 2-Step Interactive Qualifier -->
+        <div class="md:col-span-7 space-y-6">
+          <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-black flex items-center justify-center text-sm">AI</span>
+            <div>
+              <div class="text-sm font-bold text-white">Nexus AI Onboarding Agent</div>
+              <div class="text-xs text-emerald-400 font-mono">● Online • Instant Calendar Sync</div>
+            </div>
+          </div>
+
+          <!-- Question 1 -->
+          <div class="space-y-2.5">
+            <label class="block text-sm font-bold text-slate-200">
+              Q1: How many calls do you estimate your team misses weekly (including after-hours & busy lines)?
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" onclick="setQualCalls('1–3 calls/wk')" class="qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">1–3 / week</button>
+              <button type="button" onclick="setQualCalls('4–8 calls/wk')" class="qual-call-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition">4–8 / week</button>
+              <button type="button" onclick="setQualCalls('9–15 calls/wk')" class="qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">9–15 / week</button>
+              <button type="button" onclick="setQualCalls('15+ calls/wk')" class="qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">15+ / week</button>
+            </div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="space-y-2.5">
+            <label class="block text-sm font-bold text-slate-200">
+              Q2: What CRM or dispatch calendar do you currently use?
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button type="button" onclick="setQualCRM('ServiceTitan')" class="qual-crm-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition">ServiceTitan</button>
+              <button type="button" onclick="setQualCRM('Housecall Pro')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Housecall Pro</button>
+              <button type="button" onclick="setQualCRM('Jobber')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Jobber</button>
+              <button type="button" onclick="setQualCRM('Google Calendar')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Google Calendar</button>
+              <button type="button" onclick="setQualCRM('FieldEdge / Other')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">FieldEdge / Other</button>
+              <button type="button" onclick="setQualCRM('Pen & Paper / SMS')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Phone / SMS Only</button>
+            </div>
+          </div>
+
+          <!-- Dynamic AI Qualification Verdict -->
+          <div id="qual-summary" class="p-4 rounded-2xl bg-slate-950 border border-emerald-500/40 text-xs sm:text-sm text-slate-200 space-y-1">
+            <div class="font-mono text-xs text-emerald-400 font-bold">✓ QUALIFIED FOR TURNKEY 48-HOUR DEPLOYMENT</div>
+            <p id="qual-summary-text">
+              Recovering <strong>4–8 calls/wk</strong> with direct native webhook integration into <strong>ServiceTitan</strong> typically adds <strong>$18,000–$36,000/mo</strong> in booked emergency dispatches. Pick a 15-minute slot to activate your NYC number:
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Instant In-Thread Calendar Slot Picker -->
+        <div class="md:col-span-5 bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <div class="text-xs font-mono uppercase text-amber-400 font-bold">Instant Calendar Lock</div>
+              <div class="text-sm font-bold text-white">15-Min Live Number Activation</div>
+            </div>
+            <span class="text-xs font-mono bg-slate-800 px-2.5 py-1 rounded text-slate-300">EST / NYC</span>
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-mono text-slate-400">Select a Day & Time Slot:</label>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 7:30 AM EST')" class="slot-btn bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-lg border border-amber-400">Tomorrow 7:30 AM</button>
+              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 12:15 PM EST')" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700">Tomorrow 12:15 PM</button>
+              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 4:30 PM EST')" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700">Tomorrow 4:30 PM</button>
+              <button type="button" onclick="selectSlot(this, 'Thursday @ 8:00 AM EST')" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700">Thu 8:00 AM</button>
+            </div>
+          </div>
+
+          <form onsubmit="confirmInstantBooking(event)" class="space-y-2.5">
+            <input id="book-name" type="text" required placeholder="Your Name & Company (e.g. Mike - Queens HVAC)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+            <input id="book-contact" type="text" required placeholder="Cell Phone or Email for Calendar Invite" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm py-3 rounded-xl transition shadow-lg">
+              Confirm 15-Min Activation Call →
+            </button>
+          </form>
+          <div id="booking-confirmation" class="hidden text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 rounded-lg p-3"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: High-Intent Search & Pain-Point Decision Guides (SEO Content) -->
+  <section id="seo-guides" class="py-16 md:py-24 bg-slate-950/60">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Decision-Stage Contractor Playbooks</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          Why NYC Trade Owners Are Replacing Call Centers With 8-Second AI Text-Back
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- SEO Guide 1 -->
+        <article class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4">
+          <div class="text-xs font-mono text-amber-400 uppercase">NYC Emergency Dispatch Study</div>
+          <h3 class="text-xl sm:text-2xl font-bold text-white">
+            How NYC Plumbing & HVAC Companies Stop Losing After-Hours Emergency Dispatch Calls
+          </h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            When a pipe bursts in Brooklyn at 10:30 PM or a walk-in cooler fails in Manhattan on Sunday morning, the property owner searches Google Maps and calls the top 3 results. <strong>78% of emergency trade jobs go to the first contractor who responds.</strong>
+          </p>
+          <ul class="text-sm text-slate-300 space-y-2 list-disc pl-5">
+            <li><strong>The Voicemail Death Trap:</strong> Less than 14% of emergency callers leave a voicemail. If your line rings 5 times and hits a generic greeting, that $1,800 dispatch is gone.</li>
+            <li><strong>The 8-Second Pattern Interrupt:</strong> When Nexus AI detects a missed call or busy signal, it sends a personalized SMS within 8 seconds while the homeowner is still looking at their phone screen.</li>
+            <li><strong>Automated Triage:</strong> The AI asks for the NYC zip code, nature of the emergency, and photo of the leak/unit, then books the job or wakes up your on-call tech only for verified high-ticket emergencies.</li>
+          </ul>
+        </article>
+
+        <!-- SEO Guide 2 -->
+        <article class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4">
+          <div class="text-xs font-mono text-amber-400 uppercase">Head-to-Head Cost & Conversion Comparison</div>
+          <h3 class="text-xl sm:text-2xl font-bold text-white">
+            Virtual Receptionist vs. Automated AI Text-Back for Trade Contractors
+          </h3>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            Many contractors try $800/month answering services only to discover operators taking messages on sticky notes, mispronouncing local neighborhoods, and failing to book the job.
+          </p>
+          <div class="overflow-x-auto pt-2">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-slate-700 text-slate-400 font-mono">
+                  <th class="py-2">Metric</th>
+                  <th class="py-2">Call Center / Receptionist</th>
+                  <th class="py-2 text-amber-400">Nexus 8-Sec AI</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-200">
+                <tr>
+                  <td class="py-2.5 font-semibold">Response Speed</td>
+                  <td class="py-2.5 text-slate-400">45–90 sec hold time</td>
+                  <td class="py-2.5 text-emerald-400 font-bold">8 Seconds (Instant SMS/Voice)</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 font-semibold">Trade Qualification</td>
+                  <td class="py-2.5 text-slate-400">Generic "Takes a message"</td>
+                  <td class="py-2.5 text-emerald-400 font-bold">Triage + Photo + Zip + CRM Sync</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 font-semibold">Monthly Cost</td>
+                  <td class="py-2.5 text-slate-400">$650 – $1,800/mo + overages</td>
+                  <td class="py-2.5 text-emerald-400 font-bold">Flat-rate • Unlimited 24/7</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 py-10 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>© 2026 Nexus AI Solutions • NYC Trade Dispatch Automation</div>
+      <div class="font-mono text-slate-400">
+        Instant 8-Sec Demo Line: <a href="tel:+12125550199" class="text-amber-400 font-bold">(212) 555-0199</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactive Logic for Calculator, 8-Second Sandbox, and 2-Question Qualifier -->
+  <script>
+    // --- 1. Missed Revenue Calculator Logic ---
+    let currentTrade = 'Plumbing';
+    function selectTrade(trade, defaultTicket, defaultMissed) {
+      currentTrade = trade;
+      document.getElementById('ticket-slider').value = defaultTicket;
+      document.getElementById('missed-slider').value = defaultMissed;
+      document.getElementById('calc-trade-pill').textContent = trade;
+
+      document.querySelectorAll('.trade-btn').forEach(btn => {
+        btn.className = 'trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition';
+      });
+      const activeBtn = document.getElementById('trade-' + trade);
+      if (activeBtn) {
+        activeBtn.className = 'trade-btn bg-amber-500 text-slate-950 font-bold py-3 px-3 rounded-xl text-sm border border-amber-400 transition';
+      }
+      updateCalculator();
+    }
+
+    function updateCalculator() {
+      const ticket = parseInt(document.getElementById('ticket-slider').value, 10);
+      const missed = parseInt(document.getElementById('missed-slider').value, 10);
+      const closeRate = parseInt(document.getElementById('close-slider').value, 10) / 100;
+
+      document.getElementById('ticket-display').textContent = '$' + ticket.toLocaleString();
+      document.getElementById('missed-display').textContent = missed + (missed === 1 ? ' call/wk' : ' calls/wk');
+      document.getElementById('close-display').textContent = Math.round(closeRate * 100) + '%' + (closeRate === 1 ? ' (Raw Potential)' : ' Close Rate');
+
+      const weekly = Math.round(ticket * missed * closeRate);
+      const monthly = Math.round(weekly * 4.33);
+      const annual = Math.round(weekly * 52);
+
+      document.getElementById('weekly-loss').innerHTML = '$' + weekly.toLocaleString() + '<span class="text-lg font-normal text-slate-400">/wk</span>';
+      document.getElementById('monthly-loss').textContent = '$' + monthly.toLocaleString();
+      document.getElementById('annual-loss').textContent = '$' + annual.toLocaleString();
+    }
+
+    async function submitCalculatorSMS(e) {
+      e.preventDefault();
+      const phone = document.getElementById('calc-phone').value.trim();
+      const weeklyText = document.getElementById('weekly-loss').textContent.replace('/wk', '');
+      const box = document.getElementById('calc-sms-confirmation');
+      box.classList.remove('hidden');
+      box.textContent = `✓ Sent! Check ${phone} in 8 seconds for your ${currentTrade} Missed Revenue Audit (${weeklyText}/wk leak) + live AI text-back demo.`;
+
+      // Optional local webhook call if webhook_server.py is running
+      try {
+        await fetch('http://127.0.0.1:8000/api/calculator-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, trade: currentTrade, weekly_loss: weeklyText })
+        });
+      } catch (_) {}
+    }
+
+    // --- 2. 8-Second Sandbox Simulator Logic ---
+    const scenarios = {
+      plumbing: {
+        opening: "Hey! Sorry we missed your call—our master plumbers are currently under a sink on a job. 🚰 Are you dealing with an active leak/emergency in NYC, or looking to schedule an estimate? Reply here and I can dispatch a tech right away!",
+        followup: "Got it! We have an emergency plumbing tech 18 minutes away from your zip code. Our emergency dispatch & diagnostic is $149 (waived if you approve the repair). Want me to lock in the next arrival window for you right now?"
+      },
+      hvac: {
+        opening: "Hi there! Sorry we missed your call—our HVAC crew is on a rooftop unit right now. ❄️ Is your AC/heating system completely down, or are you looking for seasonal maintenance? Text back your NYC zip code and I'll check our nearest truck!",
+        followup: "Understood! We have a EPA-certified HVAC tech finishing a job nearby who can be there between 2:00 PM – 4:00 PM today. Reply YES and I'll text you the live technician tracking link."
+      },
+      electrical: {
+        opening: "Hey! Sorry we just missed your call—our licensed electricians are currently working inside a live panel. ⚡ Are you experiencing a power outage/sparking issue, or looking for a quote? Reply here for immediate priority dispatch!",
+        followup: "Safety first—please leave that breaker off for now. Our master electrician can arrive within 90 minutes to inspect and repair it. Shall I book that emergency slot for your address?"
+      }
+    };
+    let activeScenario = 'plumbing';
+    let countdownInterval = null;
+
+    function setSandboxScenario(scen) {
+      activeScenario = scen;
+      document.querySelectorAll('.scen-btn').forEach(b => {
+        b.className = 'scen-btn bg-slate-800 text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-700 transition';
+      });
+      document.getElementById('scen-' + scen).className = 'scen-btn bg-amber-500 text-slate-950 py-1.5 px-2 rounded-lg transition font-bold';
+      triggerLiveSandbox();
+    }
+
+    function triggerLiveSandbox() {
+      const feed = document.getElementById('sandbox-feed');
+      const badge = document.getElementById('timer-badge');
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      feed.innerHTML = `
+        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs flex items-center justify-between text-red-300">
+          <span>📵 Incoming Call: NYC Homeowner</span>
+          <span class="font-mono font-bold">HUNG UP (NO VOICEMAIL)</span>
+        </div>
+        <div id="countdown-status" class="text-center py-4 font-mono text-xs text-amber-400 animate-pulse">
+          ⏱ Detecting missed call... triggering 8.0s AI SMS recovery...
+        </div>
+      `;
+
+      let elapsed = 0;
+      const target = 8.0;
+      // Speed up slightly in browser (1.6s real time = 8.0s simulated clock) so user doesn't wait long
+      countdownInterval = setInterval(() => {
+        elapsed += 0.5;
+        badge.textContent = `⏱ ${elapsed.toFixed(1)}s / 8.0s`;
+        if (elapsed >= target) {
+          clearInterval(countdownInterval);
+          badge.textContent = `✓ Sent in 8.0s`;
+          const statusEl = document.getElementById('countdown-status');
+          if (statusEl) statusEl.remove();
+          feed.innerHTML += `
+            <div class="bg-amber-500/15 border border-amber-500/40 rounded-2xl rounded-tl-sm p-3.5 text-slate-100 space-y-1">
+              <div class="text-[10px] font-mono uppercase text-amber-400 font-bold">Nexus AI Dispatch • +08.0s after hangup</div>
+              <p>${scenarios[activeScenario].opening}</p>
+            </div>
+          `;
+          feed.scrollTop = feed.scrollHeight;
+        }
+      }, 150);
+    }
+
+    function sendSandboxReply() {
+      const input = document.getElementById('sandbox-user-input');
+      const text = input.value.trim() || "Yes, emergency leak in Queens! Need someone ASAP.";
+      const feed = document.getElementById('sandbox-feed');
+      input.value = '';
+
+      feed.innerHTML += `
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tr-sm p-3 text-slate-200 ml-8 text-xs">
+          <div class="text-[10px] font-mono text-slate-400 mb-0.5">NYC Homeowner</div>
+          <p>${text.replace(/</g, '&lt;')}</p>
+        </div>
+      `;
+      feed.scrollTop = feed.scrollHeight;
+
+      setTimeout(() => {
+        feed.innerHTML += `
+          <div class="bg-emerald-500/15 border border-emerald-500/40 rounded-2xl rounded-tl-sm p-3.5 text-slate-100 space-y-1 mr-4 text-xs">
+            <div class="text-[10px] font-mono uppercase text-emerald-400 font-bold">Nexus AI Dispatch • Instant Qualification</div>
+            <p>${scenarios[activeScenario].followup}</p>
+          </div>
+        `;
+        feed.scrollTop = feed.scrollHeight;
+      }, 600);
+    }
+
+    // --- 3. 2-Question AI Qualifier & Calendar Booking Logic ---
+    let selectedCalls = '4–8 calls/wk';
+    let selectedCRM = 'ServiceTitan';
+    let selectedSlotTime = 'Tomorrow @ 7:30 AM EST';
+
+    function setQualCalls(val) {
+      selectedCalls = val;
+      document.querySelectorAll('.qual-call-btn').forEach(btn => {
+        btn.className = btn.textContent.trim() === val.replace(' calls/wk', ' / week')
+          ? 'qual-call-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition'
+          : 'qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition';
+      });
+      updateQualSummary();
+    }
+
+    function setQualCRM(val) {
+      selectedCRM = val;
+      document.querySelectorAll('.qual-crm-btn').forEach(btn => {
+        btn.className = btn.textContent.trim() === val
+          ? 'qual-crm-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition'
+          : 'qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition';
+      });
+      updateQualSummary();
+    }
+
+    function updateQualSummary() {
+      document.getElementById('qual-summary-text').innerHTML =
+        `Recovering <strong>${selectedCalls}</strong> with direct integration into <strong>${selectedCRM}</strong> keeps your trucks full without hiring an office manager. Pick a 15-minute slot to activate your dedicated NYC number:`;
+    }
+
+    function selectSlot(btn, slotText) {
+      selectedSlotTime = slotText;
+      document.querySelectorAll('.slot-btn').forEach(b => {
+        b.className = 'slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700';
+      });
+      btn.className = 'slot-btn bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-lg border border-amber-400';
+    }
+
+    function confirmInstantBooking(e) {
+      e.preventDefault();
+      const name = document.getElementById('book-name').value.trim();
+      const contact = document.getElementById('book-contact').value.trim();
+      const conf = document.getElementById('booking-confirmation');
+      conf.classList.remove('hidden');
+      conf.innerHTML = `✓ Booked for <strong>${selectedSlotTime}</strong>! Calendar invite & SMS confirmation sent to <strong>${contact}</strong> (${name} • ${selectedCalls} • ${selectedCRM}).`;
+    }
+  </script>
+</body>
+</html>

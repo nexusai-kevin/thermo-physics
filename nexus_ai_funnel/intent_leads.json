@@ -1,0 +1,102 @@
+[
+  {
+    "source": "Reddit",
+    "community": "r/sweatystartup",
+    "author": "u/QueensMasterPlumber",
+    "title": "Missing phone calls while under sinks\u2014answering service vs AI text back?",
+    "snippet": "Running a 2-truck plumbing shop in Queens/Brooklyn. Whenever both of us are on jobs, new emergency calls go to voicemail and they never leave a message. Tried Ruby receptionist but it was $750/mo and ...",
+    "url": "https://www.reddit.com/r/sweatystartup/comments/example_plumbing_missed_calls",
+    "intent_score": 100,
+    "matched_triggers": [
+      "answering service",
+      "housecall pro",
+      "missing phone calls",
+      "plumbing",
+      "queens",
+      "ruby receptionist"
+    ],
+    "detected_trade": "Plumbing",
+    "detected_crm": "Housecall Pro",
+    "suggested_reply": "Fellow plumbing operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Housecall Pro. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
+    "captured_at": "2026-11-03 13:32 UTC"
+  },
+  {
+    "source": "Reddit",
+    "community": "r/HVAC",
+    "author": "u/TriStateCooling",
+    "title": "How are small HVAC shops handling after-hours emergency calls without burning out?",
+    "snippet": "During peak summer and winter freezes in NYC, my phone rings at 11pm. If I let it go to voicemail, I lose a $1,800 emergency no-heat/no-cool ticket. Receptionist is too expensive for 24/7 coverage. Ne...",
+    "url": "https://www.reddit.com/r/HVAC/comments/example_after_hours_hvac",
+    "intent_score": 100,
+    "matched_triggers": [
+      "after-hours emergency calls",
+      "hvac",
+      "nyc",
+      "receptionist is too expensive",
+      "servicetitan",
+      "ticket"
+    ],
+    "detected_trade": "HVAC",
+    "detected_crm": "ServiceTitan",
+    "suggested_reply": "Fellow hvac operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into ServiceTitan. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
+    "captured_at": "2026-11-03 13:32 UTC"
+  },
+  {
+    "source": "Reddit",
+    "community": "r/Contractor",
+    "author": "u/MetroSparkyNYC",
+    "title": "Calls going to voicemail while estimating jobs\u2014losing at least 5 leads a week",
+    "snippet": "I'm an electrical contractor using Jobber. Every week I see 5-8 missed calls from local numbers. By the time I call back 2 hours later, they already booked another electrician on Google Maps. Looking ...",
+    "url": "https://www.reddit.com/r/Contractor/comments/example_electrician_voicemail",
+    "intent_score": 100,
+    "matched_triggers": [
+      "electrical",
+      "going to voicemail",
+      "jobber",
+      "missed calls",
+      "missed-call text"
+    ],
+    "detected_trade": "Electrical",
+    "detected_crm": "Jobber",
+    "suggested_reply": "Fellow electrical operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Jobber. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
+    "captured_at": "2026-11-03 13:32 UTC"
+  },
+  {
+    "source": "Facebook Group",
+    "community": "NYC & Long Island Trade Contractors Network",
+    "author": "Sal D. (Roofing & Waterproofing)",
+    "title": "Anyone have a good virtual receptionist that doesn't cost $1k/month?",
+    "snippet": "Every time it rains in NYC my phone blows up while I'm on a roof. I can't answer the phone on a ladder and I'm missing $3,000+ leak repair tickets. Need an answering service or AI that texts them righ...",
+    "url": "https://facebook.com/groups/nyc-contractors/posts/example_roofing",
+    "intent_score": 100,
+    "matched_triggers": [
+      "answering service",
+      "can't answer the phone",
+      "google calendar",
+      "nyc",
+      "virtual receptionist"
+    ],
+    "detected_trade": "Roofing",
+    "detected_crm": "Google Calendar",
+    "suggested_reply": "Fellow roofing operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Google Calendar. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
+    "captured_at": "2026-11-03 13:32 UTC"
+  },
+  {
+    "source": "Google Maps Review Trigger",
+    "community": "NYC Competitor 1-Star Review Alert",
+    "author": "Competitor: Apex Boro Plumbing (Brooklyn, NY)",
+    "title": "1-Star Review: 'Called 3 times for an emergency leak, went straight to voicemail'",
+    "snippet": "Multiple recent Google Maps reviews on Apex Boro Plumbing complain: 'Cannot get anyone to answer the phone for emergency dispatch, left voicemail and never heard back.' High-intent prospect for Nexus ...",
+    "url": "https://maps.google.com/?q=Brooklyn+Plumbing+Competitor+Audit",
+    "intent_score": 60,
+    "matched_triggers": [
+      "emergency dispatch",
+      "plumbing",
+      "straight to voicemail"
+    ],
+    "detected_trade": "Plumbing",
+    "detected_crm": "Unspecified CRM",
+    "suggested_reply": "Fellow plumbing operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that syncs directly with Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
+    "captured_at": "2026-11-03 13:32 UTC"
+  }
+]
