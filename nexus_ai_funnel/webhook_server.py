@@ -323,13 +323,12 @@ class WebhookHandler(BaseHTTPRequestHandler):
         if self.path == "/api/run-hunter":
             buf = io.StringIO()
             with redirect_stdout(buf):
-                hunter = hunter_agent.ContractorHunter()
-                leads = hunter.process_and_export(hunter_agent.DEFAULT_NYC_TARGETS)
+                leads = hunter_agent.discover_and_audit_real_nyc_contractors()
             for item in leads:
                 ENGINE.register_hunter_prospect(asdict(item))
             ENGINE.log_event(
                 "HUNTER AGENT",
-                f"Audited {len(leads)} NYC contractors across 5 boroughs -> audited_hunter_leads.csv",
+                f"Live-audited {len(leads)} real NYC contractors -> audited_hunter_leads.csv",
             )
             self._send_json(
                 {
@@ -345,28 +344,30 @@ class WebhookHandler(BaseHTTPRequestHandler):
             name = data.get("name", "Metro NYC Plumbing")
             trade = data.get("trade", "Plumbing")
             borough = data.get("borough", "Queens")
-            phone = data.get("phone", "718-555-0199")
+            phone = data.get("phone", "(718) 555-0199")
+            website = data.get("website", "")
             claims_24_7 = bool(data.get("claims_24_7", True))
-            review = data.get(
-                "review",
-                "Called for an after-hours leak, went straight to voicemail.",
-            )
+            review = data.get("review", "")
             hunter = hunter_agent.ContractorHunter()
             audit = hunter.audit_contractor_profile(
-                name, trade, borough, review, claims_24_7
+                name=name,
+                trade=trade,
+                borough=borough,
+                website=website,
+                review_snippet=review,
+                claims_24_7=claims_24_7,
             )
             new_lead = hunter_agent.ContractorLead(
                 company_name=name,
                 trade=trade,
                 phone=phone,
-                website=data.get("website", ""),
+                website=website,
                 borough=borough,
-                claims_24_7=claims_24_7,
-                negative_review_snippet=review,
+                claims_24_7=audit["claims_24_7"],
+                negative_review_snippet=audit["finding"],
                 audit_risk=audit["audit_risk"],
                 personalized_hook=audit["hook"],
             )
-            # Prepend to existing JSON file
             existing = load_json_file("audited_hunter_leads.json")
             existing.insert(0, asdict(new_lead))
             (BASE_DIR / "audited_hunter_leads.json").write_text(
@@ -375,20 +376,20 @@ class WebhookHandler(BaseHTTPRequestHandler):
             ENGINE.register_hunter_prospect(asdict(new_lead))
             ENGINE.log_event(
                 "HUNTER CUSTOM",
-                f"Audited {name} ({trade} • {borough}) -> {audit['audit_risk']}",
+                f"Live-audited {name} ({website or borough}) -> {audit['audit_risk']}",
             )
             self._send_json({"ok": True, "lead": asdict(new_lead), "all_leads": existing})
             return
 
         if self.path == "/api/run-intent":
-            include_live = bool(data.get("include_live", False))
+            include_live = bool(data.get("include_live", True))
             leads = intent_monitor.run_intent_monitor(
-                include_live=include_live, min_score=30
+                include_live=include_live, min_score=35
             )
             intent_monitor.export_leads(leads, BASE_DIR)
             ENGINE.log_event(
                 "INTENT MONITOR",
-                f"Scanned contractor communities & reviews -> Found {len(leads)} high-intent leads.",
+                f"Scraped live Reddit RSS feeds -> Captured {len(leads)} real threads.",
             )
             self._send_json(
                 {

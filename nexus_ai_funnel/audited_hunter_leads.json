@@ -1,57 +1,90 @@
 [
   {
-    "company_name": "Bronx Master Emergency Plumbing",
-    "trade": "Plumbing & Drain",
-    "phone": "718-555-0144",
-    "website": "bronxmasterplumbing.com",
-    "borough": "The Bronx",
-    "claims_24_7": true,
-    "negative_review_snippet": "Called at 10 PM for a sewer backup, nobody answered and got voicemail.",
-    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
-    "personalized_hook": "Even though your site lists 24/7 plumbing & drain coverage in The Bronx, a recent caller noted: \"Called at 10 PM for a sewer backup, nobody answered and got voicemail.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
-  },
-  {
-    "company_name": "Kings County Heat & Cool",
-    "trade": "HVAC",
-    "phone": "718-555-0182",
-    "website": "kingscountyhvac.com",
+    "company_name": "Petri Plumbing, Heating, Cooling & Drain Cleaning",
+    "trade": "Plumbing & HVAC",
+    "phone": "(718) 748-1254",
+    "website": "https://www.petriplumbing.com",
     "borough": "Brooklyn",
     "claims_24_7": true,
-    "negative_review_snippet": "Furnace failed during freeze, waited 4 hours for a call back.",
-    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
-    "personalized_hook": "Even though your site lists 24/7 hvac coverage in Brooklyn, a recent caller noted: \"Furnace failed during freeze, waited 4 hours for a call back.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+    "negative_review_snippet": "Live audit of https://www.petriplumbing.com: advertises 24/7/Emergency service on homepage but has no automated SMS missed-call capture widget.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey Petri Plumbing, Heating, Cooling & Drain Cleaning team \u2014 saw on your site (https://www.petriplumbing.com) that you handle 24/7 emergency plumbing & hvac across Brooklyn, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
   },
   {
-    "company_name": "Astoria Rapid Rooters & Mechanical",
-    "trade": "Plumbing",
-    "phone": "718-555-0193",
-    "website": "astoriarapidrooters.com",
+    "company_name": "Roto-Rooter Plumbing & Water Cleanup (NYC)",
+    "trade": "Plumbing & Drain",
+    "phone": "(212) 687-1661",
+    "website": "https://www.rotorooter.com/newyorkny/",
+    "borough": "Manhattan",
+    "claims_24_7": true,
+    "negative_review_snippet": "Live audit of https://www.rotorooter.com/newyorkny/: advertises 24/7/Emergency service on homepage but has no automated SMS missed-call capture widget.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey Roto-Rooter Plumbing & Water Cleanup (NYC) team \u2014 saw on your site (https://www.rotorooter.com/newyorkny/) that you handle 24/7 emergency plumbing & drain across Manhattan, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
+  },
+  {
+    "company_name": "A.B.C. Tank Repair & Lining / NYC Heating",
+    "trade": "HVAC & Boiler",
+    "phone": "(718) 388-5676",
+    "website": "https://www.abctank.com",
+    "borough": "Brooklyn",
+    "claims_24_7": true,
+    "negative_review_snippet": "Live audit of https://www.abctank.com: static phone number listed on homepage with no after-hours AI SMS text-back.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey A.B.C. Tank Repair & Lining / NYC Heating team \u2014 saw on your site (https://www.abctank.com) that you handle 24/7 emergency hvac & boiler across Brooklyn, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
+  },
+  {
+    "company_name": "Vigilante Plumbing, Heating & Air Conditioning",
+    "trade": "Plumbing & HVAC",
+    "phone": "(718) 530-0404",
+    "website": "https://www.vigilanteplumbing.com",
+    "borough": "Brooklyn",
+    "claims_24_7": true,
+    "negative_review_snippet": "Live audit of https://www.vigilanteplumbing.com: advertises 24/7/Emergency service on homepage but has no automated SMS missed-call capture widget.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey Vigilante Plumbing, Heating & Air Conditioning team \u2014 saw on your site (https://www.vigilanteplumbing.com) that you handle 24/7 emergency plumbing & hvac across Brooklyn, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
+  },
+  {
+    "company_name": "Kew Forest Plumbing & Heating",
+    "trade": "Plumbing & Heating",
+    "phone": "(718) 456-0800",
+    "website": "https://kewforestplumbing.com",
     "borough": "Queens",
     "claims_24_7": true,
-    "negative_review_snippet": "Website says 24hr emergency plumber but phone rang 8 times and disconnected.",
-    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
-    "personalized_hook": "Even though your site lists 24/7 plumbing coverage in Queens, a recent caller noted: \"Website says 24hr emergency plumber but phone rang 8 times and disconnected.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+    "negative_review_snippet": "Live audit of https://kewforestplumbing.com: advertises 24/7/Emergency service on homepage but has no automated SMS missed-call capture widget.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey Kew Forest Plumbing & Heating team \u2014 saw on your site (https://kewforestplumbing.com) that you handle 24/7 emergency plumbing & heating across Queens, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
   },
   {
-    "company_name": "Midtown Commercial Electric Corp",
-    "trade": "Electrical",
-    "phone": "212-555-0167",
-    "website": "midtownelectricnyc.com",
+    "company_name": "Hub Plumbing & Mechanical NYC",
+    "trade": "Emergency Plumbing",
+    "phone": "(917) 634-8888",
+    "website": "https://www.hubplumbingnyc.com",
     "borough": "Manhattan",
-    "claims_24_7": false,
-    "negative_review_snippet": "Left two voicemails about a tripped main panel in our restaurant, ended up calling someone else.",
-    "audit_risk": "Standard After-Hours Leakage",
-    "personalized_hook": "Noticed you handle electrical across Manhattan, where a recent review flagged: \"Left two voicemails about a tripped main panel in our restaurant, ended up calling someone else.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+    "claims_24_7": true,
+    "negative_review_snippet": "Live audit of https://www.hubplumbingnyc.com: static phone number listed on homepage with no after-hours AI SMS text-back.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey Hub Plumbing & Mechanical NYC team \u2014 saw on your site (https://www.hubplumbingnyc.com) that you handle 24/7 emergency emergency plumbing across Manhattan, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
   },
   {
-    "company_name": "Verrazzano Storm Roofing & Siding",
-    "trade": "Roofing",
-    "phone": "718-555-0129",
-    "website": "verrazzanoroofing.com",
-    "borough": "Staten Island",
+    "company_name": "Fred Smith Plumbing & Heating",
+    "trade": "Plumbing & Heating",
+    "phone": "(212) 744-9100",
+    "website": "https://www.fredsmithplumbing.com",
+    "borough": "Manhattan",
     "claims_24_7": true,
-    "negative_review_snippet": "Active roof leak during Sunday storm, answering service took a message and nobody ever texted back.",
-    "audit_risk": "Critical: 24/7 Promise vs. Voicemail Abandonment",
-    "personalized_hook": "Even though your site lists 24/7 roofing coverage in Staten Island, a recent caller noted: \"Active roof leak during Sunday storm, answering service took a message and nobody ever texted back.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds\u2014costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
+    "negative_review_snippet": "Live audit of https://www.fredsmithplumbing.com: static phone number listed on homepage with no after-hours AI SMS text-back.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey Fred Smith Plumbing & Heating team \u2014 saw on your site (https://www.fredsmithplumbing.com) that you handle 24/7 emergency plumbing & heating across Manhattan, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
+  },
+  {
+    "company_name": "Bluewater Plumbing, Heating & Cooling",
+    "trade": "Plumbing & HVAC",
+    "phone": "(718) 673-9311",
+    "website": "https://www.bluewaterplumbing.com",
+    "borough": "Brooklyn",
+    "claims_24_7": true,
+    "negative_review_snippet": "Inspected https://www.bluewaterplumbing.com \u2014 phone-only contact without instant SMS missed-call recovery.",
+    "audit_risk": "Critical: 24/7 Claim Without Instant SMS Capture",
+    "personalized_hook": "Hey Bluewater Plumbing, Heating & Cooling team \u2014 saw on your site (https://www.bluewaterplumbing.com) that you handle 24/7 emergency plumbing & hvac across Brooklyn, but your phone line doesn't have an instant SMS text-back if a tech is on another call. In NYC, when after-hours or overflow emergency calls hit voicemail, 78% of homeowners call the next Google Maps listing within 45 seconds\u2014costing $1,500+ per missed job. Test our live 8-second AI dispatcher & missed-revenue calculator at https://getnexusaisolutions.com/funnel#sandbox"
   }
 ]

@@ -1,102 +1,196 @@
 [
   {
-    "source": "Reddit",
-    "community": "r/sweatystartup",
-    "author": "u/QueensMasterPlumber",
-    "title": "Missing phone calls while under sinks\u2014answering service vs AI text back?",
-    "snippet": "Running a 2-truck plumbing shop in Queens/Brooklyn. Whenever both of us are on jobs, new emergency calls go to voicemail and they never leave a message. Tried Ruby receptionist but it was $750/mo and ...",
-    "url": "https://www.reddit.com/r/sweatystartup/comments/example_plumbing_missed_calls",
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/Mikethe1guy",
+    "title": "Did a quick \"missed call audit\" on our inbound leads this month, and the math is sickening. How are you guys handling this?",
+    "snippet": "I spent some time digging through our call logs from the past month to figure out where we are losing leads. It turns out that when we are onsite, driving between jobs, or even just slightly past 5:30 PM, we are missing a crazy amount of incoming calls. From w...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1uyxrhn/did_a_quick_missed_call_audit_on_our_inbound/",
     "intent_score": 100,
     "matched_triggers": [
       "answering service",
-      "housecall pro",
-      "missing phone calls",
-      "plumbing",
-      "queens",
-      "ruby receptionist"
-    ],
-    "detected_trade": "Plumbing",
-    "detected_crm": "Housecall Pro",
-    "suggested_reply": "Fellow plumbing operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Housecall Pro. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
-    "captured_at": "2026-11-03 13:32 UTC"
-  },
-  {
-    "source": "Reddit",
-    "community": "r/HVAC",
-    "author": "u/TriStateCooling",
-    "title": "How are small HVAC shops handling after-hours emergency calls without burning out?",
-    "snippet": "During peak summer and winter freezes in NYC, my phone rings at 11pm. If I let it go to voicemail, I lose a $1,800 emergency no-heat/no-cool ticket. Receptionist is too expensive for 24/7 coverage. Ne...",
-    "url": "https://www.reddit.com/r/HVAC/comments/example_after_hours_hvac",
-    "intent_score": 100,
-    "matched_triggers": [
-      "after-hours emergency calls",
       "hvac",
-      "nyc",
-      "receptionist is too expensive",
-      "servicetitan",
-      "ticket"
+      "leads",
+      "missed call",
+      "receptionist",
+      "voicemail"
     ],
     "detected_trade": "HVAC",
-    "detected_crm": "ServiceTitan",
-    "suggested_reply": "Fellow hvac operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into ServiceTitan. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
-    "captured_at": "2026-11-03 13:32 UTC"
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/Mikethe1guy \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for hvac shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-07-17"
   },
   {
-    "source": "Reddit",
-    "community": "r/Contractor",
-    "author": "u/MetroSparkyNYC",
-    "title": "Calls going to voicemail while estimating jobs\u2014losing at least 5 leads a week",
-    "snippet": "I'm an electrical contractor using Jobber. Every week I see 5-8 missed calls from local numbers. By the time I call back 2 hours later, they already booked another electrician on Google Maps. Looking ...",
-    "url": "https://www.reddit.com/r/Contractor/comments/example_electrician_voicemail",
-    "intent_score": 100,
-    "matched_triggers": [
-      "electrical",
-      "going to voicemail",
-      "jobber",
-      "missed calls",
-      "missed-call text"
-    ],
-    "detected_trade": "Electrical",
-    "detected_crm": "Jobber",
-    "suggested_reply": "Fellow electrical operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Jobber. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
-    "captured_at": "2026-11-03 13:32 UTC"
-  },
-  {
-    "source": "Facebook Group",
-    "community": "NYC & Long Island Trade Contractors Network",
-    "author": "Sal D. (Roofing & Waterproofing)",
-    "title": "Anyone have a good virtual receptionist that doesn't cost $1k/month?",
-    "snippet": "Every time it rains in NYC my phone blows up while I'm on a roof. I can't answer the phone on a ladder and I'm missing $3,000+ leak repair tickets. Need an answering service or AI that texts them righ...",
-    "url": "https://facebook.com/groups/nyc-contractors/posts/example_roofing",
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/Pro_Automation__",
+    "title": "Has anyone tried automated phone answering services for their small business?",
+    "snippet": "We sometimes miss calls during busy hours and after closing, and I\u2019m looking at options like automated phone answering systems that can take messages or book appointments. For anyone who has used one: \u25cfDid it help reduce missed calls? \u25cfHow did customers react?...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1rg71mb/has_anyone_tried_automated_phone_answering/",
     "intent_score": 100,
     "matched_triggers": [
       "answering service",
-      "can't answer the phone",
-      "google calendar",
-      "nyc",
-      "virtual receptionist"
+      "customers",
+      "missed calls",
+      "voicemail"
     ],
-    "detected_trade": "Roofing",
-    "detected_crm": "Google Calendar",
-    "suggested_reply": "Fellow roofing operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Google Calendar. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
-    "captured_at": "2026-11-03 13:32 UTC"
+    "detected_trade": "Small Business / Home Services",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/Pro_Automation__ \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for small business / home services shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-02-27"
   },
   {
-    "source": "Google Maps Review Trigger",
-    "community": "NYC Competitor 1-Star Review Alert",
-    "author": "Competitor: Apex Boro Plumbing (Brooklyn, NY)",
-    "title": "1-Star Review: 'Called 3 times for an emergency leak, went straight to voicemail'",
-    "snippet": "Multiple recent Google Maps reviews on Apex Boro Plumbing complain: 'Cannot get anyone to answer the phone for emergency dispatch, left voicemail and never heard back.' High-intent prospect for Nexus ...",
-    "url": "https://maps.google.com/?q=Brooklyn+Plumbing+Competitor+Audit",
-    "intent_score": 60,
+    "source": "Reddit (Live)",
+    "community": "r/Plumbing",
+    "author": "/u/shahzada_e_lahore",
+    "title": "Plumbing business owners \u2014 how do you handle missed calls or after hour calls ?",
+    "snippet": "If you\u2019re on a job and can\u2019t answer the phone, what usually happens? \u2022 Voicemail? \u2022 Call back later? \u2022 Answering service? \u2022 Office staff? Do you feel like you lose jobs because of missed calls, or is it not a big deal? submitted by /u/shahzada_e_lahore to r/Pl...",
+    "url": "https://www.reddit.com/r/Plumbing/comments/1r5kpbl/plumbing_business_owners_how_do_you_handle_missed/",
+    "intent_score": 100,
     "matched_triggers": [
-      "emergency dispatch",
+      "answer the phone",
+      "answering service",
+      "missed calls",
       "plumbing",
-      "straight to voicemail"
+      "voicemail"
     ],
     "detected_trade": "Plumbing",
-    "detected_crm": "Unspecified CRM",
-    "suggested_reply": "Fellow plumbing operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that syncs directly with Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds.",
-    "captured_at": "2026-11-03 13:32 UTC"
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/shahzada_e_lahore \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for plumbing shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-02-15"
+  },
+  {
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/Ok-Statement-9320",
+    "title": "I just lost a $4k install job because my \"premium\" answering service put the customer on hold for 12 minutes. I\u2019m done.",
+    "snippet": "I need to vent because I'm furious. I\u2019m a solo HVAC operator. I pay these 'human' answering services $300/mo to handle calls when I'm in a crawlspace or driving. Yesterday, a lead called for a full system replacement. I checked the logs later: The receptionist...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1pixiv2/i_just_lost_a_4k_install_job_because_my_premium/",
+    "intent_score": 100,
+    "matched_triggers": [
+      "answering service",
+      "call center",
+      "hvac",
+      "receptionist"
+    ],
+    "detected_trade": "HVAC",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/Ok-Statement-9320 \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for hvac shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2025-12-10"
+  },
+  {
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/No-0x",
+    "title": "How do you handle calls that come in after hours?",
+    "snippet": "i run a small service business and after-hours calls are my biggest leak. during the day i can call people back between jobs, but after 6pm it's either i pick up or it goes to voicemail, and most people don't leave one, they just call the next company. tried a...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1xajpxj/how_do_you_handle_calls_that_come_in_after_hours/",
+    "intent_score": 95,
+    "matched_triggers": [
+      "after hours",
+      "answering service",
+      "voicemail"
+    ],
+    "detected_trade": "Small Business / Home Services",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/No-0x \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for small business / home services shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-10-20"
+  },
+  {
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/Legitimate_Bet3803",
+    "title": "How did you handle the phones when you were too busy to answer and couldn't afford an office person yet?",
+    "snippet": "Ran an HVAC shop in Tampa for years. Going from one truck to two nearly broke me. I was in attics all day, the phone kept ringing, and every missed call was probably a customer calling the next guy. I tried an answering service. It took messages, but I was sti...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1wzdt17/how_did_you_handle_the_phones_when_you_were_too/",
+    "intent_score": 85,
+    "matched_triggers": [
+      "answering service",
+      "hvac",
+      "missed call"
+    ],
+    "detected_trade": "HVAC",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/Legitimate_Bet3803 \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for hvac shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-10-06"
+  },
+  {
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/Rare-Bodybuilder7484",
+    "title": "Anyone using an AI phone receptionist? How do you stop customers hanging up and improve conversions?",
+    "snippet": "Hey everyone, I run a local service based business in Australia and I'm currently setting up an AI phone receptionist to handle incoming enquiries. The goal isn't to have the AI sell anything or close deals. I simply want it to answer incoming calls, collect s...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1x9hx5r/anyone_using_an_ai_phone_receptionist_how_do_you/",
+    "intent_score": 70,
+    "matched_triggers": [
+      "customers",
+      "receptionist",
+      "virtual receptionist"
+    ],
+    "detected_trade": "Small Business / Home Services",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/Rare-Bodybuilder7484 \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for small business / home services shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-10-18"
+  },
+  {
+    "source": "Reddit (Live)",
+    "community": "r/Contractor",
+    "author": "/u/randomdude1323",
+    "title": "Private Equity Is Destroying the Blue-Collar Trades",
+    "snippet": "Is anyone else noticing what\u2019s happening to the plumbing, HVAC, and electrical industries? Private equity firms are buying up established local companies left and right than dumping insane amounts of money into Google Ads, Local Service Ads, and marketing to c...",
+    "url": "https://www.reddit.com/r/Contractor/comments/1x5banp/private_equity_is_destroying_the_bluecollar_trades/",
+    "intent_score": 55,
+    "matched_triggers": [
+      "answer the phone",
+      "customers",
+      "plumbing"
+    ],
+    "detected_trade": "Plumbing",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/randomdude1323 \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for plumbing shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-10-13"
+  },
+  {
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/Mierkichi",
+    "title": "Lawyer with a 287K-view TikTok and 0 clients. What would you do?",
+    "snippet": "Hi all. I'm a lawyer in Spain, and a few months ago I started a small online immigration practice with two friends: residence permits, renewals, citizenship. Not sharing the name or any links. I just want honest feedback, because I've been going round in circl...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1wg0lax/lawyer_with_a_287kview_tiktok_and_0_clients_what/",
+    "intent_score": 40,
+    "matched_triggers": [
+      "leads",
+      "voicemail"
+    ],
+    "detected_trade": "Small Business / Home Services",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/Mierkichi \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for small business / home services shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-09-14"
+  },
+  {
+    "source": "Reddit (Live)",
+    "community": "r/smallbusiness",
+    "author": "/u/Plane_Mine_6888",
+    "title": "Anyone here pay for an answering service? Was it worth it?",
+    "snippet": "As i am building the voice agent for the contractors as i genuinely want to know is it really a needed in the market and if they are already using some services related to it and if they are facing any problem with it submitted by /u/Plane_Mine_6888 to r/small...",
+    "url": "https://www.reddit.com/r/smallbusiness/comments/1uxsoc5/anyone_here_pay_for_an_answering_service_was_it/",
+    "intent_score": 35,
+    "matched_triggers": [
+      "answering service"
+    ],
+    "detected_trade": "Trade Contractor",
+    "detected_crm": "Direct Calendar / Phone",
+    "suggested_reply": "Hey /u/Plane_Mine_6888 \u2014 almost 80% of callers who hit voicemail hang up and call the next listing on Google Maps within 45 seconds. Instead of paying $600\u2013$1,200/mo for a call center that just takes messages, we built an 8-second automated missed-call text-back & AI dispatcher for trade contractor shops that plugs straight into Jobber, Housecall Pro, ServiceTitan, or Google Calendar. You can test the live 8-second simulator or run your numbers at https://getnexusaisolutions.com/funnel",
+    "captured_at": "2026-11-03 19:09 UTC",
+    "post_date": "2026-07-16"
   }
 ]

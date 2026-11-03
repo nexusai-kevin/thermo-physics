@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nexus AI Solutions — Autonomous Funnel & Hunter Command Center</title>
+  <title>Nexus AI — Private Backend Command Center (Real Lead Hunter & Live Reddit Monitor)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,7 +29,7 @@
 </head>
 <body class="min-h-screen antialiased selection:bg-amber-500 selection:text-slate-950">
 
-  <!-- Top Navigation & Server Status Header -->
+  <!-- Top Navigation & Private Backend Status Header -->
   <header class="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur px-4 sm:px-6 py-3.5">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
@@ -37,24 +37,27 @@
           N
         </div>
         <div>
-          <div class="flex items-center gap-2.5">
-            <span class="font-extrabold text-lg tracking-tight text-white">NEXUS AI COMMAND CENTER</span>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <span class="font-extrabold text-lg tracking-tight text-white">NEXUS AI — PRIVATE BACKEND COMMAND CENTER</span>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-red-500/15 text-red-300 border border-red-500/30 font-bold">
+              🔒 INTERNAL OWNER ONLY (NOT PUBLIC)
+            </span>
             <span id="server-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
               <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              ENGINE LIVE (:8000)
+              LOCAL PYTHON ENGINE (:8000)
             </span>
           </div>
-          <p class="text-xs text-slate-400 font-mono">Autonomous Outbound Hunter + Community Intent Monitor + 8-Sec SMS Qualifier</p>
+          <p class="text-xs text-slate-400 font-mono">Live NYC Contractor Website Auditor + Live Reddit RSS Scraper + Twilio Webhook State Machine</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2.5">
-        <a href="index.html" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
-          <span>🌐 View Public Contractor Funnel</span>
+        <a href="https://getnexusaisolutions.com/funnel" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+          <span>🌐 View Public Customer Funnel</span>
           <span class="text-amber-400">↗</span>
         </a>
         <button onclick="runAllPipelines()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-lg transition flex items-center gap-2">
-          <span>⚡ Run Full Pipeline (1-Click)</span>
+          <span>⚡ Run All Live Scrapers (1-Click)</span>
         </button>
       </div>
     </div>
@@ -62,211 +65,139 @@
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
-    <!-- 1. Visual End-to-End Pipeline Architecture Map -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div>
-          <span class="text-[11px] font-mono uppercase tracking-widest text-amber-400 font-bold">Live System Architecture</span>
-          <h1 class="text-xl sm:text-2xl font-extrabold text-white">Self-Serve Capture & Autonomous Outbound Pipeline</h1>
-        </div>
-        <div class="text-xs font-mono text-slate-400">
-          NYC Demo Line: <span class="text-amber-400 font-bold">(212) 555-0199</span> • Webhook: <span class="text-emerald-400">/twilio/sms-reply</span>
-        </div>
-      </div>
-
-      <!-- 4 Interactive Pipeline Nodes -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <!-- Node 1: Hunter Agent -->
-        <div id="node-hunter" class="p-4 rounded-xl bg-slate-950 border border-slate-800 transition relative">
-          <div class="flex items-center justify-between text-xs font-mono text-amber-400 mb-1">
-            <span>STAGE 1 • OUTBOUND</span>
-            <span id="stat-hunter-count" class="bg-amber-500/20 px-2 py-0.5 rounded text-amber-300 font-bold">5 Audited</span>
-          </div>
-          <div class="font-bold text-white text-sm">Autonomous Hunter Agent</div>
-          <p class="text-xs text-slate-400 mt-1">Audits NYC contractors claiming 24/7 service with 1-star voicemail complaints.</p>
-          <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
-            <span>hunter_agent.py</span>
-            <button onclick="runHunterScript()" class="text-amber-400 hover:underline font-bold">▶ Run Now</button>
-          </div>
-        </div>
-
-        <!-- Node 2: Intent Monitor -->
-        <div id="node-intent" class="p-4 rounded-xl bg-slate-950 border border-slate-800 transition relative">
-          <div class="flex items-center justify-between text-xs font-mono text-sky-400 mb-1">
-            <span>STAGE 2 • LISTENING</span>
-            <span id="stat-intent-count" class="bg-sky-500/20 px-2 py-0.5 rounded text-sky-300 font-bold">5 High-Intent</span>
-          </div>
-          <div class="font-bold text-white text-sm">Community Intent Monitor</div>
-          <p class="text-xs text-slate-400 mt-1">Monitors Reddit (r/sweatystartup, r/HVAC) & reviews for "missed calls" & "receptionist".</p>
-          <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
-            <span>intent_monitor.py</span>
-            <button onclick="runIntentScript()" class="text-sky-400 hover:underline font-bold">▶ Run Now</button>
-          </div>
-        </div>
-
-        <!-- Node 3: Capture Funnel -->
-        <div id="node-funnel" class="p-4 rounded-xl bg-slate-950 border border-slate-800 transition relative">
-          <div class="flex items-center justify-between text-xs font-mono text-purple-400 mb-1">
-            <span>STAGE 3 • CAPTURE</span>
-            <span class="bg-purple-500/20 px-2 py-0.5 rounded text-purple-300 font-bold">8.0s SLA</span>
-          </div>
-          <div class="font-bold text-white text-sm">Sandbox & Revenue Calculator</div>
-          <p class="text-xs text-slate-400 mt-1">Calculates weekly voicemail leak ($9,000/wk) & triggers live 8-second demo text.</p>
-          <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
-            <span>index.html</span>
-            <a href="index.html#calculator" target="_blank" class="text-purple-400 hover:underline font-bold">Open Tool ↗</a>
-          </div>
-        </div>
-
-        <!-- Node 4: 2-Question SMS Qualifier -->
-        <div id="node-webhook" class="p-4 rounded-xl bg-slate-950 border border-slate-800 transition relative">
-          <div class="flex items-center justify-between text-xs font-mono text-emerald-400 mb-1">
-            <span>STAGE 4 • CONVERSION</span>
-            <span id="stat-session-count" class="bg-emerald-500/20 px-2 py-0.5 rounded text-emerald-300 font-bold">Active</span>
-          </div>
-          <div class="font-bold text-white text-sm">2-Question AI SMS Qualifier</div>
-          <p class="text-xs text-slate-400 mt-1">Asks missed calls/wk + CRM (ServiceTitan/Jobber) & locks 15-min calendar slot.</p>
-          <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
-            <span>webhook_server.py</span>
-            <button onclick="runSmsSimulation()" class="text-emerald-400 hover:underline font-bold">▶ Simulate SMS</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. One-Button Action Control Bar -->
+    <!-- 1. One-Button Action Control Bar -->
     <section class="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-amber-500/40 rounded-2xl p-5 glow-amber">
       <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         <div>
-          <div class="text-xs font-mono uppercase text-amber-400 font-bold">One-Click Script Execution Controls</div>
-          <div class="text-sm text-slate-300">Click any button below to execute the Python backend scripts and watch the live output update immediately:</div>
+          <div class="text-xs font-mono uppercase text-amber-400 font-bold">One-Button Backend Script Runners</div>
+          <div class="text-sm text-slate-300">Click to run live website audits on real NYC contractors or scrape real Reddit threads:</div>
         </div>
         <div class="flex flex-wrap items-center gap-2.5">
           <button id="btn-run-hunter" onclick="runHunterScript()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs px-4 py-3 rounded-xl transition shadow flex items-center gap-2">
-            <span>🎯 1. Run Hunter Agent (hunter_agent.py)</span>
+            <span>🎯 1. Audit Real NYC Contractors (hunter_agent.py)</span>
           </button>
           <button id="btn-run-intent" onclick="runIntentScript()" class="bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold text-xs px-4 py-3 rounded-xl transition shadow flex items-center gap-2">
-            <span>📡 2. Run Intent Monitor (intent_monitor.py)</span>
+            <span>📡 2. Scrape Live Reddit Leads (intent_monitor.py)</span>
           </button>
           <button id="btn-run-sim" onclick="runSmsSimulation()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs px-4 py-3 rounded-xl transition shadow flex items-center gap-2">
-            <span>💬 3. Simulate 8-Sec Missed Call + 2-Q Booking</span>
+            <span>💬 3. Test 2-Q SMS Qualifier Flow</span>
           </button>
         </div>
       </div>
     </section>
 
-    <!-- 3. Main Split Workspace: Left = Hunter & Intent Tables | Right = Live SMS Phone Qualifier + Console -->
+    <!-- 2. Main Split Workspace -->
     <div class="grid lg:grid-cols-12 gap-8 items-start">
 
-      <!-- Left 7 Columns: Hunter Audited Contractors & Community Intent Leads -->
+      <!-- Left 7 Columns: Real NYC Contractor Audits & Real Live Reddit Leads -->
       <div class="lg:col-span-7 space-y-8">
 
-        <!-- Panel A: Autonomous Hunter Audited NYC Contractors -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+        <!-- Panel A: Real NYC Contractors Audited Live -->
+        <div id="node-hunter" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
             <div>
-              <span class="text-[11px] font-mono uppercase text-amber-400 font-bold">Output of hunter_agent.py</span>
-              <h2 class="text-lg font-bold text-white">Audited NYC Contractors & Personalized Vulnerability Hooks</h2>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono uppercase text-emerald-400 font-bold">● REAL NYC BUSINESSES (LIVE HTML AUDIT)</span>
+                <span id="stat-hunter-count" class="text-[11px] font-mono bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded font-bold">8 Audited</span>
+              </div>
+              <h2 class="text-lg font-bold text-white mt-0.5">Real NYC Contractors & Outbound Vulnerability Hooks</h2>
             </div>
-            <button onclick="toggleCustomAuditModal()" class="text-xs font-mono bg-slate-800 hover:bg-slate-700 text-amber-400 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-              + Audit Custom Contractor
+            <button onclick="toggleCustomAuditModal()" class="text-xs font-mono bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-3 py-1.5 rounded-lg border border-amber-500/40 font-bold transition">
+              + Audit Any Contractor Website Live
             </button>
           </div>
 
-          <!-- Optional Custom Contractor Audit Form -->
+          <!-- Live Website Audit Form -->
           <form id="custom-audit-form" onsubmit="submitCustomAudit(event)" class="hidden bg-slate-950 border border-amber-500/40 rounded-xl p-4 space-y-3">
-            <div class="text-xs font-mono text-amber-400 font-bold">Audit Any NYC Contractor Profile Live</div>
+            <div class="text-xs font-mono text-amber-400 font-bold">Live Website Crawler & Audit Generator</div>
             <div class="grid sm:grid-cols-3 gap-2.5">
-              <input id="ca-name" type="text" required placeholder="Company Name (e.g. Boro Plumbing)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white" />
+              <input id="ca-name" type="text" required placeholder="Company Name (e.g. Petri Plumbing)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white" />
               <select id="ca-trade" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                <option value="Plumbing & HVAC">Plumbing & HVAC</option>
                 <option value="Plumbing">Plumbing</option>
                 <option value="HVAC">HVAC</option>
                 <option value="Electrical">Electrical</option>
                 <option value="Roofing">Roofing</option>
               </select>
               <select id="ca-borough" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
-                <option value="Queens">Queens</option>
                 <option value="Brooklyn">Brooklyn</option>
+                <option value="Queens">Queens</option>
                 <option value="Manhattan">Manhattan</option>
                 <option value="The Bronx">The Bronx</option>
                 <option value="Staten Island">Staten Island</option>
               </select>
             </div>
             <div class="grid sm:grid-cols-3 gap-2.5">
-              <input id="ca-phone" type="text" value="718-555-0199" placeholder="Phone" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono" />
-              <input id="ca-review" type="text" required placeholder="1-Star Review Complaint (e.g. Called at 9pm, went straight to voicemail)" class="sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white" />
+              <input id="ca-phone" type="text" required placeholder="Real Phone (e.g. (718) 748-1254)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono" />
+              <input id="ca-website" type="text" required placeholder="Website URL to Crawl Live (e.g. https://www.petriplumbing.com)" class="sm:col-span-2 bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white font-mono" />
             </div>
             <div class="flex items-center justify-between pt-1">
-              <label class="flex items-center gap-2 text-xs text-slate-300">
-                <input id="ca-247" type="checkbox" checked class="accent-amber-500" />
-                <span>Website claims "24/7 Emergency Service"</span>
-              </label>
+              <span class="text-[11px] font-mono text-slate-400">Crawls homepage HTML for 24/7 claims vs. missing SMS widgets</span>
               <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg">
-                Generate Audit Hook →
+                Crawl & Generate Hook →
               </button>
             </div>
           </form>
 
           <!-- Hunter Leads List -->
-          <div id="hunter-leads-container" class="space-y-3 max-h-[460px] overflow-y-auto pr-1"></div>
+          <div id="hunter-leads-container" class="space-y-3 max-h-[500px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Panel B: Community Intent Monitor Leads (Reddit / Reviews) -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
+        <!-- Panel B: Real Live Reddit Threads -->
+        <div id="node-intent" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
             <div>
-              <span class="text-[11px] font-mono uppercase text-sky-400 font-bold">Output of intent_monitor.py</span>
-              <h2 class="text-lg font-bold text-white">High-Intent Community & Review Triggers (Score 60–100)</h2>
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-mono uppercase text-emerald-400 font-bold">● 100% REAL LIVE REDDIT THREADS</span>
+                <span id="stat-intent-count" class="text-[11px] font-mono bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded font-bold">10 Live Threads</span>
+              </div>
+              <h2 class="text-lg font-bold text-white mt-0.5">Live Reddit Intent Feed (Click Any Post to Reply on Reddit)</h2>
             </div>
-            <span class="text-xs font-mono text-slate-400">r/sweatystartup • r/HVAC • r/Contractor</span>
+            <span class="text-xs font-mono text-slate-400">r/smallbusiness • r/Plumbing • r/Contractor</span>
           </div>
 
-          <div id="intent-leads-container" class="space-y-3 max-h-[420px] overflow-y-auto pr-1"></div>
+          <div id="intent-leads-container" class="space-y-3 max-h-[520px] overflow-y-auto pr-1"></div>
         </div>
 
       </div>
 
-      <!-- Right 5 Columns: Live Interactive 2-Question SMS Qualifier + Activity Console -->
+      <!-- Right 5 Columns: SMS Qualifier Sandbox + Live Console Log -->
       <div class="lg:col-span-5 space-y-6 sticky top-20">
 
-        <!-- Live SMS Phone Terminal Connected to NexusQualifierEngine -->
-        <div class="bg-slate-900 border-2 border-emerald-500/50 rounded-3xl p-5 shadow-2xl space-y-4 glow-emerald">
+        <div id="node-webhook" class="bg-slate-900 border-2 border-emerald-500/50 rounded-3xl p-5 shadow-2xl space-y-4 glow-emerald">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <span class="text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-bold">● Live Webhook State Machine</span>
+              <span class="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">● STATE MACHINE TESTER + TWILIO MONITOR</span>
               <h3 class="text-base font-extrabold text-white">2-Question AI SMS Qualifier Terminal</h3>
             </div>
             <span id="sms-stage-pill" class="text-[11px] font-mono bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full border border-emerald-500/30 font-bold">
-              READY
+              SANDBOX READY
             </span>
           </div>
 
-          <!-- Quick Scenario Buttons inside Terminal -->
           <div class="grid grid-cols-2 gap-2 text-xs">
             <button onclick="triggerMissedCallInTerminal()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 font-mono font-bold py-2 px-3 rounded-xl border border-slate-700 transition">
-              📵 1. Simulate Missed Call
+              📵 1. Test Missed Call
             </button>
             <button onclick="runSmsSimulation()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-mono font-bold py-2 px-3 rounded-xl border border-emerald-500/40 transition">
-              ⚡ Auto-Play Full 4-Step Flow
+              ⚡ Auto-Play 4-Step Demo
             </button>
           </div>
 
-          <!-- Chat Feed -->
-          <div id="live-sms-feed" class="bg-slate-950 border border-slate-800 rounded-2xl p-4 h-80 overflow-y-auto space-y-3 text-xs"></div>
+          <div id="live-sms-feed" class="bg-slate-950 border border-slate-800 rounded-2xl p-4 h-72 overflow-y-auto space-y-3 text-xs"></div>
 
-          <!-- Manual SMS Input -->
           <form onsubmit="sendManualSms(event)" class="flex gap-2">
-            <input id="manual-sms-input" type="text" placeholder="Reply as contractor (e.g. '6 calls/wk' or 'ServiceTitan')..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-400" />
+            <input id="manual-sms-input" type="text" placeholder="Test reply (e.g. '6 calls/wk' or 'ServiceTitan')..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-400" />
             <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl transition">
-              Send SMS
+              Send
             </button>
           </form>
         </div>
 
-        <!-- Real-Time Backend Execution & Webhook Console Log -->
+        <!-- Backend Execution Console -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2.5">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-mono uppercase text-slate-400 font-bold">Live Execution & Webhook Log</span>
+            <span class="text-xs font-mono uppercase text-slate-400 font-bold">Backend Script Execution Log</span>
             <button onclick="clearConsoleLog()" class="text-[11px] font-mono text-slate-500 hover:text-slate-300">Clear</button>
           </div>
           <div id="console-log" class="bg-slate-950 border border-slate-800 rounded-xl p-3 h-48 overflow-y-auto font-mono text-[11px] space-y-1.5 text-slate-300"></div>
@@ -280,103 +211,8 @@
 
   <script>
     const API_BASE = 'http://127.0.0.1:8000';
-    let activeSimPhone = '+1 (917) 555-0188';
-
-    // Pre-loaded fallback data so UI works even if opened via file:// before server starts
-    let stateData = {
-      hunter_leads: [
-        {
-          company_name: "Bronx Master Emergency Plumbing",
-          trade: "Plumbing & Drain",
-          phone: "718-555-0144",
-          website: "bronxmasterplumbing.com",
-          borough: "The Bronx",
-          claims_24_7: true,
-          negative_review_snippet: "Called at 10 PM for a sewer backup, nobody answered and got voicemail.",
-          audit_risk: "Critical: 24/7 Promise vs. Voicemail Abandonment",
-          personalized_hook: "Even though your site lists 24/7 plumbing & drain coverage in The Bronx, a recent caller noted: \"Called at 10 PM for a sewer backup, nobody answered and got voicemail.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds—costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
-        },
-        {
-          company_name: "Kings County Heat & Cool",
-          trade: "HVAC",
-          phone: "718-555-0182",
-          website: "kingscountyhvac.com",
-          borough: "Brooklyn",
-          claims_24_7: true,
-          negative_review_snippet: "Furnace failed during freeze, waited 4 hours for a call back.",
-          audit_risk: "Critical: 24/7 Promise vs. Voicemail Abandonment",
-          personalized_hook: "Even though your site lists 24/7 hvac coverage in Brooklyn, a recent caller noted: \"Furnace failed during freeze, waited 4 hours for a call back.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds—costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
-        },
-        {
-          company_name: "Astoria Rapid Rooters & Mechanical",
-          trade: "Plumbing",
-          phone: "718-555-0193",
-          website: "astoriarapidrooters.com",
-          borough: "Queens",
-          claims_24_7: true,
-          negative_review_snippet: "Website says 24hr emergency plumber but phone rang 8 times and disconnected.",
-          audit_risk: "Critical: 24/7 Promise vs. Voicemail Abandonment",
-          personalized_hook: "Even though your site lists 24/7 plumbing coverage in Queens, a recent caller noted: \"Website says 24hr emergency plumber but phone rang 8 times and disconnected.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds—costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
-        },
-        {
-          company_name: "Midtown Commercial Electric Corp",
-          trade: "Electrical",
-          phone: "212-555-0167",
-          website: "midtownelectricnyc.com",
-          borough: "Manhattan",
-          claims_24_7: false,
-          negative_review_snippet: "Left two voicemails about a tripped main panel in our restaurant, ended up calling someone else.",
-          audit_risk: "Standard After-Hours Leakage",
-          personalized_hook: "Noticed you handle electrical across Manhattan, where a recent review flagged: \"Left two voicemails about a tripped main panel in our restaurant, ended up calling someone else.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds—costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
-        },
-        {
-          company_name: "Verrazzano Storm Roofing & Siding",
-          trade: "Roofing",
-          phone: "718-555-0129",
-          website: "verrazzanoroofing.com",
-          borough: "Staten Island",
-          claims_24_7: true,
-          negative_review_snippet: "Active roof leak during Sunday storm, answering service took a message and nobody ever texted back.",
-          audit_risk: "Critical: 24/7 Promise vs. Voicemail Abandonment",
-          personalized_hook: "Even though your site lists 24/7 roofing coverage in Staten Island, a recent caller noted: \"Active roof leak during Sunday storm, answering service took a message and nobody ever texted back.\" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds—costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199."
-        }
-      ],
-      intent_leads: [
-        {
-          source: "Reddit",
-          community: "r/sweatystartup",
-          author: "u/QueensMasterPlumber",
-          title: "Missing phone calls while under sinks—answering service vs AI text back?",
-          intent_score: 100,
-          matched_triggers: ["answering service", "housecall pro", "missing phone calls", "plumbing", "queens"],
-          detected_trade: "Plumbing",
-          detected_crm: "Housecall Pro",
-          suggested_reply: "Fellow plumbing operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Housecall Pro. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds."
-        },
-        {
-          source: "Reddit",
-          community: "r/HVAC",
-          author: "u/TriStateCooling",
-          title: "How are small HVAC shops handling after-hours emergency calls without burning out?",
-          intent_score: 100,
-          matched_triggers: ["after-hours emergency calls", "hvac", "nyc", "receptionist is too expensive", "servicetitan"],
-          detected_trade: "HVAC",
-          detected_crm: "ServiceTitan",
-          suggested_reply: "Fellow hvac operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into ServiceTitan. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds."
-        },
-        {
-          source: "Reddit",
-          community: "r/Contractor",
-          author: "u/MetroSparkyNYC",
-          title: "Calls going to voicemail while estimating jobs—losing at least 5 leads a week",
-          intent_score: 100,
-          matched_triggers: ["electrical", "going to voicemail", "jobber", "missed calls"],
-          detected_trade: "Electrical",
-          detected_crm: "Jobber",
-          suggested_reply: "Fellow electrical operator note: almost 80% of emergency callers hang up on voicemail and dial the next Google Maps listing within 30 seconds. Instead of paying $800+/mo for a slow call center that just takes messages, test an 8-second automated missed-call text-back that plugs straight into Jobber. You can call our live NYC sandbox at (212) 555-0199 and hang up to watch how the AI qualifies the job and locks in the dispatch slot in 8 seconds."
-        }
-      ]
-    };
+    let activeSimPhone = '(718) 748-1254';
+    let stateData = { hunter_leads: [], intent_leads: [] };
 
     function addLog(tag, message, color = 'text-amber-400') {
       const box = document.getElementById('console-log');
@@ -398,7 +234,7 @@
     }
 
     function renderHunterLeads(leads) {
-      document.getElementById('stat-hunter-count').textContent = `${leads.length} Audited`;
+      document.getElementById('stat-hunter-count').textContent = `${leads.length} Real NYC Leads`;
       const container = document.getElementById('hunter-leads-container');
       container.innerHTML = leads.map((item, idx) => `
         <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition space-y-2.5">
@@ -408,28 +244,26 @@
               <span class="text-xs font-mono text-amber-400 ml-2">${item.trade} • ${item.borough}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-[11px] font-mono px-2 py-0.5 rounded ${item.claims_24_7 ? 'bg-red-500/15 text-red-300 border border-red-500/30' : 'bg-amber-500/15 text-amber-300'}">
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-red-500/15 text-red-300 border border-red-500/30">
                 ${item.audit_risk}
               </span>
-              <span class="text-xs font-mono text-slate-400">${item.phone}</span>
+              <a href="tel:${item.phone}" class="text-xs font-mono text-emerald-400 font-bold hover:underline">${item.phone}</a>
             </div>
           </div>
 
-          <div class="text-xs text-red-300/90 bg-red-950/30 border border-red-500/20 rounded-lg px-3 py-1.5 font-mono">
-            1★ Review Signal: "${item.negative_review_snippet || 'Unanswered after-hours call'}"
+          <div class="flex items-center justify-between text-xs bg-slate-900/90 border border-slate-800 rounded-lg px-3 py-1.5 font-mono">
+            <span class="text-slate-300 truncate max-w-md">${item.negative_review_snippet || 'Live website audited'}</span>
+            ${item.website ? `<a href="${item.website}" target="_blank" class="text-amber-400 hover:underline shrink-0 ml-2">🌐 Open Site ↗</a>` : ''}
           </div>
 
           <div class="text-xs text-slate-300 bg-slate-900 border border-slate-800 rounded-lg p-3 leading-relaxed">
-            <span class="text-[10px] font-mono uppercase text-amber-400 block mb-1 font-bold">Generated Outbound Hook:</span>
+            <span class="text-[10px] font-mono uppercase text-amber-400 block mb-1 font-bold">Ready-to-Send Outbound Message:</span>
             ${item.personalized_hook}
           </div>
 
           <div class="flex items-center justify-end gap-2 pt-1">
-            <button onclick="copyText(${idx}, 'hunter')" id="copy-hunter-${idx}" class="text-[11px] font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-              📋 Copy Hook
-            </button>
-            <button onclick="simulateContractorCall('${item.company_name.replace(/'/g, "")}', '${item.phone}', '${item.trade}')" class="text-[11px] font-mono bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 px-3 py-1.5 rounded-lg border border-amber-500/40 font-bold transition">
-              📲 Simulate Call to Demo Line →
+            <button onclick="copyText(${idx}, 'hunter')" id="copy-hunter-${idx}" class="text-[11px] font-mono bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">
+              📋 Copy Outbound Message
             </button>
           </div>
         </div>
@@ -437,7 +271,7 @@
     }
 
     function renderIntentLeads(leads) {
-      document.getElementById('stat-intent-count').textContent = `${leads.length} High-Intent`;
+      document.getElementById('stat-intent-count').textContent = `${leads.length} Live Reddit Threads`;
       const container = document.getElementById('intent-leads-container');
       container.innerHTML = leads.map((item, idx) => `
         <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 transition space-y-2.5">
@@ -446,29 +280,31 @@
               <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
                 SCORE ${item.intent_score}/100
               </span>
-              <span class="text-xs font-mono text-slate-300 font-bold">${item.community}</span>
-              <span class="text-xs font-mono text-slate-500">(${item.author})</span>
+              <span class="text-xs font-mono text-slate-200 font-bold">${item.community}</span>
+              <span class="text-xs font-mono text-emerald-400">${item.author}</span>
+              ${item.post_date ? `<span class="text-[11px] font-mono text-slate-500">• ${item.post_date}</span>` : ''}
             </div>
-            <div class="flex items-center gap-1.5 text-[11px] font-mono">
-              <span class="bg-slate-800 text-amber-400 px-2 py-0.5 rounded">${item.detected_trade}</span>
-              <span class="bg-slate-800 text-emerald-400 px-2 py-0.5 rounded">${item.detected_crm}</span>
-            </div>
+            <a href="${item.url}" target="_blank" class="text-xs font-mono bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 px-2.5 py-1 rounded-lg border border-sky-500/40 font-bold transition">
+              ↗ Open Live Reddit Post
+            </a>
           </div>
 
           <div class="text-sm font-bold text-white">${item.title}</div>
+
+          ${item.snippet ? `<p class="text-xs text-slate-400 line-clamp-2">${item.snippet}</p>` : ''}
 
           <div class="flex flex-wrap gap-1.5">
             ${(item.matched_triggers || []).map(t => `<span class="text-[10px] font-mono bg-slate-900 border border-slate-800 text-slate-400 px-2 py-0.5 rounded">✓ ${t}</span>`).join('')}
           </div>
 
           <div class="text-xs text-slate-300 bg-slate-900 border border-slate-800 rounded-lg p-3 leading-relaxed">
-            <span class="text-[10px] font-mono uppercase text-sky-400 block mb-1 font-bold">Suggested Value-First Reply:</span>
+            <span class="text-[10px] font-mono uppercase text-sky-400 block mb-1 font-bold">Suggested Reddit Reply / DM:</span>
             ${item.suggested_reply}
           </div>
 
-          <div class="flex justify-end">
-            <button onclick="copyText(${idx}, 'intent')" id="copy-intent-${idx}" class="text-[11px] font-mono bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition">
-              📋 Copy Community Reply
+          <div class="flex justify-end gap-2">
+            <button onclick="copyText(${idx}, 'intent')" id="copy-intent-${idx}" class="text-[11px] font-mono bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition">
+              📋 Copy Reply
             </button>
           </div>
         </div>
@@ -487,12 +323,11 @@
       addLog('CLIPBOARD', `Copied ${type.toUpperCase()} message #${idx + 1} to clipboard.`);
     }
 
-    // --- One-Button Script Runners ---
     async function runHunterScript() {
       flashStage('node-hunter');
       const btn = document.getElementById('btn-run-hunter');
-      btn.textContent = '⏳ Auditing NYC Contractors...';
-      addLog('HUNTER AGENT', 'Executing hunter_agent.py across 5 NYC boroughs...', 'text-amber-400');
+      btn.textContent = '⏳ Auditing Live NYC Websites...';
+      addLog('HUNTER AGENT', 'Crawling real NYC contractor websites & checking 24/7 vs SMS capture...', 'text-amber-400');
 
       try {
         const res = await fetch(`${API_BASE}/api/run-hunter`, { method: 'POST' });
@@ -501,37 +336,35 @@
           stateData.hunter_leads = data.leads;
           renderHunterLeads(stateData.hunter_leads);
         }
-        addLog('HUNTER DONE', `Audited ${data.count} NYC contractors -> exported audited_hunter_leads.csv`, 'text-emerald-400');
-      } catch (_) {
-        renderHunterLeads(stateData.hunter_leads);
-        addLog('HUNTER DONE', `Audited ${stateData.hunter_leads.length} NYC contractors (local mode).`, 'text-emerald-400');
+        addLog('HUNTER DONE', `Live-audited ${data.count} real NYC contractors -> saved to audited_hunter_leads.csv`, 'text-emerald-400');
+      } catch (err) {
+        addLog('ERROR', 'Make sure START_NEXUS.bat / webhook_server.py is running on port 8000.', 'text-red-400');
       }
-      btn.textContent = '🎯 1. Run Hunter Agent (hunter_agent.py)';
+      btn.textContent = '🎯 1. Audit Real NYC Contractors (hunter_agent.py)';
     }
 
     async function runIntentScript() {
       flashStage('node-intent');
       const btn = document.getElementById('btn-run-intent');
-      btn.textContent = '⏳ Scanning Communities...';
-      addLog('INTENT MONITOR', 'Scanning r/sweatystartup, r/HVAC, r/Contractor & reviews...', 'text-sky-400');
+      btn.textContent = '⏳ Scraping Live Reddit RSS...';
+      addLog('INTENT MONITOR', 'Fetching live Reddit threads across r/smallbusiness, r/Plumbing, r/HVAC, r/Contractor...', 'text-sky-400');
 
       try {
         const res = await fetch(`${API_BASE}/api/run-intent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ include_live: false })
+          body: JSON.stringify({ include_live: true })
         });
         const data = await res.json();
         if (data.leads) {
           stateData.intent_leads = data.leads;
           renderIntentLeads(stateData.intent_leads);
         }
-        addLog('INTENT DONE', `Detected ${data.count} high-intent leads -> exported intent_leads.csv`, 'text-emerald-400');
-      } catch (_) {
-        renderIntentLeads(stateData.intent_leads);
-        addLog('INTENT DONE', `Detected ${stateData.intent_leads.length} high-intent community leads.`, 'text-emerald-400');
+        addLog('INTENT DONE', `Captured ${data.count} real Reddit threads -> saved to intent_leads.csv`, 'text-emerald-400');
+      } catch (err) {
+        addLog('ERROR', 'Make sure START_NEXUS.bat / webhook_server.py is running on port 8000.', 'text-red-400');
       }
-      btn.textContent = '📡 2. Run Intent Monitor (intent_monitor.py)';
+      btn.textContent = '📡 2. Scrape Live Reddit Leads (intent_monitor.py)';
     }
 
     function toggleCustomAuditModal() {
@@ -546,11 +379,11 @@
         trade: document.getElementById('ca-trade').value,
         borough: document.getElementById('ca-borough').value,
         phone: document.getElementById('ca-phone').value.trim(),
-        review: document.getElementById('ca-review').value.trim(),
-        claims_24_7: document.getElementById('ca-247').checked
+        website: document.getElementById('ca-website').value.trim(),
+        claims_24_7: true
       };
 
-      addLog('HUNTER CUSTOM', `Auditing ${payload.name} (${payload.trade} in ${payload.borough})...`, 'text-amber-400');
+      addLog('LIVE CRAWL', `Crawling ${payload.website} for ${payload.name}...`, 'text-amber-400');
       try {
         const res = await fetch(`${API_BASE}/api/audit-single`, {
           method: 'POST',
@@ -562,66 +395,42 @@
           stateData.hunter_leads = data.all_leads;
           renderHunterLeads(stateData.hunter_leads);
         }
+        addLog('CRAWL COMPLETE', `Audited ${payload.name} (${payload.website})!`, 'text-emerald-400');
       } catch (_) {
-        const newLead = {
-          company_name: payload.name,
-          trade: payload.trade,
-          phone: payload.phone,
-          borough: payload.borough,
-          claims_24_7: payload.claims_24_7,
-          negative_review_snippet: payload.review,
-          audit_risk: payload.claims_24_7 ? "Critical: 24/7 Promise vs. Voicemail Abandonment" : "Standard After-Hours Leakage",
-          personalized_hook: `Even though your site lists 24/7 ${payload.trade.toLowerCase()} coverage in ${payload.borough}, a recent caller noted: "${payload.review}" In NYC, when after-hours emergency calls hit voicemail, 78% of homeowners dial the next Google Maps dispatcher within 45 seconds—costing $1,500+ per missed ticket. Test our live 8-second AI dispatcher at https://getnexusaisolutions.com/funnel#sandbox or call & hang up on (212) 555-0199.`
-        };
-        stateData.hunter_leads.unshift(newLead);
-        renderHunterLeads(stateData.hunter_leads);
+        addLog('ERROR', 'Could not reach local Python server on :8000', 'text-red-400');
       }
       document.getElementById('custom-audit-form').classList.add('hidden');
-      addLog('HUNTER CUSTOM', `Generated custom outbound hook for ${payload.name}!`, 'text-emerald-400');
     }
 
-    // --- Interactive SMS Terminal & 4-Step Auto Simulation ---
     function appendSmsBubble(role, text, label = '') {
       const feed = document.getElementById('live-sms-feed');
       const div = document.createElement('div');
       if (role === 'system') {
-        div.className = 'bg-red-500/10 border border-red-500/30 rounded-xl p-2.5 text-[11px] font-mono text-red-300 flex items-center justify-between';
-        div.innerHTML = `<span>${text}</span><span class="font-bold">8.0s TRIGGER</span>`;
+        div.className = 'bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-[11px] font-mono text-amber-300 flex items-center justify-between';
+        div.innerHTML = `<span>${text}</span><span class="font-bold">SANDBOX</span>`;
       } else if (role === 'ai') {
         div.className = 'bg-emerald-500/15 border border-emerald-500/40 rounded-2xl rounded-tl-sm p-3 text-slate-100 mr-4 space-y-1';
         div.innerHTML = `<div class="text-[10px] font-mono uppercase text-emerald-400 font-bold">${label || 'Nexus AI Receptionist'}</div><p class="whitespace-pre-line leading-relaxed">${text}</p>`;
       } else {
         div.className = 'bg-slate-800 border border-slate-700 rounded-2xl rounded-tr-sm p-3 text-slate-200 ml-8 space-y-1';
-        div.innerHTML = `<div class="text-[10px] font-mono text-amber-400 font-bold">${label || 'Contractor Reply'}</div><p>${text}</p>`;
+        div.innerHTML = `<div class="text-[10px] font-mono text-amber-400 font-bold">${label || 'Test Reply'}</div><p>${text}</p>`;
       }
       feed.appendChild(div);
       feed.scrollTop = feed.scrollHeight;
     }
 
-    async function simulateContractorCall(companyName, phone, trade) {
-      activeSimPhone = phone;
-      flashStage('node-funnel');
-      flashStage('node-webhook');
+    async function triggerMissedCallInTerminal() {
       document.getElementById('live-sms-feed').innerHTML = '';
-      document.getElementById('sms-stage-pill').textContent = 'AWAITING_MISSED_CALLS';
-      appendSmsBubble('system', `📵 ${companyName} (${phone}) called (212) 555-0199 & hung up`);
-      addLog('8-SEC DEMO', `${companyName} called demo line & hung up -> firing 8-sec SMS recovery.`, 'text-amber-400');
-
+      appendSmsBubble('system', '📵 [SANDBOX TEST] Simulated Missed Call Triggered');
       try {
         const res = await fetch(`${API_BASE}/api/sms-chat`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, trade, action: 'missed_call' })
+          body: JSON.stringify({ phone: activeSimPhone, trade: 'Plumbing', action: 'missed_call' })
         });
         const data = await res.json();
         appendSmsBubble('ai', data.reply, 'Nexus AI • +08.0s Instant Recovery');
-      } catch (_) {
-        appendSmsBubble('ai', "⚡ [Nexus AI 8-Sec Demo] You just called our NYC Demo Line and hung up! This is the exact instant text your emergency callers get instead of hitting voicemail.\n\nWant to see what this would recover for your shop? Reply with roughly how many calls you miss per week (e.g. '6').", 'Nexus AI • +08.0s Instant Recovery');
-      }
-    }
-
-    function triggerMissedCallInTerminal() {
-      simulateContractorCall('Bronx Master Plumbing', '+1 (718) 555-0144', 'Plumbing');
+      } catch (_) {}
     }
 
     async function sendManualSms(e) {
@@ -630,10 +439,7 @@
       const msg = input.value.trim();
       if (!msg) return;
       input.value = '';
-
-      appendSmsBubble('user', msg, `Contractor (${activeSimPhone})`);
-      flashStage('node-webhook');
-
+      appendSmsBubble('user', msg);
       try {
         const res = await fetch(`${API_BASE}/api/sms-chat`, {
           method: 'POST',
@@ -642,31 +448,18 @@
         });
         const data = await res.json();
         if (data.session) {
-          document.getElementById('sms-stage-pill').textContent = data.session.stage;
+          document.getElementById('sms-stage-pill').textContent = `SANDBOX: ${data.session.stage}`;
         }
         appendSmsBubble('ai', data.reply, 'Nexus AI Qualifier');
-        addLog('SMS QUALIFIER', `Processed contractor reply "${msg}" -> stage: ${data.session ? data.session.stage : 'ACTIVE'}`, 'text-emerald-400');
-      } catch (_) {
-        appendSmsBubble('ai', "Got it! We integrate directly with your CRM and can lock in your 15-min activation call at https://cal.com/nexus-ai-nyc/15min-activation", 'Nexus AI Qualifier');
-      }
+      } catch (_) {}
     }
 
     async function runSmsSimulation() {
-      flashStage('node-funnel');
       flashStage('node-webhook');
       const feed = document.getElementById('live-sms-feed');
       feed.innerHTML = '';
       const pill = document.getElementById('sms-stage-pill');
-      pill.textContent = 'SIMULATING...';
-      addLog('SIMULATION', 'Starting 4-step 8-Second Missed Call + 2-Question SMS Qualification...', 'text-emerald-400');
-
-      let steps = [
-        "⚡ [Nexus AI 8-Sec Demo] You just called our NYC Demo Line and hung up! This is the exact instant text your emergency plumbing/HVAC/electrical callers get instead of hitting voicemail.\n\nWant to see what this would recover for your shop? Reply with roughly how many calls you miss per week (e.g. '6').",
-        "Got it—6 missed calls/wk at a $1,500 avg emergency ticket is ~$9,000/wk in potential jobs calling the next listing on Google Maps.\n\nQ2 (of 2): What CRM or calendar do you use to schedule jobs? (e.g. ServiceTitan, Housecall Pro, Jobber, Google Calendar)",
-        "Perfect—we integrate directly with Housecall Pro so qualified emergency jobs land straight on your dispatch board (recovering ~$36,000/mo).\n\n📅 Grab a 15-min slot here to activate your dedicated NYC number:\nhttps://cal.com/nexus-ai-nyc/15min-activation\n\n(Or reply 'MORNING' or 'AFTERNOON' and I'll text you 2 open times right here.)",
-        "✅ Locked in for Tomorrow at 8:00 AM EST! We've sent a calendar invite and will have your Housecall Pro sandbox ready to test live."
-      ];
-
+      pill.textContent = 'TESTING FLOW...';
       try {
         const res = await fetch(`${API_BASE}/api/run-simulation`, {
           method: 'POST',
@@ -674,75 +467,48 @@
           body: JSON.stringify({})
         });
         const data = await res.json();
-        if (data.steps) steps = data.steps;
+        const steps = data.steps || [];
+        appendSmsBubble('system', '📵 [SANDBOX TEST] Testing 8-Sec Missed Call -> 2-Question SMS Flow');
+        if (steps[0]) appendSmsBubble('ai', steps[0], 'Step 1: +08.0s Missed Call Text-Back');
+        if (steps[1]) {
+          appendSmsBubble('user', 'We miss around 6 calls a week when both trucks are on jobs');
+          appendSmsBubble('ai', steps[1], 'Step 2: Revenue Math + CRM Question');
+        }
+        if (steps[2]) {
+          appendSmsBubble('user', 'Housecall Pro');
+          appendSmsBubble('ai', steps[2], 'Step 3: Direct Calendar Booking Link');
+        }
+        if (steps[3]) {
+          appendSmsBubble('user', 'MORNING works best');
+          appendSmsBubble('ai', steps[3], 'Step 4: Calendar Slot Locked');
+        }
+        pill.textContent = 'SANDBOX READY';
       } catch (_) {}
-
-      appendSmsBubble('system', '📵 Incoming Call: Queens Plumbing Contractor (+1 917-555-0188) — HUNG UP');
-      setTimeout(() => {
-        pill.textContent = 'Q1: MISSED CALLS';
-        appendSmsBubble('ai', steps[0], 'Nexus AI • +08.0s after hangup');
-      }, 300);
-
-      setTimeout(() => {
-        appendSmsBubble('user', 'We miss around 6 calls a week when both trucks are on jobs');
-      }, 950);
-
-      setTimeout(() => {
-        pill.textContent = 'Q2: CRM CHECK';
-        appendSmsBubble('ai', steps[1], 'Nexus AI Qualifier');
-      }, 1500);
-
-      setTimeout(() => {
-        appendSmsBubble('user', 'Housecall Pro');
-      }, 2100);
-
-      setTimeout(() => {
-        pill.textContent = 'CALENDAR LINK SENT';
-        appendSmsBubble('ai', steps[2], 'Nexus AI Qualifier');
-      }, 2700);
-
-      setTimeout(() => {
-        appendSmsBubble('user', 'MORNING works best');
-      }, 3300);
-
-      setTimeout(() => {
-        pill.textContent = '✓ BOOKED (8:00 AM)';
-        appendSmsBubble('ai', steps[3], 'Nexus AI Calendar Lock');
-        addLog('BOOKING LOCKED', 'Queens Plumbing Contractor qualified (6 calls/wk • Housecall Pro) & booked for Tomorrow 8:00 AM EST!', 'text-emerald-400');
-      }, 3900);
     }
 
     async function runAllPipelines() {
       await runHunterScript();
       await runIntentScript();
-      await runSmsSimulation();
     }
 
     async function initDashboard() {
-      renderHunterLeads(stateData.hunter_leads);
-      renderIntentLeads(stateData.intent_leads);
-      addLog('SYSTEM', 'Command Center UI loaded. Connecting to local Nexus Python server (:8000)...');
-
+      addLog('SYSTEM', 'Loading real NYC contractors and live Reddit threads from local backend (:8000)...');
       try {
         const res = await fetch(`${API_BASE}/api/state`);
         const data = await res.json();
-        if (data.hunter_leads && data.hunter_leads.length) {
+        if (data.hunter_leads) {
           stateData.hunter_leads = data.hunter_leads;
           renderHunterLeads(stateData.hunter_leads);
         }
-        if (data.intent_leads && data.intent_leads.length) {
+        if (data.intent_leads) {
           stateData.intent_leads = data.intent_leads;
           renderIntentLeads(stateData.intent_leads);
         }
-        addLog('CONNECTED', 'Connected to live webhook_server.py on http://localhost:8000', 'text-emerald-400');
+        addLog('READY', `Loaded ${stateData.hunter_leads.length} real NYC contractors & ${stateData.intent_leads.length} live Reddit threads.`, 'text-emerald-400');
+        triggerMissedCallInTerminal();
       } catch (_) {
-        const badge = document.getElementById('server-badge');
-        badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono bg-amber-500/15 text-amber-400 border border-amber-500/30';
-        badge.innerHTML = '<span>● LOCAL SANDBOX MODE</span>';
+        addLog('OFFLINE', 'Start START_NEXUS.bat to connect live Python scrapers.', 'text-red-400');
       }
-
-      // Run initial SMS preview so terminal isn't empty
-      runSmsSimulation();
     }
 
     window.addEventListener('DOMContentLoaded', initDashboard);
