@@ -116,6 +116,7 @@ async def store_memory(req: StoreMemoryRequest) -> Dict[str, Any]:
 
     vec = bridge.embed_sensory_input(req.text)
     bridge.memory.store(vec, label)
+    bridge.set_memory_text(label, req.text)
     try:
         bridge.memory.save(bridge.memory_path)
     except Exception as e:
@@ -126,6 +127,30 @@ async def store_memory(req: StoreMemoryRequest) -> Dict[str, Any]:
         "label": label,
         "memory_count": len(bridge.memory.patterns),
     }
+
+
+@app.delete("/memory/{label}")
+async def delete_memory(label: str) -> Dict[str, Any]:
+    """Deletes every pattern with the exact label and persists."""
+    import numpy as np
+    keep = [i for i, l in enumerate(bridge.memory.labels) if l != label]
+    removed = len(bridge.memory.labels) - len(keep)
+    if removed == 0:
+        raise HTTPException(status_code=404, detail="label not found")
+    bridge.memory.patterns = bridge.memory.patterns[keep] if keep else np.empty((0, bridge.dim), dtype=np.float32)
+    bridge.memory.labels = [bridge.memory.labels[i] for i in keep]
+    bridge.memory.save(bridge.memory_path)
+    bridge.set_memory_text(label, None)
+    return {"status": "deleted", "removed": removed, "memory_count": len(bridge.memory.labels)}
+
+
+@app.get("/memory/recall")
+async def recall_memory(q: str, k: int = 5) -> Dict[str, Any]:
+    """Top-k cosine matches for a query (no LLM call, no storage)."""
+    v = bridge.embed_sensory_input(q)
+    sims = bridge.memory.patterns @ (v / (float((v @ v) ** 0.5) + 1e-8))
+    idx = sims.argsort()[::-1][:k]
+    return {"query": q, "matches": [{"label": bridge.memory.labels[i], "score": round(float(sims[i]), 4)} for i in idx]}
 
 
 @app.post("/memory/seed")
@@ -195,10 +220,10 @@ async def websocket_cora(websocket: WebSocket) -> None:
 # ============================================================================
 
 def run_server() -> None:
-    """Starts the Cora Thermodynamic SI Core FastAPI server on port 8090."""
+    """Starts the Cora Thermodynamic SI Core FastAPI server on port 8091."""
     import uvicorn
-    print("[*] Starting Cora Thermodynamic SI Core Server on http://127.0.0.1:8090 ...")
-    uvicorn.run("thermo_physics.si_core.cora_server:app", host="127.0.0.1", port=8090, reload=False)
+    print("[*] Starting Cora Thermodynamic SI Core Server on http://127.0.0.1:8091 ...")
+    uvicorn.run("thermo_physics.si_core.cora_server:app", host="127.0.0.1", port=int(os.environ.get('CORA_PORT', '8091')), reload=False)
 
 
 if __name__ == "__main__":

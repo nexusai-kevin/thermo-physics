@@ -127,7 +127,10 @@ class CoraThermodynamicBridge:
         seed: Optional[int] = 42,
     ) -> None:
         self.ollama_url = ollama_url.rstrip("/")
-        self.memory_path = memory_path
+        _mp = Path(os.path.expanduser(memory_path))
+        if not _mp.is_absolute():
+            _mp = Path(__file__).resolve().parents[2] / _mp  # repo root
+        self.memory_path = str(_mp)
         self.dim = embedding_dim
         self.seed = seed
 
@@ -137,17 +140,54 @@ class CoraThermodynamicBridge:
         self.arbiter = PottsGoalArbiter(num_modules=6, num_states=4, coupling_strength=1.2)
         self.metabolism = MetabolicHomeostasis(vram_limit_gb=16.0)
 
-        # Initialize episodic memory from disk or seed foundational attractors
-        self._init_memory()
-
-        # Discover local Ollama models on RTX 5080
+        # Discover local Ollama models first so seeding can use real embeddings
         self.ollama_online = False
         self.installed_models: List[str] = []
         self.tier_mapping: Dict[str, str] = {}
         self.discover_models()
+        self.warm_embedder()
+
+        # Initialize episodic memory from disk or seed foundational attractors
+        self._init_memory()
 
         # Pre-warm live VRAM telemetry
         get_live_vram_usage_gb()
+
+    @property
+    def texts_path(self) -> str:
+        return os.path.splitext(self.memory_path)[0] + "_texts.json"
+
+    def load_memory_texts(self) -> Dict[str, str]:
+        try:
+            with open(self.texts_path, encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def set_memory_text(self, label: str, text: Optional[str]) -> None:
+        d = self.load_memory_texts()
+        if text is None:
+            d.pop(label, None)
+        else:
+            d[label] = text
+        with open(self.texts_path, "w", encoding="utf-8") as f:
+            json.dump(d, f, indent=1, ensure_ascii=False)
+
+    def warm_embedder(self) -> bool:
+        if not self.ollama_online:
+            print("[!] WARNING: Ollama offline at startup; embeddings will use hash fallback", flush=True)
+            return False
+        try:
+            payload = json.dumps({"model": "nomic-embed-text", "input": "warmup", "keep_alive": "30m"}).encode("utf-8")
+            req = urllib.request.Request(f"{self.ollama_url}/api/embed", data=payload,
+                                         headers={"Content-Type": "application/json", "User-Agent": "Cora-SI-Core"})
+            with urllib.request.urlopen(req, timeout=60.0) as resp:
+                ok = resp.status == 200
+            print("[*] nomic-embed-text warmed" if ok else "[!] WARNING: embedder warmup non-200", flush=True)
+            return ok
+        except Exception as e:
+            print(f"[!] WARNING: embedder warmup failed ({e!r})", flush=True)
+            return False
 
     def _init_memory(self) -> None:
         """Loads episodic memory from disk if available, otherwise seeds baseline attractors."""
@@ -171,7 +211,7 @@ class CoraThermodynamicBridge:
             ("Security_Boundary_Verification", "Strict boundary enforcement, access controls, and safety gates."),
         ]
         for label, desc in foundational:
-            vec = deterministic_hash_embedding(desc, dim=self.dim)
+            vec = self.embed_prompt(desc)
             self.memory.store(vec, label)
 
         # Save initial seed to disk
@@ -235,15 +275,15 @@ class CoraThermodynamicBridge:
                     data=payload,
                     headers={"Content-Type": "application/json", "User-Agent": "Cora-SI-Core"},
                 )
-                with urllib.request.urlopen(req, timeout=2.0) as resp:
+                with urllib.request.urlopen(req, timeout=30.0) as resp:
                     if resp.status == 200:
                         data = json.loads(resp.read().decode("utf-8"))
                         embeddings = data.get("embeddings", [])
                         if embeddings and len(embeddings[0]) == self.dim:
                             vec = np.asarray(embeddings[0], dtype=np.float32)
                             return vec / (np.linalg.norm(vec) + 1e-8)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[!] WARNING: /api/embed failed ({e!r}); trying legacy endpoint", flush=True)
 
             # 2. Try legacy /api/embeddings
             legacy_url = f"{self.ollama_url}/api/embeddings"
@@ -254,16 +294,17 @@ class CoraThermodynamicBridge:
                     data=payload,
                     headers={"Content-Type": "application/json", "User-Agent": "Cora-SI-Core"},
                 )
-                with urllib.request.urlopen(req, timeout=2.0) as resp:
+                with urllib.request.urlopen(req, timeout=30.0) as resp:
                     if resp.status == 200:
                         data = json.loads(resp.read().decode("utf-8"))
                         embedding = data.get("embedding", [])
                         if embedding and len(embedding) == self.dim:
                             vec = np.asarray(embedding, dtype=np.float32)
                             return vec / (np.linalg.norm(vec) + 1e-8)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[!] WARNING: /api/embeddings failed ({e!r})", flush=True)
 
+        print("[!] WARNING: nomic-embed-text unavailable - HASH FALLBACK embedding used; semantic recall is meaningless for this input", flush=True)
         # Robust deterministic fallback
         return deterministic_hash_embedding(prompt, dim=self.dim)
 
@@ -338,7 +379,8 @@ class CoraThermodynamicBridge:
 
         # Automatic episodic consolidation if novel
         consolidated = False
-        if novelty > 0.45 and not store_as_memory:
+        auto_store = os.environ.get("CORA_AUTO_EPISODIC", "0").strip().lower() in ("1", "true", "yes", "on")
+        if auto_store and novelty > 0.45 and not store_as_memory:
             clean_snippet = "".join(c if c.isalnum() else "_" for c in user_prompt[:24]).strip("_")
             new_label = f"Episodic_{int(time.time())}_{clean_snippet}"
             self.memory.store(spin_vector, new_label)
@@ -479,6 +521,12 @@ class CoraThermodynamicBridge:
         """Injects thermodynamic ground state telemetry into Cora's system prompt."""
         stance = telemetry["organ_3_stance"]
         directive = self.STANCE_DIRECTIVES.get(stance, "Act coherently and effectively.")
+        texts = self.load_memory_texts()
+        facts = [texts[m["label"]] for m in telemetry.get("hopfield_top_matches", [])
+                 if m.get("score", 0) >= float(os.environ.get("CORA_RECALL_MIN", "0.55")) and m["label"] in texts]
+        recalled = ""
+        if facts:
+            recalled = "[RECALLED MEMORIES - trusted facts; use them to answer]\n" + "\n".join(f"- {f}" for f in facts) + "\n\n"
 
         return (
             "You are Cora, an autonomous AI architect and coding intelligence powered by a "
@@ -491,7 +539,8 @@ class CoraThermodynamicBridge:
             f"- Potts Goal Consensus: {stance} (H = {telemetry['organ_3_potts_energy']})\n"
             f"- Metabolic Inference Tier: {telemetry['organ_4_tier']} -> {telemetry['organ_4_model']} (VRAM: {telemetry['organ_4_live_vram_gb']}/16.0 GB)\n\n"
             f"[BEHAVIORAL DIRECTIVE: {stance}]\n"
-            f"{directive}\n"
+            f"{directive}\n\n"
+            f"{recalled}"
         )
 
     def chat(self, user_prompt: str, seed: Optional[int] = None) -> Tuple[str, Dict[str, Any]]:
