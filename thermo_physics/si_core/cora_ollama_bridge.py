@@ -237,27 +237,55 @@ class CoraThermodynamicBridge:
 
         self.installed_models = models
 
-        # Intelligent model tier mapping
+        # Intelligent model tier mapping (size-aware; never treat 14b+/MoE as "fast")
+        import re
         fast_candidate = None
         core_candidate = None
         deep_candidate = None
+        size_re = re.compile(r"(\d+(?:\.\d+)?)b")
+
+        def _max_param_b(name: str):
+            sizes = [float(x) for x in size_re.findall(name.lower())]
+            return max(sizes) if sizes else None
 
         for m in models:
             m_lower = m.lower()
-            if any(k in m_lower for k in ["3b", "1.5b", "2b", "phi", "mini"]):
-                if not fast_candidate:
-                    fast_candidate = m
-            elif any(k in m_lower for k in ["8b", "7b", "9b", "llama3.1", "mistral"]):
-                if not core_candidate:
-                    core_candidate = m
-            elif any(k in m_lower for k in ["14b", "32b", "70b", "deepseek", "qwen2.5:14b"]):
+            if "embed" in m_lower:
+                continue
+            # Prefer explicit Cora roles when present
+            base = m_lower.split(":")[0]
+            if base == "cora-deep":
                 if not deep_candidate:
                     deep_candidate = m
+                continue
+            if base == "cora":
+                core_candidate = m  # Kevin's primary always wins Core
+                continue
+            if base == "cora-tanarie":
+                if not core_candidate:
+                    core_candidate = m
+                continue
+
+            mb = _max_param_b(m_lower)
+            # Tiny / edge aliases without a clear Nb tag
+            tiny_alias = any(k in m_lower for k in ("lfm3", "mini", "tiny", "phi-2", "phi2"))
+            if mb is not None:
+                if mb <= 3.5 or (tiny_alias and mb <= 4.0):
+                    if not fast_candidate:
+                        fast_candidate = m
+                elif mb <= 10.0:
+                    if not core_candidate:
+                        core_candidate = m
+                else:
+                    if not deep_candidate:
+                        deep_candidate = m
+            elif tiny_alias and not fast_candidate:
+                fast_candidate = m
 
         # Fallback hierarchy if specific tiers are missing
         primary = models[0] if models else "llama3.1:8b"
         self.tier_mapping = {
-            "Local_Fast_3B": fast_candidate or primary or "qwen2.5:3b",
+            "Local_Fast_3B": fast_candidate or "qwen2.5:3b",
             "Local_Core_8B": core_candidate or primary or "llama3.1:8b",
             "Local_Deep_14B": deep_candidate or primary or "qwen2.5:14b",
         }
