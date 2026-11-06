@@ -119,6 +119,7 @@ def seed_cora_memory(
         if label not in existing_labels:
             vec = bridge.embed_sensory_input(text)
             bridge.memory.store(vec, label)
+            bridge.set_memory_text(label, text)
             existing_labels.add(label)
             added_count += 1
 
@@ -137,6 +138,7 @@ def seed_cora_memory(
             if label not in existing_labels:
                 vec = bridge.embed_sensory_input(text)
                 bridge.memory.store(vec, label)
+                bridge.set_memory_text(label, text)
                 existing_labels.add(label)
                 added_count += 1
 
