@@ -19,6 +19,7 @@ Serves:
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime as dt
 import io
 import json
@@ -26,6 +27,7 @@ import os
 import pathlib
 import sys
 import urllib.parse
+import urllib.request
 from contextlib import redirect_stdout
 from dataclasses import asdict, dataclass, field
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -38,13 +40,82 @@ BASE_DIR = pathlib.Path(__file__).resolve().parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
+# Lightweight environment loader
+def load_simple_env(env_path: pathlib.Path) -> None:
+    if not env_path.is_file():
+        return
+    try:
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                k = k.strip()
+                v = v.strip().strip('"').strip("'")
+                if k and k not in os.environ:
+                    os.environ[k] = v
+    except Exception:
+        pass
+
+load_simple_env(BASE_DIR / ".env")
+load_simple_env(BASE_DIR.parent / ".env")
+
 import hunter_agent  # noqa: E402
 import intent_monitor  # noqa: E402
 
+OWNER_ALERT_PHONE = os.environ.get("NEXUS_OWNER_ALERT_PHONE", "+19298392194").strip()
 CALENDLY_BOOKING_URL = os.environ.get(
     "NEXUS_BOOKING_URL", "https://cal.com/nexus-ai-nyc/15min-activation"
 )
 NYC_DEMO_NUMBER = os.environ.get("NEXUS_DEMO_NUMBER", "+12125550199")
+
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "").strip()
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "").strip()
+TWILIO_FROM_NUMBER = os.environ.get("TWILIO_FROM_NUMBER", NYC_DEMO_NUMBER).strip()
+
+
+def send_twilio_sms(to_number: str, text: str) -> dict:
+    """Attempts real carrier SMS via Twilio REST API if configured."""
+    sid = os.environ.get("TWILIO_ACCOUNT_SID", "").strip()
+    token = os.environ.get("TWILIO_AUTH_TOKEN", "").strip()
+    from_num = os.environ.get("TWILIO_FROM_NUMBER", NYC_DEMO_NUMBER).strip()
+
+    if not (sid and token and from_num):
+        return {
+            "delivered": False,
+            "channel": "SYSTEM_SIMULATION",
+            "status": "QUEUED_LOCAL",
+            "note": "Alert saved & broadcasted. Add TWILIO_ACCOUNT_SID & TWILIO_AUTH_TOKEN in .env for live cellular SMS.",
+        }
+
+    try:
+        url = f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json"
+        auth_str = f"{sid}:{token}"
+        auth_header = (
+            "Basic " + base64.b64encode(auth_str.encode("utf-8")).decode("utf-8")
+        )
+        payload = urllib.parse.urlencode(
+            {"To": to_number, "From": from_num, "Body": text}
+        ).encode("utf-8")
+        req = urllib.request.Request(
+            url, data=payload, headers={"Authorization": auth_header}
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return {
+                "delivered": True,
+                "channel": "TWILIO_CARRIER",
+                "status": "DELIVERED",
+                "sid": data.get("sid"),
+            }
+    except Exception as exc:
+        return {
+            "delivered": False,
+            "channel": "TWILIO_ERROR",
+            "status": "FAILED",
+            "note": str(exc),
+        }
 
 
 def now_ts() -> str:
@@ -68,13 +139,68 @@ class NexusQualifierEngine:
         self.booking_url = booking_url
         self.sessions: Dict[str, LeadSession] = {}
         self.audited_prospects: Dict[str, dict] = {}
+        self.owner_alerts: List[dict] = []
+        self.load_persisted_alerts()
         self.activity_log: List[dict] = [
             {
                 "time": now_ts(),
                 "type": "SYSTEM",
-                "message": "Nexus AI Unified Funnel & Command Center initialized.",
+                "message": f"Nexus AI Unified Funnel initialized. Text alerts linked to {OWNER_ALERT_PHONE}.",
             }
         ]
+
+    def load_persisted_alerts(self) -> None:
+        alerts_file = BASE_DIR / "hot_leads_alerts.json"
+        if alerts_file.is_file():
+            try:
+                with open(alerts_file, "r", encoding="utf-8") as f:
+                    self.owner_alerts = json.load(f)
+            except Exception:
+                self.owner_alerts = []
+
+    def save_persisted_alerts(self) -> None:
+        alerts_file = BASE_DIR / "hot_leads_alerts.json"
+        try:
+            with open(alerts_file, "w", encoding="utf-8") as f:
+                json.dump(self.owner_alerts[:50], f, indent=2)
+        except Exception:
+            pass
+
+    def dispatch_owner_alert(
+        self, trigger_event: str, lead_phone: str, lead_summary: str
+    ) -> dict:
+        timestamp = dt.datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")
+        sms_text = (
+            f"🔥 [NEXUS HOT LEAD ALERT]\n"
+            f"Someone is interested in your AI reception service!\n\n"
+            f"• Lead: {lead_phone}\n"
+            f"• Event: {trigger_event}\n"
+            f"• Details: {lead_summary}\n"
+            f"• Time: {timestamp}\n\n"
+            f"Call or text them back immediately to close the deal!"
+        )
+
+        delivery = send_twilio_sms(OWNER_ALERT_PHONE, sms_text)
+        alert_record = {
+            "id": f"alert-{len(self.owner_alerts) + 1}",
+            "time": now_ts(),
+            "timestamp": timestamp,
+            "target_phone": OWNER_ALERT_PHONE,
+            "event": trigger_event,
+            "lead_phone": lead_phone,
+            "details": lead_summary,
+            "sms_body": sms_text,
+            "status": delivery.get("status", "QUEUED"),
+            "channel": delivery.get("channel", "SYSTEM"),
+            "note": delivery.get("note", ""),
+        }
+        self.owner_alerts.insert(0, alert_record)
+        self.save_persisted_alerts()
+        self.log_event(
+            "OWNER SMS ALERT",
+            f"Dispatched text alert to {OWNER_ALERT_PHONE}: [{trigger_event}] {lead_phone} ({lead_summary})",
+        )
+        return alert_record
 
     def log_event(self, event_type: str, message: str) -> None:
         self.activity_log.insert(
@@ -106,6 +232,11 @@ class NexusQualifierEngine:
             "8-SEC DEMO",
             f"Missed call from {caller_phone} ({trade}) -> Fired 8-second SMS recovery.",
         )
+        self.dispatch_owner_alert(
+            "DEMO_CALL_TRIGGERED",
+            caller_phone,
+            f"Missed call from {trade} contractor. Fired 8-sec SMS demo.",
+        )
         return msg
 
     def trigger_calculator_audit(
@@ -124,6 +255,11 @@ class NexusQualifierEngine:
         self.log_event(
             "CALC LEAD",
             f"Calculator audit requested by {phone} ({trade} | {weekly_loss}/wk).",
+        )
+        self.dispatch_owner_alert(
+            "CALCULATOR_SUBMITTED",
+            phone,
+            f"Trade: {trade} | Estimated Loss: {weekly_loss}/wk",
         )
         return msg
 
@@ -163,6 +299,11 @@ class NexusQualifierEngine:
                 "QUALIFIED Q1",
                 f"{from_phone} misses {missed} calls/wk (~${est_weekly:,}/wk leak). Asked Q2 (CRM).",
             )
+            self.dispatch_owner_alert(
+                "QUALIFIED_CALL_VOLUME",
+                from_phone,
+                f"Misses {missed} calls/wk (~${est_weekly:,}/wk leak). Moving to CRM stage.",
+            )
             return reply
 
         if session.stage == "AWAITING_CRM":
@@ -181,6 +322,11 @@ class NexusQualifierEngine:
                 "QUALIFIED Q2",
                 f"{from_phone} uses {session.crm}. Sent direct booking link ({self.booking_url}).",
             )
+            self.dispatch_owner_alert(
+                "QUALIFIED_CRM_PROVIDED",
+                from_phone,
+                f"Uses CRM: {session.crm} | Potential recovery: ~${est_monthly:,}/mo | Sent booking link",
+            )
             return reply
 
         low = clean.lower()
@@ -198,6 +344,11 @@ class NexusQualifierEngine:
             self.log_event(
                 "CALENDAR LOCKED",
                 f"Booked {from_phone} ({session.crm}) for {slot}!",
+            )
+            self.dispatch_owner_alert(
+                "CALENDAR_SLOT_LOCKED",
+                from_phone,
+                f"Locked in for {slot} | CRM: {session.crm}",
             )
             return reply
 
@@ -298,11 +449,13 @@ class WebhookHandler(BaseHTTPRequestHandler):
             self._send_json(
                 {
                     "status": "online",
+                    "owner_phone": OWNER_ALERT_PHONE,
                     "demo_number": NYC_DEMO_NUMBER,
                     "booking_url": CALENDLY_BOOKING_URL,
                     "hunter_leads": hunter_leads,
                     "intent_leads": intent_leads,
                     "sms_sessions": sessions_list,
+                    "owner_alerts": ENGINE.owner_alerts,
                     "activity_log": ENGINE.activity_log,
                 }
             )
@@ -460,6 +613,36 @@ class WebhookHandler(BaseHTTPRequestHandler):
             weekly_loss = data.get("weekly_loss", "$9,000")
             sms_text = ENGINE.trigger_calculator_audit(phone, trade, weekly_loss)
             self._send_json({"ok": True, "sms_preview": sms_text})
+            return
+
+        if self.path == "/api/book-slot":
+            name = data.get("name", "Interested Contractor").strip()
+            contact = data.get("contact", "").strip()
+            slot = data.get("slot", "Tomorrow @ 8:00 AM EST").strip()
+            calls = data.get("calls", "4–8 calls/wk").strip()
+            crm = data.get("crm", "ServiceTitan").strip()
+
+            ENGINE.log_event(
+                "BOOKING CONFIRMED",
+                f"{name} ({contact}) booked {slot} | CRM: {crm} | Volume: {calls}",
+            )
+            alert = ENGINE.dispatch_owner_alert(
+                "WEB_CALENDAR_BOOKING",
+                contact,
+                f"Name: {name} | Slot: {slot} | CRM: {crm} | Volume: {calls}",
+            )
+            self._send_json({"ok": True, "alert": alert})
+            return
+
+        if self.path == "/api/test-owner-alert":
+            test_phone = data.get("test_lead_phone", "+1 (212) 555-0144")
+            test_trade = data.get("trade", "HVAC")
+            alert = ENGINE.dispatch_owner_alert(
+                "TEST_HOT_LEAD",
+                test_phone,
+                f"{test_trade} Contractor requested immediate 8-sec emergency demo ($12,000/wk leak)",
+            )
+            self._send_json({"ok": True, "alert": alert})
             return
 
         if self.path == "/twilio/voice-missed":

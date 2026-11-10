@@ -1,0 +1,41 @@
+[
+  {
+    "id": "alert-3",
+    "time": "09:58:18",
+    "timestamp": "2026-11-04 09:58:18 AM",
+    "target_phone": "+19298392194",
+    "event": "CALCULATOR_SUBMITTED",
+    "lead_phone": "(347) 555-9012",
+    "details": "Trade: Plumbing | Estimated Loss: $9,000/wk",
+    "sms_body": "\ud83d\udd25 [NEXUS HOT LEAD ALERT]\nSomeone is interested in your AI reception service!\n\n\u2022 Lead: (347) 555-9012\n\u2022 Event: CALCULATOR_SUBMITTED\n\u2022 Details: Trade: Plumbing | Estimated Loss: $9,000/wk\n\u2022 Time: 2026-11-04 09:58:18 AM\n\nCall or text them back immediately to close the deal!",
+    "status": "QUEUED_LOCAL",
+    "channel": "SYSTEM_SIMULATION",
+    "note": "Alert saved & broadcasted. Add TWILIO_ACCOUNT_SID & TWILIO_AUTH_TOKEN in .env for live cellular SMS."
+  },
+  {
+    "id": "alert-2",
+    "time": "09:58:11",
+    "timestamp": "2026-11-04 09:58:11 AM",
+    "target_phone": "+19298392194",
+    "event": "WEB_CALENDAR_BOOKING",
+    "lead_phone": "(917) 555-8821",
+    "details": "Name: Mike Henderson | Slot: Tomorrow @ 8:00 AM EST | CRM: Housecall Pro | Volume: 6 calls/wk",
+    "sms_body": "\ud83d\udd25 [NEXUS HOT LEAD ALERT]\nSomeone is interested in your AI reception service!\n\n\u2022 Lead: (917) 555-8821\n\u2022 Event: WEB_CALENDAR_BOOKING\n\u2022 Details: Name: Mike Henderson | Slot: Tomorrow @ 8:00 AM EST | CRM: Housecall Pro | Volume: 6 calls/wk\n\u2022 Time: 2026-11-04 09:58:11 AM\n\nCall or text them back immediately to close the deal!",
+    "status": "QUEUED_LOCAL",
+    "channel": "SYSTEM_SIMULATION",
+    "note": "Alert saved & broadcasted. Add TWILIO_ACCOUNT_SID & TWILIO_AUTH_TOKEN in .env for live cellular SMS."
+  },
+  {
+    "id": "alert-1",
+    "time": "09:57:59",
+    "timestamp": "2026-11-04 09:57:59 AM",
+    "target_phone": "+19298392194",
+    "event": "TEST_HOT_LEAD",
+    "lead_phone": "+1 (917) 555-0144",
+    "details": "Emergency HVAC Contractor requested immediate 8-sec emergency demo ($12,000/wk leak)",
+    "sms_body": "\ud83d\udd25 [NEXUS HOT LEAD ALERT]\nSomeone is interested in your AI reception service!\n\n\u2022 Lead: +1 (917) 555-0144\n\u2022 Event: TEST_HOT_LEAD\n\u2022 Details: Emergency HVAC Contractor requested immediate 8-sec emergency demo ($12,000/wk leak)\n\u2022 Time: 2026-11-04 09:57:59 AM\n\nCall or text them back immediately to close the deal!",
+    "status": "QUEUED_LOCAL",
+    "channel": "SYSTEM_SIMULATION",
+    "note": "Alert saved & broadcasted. Add TWILIO_ACCOUNT_SID & TWILIO_AUTH_TOKEN in .env for live cellular SMS."
+  }
+]

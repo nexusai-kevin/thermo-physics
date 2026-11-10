@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/funnel", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/command_center.html" },
+    { "source": "/command-center", "destination": "/command_center.html" }
+  ]
+}
