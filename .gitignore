@@ -17,3 +17,9 @@ build/
 Thumbs.db
 .vscode/
 .idea/
+
+# Environment and secrets
+.env
+.env.*
+*.log
+

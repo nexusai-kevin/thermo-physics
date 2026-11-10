@@ -164,6 +164,28 @@
       <!-- Right 5 Columns: SMS Qualifier Sandbox + Live Console Log -->
       <div class="lg:col-span-5 space-y-6 sticky top-20">
 
+        <!-- Real-Time Owner SMS Alert Dispatcher (+1 929-839-2194) -->
+        <div id="node-alerts" class="bg-gradient-to-br from-slate-900 to-amber-950/20 border-2 border-amber-500/60 rounded-3xl p-5 shadow-2xl space-y-3.5 glow-amber">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <div>
+              <span class="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">● OWNER INSTANT TEXT DISPATCH</span>
+              <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+                <span>Alerts Linked:</span>
+                <span class="text-amber-400 font-mono bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">+1 (929) 839-2194</span>
+              </h3>
+            </div>
+            <button onclick="sendTestOwnerAlert()" class="text-[10px] font-mono bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 rounded-lg transition shadow">
+              ⚡ Test Alert to 929-839-2194
+            </button>
+          </div>
+
+          <div id="owner-alerts-feed" class="bg-slate-950 border border-slate-800 rounded-2xl p-3 h-48 overflow-y-auto space-y-2 text-xs font-mono">
+            <div class="text-center py-6 text-slate-500 text-xs">
+              ⏳ Ready & listening. Instant text dispatched to <strong class="text-amber-400">+1 (929) 839-2194</strong> whenever someone is interested.
+            </div>
+          </div>
+        </div>
+
         <div id="node-webhook" class="bg-slate-900 border-2 border-emerald-500/50 rounded-3xl p-5 shadow-2xl space-y-4 glow-emerald">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
@@ -210,7 +232,7 @@
   </main>
 
   <script>
-    const API_BASE = 'http://127.0.0.1:8000';
+    const API_BASE = window.location.protocol.startsWith('http') ? '' : 'http://127.0.0.1:8000';
     let activeSimPhone = '(718) 748-1254';
     let stateData = { hunter_leads: [], intent_leads: [] };
 
@@ -486,6 +508,57 @@
       } catch (_) {}
     }
 
+    function renderOwnerAlerts(alerts) {
+      const container = document.getElementById('owner-alerts-feed');
+      if (!container) return;
+      if (!alerts || alerts.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-slate-500 text-xs">
+            ⏳ Ready & listening. Instant text dispatched to <strong class="text-amber-400">+1 (929) 839-2194</strong> whenever someone is interested.
+          </div>
+        `;
+        return;
+      }
+      container.innerHTML = alerts.map(a => `
+        <div class="p-2.5 rounded-xl bg-slate-900 border border-amber-500/30 space-y-1">
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="text-amber-400 font-bold">🔥 [HOT LEAD] ${a.event}</span>
+            <span class="text-slate-500">${a.time}</span>
+          </div>
+          <div class="text-white text-xs font-bold">${a.lead_phone}</div>
+          <div class="text-slate-300 text-[11px]">${a.details}</div>
+          <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1 border-t border-slate-800">
+            <span>To: <strong class="text-slate-200">${a.target_phone}</strong></span>
+            <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${a.status}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function sendTestOwnerAlert() {
+      addLog('OWNER ALERT', 'Firing test hot lead alert to +1 (929) 839-2194...', 'text-amber-400');
+      try {
+        const res = await fetch(`${API_BASE}/api/test-owner-alert`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ test_lead_phone: '+1 (212) 555-0144', trade: 'HVAC' })
+        });
+        const data = await res.json();
+        addLog('ALERT SENT', `Notification generated -> Target: +1 (929) 839-2194 (${data.alert.status})`, 'text-emerald-400');
+        await refreshDashboardState();
+      } catch (_) {
+        addLog('ERROR', 'Failed to reach server to fire alert.', 'text-red-400');
+      }
+    }
+
+    async function refreshDashboardState() {
+      try {
+        const res = await fetch(`${API_BASE}/api/state`);
+        const data = await res.json();
+        if (data.owner_alerts) renderOwnerAlerts(data.owner_alerts);
+      } catch (_) {}
+    }
+
     async function runAllPipelines() {
       await runHunterScript();
       await runIntentScript();
@@ -504,8 +577,13 @@
           stateData.intent_leads = data.intent_leads;
           renderIntentLeads(stateData.intent_leads);
         }
+        if (data.owner_alerts) {
+          renderOwnerAlerts(data.owner_alerts);
+        }
         addLog('READY', `Loaded ${stateData.hunter_leads.length} real NYC contractors & ${stateData.intent_leads.length} live Reddit threads.`, 'text-emerald-400');
         triggerMissedCallInTerminal();
+        // Poll for fresh owner alerts every 3 seconds
+        setInterval(refreshDashboardState, 3000);
       } catch (_) {
         addLog('OFFLINE', 'Start START_NEXUS.bat to connect live Python scrapers.', 'text-red-400');
       }

@@ -4,33 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nexus AI Solutions | 8-Second Missed-Call Text-Back & 24/7 AI Dispatch for NYC Contractors</title>
-  <meta name="description" content="Stop losing $1,500+ emergency plumbing, HVAC, electrical, and roofing jobs to voicemail. Call or text our NYC Instant Demo line and watch our AI qualify and book jobs in 8 seconds." />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Stop losing $1,500+ emergency plumbing, HVAC, electrical, and roofing jobs to voicemail. Watch our AI qualify and book NYC jobs in 8 seconds." />
+  
+  <!-- Fonts: Inter Display + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
           },
           colors: {
             brand: {
-              amber: '#F59E0B',
-              orange: '#EA580C',
-              dark: '#0B0F17',
-              card: '#131B2E',
-              border: '#23304C'
+              gold: '#F59E0B',
+              amber: '#D97706',
+              dark: '#070A11',
+              card: '#0F1523',
+              border: '#1E293B',
+              cyan: '#06B6D4',
+              emerald: '#10B981',
             }
           }
         }
       }
     }
   </script>
-  <!-- High-Intent Local Business & FAQ Schema for Search & AI Engines -->
+
+  <!-- High-Intent Local Business & FAQ Schema -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -55,168 +62,409 @@
     ]
   }
   </script>
+
   <style>
-    body { background-color: #0B0F17; color: #F8FAFC; }
+    :root {
+      --bg: #070A11;
+      --card-bg: rgba(15, 21, 35, 0.88);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --amber: #F59E0B;
+      --amber-glow: rgba(245, 158, 11, 0.35);
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --smooth: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      background-color: var(--bg);
+      color: #F8FAFC;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      overflow-x: hidden;
+    }
+
+    /* Claude Fable 5.2 Aesthetic: Micro-noise grain film overlay */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.038;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Fable 5.2 Deep Radial Specular Ambient Glows */
+    .ambient-glow {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: 0;
+    }
+
+    /* Brushed Titanium / Enamel Glass Bevel Card */
+    .fable-panel {
+      position: relative;
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.75) 0%, rgba(10, 14, 24, 0.92) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.12) inset,
+        0 0 0 1px rgba(0, 0, 0, 0.8),
+        0 20px 40px -15px rgba(0, 0, 0, 0.7),
+        0 0 35px -12px var(--amber-glow);
+      backdrop-filter: blur(20px);
+      transition: border-color 0.3s var(--smooth), box-shadow 0.3s var(--smooth), transform 0.3s var(--spring);
+    }
+    .fable-panel:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
+        0 0 0 1px rgba(245, 158, 11, 0.25),
+        0 28px 56px -16px rgba(0, 0, 0, 0.85),
+        0 0 45px -8px rgba(245, 158, 11, 0.25);
+    }
+
+    /* Stamped Industrial Screw Rivet Accents */
+    .rivet {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #e2e8f0 0%, #64748b 45%, #0f172a 100%);
+      box-shadow: 0 0 0 1px #000, 0 1px 1px rgba(255,255,255,0.2) inset;
+    }
+
+    /* Mechanical Range Sliders */
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
       height: 8px;
-      background: #1E293B;
+      background: #111827;
       border-radius: 999px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06);
       outline: none;
+      cursor: pointer;
     }
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
-      background: #F59E0B;
-      cursor: pointer;
+      background: radial-gradient(circle at 35% 35%, #FDE68A 0%, #F59E0B 50%, #B45309 100%);
+      cursor: grab;
       border: 2px solid #FFF;
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 0 16px rgba(245, 158, 11, 0.8);
+      transition: transform 0.15s var(--spring);
     }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+    input[type="range"]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.05);
+    }
+
+    /* Tactile Spring Buttons */
+    .tactile-btn {
+      transition: transform 0.18s var(--spring), box-shadow 0.18s var(--smooth), filter 0.18s ease;
+      touch-action: manipulation;
+    }
+    .tactile-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+    .tactile-btn:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    /* Realistic Smartphone Bezel Simulation */
+    .phone-chassis {
+      position: relative;
+      background: linear-gradient(145deg, #1e2430 0%, #0c1018 50%, #151b26 100%);
+      border-radius: 44px;
+      padding: 12px;
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.12),
+        0 0 0 3px #05070a,
+        0 30px 80px -20px rgba(0, 0, 0, 0.95),
+        0 0 50px -10px rgba(245, 158, 11, 0.18);
+    }
+    .phone-screen {
+      position: relative;
+      background: #030712;
+      border-radius: 34px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .phone-screen::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      right: -50%;
+      bottom: -50%;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 40%, transparent 60%);
+      transform: rotate(25deg);
+    }
+
+    /* Odometer Rolling Digits */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Pulse Ring Animation */
     .pulse-ring {
-      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+      animation: pulse-ring 2.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
     }
     @keyframes pulse-ring {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(245, 158, 11, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+      0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 16px rgba(245, 158, 11, 0); }
+      100% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+
+    /* iMessage Elastic In Animation */
+    @keyframes msgIn {
+      0% { opacity: 0; transform: translateY(12px) scale(0.94); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .msg-animate {
+      animation: msgIn 0.35s var(--spring) forwards;
+    }
+
+    /* Thermal Receipt Tear Edge */
+    .receipt-edge {
+      background: radial-gradient(circle, transparent, transparent 50%, #0d1321 50%, #0d1321 100%);
+      background-size: 14px 14px;
     }
   </style>
 </head>
 <body class="antialiased selection:bg-amber-500 selection:text-slate-950">
 
-  <!-- Top Sticky Live NYC Demo Bar -->
-  <div class="sticky top-0 z-50 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-slate-950 px-4 py-2.5 shadow-lg">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
-      <div class="flex items-center gap-2 font-bold text-sm md:text-base">
-        <span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-950 animate-ping"></span>
-        <span>LIVE NYC 8-SECOND DEMO SANDBOX:</span>
-        <span class="font-normal hidden md:inline">Call & hang up to watch our AI text you back & qualify your job in 8 seconds.</span>
+  <!-- Ambient Backdrop Glows -->
+  <div class="ambient-glow w-[600px] h-[380px] bg-amber-500/10 top-[-100px] left-1/2 -translate-x-1/2"></div>
+  <div class="ambient-glow w-[500px] h-[300px] bg-cyan-500/5 top-[300px] right-[-100px]"></div>
+
+  <!-- Top Sticky Live Demo & Audio Controls Bar -->
+  <div class="sticky top-0 z-50 bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 text-slate-950 px-4 py-2.5 shadow-xl border-b border-amber-300/40">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5 text-center sm:text-left">
+      <div class="flex items-center gap-2.5 font-bold text-xs sm:text-sm">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-950"></span>
+        </span>
+        <span class="font-extrabold tracking-tight">LIVE NYC 8-SECOND DISPATCH SANDBOX:</span>
+        <span class="font-medium hidden md:inline text-slate-900">Call & hang up to watch our AI text back & qualify your emergency in 8.0s.</span>
       </div>
+      
       <div class="flex items-center gap-3">
-        <a href="tel:+12125550199" class="font-mono font-extrabold text-sm md:text-base bg-slate-950 text-amber-400 px-3.5 py-1 rounded-full hover:bg-slate-900 transition">
+        <!-- Procedural Sound Effects Toggle -->
+        <button id="audio-toggle-btn" onclick="toggleAudioEngine()" class="bg-slate-950/20 hover:bg-slate-950/30 text-slate-950 px-2.5 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1 transition">
+          <span id="audio-icon">🔊</span>
+          <span id="audio-label">FX: ON</span>
+        </button>
+
+        <a href="tel:+12125550199" onclick="SoundFX.click()" class="font-mono font-black text-xs sm:text-sm bg-slate-950 text-amber-400 px-3.5 py-1 rounded-full hover:bg-slate-900 transition shadow">
           📞 (212) 555-0199
         </a>
-        <a href="#sandbox" class="text-xs md:text-sm font-bold underline decoration-2 hover:opacity-80">
-          Try Interactive Simulator ↓
+        <a href="#sandbox" onclick="SoundFX.click()" class="text-xs font-black underline decoration-2 hover:opacity-80">
+          Try Simulator ↓
         </a>
       </div>
     </div>
   </div>
 
-  <!-- Navigation -->
-  <header class="border-b border-slate-800/80 bg-slate-950/60 backdrop-blur">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+  <!-- Header Navigation -->
+  <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-[41px] z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center font-black text-slate-950 text-xl shadow-md">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-amber-500/20">
           N
         </div>
         <div>
-          <span class="font-extrabold text-lg tracking-tight text-white">NEXUS AI</span>
-          <span class="block text-[11px] font-mono uppercase tracking-widest text-amber-400">NYC Trade Dispatch Systems</span>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg tracking-tight text-white">NEXUS AI</span>
+            <span class="hidden sm:inline text-[10px] font-mono uppercase bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20 font-bold">Fable 5.2 Core</span>
+          </div>
+          <span class="block text-[11px] font-mono uppercase tracking-widest text-amber-400/90">NYC Trade Dispatch Systems</span>
         </div>
       </div>
-      <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
-        <a href="#calculator" class="hover:text-amber-400 transition">Missed Revenue Calculator</a>
-        <a href="#sandbox" class="hover:text-amber-400 transition">8-Sec Demo Sandbox</a>
-        <a href="#qualifier" class="hover:text-amber-400 transition">AI Qualifier & Booking</a>
-        <a href="#seo-guides" class="hover:text-amber-400 transition">NYC Trade Playbooks</a>
+
+      <nav class="hidden lg:flex items-center gap-8 text-xs font-mono uppercase tracking-wider text-slate-300">
+        <a href="#radar-section" onclick="SoundFX.click()" class="hover:text-amber-400 transition flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          Live NYC Radar
+        </a>
+        <a href="#calculator" onclick="SoundFX.click()" class="hover:text-amber-400 transition">Revenue Leak Engine</a>
+        <a href="#sandbox" onclick="SoundFX.click()" class="hover:text-amber-400 transition">8-Sec Simulator</a>
+        <a href="#qualifier" onclick="SoundFX.click()" class="hover:text-amber-400 transition">AI Qualifier</a>
+        <a href="#seo-guides" onclick="SoundFX.click()" class="hover:text-amber-400 transition">NYC Playbooks</a>
       </nav>
-      <a href="#qualifier" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm px-4 py-2.5 rounded-lg transition shadow-md">
-        Test Your Setup →
-      </a>
+
+      <div class="flex items-center gap-3">
+        <a href="#qualifier" onclick="SoundFX.click()" class="tactile-btn bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl shadow-lg shadow-amber-500/25 border border-amber-300/40">
+          Lock NYC Number →
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- Hero Section + Instant Demo Phone Line -->
-  <section class="relative overflow-hidden py-14 md:py-20 border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-12 items-center">
+  <!-- Hero Section with Photorealistic iPhone Simulator & Live Telemetry -->
+  <section class="relative overflow-hidden py-12 md:py-20 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 grid lg:grid-cols-12 gap-12 items-center relative z-10">
       
-      <!-- Left Column: Copy & Direct Phone CTA -->
-      <div class="lg:col-span-7 space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono uppercase tracking-wider">
-          Built for NYC Plumbing • HVAC • Electrical • Roofing
+      <!-- Left Column: High-Impact Editorial Copy & Value Prop -->
+      <div class="lg:col-span-7 space-y-7">
+        
+        <!-- Live NYC Dispatch Status Badge -->
+        <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/30 text-amber-300 text-xs font-mono shadow-inner">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span class="font-semibold uppercase tracking-wider">NYC Trades: Plumbing • HVAC • Electrical • Roofing</span>
         </div>
-        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.08]">
-          Every Missed Call While You’re on a Job Costs You <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">$1,500+</span>.
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-white">
+          Every Missed Call While You’re on a Job Costs You 
+          <span class="relative whitespace-nowrap">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-300 font-extrabold">$1,500+</span>
+            <svg class="absolute -bottom-2 left-0 w-full h-3 text-amber-500/40" viewBox="0 0 100 20" preserveAspectRatio="none">
+              <path d="M0,15 Q50,0 100,15" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </span>
         </h1>
-        <p class="text-lg sm:text-xl text-slate-300 max-w-2xl leading-relaxed">
-          When an NYC homeowner has a burst pipe, dead AC, or tripped main breaker, <strong class="text-white">they don’t leave a voicemail</strong>—they call the next contractor on Google Maps. Our 24/7 AI Receptionist texts them back in <strong class="text-amber-400">8 seconds</strong>, qualifies the emergency, and books your calendar.
+
+        <p class="text-base sm:text-lg text-slate-300 max-w-2xl leading-relaxed font-normal">
+          When an NYC homeowner has a burst pipe, dead boiler, or tripped main panel, <strong class="text-white font-bold">they never leave a voicemail</strong>—they instantly dial the next contractor on Google Maps. Nexus AI texts them back in <strong class="text-amber-400 font-mono font-bold">8.0 seconds</strong>, qualifies the job with 2 trade questions, and books directly into your calendar.
         </p>
 
-        <!-- Primary Instant Demo CTA Card -->
-        <div class="p-6 rounded-2xl bg-slate-900/90 border-2 border-amber-500/60 shadow-2xl space-y-4">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">⚡ Zero-Salesperson Instant Proof</span>
-            <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">● 24/7 NYC Demo Line Active</span>
+        <!-- Zero-Salesperson Proof Terminal -->
+        <div class="fable-panel p-6 sm:p-7 space-y-5">
+          <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-800/80 pb-3">
+            <div class="flex items-center gap-2">
+              <div class="rivet"></div>
+              <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">⚡ Zero-Salesperson Instant Proof</span>
+            </div>
+            <span class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              24/7 NYC Line Active
+            </span>
           </div>
-          <p class="text-base sm:text-lg font-semibold text-white">
-            “Call or text this number and hang up to see how our 24/7 AI receptionist answers, qualifies, and schedules your emergency jobs in 8 seconds.”
+
+          <p class="text-sm sm:text-base text-slate-200 font-medium leading-relaxed">
+            “Call or text our live NYC demo line right now and hang up. Watch how our AI dispatcher texts you back, qualifies your emergency, and slots you into the calendar in under 8 seconds.”
           </p>
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-1">
-            <a href="tel:+12125550199" class="pulse-ring flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xl px-6 py-4 rounded-xl shadow-lg hover:brightness-110 transition">
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1">
+            <a href="tel:+12125550199" onclick="SoundFX.click()" class="pulse-ring tactile-btn flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500 text-slate-950 font-black text-lg sm:text-xl px-7 py-4 rounded-xl shadow-xl shadow-amber-500/30 border border-amber-300">
               <span>📲 (212) 555-0199</span>
             </a>
-            <button onclick="triggerLiveSandbox()" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold px-5 py-4 rounded-xl border border-slate-700 transition text-sm">
-              <span>▶ Simulate 8-Sec Missed Call in Browser</span>
+            
+            <button onclick="triggerLiveSandbox(); SoundFX.click();" class="tactile-btn flex items-center justify-center gap-2 bg-slate-900/90 hover:bg-slate-800 text-slate-100 font-semibold px-5 py-4 rounded-xl border border-slate-700/80 shadow text-xs sm:text-sm font-mono">
+              <span class="text-amber-400 font-bold">▶</span> Run 8-Sec Browser Test
             </button>
           </div>
-          <p class="text-xs text-slate-400">
-            No forms. No cold pitch. Experience the exact SMS flow your customers get when you can't pick up the phone.
-          </p>
+
+          <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-1">
+            <span>● No forms required</span>
+            <span>● No cold calls</span>
+            <span>● 100% Real-Time SMS Pipeline</span>
+          </div>
         </div>
+
+        <!-- Metric Badges Row -->
+        <div class="grid grid-cols-3 gap-3 pt-2">
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Response Speed</div>
+            <div class="text-xl sm:text-2xl font-mono font-black text-amber-400 mt-0.5">8.0s</div>
+            <div class="text-[10px] text-slate-500">vs 45s call center</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Recovery Rate</div>
+            <div class="text-xl sm:text-2xl font-mono font-black text-emerald-400 mt-0.5">78.4%</div>
+            <div class="text-[10px] text-slate-500">of dropped callers</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-center">
+            <div class="text-[10px] font-mono uppercase text-slate-400">NYC Average Save</div>
+            <div class="text-xl sm:text-2xl font-mono font-black text-white mt-0.5">+$9,000</div>
+            <div class="text-[10px] text-slate-500">per truck / month</div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Right Column: Interactive 8-Second Phone Sandbox -->
-      <div id="sandbox" class="lg:col-span-5">
-        <div class="bg-slate-900 border border-slate-700/80 rounded-3xl p-5 shadow-2xl max-w-md mx-auto">
-          <!-- Phone Status Bar -->
-          <div class="flex items-center justify-between text-xs text-slate-400 pb-3 border-b border-slate-800">
-            <span class="font-mono font-bold text-white">NYC Contractor Sandbox</span>
-            <div class="flex items-center gap-2">
-              <span id="timer-badge" class="font-mono bg-slate-800 text-amber-400 px-2.5 py-0.5 rounded-full">Ready (0.0s)</span>
+      <!-- Right Column: Photorealistic Dark-Titanium iPhone Simulator -->
+      <div id="sandbox" class="lg:col-span-5 flex justify-center">
+        <div class="phone-chassis w-full max-w-[380px]">
+          <div class="phone-screen p-4 min-h-[580px] flex flex-col justify-between">
+            
+            <!-- Dynamic Island & Speaker Assembly -->
+            <div class="flex flex-col items-center gap-1.5 pb-2">
+              <div id="dynamic-island" class="bg-black border border-slate-800 rounded-full px-4 py-1 flex items-center justify-between w-48 text-[11px] font-mono text-slate-300 shadow-md transition-all duration-300">
+                <span class="flex items-center gap-1.5">
+                  <span id="island-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span id="island-text" class="text-[10px] uppercase font-bold tracking-wider text-slate-200">STANDBY</span>
+                </span>
+                <span id="island-timer" class="text-amber-400 font-bold">0.0s</span>
+              </div>
             </div>
-          </div>
 
-          <!-- Trade Scenario Selector -->
-          <div class="my-3">
-            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1.5">Select Simulated Emergency Scenario:</label>
-            <div class="grid grid-cols-3 gap-1.5 text-xs font-semibold">
-              <button onclick="setSandboxScenario('plumbing')" id="scen-plumbing" class="scen-btn bg-amber-500 text-slate-950 py-1.5 px-2 rounded-lg transition">🔧 Plumbing</button>
-              <button onclick="setSandboxScenario('hvac')" id="scen-hvac" class="scen-btn bg-slate-800 text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-700 transition">❄️ HVAC</button>
-              <button onclick="setSandboxScenario('electrical')" id="scen-electrical" class="scen-btn bg-slate-800 text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-700 transition">⚡ Electrical</button>
+            <!-- Simulated Scenario Switcher Tabs -->
+            <div class="my-2 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800/80">
+              <div class="text-[10px] font-mono uppercase text-slate-400 mb-1 px-1 flex justify-between">
+                <span>SIMULATED NYC EMERGENCY:</span>
+                <span class="text-amber-400 font-bold">1-TAP TEST</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1 text-[11px] font-bold">
+                <button onclick="setSandboxScenario('plumbing')" id="scen-plumbing" class="scen-btn bg-amber-500 text-slate-950 py-1.5 rounded-lg transition font-extrabold shadow">🔧 Plumbing</button>
+                <button onclick="setSandboxScenario('hvac')" id="scen-hvac" class="scen-btn bg-slate-900 text-slate-300 py-1.5 rounded-lg hover:bg-slate-800 transition">❄️ HVAC</button>
+                <button onclick="setSandboxScenario('electrical')" id="scen-electrical" class="scen-btn bg-slate-900 text-slate-300 py-1.5 rounded-lg hover:bg-slate-800 transition">⚡ Electric</button>
+              </div>
             </div>
-          </div>
 
-          <!-- Simulated Phone Screen -->
-          <div id="sandbox-feed" class="bg-slate-950 rounded-2xl p-4 h-80 overflow-y-auto space-y-3 border border-slate-800/90 text-sm">
-            <div class="text-center text-xs text-slate-500 font-mono py-1">
-              Click "Simulate Missed Call" below to test the 8-second dispatch recovery
-            </div>
-            <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs flex items-center justify-between text-red-300">
-              <span>📵 Incoming Call: Brooklyn Homeowner</span>
-              <span class="font-mono font-bold">MISSED</span>
-            </div>
-            <div class="bg-amber-500/15 border border-amber-500/40 rounded-2xl rounded-tl-sm p-3.5 text-slate-100 space-y-1">
-              <div class="text-[10px] font-mono uppercase text-amber-400 font-bold">Nexus AI Dispatch • +08.0s after hangup</div>
-              <p id="sandbox-initial-msg">Hey! Sorry we missed your call—our master plumbers are currently under a sink on a job. 🚰 Are you dealing with an active leak/emergency in NYC, or looking to schedule an estimate? Reply here and I can dispatch a tech right away!</p>
-            </div>
-          </div>
+            <!-- Real-Time SMS Chat Feed -->
+            <div id="sandbox-feed" class="flex-1 bg-slate-950/90 rounded-2xl p-3.5 overflow-y-auto space-y-3 border border-slate-900 text-xs shadow-inner max-h-[340px]">
+              <div class="text-center text-[10px] text-slate-500 font-mono py-1">
+                ── Today 10:42 PM • Brooklyn, NY ──
+              </div>
 
-          <!-- Interactive Reply Input inside Sandbox -->
-          <div class="mt-3 space-y-2">
-            <div class="flex gap-2">
-              <input id="sandbox-user-input" type="text" placeholder="Type homeowner reply (e.g. 'Basement pipe burst in Queens')..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400" />
-              <button onclick="sendSandboxReply()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition">
-                Send
+              <!-- Missed Call Event -->
+              <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-2.5 text-xs flex items-center justify-between text-red-300">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">📵</span>
+                  <div>
+                    <div class="font-bold text-white text-[11px]">Incoming Call (Park Slope)</div>
+                    <div class="text-[10px] text-red-400">Caller hung up (no voicemail)</div>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-700">MISSED</span>
+              </div>
+
+              <!-- AI Dispatch SMS Message -->
+              <div class="msg-animate bg-gradient-to-br from-amber-500/20 to-orange-500/15 border border-amber-500/40 rounded-2xl rounded-tl-sm p-3 text-slate-100 space-y-1">
+                <div class="flex items-center justify-between text-[10px] font-mono text-amber-400 font-bold border-b border-amber-500/20 pb-1">
+                  <span>NEXUS DISPATCH BOT</span>
+                  <span class="text-emerald-400">⚡ +08.0s</span>
+                </div>
+                <p id="sandbox-initial-msg" class="leading-relaxed text-[11.5px]">
+                  Hey! Sorry we missed your call—our master plumbers are currently under a sink on a job in Brooklyn. 🚰 Are you dealing with an active leak/emergency in NYC, or looking to schedule an estimate? Reply here and I can dispatch a tech right away!
+                </p>
+              </div>
+            </div>
+
+            <!-- Interactive Reply Dock -->
+            <div class="mt-3 space-y-2">
+              <div class="flex gap-1.5">
+                <input id="sandbox-user-input" type="text" placeholder="Reply as homeowner (e.g. 'Burst pipe in basement!')..." class="flex-1 bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400 font-sans" onkeydown="if(event.key==='Enter') sendSandboxReply()" />
+                <button onclick="sendSandboxReply()" class="tactile-btn bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl transition shadow">
+                  Send
+                </button>
+              </div>
+
+              <button onclick="triggerLiveSandbox(); SoundFX.click();" class="w-full py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-amber-400 font-mono text-[11px] font-bold border border-slate-800 transition flex items-center justify-center gap-1.5">
+                <span>↻ Replay 8.0s Missed-Call Countdown</span>
               </button>
             </div>
-            <button onclick="triggerLiveSandbox()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-mono text-xs font-bold border border-slate-700 transition">
-              ↻ Replay 8-Second Missed-Call Countdown
-            </button>
+
           </div>
         </div>
       </div>
@@ -224,62 +472,175 @@
     </div>
   </section>
 
-  <!-- Section 2: High-Intent "Missed Revenue Calculator" Lead Magnet -->
-  <section id="calculator" class="py-16 md:py-24 border-b border-slate-800 bg-slate-950/50">
+  <!-- Live NYC Emergency Dispatch Radar Canvas Section -->
+  <section id="radar-section" class="py-14 md:py-20 border-b border-slate-800/80 relative bg-slate-950/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-800/80 pb-6">
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-400 font-bold mb-1">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            Real-Time NYC Borough Telemetry
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Live NYC Emergency Signal & Dispatch Radar
+          </h2>
+          <p class="text-sm text-slate-400 max-w-xl mt-1">
+            Visualizing simulated live missed calls across Manhattan, Brooklyn, Queens, Bronx, and Staten Island recovering under 8 seconds.
+          </p>
+        </div>
+
+        <!-- Telemetry Data Counter Bar -->
+        <div class="flex items-center gap-4 text-xs font-mono">
+          <div class="bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-xl">
+            <span class="text-slate-400">BOROUGHS:</span>
+            <span class="text-emerald-400 font-bold ml-1">5/5 ONLINE</span>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-xl">
+            <span class="text-slate-400">AI LATENCY:</span>
+            <span class="text-amber-400 font-bold ml-1">7.8s AVG</span>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-xl">
+            <span class="text-slate-400">STATUS:</span>
+            <span class="text-cyan-400 font-bold ml-1">LIVE DISPATCH</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radar Canvas & Live Terminal Stream -->
+      <div class="grid lg:grid-cols-12 gap-6 items-stretch">
+        
+        <!-- Canvas Visualizer -->
+        <div class="lg:col-span-7 fable-panel p-4 flex flex-col justify-between overflow-hidden">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400 border-b border-slate-800/80 pb-2 mb-2">
+            <span class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              NYC RADAR GRID [40.7128° N, 74.0060° W]
+            </span>
+            <span class="text-[10px] text-slate-500">REFRESH: 60 FPS</span>
+          </div>
+          
+          <div class="relative w-full h-[320px] rounded-xl overflow-hidden bg-[#040810] border border-cyan-500/20">
+            <canvas id="radar-canvas" class="w-full h-full block"></canvas>
+            
+            <!-- Compass Overlay -->
+            <div class="absolute top-3 left-3 text-[10px] font-mono text-cyan-400/70 pointer-events-none">
+              <div>N 360°</div>
+              <div>RANGE: 25 MILES</div>
+            </div>
+            <div class="absolute bottom-3 right-3 text-[10px] font-mono text-amber-400/80 pointer-events-none text-right">
+              <div>DISPATCH FREQ: 915 MHz</div>
+              <div>NYC BOROUGH GRID</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Dispatch Telemetry Event Stream -->
+        <div class="lg:col-span-5 fable-panel p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-3">
+              <span class="text-xs font-mono uppercase text-amber-400 font-bold">⚡ Live Signal Ticker</span>
+              <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                AUTO-POLLING
+              </span>
+            </div>
+
+            <div id="radar-log" class="space-y-2.5 max-h-[260px] overflow-y-auto text-xs font-mono pr-1">
+              <!-- Log items populated dynamically -->
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-slate-300">
+                <span class="text-amber-400 font-bold">[QUEENS]</span>
+                <span class="truncate mx-2">🚰 Sump pump fail • 10:41 PM</span>
+                <span class="text-emerald-400 font-bold">7.4s BOOKED</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-slate-300">
+                <span class="text-cyan-400 font-bold">[BROOKLYN]</span>
+                <span class="truncate mx-2">❄️ Boiler ignition error • 10:42 PM</span>
+                <span class="text-emerald-400 font-bold">8.1s BOOKED</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-slate-300">
+                <span class="text-orange-400 font-bold">[MANHATTAN]</span>
+                <span class="truncate mx-2">⚡ Commercial subpanel trip</span>
+                <span class="text-emerald-400 font-bold">7.9s BOOKED</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>Average Dispatch Speed: <strong class="text-emerald-400">7.8 Seconds</strong></span>
+            <a href="#calculator" class="text-amber-400 font-bold underline hover:text-amber-300">Calculate Your Loss →</a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Section 2: Mechanical Split-Flap Revenue Leak Calculator -->
+  <section id="calculator" class="py-16 md:py-24 border-b border-slate-800/80 bg-slate-950/60 relative">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
-      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
-        <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Free NYC Contractor Audit Tool</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+        <div class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
+          <div class="rivet"></div>
+          Free NYC Contractor Revenue Audit
+          <div class="rivet"></div>
+        </div>
+        <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white">
           Missed Call Revenue Leak Calculator
         </h2>
-        <p class="text-slate-400 text-base sm:text-lg">
-          Enter your trade, average job ticket, and how many calls go to voicemail while you or your crew are driving, on a roof, or on another line.
+        <p class="text-slate-300 text-base sm:text-lg">
+          Adjust the sliders below to calculate your exact monthly and annual revenue lost to voicemail while your crew is driving or on another job.
         </p>
       </div>
 
       <div class="grid lg:grid-cols-12 gap-8 items-stretch">
-        <!-- Calculator Controls -->
-        <div class="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-7">
-          <!-- Trade Selection -->
+        
+        <!-- Left: Interactive Precision Control Panel -->
+        <div class="lg:col-span-7 fable-panel p-6 sm:p-8 space-y-8">
+          
+          <!-- 1. Trade Selector -->
           <div>
-            <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-2.5">1. Select Your Trade (Sets NYC Avg Emergency Ticket)</label>
+            <label class="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-3 font-bold">
+              1. Select Your NYC Trade (Sets Average Emergency Ticket)
+            </label>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <button type="button" onclick="selectTrade('Plumbing', 1500, 6)" id="trade-Plumbing" class="trade-btn bg-amber-500 text-slate-950 font-bold py-3 px-3 rounded-xl text-sm border border-amber-400 transition">
+              <button type="button" onclick="selectTrade('Plumbing', 1500, 6); SoundFX.click();" id="trade-Plumbing" class="trade-btn bg-amber-500 text-slate-950 font-black py-3 px-3 rounded-xl text-xs sm:text-sm border border-amber-300 transition shadow-lg shadow-amber-500/20">
                 🚰 Plumbing
               </button>
-              <button type="button" onclick="selectTrade('HVAC', 1850, 5)" id="trade-HVAC" class="trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition">
+              <button type="button" onclick="selectTrade('HVAC', 1850, 5); SoundFX.click();" id="trade-HVAC" class="trade-btn bg-slate-900 text-slate-200 font-semibold py-3 px-3 rounded-xl text-xs sm:text-sm border border-slate-700 hover:border-slate-500 transition">
                 ❄️ HVAC
               </button>
-              <button type="button" onclick="selectTrade('Electrical', 1200, 7)" id="trade-Electrical" class="trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition">
+              <button type="button" onclick="selectTrade('Electrical', 1200, 7); SoundFX.click();" id="trade-Electrical" class="trade-btn bg-slate-900 text-slate-200 font-semibold py-3 px-3 rounded-xl text-xs sm:text-sm border border-slate-700 hover:border-slate-500 transition">
                 ⚡ Electrical
               </button>
-              <button type="button" onclick="selectTrade('Roofing', 3200, 4)" id="trade-Roofing" class="trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition">
+              <button type="button" onclick="selectTrade('Roofing', 3200, 4); SoundFX.click();" id="trade-Roofing" class="trade-btn bg-slate-900 text-slate-200 font-semibold py-3 px-3 rounded-xl text-xs sm:text-sm border border-slate-700 hover:border-slate-500 transition">
                 🏠 Roofing
               </button>
             </div>
           </div>
 
           <!-- Slider 1: Average Job Ticket -->
-          <div class="space-y-2">
+          <div class="space-y-2.5">
             <div class="flex justify-between items-center">
-              <label for="ticket-slider" class="text-sm font-semibold text-slate-200">2. Average Job / Dispatch Ticket Value</label>
-              <span id="ticket-display" class="font-mono text-xl font-extrabold text-amber-400">$1,500</span>
+              <label for="ticket-slider" class="text-sm font-bold text-slate-200">2. Average Emergency Job Ticket Value</label>
+              <span id="ticket-display" class="font-mono text-xl sm:text-2xl font-black text-amber-400 tabular-nums">$1,500</span>
             </div>
-            <input id="ticket-slider" type="range" min="300" max="5000" step="50" value="1500" oninput="updateCalculator()" class="w-full" />
+            <input id="ticket-slider" type="range" min="300" max="5000" step="50" value="1500" oninput="updateCalculator(); SoundFX.slider();" class="w-full" />
             <div class="flex justify-between text-[11px] font-mono text-slate-500">
-              <span>$300 (Service Call)</span>
+              <span>$300 (Diagnostic)</span>
               <span>$1,500 (Emergency Repair)</span>
-              <span>$5,000 (Install/Replacement)</span>
+              <span>$5,000 (Replacement)</span>
             </div>
           </div>
 
           <!-- Slider 2: Weekly Missed Calls -->
-          <div class="space-y-2">
+          <div class="space-y-2.5">
             <div class="flex justify-between items-center">
-              <label for="missed-slider" class="text-sm font-semibold text-slate-200">3. Unanswered / Voicemail Calls Per Week</label>
-              <span id="missed-display" class="font-mono text-xl font-extrabold text-amber-400">6 calls/wk</span>
+              <label for="missed-slider" class="text-sm font-bold text-slate-200">3. Unanswered Calls Per Week (Voicemail / Busy)</label>
+              <span id="missed-display" class="font-mono text-xl sm:text-2xl font-black text-amber-400 tabular-nums">6 calls/wk</span>
             </div>
-            <input id="missed-slider" type="range" min="1" max="30" step="1" value="6" oninput="updateCalculator()" class="w-full" />
+            <input id="missed-slider" type="range" min="1" max="30" step="1" value="6" oninput="updateCalculator(); SoundFX.slider();" class="w-full" />
             <div class="flex justify-between text-[11px] font-mono text-slate-500">
               <span>1 call/wk</span>
               <span>10 calls/wk</span>
@@ -287,216 +648,240 @@
             </div>
           </div>
 
-          <!-- Slider 3: Close Rate on Answered Calls -->
-          <div class="space-y-2">
+          <!-- Slider 3: Close Rate on Live Answered Calls -->
+          <div class="space-y-2.5">
             <div class="flex justify-between items-center">
-              <label for="close-slider" class="text-sm font-semibold text-slate-200">4. Your Close Rate When You Answer Live</label>
-              <span id="close-display" class="font-mono text-xl font-extrabold text-emerald-400">100% (Raw Potential)</span>
+              <label for="close-slider" class="text-sm font-bold text-slate-200">4. Estimated Close Rate on Live Answered Calls</label>
+              <span id="close-display" class="font-mono text-xl sm:text-2xl font-black text-emerald-400 tabular-nums">100% (Raw Potential)</span>
             </div>
-            <input id="close-slider" type="range" min="25" max="100" step="5" value="100" oninput="updateCalculator()" class="w-full" />
+            <input id="close-slider" type="range" min="25" max="100" step="5" value="100" oninput="updateCalculator(); SoundFX.slider();" class="w-full" />
             <div class="flex justify-between text-[11px] font-mono text-slate-500">
               <span>25% Conservative</span>
               <span>50% Typical Emergency</span>
-              <span>100% Full Ticket Value</span>
+              <span>100% Full Potential</span>
             </div>
           </div>
+
         </div>
 
-        <!-- Calculator Output + SMS Report Capture -->
-        <div class="lg:col-span-5 bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-500/60 rounded-2xl p-6 sm:p-8 flex flex-col justify-between space-y-6 shadow-2xl">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
+        <!-- Right: Odometer Display & Instant SMS Report Receipt -->
+        <div class="lg:col-span-5 fable-panel p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div class="space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
               <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Estimated Revenue Lost to Voicemail</span>
-              <span id="calc-trade-pill" class="text-xs font-mono bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full">Plumbing</span>
+              <span id="calc-trade-pill" class="text-xs font-mono bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full font-bold border border-amber-500/30">Plumbing</span>
             </div>
 
-            <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/30">
-              <div class="text-xs font-mono uppercase text-red-300">Weekly Lost Revenue</div>
-              <div id="weekly-loss" class="font-mono text-4xl sm:text-5xl font-black text-white mt-1">$9,000<span class="text-lg font-normal text-slate-400">/wk</span></div>
+            <!-- Weekly Lost Banner with Odometer -->
+            <div class="p-5 rounded-2xl bg-red-950/40 border border-red-500/30 shadow-inner">
+              <div class="text-[11px] font-mono uppercase text-red-300 font-semibold">Weekly Bleed</div>
+              <div id="weekly-loss" class="font-mono text-4xl sm:text-5xl font-black text-white mt-1 tabular-nums">
+                $9,000<span class="text-lg font-normal text-slate-400">/wk</span>
+              </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700">
+            <!-- Monthly & Annual Split-Flap Ticker -->
+            <div class="grid grid-cols-2 gap-3.5">
+              <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
                 <div class="text-[11px] font-mono uppercase text-slate-400">Monthly Leak</div>
-                <div id="monthly-loss" class="font-mono text-2xl font-extrabold text-amber-400 mt-0.5">$39,000</div>
+                <div id="monthly-loss" class="font-mono text-2xl font-black text-amber-400 mt-1 tabular-nums">$39,000</div>
               </div>
-              <div class="p-3.5 rounded-xl bg-slate-800/70 border border-slate-700">
-                <div class="text-[11px] font-mono uppercase text-slate-400">Annual Leak</div>
-                <div id="annual-loss" class="font-mono text-2xl font-extrabold text-orange-400 mt-0.5">$468,000</div>
+              <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
+                <div class="text-[11px] font-mono uppercase text-slate-400">Annual Drain</div>
+                <div id="annual-loss" class="font-mono text-2xl font-black text-orange-400 mt-1 tabular-nums">$468,000</div>
               </div>
             </div>
 
-            <div class="text-xs text-slate-300 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
-              💡 <strong>Break-Even Math:</strong> Saving just <strong class="text-emerald-400">1 missed emergency call per month</strong> pays for Nexus AI Solutions 5x over.
+            <!-- Break-Even Guarantee Callout -->
+            <div class="text-xs text-slate-200 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3.5 leading-relaxed">
+              💡 <strong class="text-emerald-400 font-bold">The Math:</strong> Recovering just <strong class="text-white underline">1 missed emergency call per month</strong> completely pays for Nexus AI Solutions multiple times over.
             </div>
           </div>
 
-          <!-- SMS Lead Magnet Form -->
-          <form onsubmit="submitCalculatorSMS(event)" class="space-y-3 pt-2 border-t border-slate-800">
-            <label for="calc-phone" class="block text-sm font-bold text-white">
-              Enter your cell to text yourself this report & test our missed-call text-back solution live:
+          <!-- Instant SMS Report Lead Capture -->
+          <form onsubmit="submitCalculatorSMS(event)" class="space-y-3 pt-3 border-t border-slate-800/80">
+            <label for="calc-phone" class="block text-xs font-bold text-slate-200 font-mono">
+              Enter your cell to text yourself this exact audit & test our 8-second text-back live:
             </label>
             <div class="flex flex-col sm:flex-row gap-2">
-              <input id="calc-phone" type="tel" required placeholder="(917) 555-0143" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-amber-400" />
-              <button type="submit" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-sm px-5 py-3 rounded-xl transition whitespace-nowrap shadow-lg">
-                Text My Report + Demo →
+              <input id="calc-phone" type="tel" required placeholder="(917) 555-0143" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs sm:text-sm text-white font-mono focus:outline-none focus:border-amber-400" />
+              <button type="submit" onclick="SoundFX.click()" class="tactile-btn bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 font-black text-xs sm:text-sm px-5 py-3 rounded-xl transition whitespace-nowrap shadow-lg">
+                Text My Report →
               </button>
             </div>
-            <div id="calc-sms-confirmation" class="hidden text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 rounded-lg p-3"></div>
+            <div id="calc-sms-confirmation" class="hidden text-xs font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 rounded-lg p-3"></div>
           </form>
+
         </div>
+
       </div>
+
     </div>
   </section>
 
-  <!-- Section 3: Automated 2-Question AI Qualifier & Frictionless Calendar Booking -->
-  <section id="qualifier" class="py-16 md:py-24 border-b border-slate-800">
+  <!-- Section 3: 2-Question AI Qualifier & Instant Calendar Booking -->
+  <section id="qualifier" class="py-16 md:py-24 border-b border-slate-800/80">
     <div class="max-w-5xl mx-auto px-4 sm:px-6">
-      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
-        <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Zero Back-and-Forth Email Tag</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+        <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Zero Email Back-and-Forth</span>
+        <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white">
           2-Question AI Qualifier & Instant Setup Booking
         </h2>
-        <p class="text-slate-400 text-base sm:text-lg">
-          Answer 2 operational questions below to see how our AI qualifies leads and unlocks direct calendar booking in under 30 seconds.
+        <p class="text-slate-300 text-base sm:text-lg">
+          Select your weekly missed volume and current software below to unlock priority 48-hour onboarding.
         </p>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl grid md:grid-cols-12 gap-8 items-center">
-        <!-- Left: 2-Step Interactive Qualifier -->
+      <div class="fable-panel p-6 sm:p-10 grid md:grid-cols-12 gap-8 items-center">
+        
+        <!-- Left: Interactive 2-Question Stepper -->
         <div class="md:col-span-7 space-y-6">
           <div class="flex items-center gap-3">
-            <span class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 font-black flex items-center justify-center text-sm">AI</span>
+            <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 font-black flex items-center justify-center text-sm shadow">AI</span>
             <div>
-              <div class="text-sm font-bold text-white">Nexus AI Onboarding Agent</div>
+              <div class="text-sm font-bold text-white">Nexus AI Onboarding Engine</div>
               <div class="text-xs text-emerald-400 font-mono">● Online • Instant Calendar Sync</div>
             </div>
           </div>
 
-          <!-- Question 1 -->
+          <!-- Question 1: Missed Call Volume -->
           <div class="space-y-2.5">
-            <label class="block text-sm font-bold text-slate-200">
-              Q1: How many calls do you estimate your team misses weekly (including after-hours & busy lines)?
+            <label class="block text-xs font-bold font-mono text-slate-300 uppercase">
+              Q1: How many calls does your team miss weekly (after-hours & busy lines)?
             </label>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <button type="button" onclick="setQualCalls('1–3 calls/wk')" class="qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">1–3 / week</button>
-              <button type="button" onclick="setQualCalls('4–8 calls/wk')" class="qual-call-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition">4–8 / week</button>
-              <button type="button" onclick="setQualCalls('9–15 calls/wk')" class="qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">9–15 / week</button>
-              <button type="button" onclick="setQualCalls('15+ calls/wk')" class="qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">15+ / week</button>
+              <button type="button" onclick="setQualCalls('1–3 calls/wk'); SoundFX.click();" class="qual-call-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">1–3 / week</button>
+              <button type="button" onclick="setQualCalls('4–8 calls/wk'); SoundFX.click();" class="qual-call-btn bg-amber-500 text-slate-950 text-xs font-black py-2.5 px-3 rounded-xl border border-amber-300 transition shadow">4–8 / week</button>
+              <button type="button" onclick="setQualCalls('9–15 calls/wk'); SoundFX.click();" class="qual-call-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">9–15 / week</button>
+              <button type="button" onclick="setQualCalls('15+ calls/wk'); SoundFX.click();" class="qual-call-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">15+ / week</button>
             </div>
           </div>
 
-          <!-- Question 2 -->
+          <!-- Question 2: CRM & Dispatch Stack -->
           <div class="space-y-2.5">
-            <label class="block text-sm font-bold text-slate-200">
+            <label class="block text-xs font-bold font-mono text-slate-300 uppercase">
               Q2: What CRM or dispatch calendar do you currently use?
             </label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <button type="button" onclick="setQualCRM('ServiceTitan')" class="qual-crm-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition">ServiceTitan</button>
-              <button type="button" onclick="setQualCRM('Housecall Pro')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Housecall Pro</button>
-              <button type="button" onclick="setQualCRM('Jobber')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Jobber</button>
-              <button type="button" onclick="setQualCRM('Google Calendar')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Google Calendar</button>
-              <button type="button" onclick="setQualCRM('FieldEdge / Other')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">FieldEdge / Other</button>
-              <button type="button" onclick="setQualCRM('Pen & Paper / SMS')" class="qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Phone / SMS Only</button>
+              <button type="button" onclick="setQualCRM('ServiceTitan'); SoundFX.click();" class="qual-crm-btn bg-amber-500 text-slate-950 text-xs font-black py-2.5 px-3 rounded-xl border border-amber-300 transition shadow">ServiceTitan</button>
+              <button type="button" onclick="setQualCRM('Housecall Pro'); SoundFX.click();" class="qual-crm-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Housecall Pro</button>
+              <button type="button" onclick="setQualCRM('Jobber'); SoundFX.click();" class="qual-crm-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Jobber</button>
+              <button type="button" onclick="setQualCRM('Google Calendar'); SoundFX.click();" class="qual-crm-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Google Calendar</button>
+              <button type="button" onclick="setQualCRM('FieldEdge / Other'); SoundFX.click();" class="qual-crm-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">FieldEdge / Other</button>
+              <button type="button" onclick="setQualCRM('Phone / SMS Only'); SoundFX.click();" class="qual-crm-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition">Phone / SMS Only</button>
             </div>
           </div>
 
           <!-- Dynamic AI Qualification Verdict -->
-          <div id="qual-summary" class="p-4 rounded-2xl bg-slate-950 border border-emerald-500/40 text-xs sm:text-sm text-slate-200 space-y-1">
-            <div class="font-mono text-xs text-emerald-400 font-bold">✓ QUALIFIED FOR TURNKEY 48-HOUR DEPLOYMENT</div>
-            <p id="qual-summary-text">
-              Recovering <strong>4–8 calls/wk</strong> with direct native webhook integration into <strong>ServiceTitan</strong> typically adds <strong>$18,000–$36,000/mo</strong> in booked emergency dispatches. Pick a 15-minute slot to activate your NYC number:
+          <div id="qual-summary" class="p-4 rounded-2xl bg-slate-950 border border-emerald-500/40 text-xs sm:text-sm text-slate-200 space-y-1.5 shadow-inner">
+            <div class="font-mono text-xs text-emerald-400 font-bold flex items-center gap-1.5">
+              <span>✓</span> QUALIFIED FOR TURNKEY 48-HOUR NYC DEPLOYMENT
+            </div>
+            <p id="qual-summary-text" class="leading-relaxed">
+              Recovering <strong>4–8 calls/wk</strong> with direct integration into <strong>ServiceTitan</strong> typically adds <strong>$18,000–$36,000/mo</strong> in booked emergency dispatches. Pick a 15-minute slot to activate your NYC number:
             </p>
           </div>
         </div>
 
-        <!-- Right: Instant In-Thread Calendar Slot Picker -->
-        <div class="md:col-span-5 bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <!-- Right: Frictionless In-Thread Calendar Slot Picker -->
+        <div class="md:col-span-5 bg-slate-950/90 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-xl">
           <div class="flex items-center justify-between border-b border-slate-800 pb-3">
             <div>
-              <div class="text-xs font-mono uppercase text-amber-400 font-bold">Instant Calendar Lock</div>
+              <div class="text-xs font-mono uppercase text-amber-400 font-bold">Priority Calendar Lock</div>
               <div class="text-sm font-bold text-white">15-Min Live Number Activation</div>
             </div>
-            <span class="text-xs font-mono bg-slate-800 px-2.5 py-1 rounded text-slate-300">EST / NYC</span>
+            <span class="text-xs font-mono bg-slate-900 px-2.5 py-1 rounded text-slate-300 border border-slate-800">EST / NYC</span>
           </div>
 
           <div class="space-y-2">
-            <label class="block text-xs font-mono text-slate-400">Select a Day & Time Slot:</label>
+            <label class="block text-xs font-mono text-slate-400">Available Activation Windows:</label>
             <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 7:30 AM EST')" class="slot-btn bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-lg border border-amber-400">Tomorrow 7:30 AM</button>
-              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 12:15 PM EST')" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700">Tomorrow 12:15 PM</button>
-              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 4:30 PM EST')" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700">Tomorrow 4:30 PM</button>
-              <button type="button" onclick="selectSlot(this, 'Thursday @ 8:00 AM EST')" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700">Thu 8:00 AM</button>
+              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 7:30 AM EST'); SoundFX.click();" class="slot-btn bg-amber-500 text-slate-950 font-black py-2.5 px-2 rounded-xl border border-amber-300 shadow">Tomorrow 7:30 AM</button>
+              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 12:15 PM EST'); SoundFX.click();" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-xl border border-slate-700">Tomorrow 12:15 PM</button>
+              <button type="button" onclick="selectSlot(this, 'Tomorrow @ 4:30 PM EST'); SoundFX.click();" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-xl border border-slate-700">Tomorrow 4:30 PM</button>
+              <button type="button" onclick="selectSlot(this, 'Thursday @ 8:00 AM EST'); SoundFX.click();" class="slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-xl border border-slate-700">Thu 8:00 AM</button>
             </div>
           </div>
 
-          <form onsubmit="confirmInstantBooking(event)" class="space-y-2.5">
-            <input id="book-name" type="text" required placeholder="Your Name & Company (e.g. Mike - Queens HVAC)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400" />
+          <form onsubmit="confirmInstantBooking(event)" class="space-y-3">
+            <input id="book-name" type="text" required placeholder="Your Name & NYC Company (e.g. Mike - Queens HVAC)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400" />
             <input id="book-contact" type="text" required placeholder="Cell Phone or Email for Calendar Invite" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400" />
-            <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm py-3 rounded-xl transition shadow-lg">
+            <button type="submit" onclick="SoundFX.click()" class="tactile-btn w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black text-xs sm:text-sm py-3.5 rounded-xl transition shadow-lg shadow-emerald-500/20">
               Confirm 15-Min Activation Call →
             </button>
           </form>
-          <div id="booking-confirmation" class="hidden text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 rounded-lg p-3"></div>
+          
+          <div id="booking-confirmation" class="hidden text-xs font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/40 rounded-xl p-3"></div>
         </div>
+
       </div>
+
     </div>
   </section>
 
-  <!-- Section 4: High-Intent Search & Pain-Point Decision Guides (SEO Content) -->
-  <section id="seo-guides" class="py-16 md:py-24 bg-slate-950/60">
+  <!-- Section 4: High-Intent Search Playbooks & Comparison Matrix -->
+  <section id="seo-guides" class="py-16 md:py-24 bg-slate-950/70 border-b border-slate-800/80">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
       <div class="text-center max-w-3xl mx-auto space-y-3">
         <span class="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">Decision-Stage Contractor Playbooks</span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
-          Why NYC Trade Owners Are Replacing Call Centers With 8-Second AI Text-Back
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          Why NYC Trade Owners Are Replacing Call Centers With 8-Second AI
         </h2>
       </div>
 
       <div class="grid md:grid-cols-2 gap-8">
-        <!-- SEO Guide 1 -->
-        <article class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4">
-          <div class="text-xs font-mono text-amber-400 uppercase">NYC Emergency Dispatch Study</div>
+        
+        <!-- Playbook 1 -->
+        <article class="fable-panel p-6 sm:p-8 space-y-4">
+          <div class="text-xs font-mono text-amber-400 uppercase font-bold flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            NYC Emergency Dispatch Study
+          </div>
           <h3 class="text-xl sm:text-2xl font-bold text-white">
             How NYC Plumbing & HVAC Companies Stop Losing After-Hours Emergency Dispatch Calls
           </h3>
           <p class="text-sm text-slate-300 leading-relaxed">
-            When a pipe bursts in Brooklyn at 10:30 PM or a walk-in cooler fails in Manhattan on Sunday morning, the property owner searches Google Maps and calls the top 3 results. <strong>78% of emergency trade jobs go to the first contractor who responds.</strong>
+            When a pipe bursts in Brooklyn at 10:30 PM or a walk-in cooler fails in Manhattan on Sunday morning, the property owner searches Google Maps and calls the top 3 results. <strong class="text-white">78% of emergency trade jobs go to the first contractor who responds.</strong>
           </p>
           <ul class="text-sm text-slate-300 space-y-2 list-disc pl-5">
-            <li><strong>The Voicemail Death Trap:</strong> Less than 14% of emergency callers leave a voicemail. If your line rings 5 times and hits a generic greeting, that $1,800 dispatch is gone.</li>
-            <li><strong>The 8-Second Pattern Interrupt:</strong> When Nexus AI detects a missed call or busy signal, it sends a personalized SMS within 8 seconds while the homeowner is still looking at their phone screen.</li>
-            <li><strong>Automated Triage:</strong> The AI asks for the NYC zip code, nature of the emergency, and photo of the leak/unit, then books the job or wakes up your on-call tech only for verified high-ticket emergencies.</li>
+            <li><strong class="text-white">The Voicemail Death Trap:</strong> Less than 14% of emergency callers leave a voicemail. If your line rings 5 times and hits a generic greeting, that $1,800 dispatch is gone.</li>
+            <li><strong class="text-white">The 8-Second Pattern Interrupt:</strong> When Nexus AI detects a missed call or busy signal, it sends a personalized SMS within 8 seconds while the homeowner is still holding their phone.</li>
+            <li><strong class="text-white">Automated Triage:</strong> The AI asks for the NYC zip code, nature of the emergency, and photo of the leak/unit, then books the job or alerts your on-call tech only for verified high-ticket jobs.</li>
           </ul>
         </article>
 
-        <!-- SEO Guide 2 -->
-        <article class="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-4">
-          <div class="text-xs font-mono text-amber-400 uppercase">Head-to-Head Cost & Conversion Comparison</div>
+        <!-- Playbook 2: Comparison Matrix -->
+        <article class="fable-panel p-6 sm:p-8 space-y-4">
+          <div class="text-xs font-mono text-amber-400 uppercase font-bold flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            Head-to-Head Comparison
+          </div>
           <h3 class="text-xl sm:text-2xl font-bold text-white">
             Virtual Receptionist vs. Automated AI Text-Back for Trade Contractors
           </h3>
           <p class="text-sm text-slate-300 leading-relaxed">
-            Many contractors try $800/month answering services only to discover operators taking messages on sticky notes, mispronouncing local neighborhoods, and failing to book the job.
+            Many contractors pay $800+/month for answering services only to discover operators taking handwritten messages, mispronouncing neighborhoods, and letting emergency jobs slip away.
           </p>
+          
           <div class="overflow-x-auto pt-2">
             <table class="w-full text-left text-xs border-collapse">
               <thead>
                 <tr class="border-b border-slate-700 text-slate-400 font-mono">
-                  <th class="py-2">Metric</th>
-                  <th class="py-2">Call Center / Receptionist</th>
-                  <th class="py-2 text-amber-400">Nexus 8-Sec AI</th>
+                  <th class="py-2.5">Feature</th>
+                  <th class="py-2.5">Call Center Service</th>
+                  <th class="py-2.5 text-amber-400 font-bold">Nexus 8-Sec AI</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-800 text-slate-200">
                 <tr>
                   <td class="py-2.5 font-semibold">Response Speed</td>
                   <td class="py-2.5 text-slate-400">45–90 sec hold time</td>
-                  <td class="py-2.5 text-emerald-400 font-bold">8 Seconds (Instant SMS/Voice)</td>
+                  <td class="py-2.5 text-emerald-400 font-bold">8 Seconds (Instant SMS)</td>
                 </tr>
                 <tr>
                   <td class="py-2.5 font-semibold">Trade Qualification</td>
-                  <td class="py-2.5 text-slate-400">Generic "Takes a message"</td>
+                  <td class="py-2.5 text-slate-400">Generic message taker</td>
                   <td class="py-2.5 text-emerald-400 font-bold">Triage + Photo + Zip + CRM Sync</td>
                 </tr>
                 <tr>
@@ -508,23 +893,187 @@
             </table>
           </div>
         </article>
+
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-800 py-10 text-center text-xs text-slate-500">
+  <footer class="border-t border-slate-800/80 py-12 text-center text-xs text-slate-500 bg-slate-950">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div>© 2026 Nexus AI Solutions • NYC Trade Dispatch Automation</div>
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>© 2026 Nexus AI Solutions • High-Performance NYC Trade Dispatch Automation</span>
+      </div>
       <div class="font-mono text-slate-400">
-        Instant 8-Sec Demo Line: <a href="tel:+12125550199" class="text-amber-400 font-bold">(212) 555-0199</a>
+        NYC 24/7 Demo Line: <a href="tel:+12125550199" class="text-amber-400 font-bold hover:underline">(212) 555-0199</a>
       </div>
     </div>
   </footer>
 
-  <!-- Interactive Logic for Calculator, 8-Second Sandbox, and 2-Question Qualifier -->
+  <!-- Sound Engine, Canvas Radar & Interactive Logic -->
   <script>
-    // --- 1. Missed Revenue Calculator Logic ---
+    // --- 1. Procedural Web Audio API Engine (Zero External Audio Assets) ---
+    const SoundFX = {
+      ctx: null,
+      enabled: true,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      click() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.025);
+        gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.025);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.025);
+      },
+      slider() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(220, this.ctx.currentTime + 0.015);
+        gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.015);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.015);
+      },
+      chime() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        // Warm 3-tone harmonic chime
+        [523.25, 659.25, 783.99].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          const startTime = this.ctx.currentTime + (idx * 0.08);
+          gain.gain.setValueAtTime(0.08, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.45);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.45);
+        });
+      }
+    };
+
+    function toggleAudioEngine() {
+      SoundFX.enabled = !SoundFX.enabled;
+      document.getElementById('audio-icon').textContent = SoundFX.enabled ? '🔊' : '🔇';
+      document.getElementById('audio-label').textContent = SoundFX.enabled ? 'FX: ON' : 'FX: OFF';
+      if (SoundFX.enabled) SoundFX.click();
+    }
+
+    // --- 2. Live NYC Emergency Dispatch Radar Canvas Visualizer ---
+    function initRadar() {
+      const canvas = document.getElementById('radar-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let angle = 0;
+
+      function resize() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      // Borough Blips
+      const blips = [
+        { name: 'BK-01', x: 0.52, y: 0.65, color: '#F59E0B', label: 'Brooklyn (Leak)' },
+        { name: 'MN-04', x: 0.44, y: 0.38, color: '#06B6D4', label: 'Manhattan (Boiler)' },
+        { name: 'QN-09', x: 0.68, y: 0.45, color: '#10B981', label: 'Queens (HVAC)' },
+        { name: 'BX-02', x: 0.50, y: 0.20, color: '#F97316', label: 'Bronx (Panel)' },
+        { name: 'SI-01', x: 0.28, y: 0.80, color: '#A855F7', label: 'Staten Island' },
+      ];
+
+      function draw() {
+        const w = canvas.width;
+        const h = canvas.height;
+        const cx = w / 2;
+        const cy = h / 2;
+        const radius = Math.min(cx, cy) * 0.9;
+
+        ctx.fillStyle = 'rgba(4, 8, 16, 0.15)';
+        ctx.fillRect(0, 0, w, h);
+
+        // Concentric Circles
+        ctx.strokeStyle = 'rgba(6, 182, 212, 0.18)';
+        ctx.lineWidth = 1;
+        for (let r = 0.25; r <= 1.0; r += 0.25) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius * r, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // Crosshairs
+        ctx.beginPath();
+        ctx.moveTo(cx - radius, cy);
+        ctx.lineTo(cx + radius, cy);
+        ctx.moveTo(cx, cy - radius);
+        ctx.lineTo(cx, cy + radius);
+        ctx.stroke();
+
+        // Sweeping Radar Line
+        angle += 0.025;
+        const endX = cx + Math.cos(angle) * radius;
+        const endY = cy + Math.sin(angle) * radius;
+
+        const sweepGrad = ctx.createLinearGradient(cx, cy, endX, endY);
+        sweepGrad.addColorStop(0, 'rgba(245, 158, 11, 0.8)');
+        sweepGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
+
+        ctx.strokeStyle = sweepGrad;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        // Render Blips
+        blips.forEach(b => {
+          const bx = w * b.x;
+          const by = h * b.y;
+          ctx.fillStyle = b.color;
+          ctx.beginPath();
+          ctx.arc(bx, by, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Blip Label
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+          ctx.font = '9px monospace';
+          ctx.fillText(b.name, bx + 6, by - 2);
+        });
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+    window.addEventListener('DOMContentLoaded', initRadar);
+
+    // --- 3. Missed Revenue Calculator Logic ---
     let currentTrade = 'Plumbing';
     function selectTrade(trade, defaultTicket, defaultMissed) {
       currentTrade = trade;
@@ -533,11 +1082,11 @@
       document.getElementById('calc-trade-pill').textContent = trade;
 
       document.querySelectorAll('.trade-btn').forEach(btn => {
-        btn.className = 'trade-btn bg-slate-800 text-slate-200 font-semibold py-3 px-3 rounded-xl text-sm border border-slate-700 hover:border-slate-500 transition';
+        btn.className = 'trade-btn bg-slate-900 text-slate-200 font-semibold py-3 px-3 rounded-xl text-xs sm:text-sm border border-slate-700 hover:border-slate-500 transition';
       });
       const activeBtn = document.getElementById('trade-' + trade);
       if (activeBtn) {
-        activeBtn.className = 'trade-btn bg-amber-500 text-slate-950 font-bold py-3 px-3 rounded-xl text-sm border border-amber-400 transition';
+        activeBtn.className = 'trade-btn bg-amber-500 text-slate-950 font-black py-3 px-3 rounded-xl text-xs sm:text-sm border border-amber-300 transition shadow-lg shadow-amber-500/20';
       }
       updateCalculator();
     }
@@ -567,10 +1116,10 @@
       const box = document.getElementById('calc-sms-confirmation');
       box.classList.remove('hidden');
       box.textContent = `✓ Sent! Check ${phone} in 8 seconds for your ${currentTrade} Missed Revenue Audit (${weeklyText}/wk leak) + live AI text-back demo.`;
+      SoundFX.chime();
 
-      // Optional local webhook call if webhook_server.py is running
       try {
-        await fetch('http://127.0.0.1:8000/api/calculator-lead', {
+        await fetch('/api/calculator-lead', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ phone, trade: currentTrade, weekly_loss: weeklyText })
@@ -578,15 +1127,15 @@
       } catch (_) {}
     }
 
-    // --- 2. 8-Second Sandbox Simulator Logic ---
+    // --- 4. Photorealistic 8-Second Sandbox Simulator Logic ---
     const scenarios = {
       plumbing: {
-        opening: "Hey! Sorry we missed your call—our master plumbers are currently under a sink on a job. 🚰 Are you dealing with an active leak/emergency in NYC, or looking to schedule an estimate? Reply here and I can dispatch a tech right away!",
+        opening: "Hey! Sorry we missed your call—our master plumbers are currently under a sink on a job in Brooklyn. 🚰 Are you dealing with an active leak/emergency in NYC, or looking to schedule an estimate? Reply here and I can dispatch a tech right away!",
         followup: "Got it! We have an emergency plumbing tech 18 minutes away from your zip code. Our emergency dispatch & diagnostic is $149 (waived if you approve the repair). Want me to lock in the next arrival window for you right now?"
       },
       hvac: {
-        opening: "Hi there! Sorry we missed your call—our HVAC crew is on a rooftop unit right now. ❄️ Is your AC/heating system completely down, or are you looking for seasonal maintenance? Text back your NYC zip code and I'll check our nearest truck!",
-        followup: "Understood! We have a EPA-certified HVAC tech finishing a job nearby who can be there between 2:00 PM – 4:00 PM today. Reply YES and I'll text you the live technician tracking link."
+        opening: "Hi there! Sorry we missed your call—our HVAC crew is on a commercial rooftop unit right now. ❄️ Is your AC/heating system completely down, or are you looking for seasonal maintenance? Text back your NYC zip code and I'll check our nearest truck!",
+        followup: "Understood! We have an EPA-certified HVAC tech finishing a job nearby who can be there between 2:00 PM – 4:00 PM today. Reply YES and I'll text you the live technician tracking link."
       },
       electrical: {
         opening: "Hey! Sorry we just missed your call—our licensed electricians are currently working inside a live panel. ⚡ Are you experiencing a power outage/sparking issue, or looking for a quote? Reply here for immediate priority dispatch!",
@@ -599,47 +1148,66 @@
     function setSandboxScenario(scen) {
       activeScenario = scen;
       document.querySelectorAll('.scen-btn').forEach(b => {
-        b.className = 'scen-btn bg-slate-800 text-slate-300 py-1.5 px-2 rounded-lg hover:bg-slate-700 transition';
+        b.className = 'scen-btn bg-slate-900 text-slate-300 py-1.5 rounded-lg hover:bg-slate-800 transition';
       });
-      document.getElementById('scen-' + scen).className = 'scen-btn bg-amber-500 text-slate-950 py-1.5 px-2 rounded-lg transition font-bold';
+      document.getElementById('scen-' + scen).className = 'scen-btn bg-amber-500 text-slate-950 py-1.5 rounded-lg transition font-extrabold shadow';
       triggerLiveSandbox();
     }
 
     function triggerLiveSandbox() {
       const feed = document.getElementById('sandbox-feed');
-      const badge = document.getElementById('timer-badge');
+      const islandText = document.getElementById('island-text');
+      const islandTimer = document.getElementById('island-timer');
+      const islandDot = document.getElementById('island-dot');
       if (countdownInterval) clearInterval(countdownInterval);
 
+      islandText.textContent = "MISSED CALL";
+      islandDot.className = "w-2 h-2 rounded-full bg-red-400 animate-ping";
+
       feed.innerHTML = `
-        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs flex items-center justify-between text-red-300">
-          <span>📵 Incoming Call: NYC Homeowner</span>
-          <span class="font-mono font-bold">HUNG UP (NO VOICEMAIL)</span>
+        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-2.5 text-xs flex items-center justify-between text-red-300">
+          <div class="flex items-center gap-2">
+            <span class="text-base">📵</span>
+            <div>
+              <div class="font-bold text-white text-[11px]">Incoming Call (Park Slope)</div>
+              <div class="text-[10px] text-red-400">Caller hung up (no voicemail)</div>
+            </div>
+          </div>
+          <span class="font-mono text-[10px] bg-red-950 text-red-300 px-2 py-0.5 rounded border border-red-700">MISSED</span>
         </div>
-        <div id="countdown-status" class="text-center py-4 font-mono text-xs text-amber-400 animate-pulse">
-          ⏱ Detecting missed call... triggering 8.0s AI SMS recovery...
+        <div id="countdown-status" class="text-center py-4 font-mono text-[11px] text-amber-400 animate-pulse flex items-center justify-center gap-2">
+          <span>⏱</span> Detecting dropped call... triggering 8.0s AI dispatch...
         </div>
       `;
 
       let elapsed = 0;
       const target = 8.0;
-      // Speed up slightly in browser (1.6s real time = 8.0s simulated clock) so user doesn't wait long
       countdownInterval = setInterval(() => {
         elapsed += 0.5;
-        badge.textContent = `⏱ ${elapsed.toFixed(1)}s / 8.0s`;
+        islandTimer.textContent = `${elapsed.toFixed(1)}s`;
+        SoundFX.slider();
+
         if (elapsed >= target) {
           clearInterval(countdownInterval);
-          badge.textContent = `✓ Sent in 8.0s`;
+          islandText.textContent = "SMS SENT (8.0s)";
+          islandDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+          SoundFX.chime();
+
           const statusEl = document.getElementById('countdown-status');
           if (statusEl) statusEl.remove();
+
           feed.innerHTML += `
-            <div class="bg-amber-500/15 border border-amber-500/40 rounded-2xl rounded-tl-sm p-3.5 text-slate-100 space-y-1">
-              <div class="text-[10px] font-mono uppercase text-amber-400 font-bold">Nexus AI Dispatch • +08.0s after hangup</div>
-              <p>${scenarios[activeScenario].opening}</p>
+            <div class="msg-animate bg-gradient-to-br from-amber-500/20 to-orange-500/15 border border-amber-500/40 rounded-2xl rounded-tl-sm p-3 text-slate-100 space-y-1">
+              <div class="flex items-center justify-between text-[10px] font-mono text-amber-400 font-bold border-b border-amber-500/20 pb-1">
+                <span>NEXUS DISPATCH BOT</span>
+                <span class="text-emerald-400">⚡ +08.0s</span>
+              </div>
+              <p class="leading-relaxed text-[11.5px]">${scenarios[activeScenario].opening}</p>
             </div>
           `;
           feed.scrollTop = feed.scrollHeight;
         }
-      }, 150);
+      }, 140);
     }
 
     function sendSandboxReply() {
@@ -647,27 +1215,46 @@
       const text = input.value.trim() || "Yes, emergency leak in Queens! Need someone ASAP.";
       const feed = document.getElementById('sandbox-feed');
       input.value = '';
+      SoundFX.click();
 
       feed.innerHTML += `
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl rounded-tr-sm p-3 text-slate-200 ml-8 text-xs">
-          <div class="text-[10px] font-mono text-slate-400 mb-0.5">NYC Homeowner</div>
+        <div class="msg-animate bg-slate-800 border border-slate-700 rounded-2xl rounded-tr-sm p-2.5 text-slate-200 ml-8 text-[11.5px]">
+          <div class="text-[9px] font-mono text-slate-400 mb-0.5">NYC Homeowner</div>
           <p>${text.replace(/</g, '&lt;')}</p>
         </div>
       `;
       feed.scrollTop = feed.scrollHeight;
 
+      // Show typing indicator
+      const typingId = "typing-" + Date.now();
+      feed.innerHTML += `
+        <div id="${typingId}" class="msg-animate bg-slate-900 border border-slate-800 rounded-2xl rounded-tl-sm p-2 text-slate-400 text-xs w-20 flex justify-center gap-1">
+          <span class="animate-bounce">●</span>
+          <span class="animate-bounce" style="animation-delay: 0.15s">●</span>
+          <span class="animate-bounce" style="animation-delay: 0.3s">●</span>
+        </div>
+      `;
+      feed.scrollTop = feed.scrollHeight;
+
       setTimeout(() => {
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        SoundFX.chime();
+
         feed.innerHTML += `
-          <div class="bg-emerald-500/15 border border-emerald-500/40 rounded-2xl rounded-tl-sm p-3.5 text-slate-100 space-y-1 mr-4 text-xs">
-            <div class="text-[10px] font-mono uppercase text-emerald-400 font-bold">Nexus AI Dispatch • Instant Qualification</div>
-            <p>${scenarios[activeScenario].followup}</p>
+          <div class="msg-animate bg-emerald-500/15 border border-emerald-500/40 rounded-2xl rounded-tl-sm p-3 text-slate-100 space-y-1 mr-2 text-[11.5px]">
+            <div class="flex items-center justify-between text-[10px] font-mono text-emerald-400 font-bold border-b border-emerald-500/20 pb-1">
+              <span>NEXUS DISPATCH</span>
+              <span>PRIORITY QUALIFIED</span>
+            </div>
+            <p class="leading-relaxed">${scenarios[activeScenario].followup}</p>
           </div>
         `;
         feed.scrollTop = feed.scrollHeight;
-      }, 600);
+      }, 900);
     }
 
-    // --- 3. 2-Question AI Qualifier & Calendar Booking Logic ---
+    // --- 5. 2-Question AI Qualifier & Calendar Booking Logic ---
     let selectedCalls = '4–8 calls/wk';
     let selectedCRM = 'ServiceTitan';
     let selectedSlotTime = 'Tomorrow @ 7:30 AM EST';
@@ -676,8 +1263,8 @@
       selectedCalls = val;
       document.querySelectorAll('.qual-call-btn').forEach(btn => {
         btn.className = btn.textContent.trim() === val.replace(' calls/wk', ' / week')
-          ? 'qual-call-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition'
-          : 'qual-call-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition';
+          ? 'qual-call-btn bg-amber-500 text-slate-950 text-xs font-black py-2.5 px-3 rounded-xl border border-amber-300 transition shadow'
+          : 'qual-call-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition';
       });
       updateQualSummary();
     }
@@ -686,32 +1273,47 @@
       selectedCRM = val;
       document.querySelectorAll('.qual-crm-btn').forEach(btn => {
         btn.className = btn.textContent.trim() === val
-          ? 'qual-crm-btn bg-amber-500 text-slate-950 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-400 transition'
-          : 'qual-crm-btn bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition';
+          ? 'qual-crm-btn bg-amber-500 text-slate-950 text-xs font-black py-2.5 px-3 rounded-xl border border-amber-300 transition shadow'
+          : 'qual-crm-btn bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 transition';
       });
       updateQualSummary();
     }
 
     function updateQualSummary() {
       document.getElementById('qual-summary-text').innerHTML =
-        `Recovering <strong>${selectedCalls}</strong> with direct integration into <strong>${selectedCRM}</strong> keeps your trucks full without hiring an office manager. Pick a 15-minute slot to activate your dedicated NYC number:`;
+        `Recovering <strong>${selectedCalls}</strong> with direct integration into <strong>${selectedCRM}</strong> typically adds <strong>$18,000–$36,000/mo</strong> in booked emergency dispatches. Pick a 15-minute slot to activate your NYC number:`;
     }
 
     function selectSlot(btn, slotText) {
       selectedSlotTime = slotText;
       document.querySelectorAll('.slot-btn').forEach(b => {
-        b.className = 'slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-lg border border-slate-700';
+        b.className = 'slot-btn bg-slate-900 hover:bg-slate-800 text-slate-200 py-2.5 px-2 rounded-xl border border-slate-700';
       });
-      btn.className = 'slot-btn bg-amber-500 text-slate-950 font-bold py-2.5 px-2 rounded-lg border border-amber-400';
+      btn.className = 'slot-btn bg-amber-500 text-slate-950 font-black py-2.5 px-2 rounded-xl border border-amber-300 shadow';
     }
 
-    function confirmInstantBooking(e) {
+    async function confirmInstantBooking(e) {
       e.preventDefault();
       const name = document.getElementById('book-name').value.trim();
       const contact = document.getElementById('book-contact').value.trim();
       const conf = document.getElementById('booking-confirmation');
       conf.classList.remove('hidden');
       conf.innerHTML = `✓ Booked for <strong>${selectedSlotTime}</strong>! Calendar invite & SMS confirmation sent to <strong>${contact}</strong> (${name} • ${selectedCalls} • ${selectedCRM}).`;
+      SoundFX.chime();
+
+      try {
+        await fetch('/api/book-slot', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            contact,
+            slot: selectedSlotTime,
+            calls: selectedCalls,
+            crm: selectedCRM
+          })
+        });
+      } catch (_) {}
     }
   </script>
 </body>
