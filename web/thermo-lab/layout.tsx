@@ -1,4 +1,27 @@
+import type { Metadata } from "next";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+
+export const metadata: Metadata = {
+  title: "Thermo Lab · Open-Source Thermodynamic Sampling Benchmarks",
+  description:
+    "Sixteen open-source thermodynamic computing stations mapping Ising, Potts, and QUBO physics to JAX block Gibbs samplers, reproducible on an ordinary laptop.",
+  alternates: {
+    canonical: "/thermo-lab",
+  },
+  openGraph: {
+    title: "Thermo Lab · Open-Source Thermodynamic Sampling Benchmarks",
+    description:
+      "Sixteen open-source thermodynamic computing stations mapping Ising, Potts, and QUBO physics to JAX block Gibbs samplers, reproducible on an ordinary laptop.",
+    url: "/thermo-lab",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Thermo Lab · Open-Source Thermodynamic Sampling Benchmarks",
+    description:
+      "Sixteen open-source thermodynamic computing stations mapping Ising, Potts, and QUBO physics to JAX block Gibbs samplers, reproducible on an ordinary laptop.",
+  },
+};
 
 const fraunces = Fraunces({
   subsets: ["latin"],

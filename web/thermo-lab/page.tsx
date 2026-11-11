@@ -59,7 +59,7 @@ const STATIONS: StationSpec[] = [
       "An NP-hard Max-Cut optimization problem on an Erdos-Renyi random graph G(50, 0.20) mapped to an antiferromagnetic Ising Hamiltonian. Annealing drives the system to partition vertices into two subgraphs while maximizing the count of cut edges.",
     scriptFile: "solve_max_cut.py",
     runtime: "7.344s (G(50, 0.20), 243 edges)",
-    keyMetric: "70.8% Optimal Cut (172/243 edges vs. 49.9% random)",
+    keyMetric: "70.8% Cut Edges (172/243 edges cut vs. 49.9% random expectation)",
     physicsFormula: "J_{uv} = -1.0  ⇒  min E(s) ⟺ max Cut(s)",
     engineeringSummary:
       "Greedy largest-first vertex coloring decomposes an arbitrary 50-node Erdos-Renyi graph into 7 conditionally independent color blocks for parallel JAX Gibbs sweeps.",
@@ -241,7 +241,7 @@ const STATIONS: StationSpec[] = [
       "Underdamped BAOAB Langevin dynamics with dynamic clause memory multipliers y_m(t) and Jarzynski-Neal SMC resampling to overcome topological frustration and energy barriers in hard constraint-satisfaction instances.",
     scriptFile: "thermo_physics/experiments/exp17_phase3_final_boss.py",
     runtime: "1.58s (BAOAB TPU Langevin; Extropic TSU analytical projection: 0.002s)",
-    keyMetric: "0 Violations (100% SAT) | Q_hk = 3,697.4 J | N_eff Resuscitated to 63.8%",
+    keyMetric: "0 Violations (100% SAT) | Q_hk = 3,697.4 dissipated | N_eff Resuscitated to 63.8%",
     physicsFormula: "m dv_i = (-∂H/∂x_i - ∑ y_m ∂C_m/∂x_i - γ v_i) dt + √(2γ k_B T) dW_i,  dy_m = (κ C_m - η(y_m - λ_0)) dt",
     engineeringSummary:
       "Underdamped symplectic BAOAB integrator coupling continuous double-well oscillators with non-conservative auxiliary clause multipliers y_m(t) and 22-stage Jarzynski-Neal SMC population resampling. Proves First Law energy conservation (<10^-10), prevents N_eff collapse (lifting 3.2% to 63.8%), and eliminates topological frustration at N=100 (0 violations).",
@@ -748,10 +748,10 @@ export default function ThermoLabPage() {
   );
   const scucDemands = useMemo(() => [450, 520, 680, 750, 620, 480], []);
   const [scucSchedule, setScucSchedule] = useState<number[][]>([
-    [1, 0, 0, 1, 1, 1], // Nuclear
-    [0, 0, 1, 0, 0, 0], // Coal
-    [0, 1, 1, 0, 0, 0], // CCGT
-    [0, 1, 0, 0, 0, 0], // Peaker
+    [1, 1, 1, 1, 1, 1], // Nuclear Base (400 MW continuous baseload)
+    [0, 0, 1, 1, 1, 0], // Coal Base (250 MW peak hours)
+    [0, 1, 0, 0, 0, 0], // CCGT Flex Gas (150 MW hour 2)
+    [1, 0, 1, 1, 0, 1], // Peaker Turbine (100 MW reserve)
   ]);
   const [scucPenaltyWeight, setScucPenaltyWeight] = useState<number>(0.005);
   const [selectedBackend, setSelectedBackend] = useState<"jax" | "extropic">("jax");
@@ -1105,13 +1105,16 @@ export default function ThermoLabPage() {
     () => selectedAssets.reduce((a, v) => a + v, 0),
     [selectedAssets]
   );
-  const quboTotalReturn = useMemo(
-    () =>
-      selectedAssets
-        .reduce((acc, sel, idx) => acc + (sel ? assetReturns[idx] : 0), 0)
-        .toFixed(1),
-    [selectedAssets, assetReturns]
-  );
+  const quboTotalReturn = useMemo(() => {
+    const selectedIndices = selectedAssets
+      .map((sel, idx) => (sel ? idx : -1))
+      .filter((idx) => idx >= 0);
+    if (selectedIndices.length === 0) return "0.0";
+    const avg =
+      selectedIndices.reduce((acc, idx) => acc + assetReturns[idx], 0) /
+      selectedIndices.length;
+    return avg.toFixed(1);
+  }, [selectedAssets, assetReturns]);
 
   const tspCurrentLength = useMemo(() => {
     let sum = 0;
@@ -1499,25 +1502,39 @@ export default function ThermoLabPage() {
         <div className="max-w-5xl mx-auto text-center space-y-6">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#05070f] border border-[rgba(250,249,245,0.12)] text-[#5eead4] text-xs font-mono shadow-inner">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#5eead4] animate-pulse" />
-            <span className="font-medium uppercase tracking-[0.18em]">16-Station Thermodynamic Benchmark Suite · Extropic thrml v0.1.4</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#5eead4]" />
+            <span className="font-medium uppercase tracking-[0.18em]">Open-Source Physics Benchmarks · Extropic thrml v0.1.4</span>
           </div>
 
           <h1 className="font-[family-name:var(--font-display)] text-3xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.03em] text-[#faf9f5] leading-[0.98]">
-            Nexus Thermodynamic Lab:{" "}
+            Open-source thermodynamic sampling benchmarks,{" "}
             <em className="italic font-light text-[#5eead4]">
-              How Physics Solves Impossible Puzzles
+              reproducible on a laptop
             </em>
           </h1>
 
           <p className="text-base sm:text-lg text-[rgba(250,249,245,0.68)] max-w-3xl mx-auto leading-relaxed font-light">
-            Instead of forcing GPUs to crunch deterministic rules step-by-step,{" "}
-            <strong className="text-[#faf9f5] font-normal">Thermodynamic Computers</strong> let nature do the math.
-            Slide the temperature dial above to watch 16 physical energy landscapes relax into optimal ground states automatically.
+            Sixteen interactive stations mapping Ising, Potts, and QUBO physics to JAX block Gibbs samplers and physical Langevin dynamics. Every station links to a standalone, open-source script in the repository that runs locally with no special hardware.
           </p>
 
-          {/* Interactive Cryogenic Presets */}
-          <div className="pt-4 flex flex-wrap justify-center gap-3 font-mono text-[11px] uppercase tracking-[0.15em]">
+          {/* Interactive Cryogenic Presets & Main Repo Star Links */}
+          <div className="pt-4 flex flex-wrap justify-center items-center gap-3 font-mono text-[11px] uppercase tracking-[0.15em]">
+            <a
+              href="https://github.com/nexusai-kevin/thermo-physics"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-[#faf9f5] px-5 py-2 font-medium text-[#020308] hover:bg-white transition-colors"
+            >
+              View Python Scripts on GitHub ↗
+            </a>
+            <a
+              href="/BENCHMARK_DOSSIER.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-[rgba(250,249,245,0.18)] bg-[#05070f] px-5 py-2 text-[#faf9f5] hover:border-[rgba(250,249,245,0.4)] transition-colors"
+            >
+              Technical Dossier (HTML) ↗
+            </a>
             <button
               onClick={() => handleBetaChange(0.2)}
               className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] px-4 py-2 text-[rgba(250,249,245,0.7)] hover:border-[rgba(250,249,245,0.4)] hover:text-[#faf9f5] transition-colors"
@@ -1528,22 +1545,14 @@ export default function ThermoLabPage() {
               onClick={() => handleBetaChange(0.44)}
               className="rounded-full border border-[#f59e0b]/40 bg-[#140e04]/60 px-4 py-2 text-[#f59e0b] hover:border-[#f59e0b] transition-colors"
             >
-              // β = 0.44 · Onsager Critical Point
+              // β = 0.44 · Critical Point
             </button>
             <button
               onClick={() => handleBetaChange(3.5)}
               className="rounded-full border border-[#5eead4]/40 bg-[#041a1a]/60 px-4 py-2 text-[#5eead4] hover:border-[#5eead4] transition-colors"
             >
-              // β = 3.50 · Ground State
+              // β = 3.50 · Low Temp
             </button>
-            <a
-              href="https://github.com/nexusai-kevin/thermo-physics"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full bg-[#faf9f5] px-5 py-2 font-medium text-[#020308] hover:bg-white transition-colors"
-            >
-              GitHub Repository ↗
-            </a>
           </div>
         </div>
       </header>
@@ -1582,7 +1591,7 @@ export default function ThermoLabPage() {
                     : "text-[rgba(250,249,245,0.6)] hover:text-[#faf9f5]"
                 }`}
               >
-                JAX Block Gibbs (Simulated)
+                JAX Block Gibbs (Measured)
               </button>
               <button
                 onClick={() => {
@@ -1595,7 +1604,7 @@ export default function ThermoLabPage() {
                     : "text-[rgba(250,249,245,0.6)] hover:text-[#faf9f5]"
                 }`}
               >
-                Extropic TSU Silicon (Drop-in Target)
+                Extropic TSU Model (Analytical Projection)
               </button>
             </div>
           </div>
@@ -1665,6 +1674,28 @@ export default function ThermoLabPage() {
                   <span className="px-3 py-1.5 rounded-lg border border-[rgba(250,249,245,0.08)] bg-[#020308]/60">
                     Runtime: <strong className="text-[#5eead4] font-normal">{station.runtime}</strong>
                   </span>
+                </div>
+
+                {/* Reproducible Open-Source Script & CLI Command */}
+                <div className="p-3.5 rounded-xl border border-[rgba(94,234,212,0.25)] bg-[#041a1a]/50 flex flex-col gap-2 font-mono text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.5)]">
+                      Reproducible Script
+                    </span>
+                    <a
+                      href={`https://github.com/nexusai-kevin/thermo-physics/blob/main/${station.scriptFile}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-[#5eead4]/40 bg-[#020308] text-[11px] text-[#5eead4] hover:bg-[#5eead4]/10 transition-colors font-medium"
+                    >
+                      <span>{station.scriptFile}</span>
+                      <span className="text-[10px] opacity-70">↗</span>
+                    </a>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-[rgba(250,249,245,0.6)] bg-[#020308]/80 px-2.5 py-1.5 rounded-lg border border-[rgba(250,249,245,0.06)]">
+                    <span className="text-[10px] text-[rgba(250,249,245,0.4)]">Run Locally:</span>
+                    <code className="text-[#34d399] select-all">uv run thrml-bench run --exp {station.id}</code>
+                  </div>
                 </div>
               </div>
 
@@ -2028,7 +2059,7 @@ export default function ThermoLabPage() {
                           {quboCount} / 5 Assets {quboCount === 5 ? "(Feasible)" : "(Penalty Active)"}
                         </div>
                         <div className="text-xs text-[rgba(250,249,245,0.55)] font-mono">
-                          Portfolio Return:{" "}
+                          Expected Return (Equal-Weighted):{" "}
                           <strong className="text-[#5eead4]">{quboTotalReturn}%</strong>
                         </div>
                       </div>
@@ -2341,7 +2372,7 @@ export default function ThermoLabPage() {
                         <div className="text-lg font-mono font-medium text-[#5eead4] mt-1">
                           {skEnergyA.toFixed(2)}
                         </div>
-                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">kcal/mol (Replica α)</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Unitless H (Replica α)</div>
                       </div>
                       <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
                         <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Order Parameter ⟨|q|⟩</div>
@@ -2729,9 +2760,9 @@ export default function ThermoLabPage() {
                       <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
                         <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Optimal Hamiltonian E*</div>
                         <div className="text-lg font-mono font-medium text-[#34d399] mt-1">
-                          5451.00
+                          953.50
                         </div>
-                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Min Global Energy</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Ground State Target</div>
                       </div>
                       <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
                         <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Current Energy H(x)</div>
@@ -2957,16 +2988,16 @@ export default function ThermoLabPage() {
                             <span className="text-[#5eead4] font-medium">8.49 × 10⁷ candidates</span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
-                            <span className="text-[rgba(250,249,245,0.45)]">MCMC Convergence:</span>
-                            <span className="text-[#faf9f5] font-medium">15,000 steps (τ_int = 1.0)</span>
+                            <span className="text-[rgba(250,249,245,0.45)]">Measured JAX Runtime:</span>
+                            <span className="text-[#faf9f5] font-medium">0.24s (Local GPU/CPU)</span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
-                            <span className="text-[rgba(250,249,245,0.45)]">Extropic TSU Latency:</span>
-                            <span className="text-[#34d399] font-medium">0.005s (projected)</span>
+                            <span className="text-[rgba(250,249,245,0.45)]">Convergence Rate:</span>
+                            <span className="text-[#34d399] font-medium">15,000 steps (τ_int = 1.0)</span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
-                            <span className="text-[rgba(250,249,245,0.45)]">Hardware Speedup:</span>
-                            <span className="text-[#5eead4] font-medium">~48,000× vs Single CPU</span>
+                            <span className="text-[rgba(250,249,245,0.45)]">Modeled TSU Latency:</span>
+                            <span className="text-[rgba(250,249,245,0.65)] font-medium">0.005s (analytical projection)</span>
                           </div>
                         </div>
 
@@ -3263,22 +3294,22 @@ export default function ThermoLabPage() {
                           </span>
                         </div>
                         <div className="text-sm font-medium text-[#faf9f5]">
-                          Extropic TSU vs GPU Baseline
+                          Measured Simulation vs Analytical Model
                         </div>
 
                         <div className="space-y-2 text-xs font-mono">
                           <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
-                            <span className="text-[rgba(250,249,245,0.45)]">Classical Baseline:</span>
-                            <span className="text-[rgba(250,249,245,0.65)] font-medium">384.5 ESS/s (simulation)</span>
+                            <span className="text-[rgba(250,249,245,0.45)]">Measured Classical Rate:</span>
+                            <span className="text-[#34d399] font-medium">384.5 ESS/s (Local JAX Benchmark)</span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
-                            <span className="text-[rgba(250,249,245,0.45)]">Extropic TSU Rate:</span>
-                            <span className="text-[#34d399] font-medium">520,833 ESS/s (Modeled Z1, 1.0W spec)</span>
+                            <span className="text-[rgba(250,249,245,0.45)]">Extropic Model Projection:</span>
+                            <span className="text-[rgba(250,249,245,0.65)] font-medium">520,833 ESS/s (Analytical Z1, 1.0W)</span>
                           </div>
                         </div>
 
                         <div className="p-3 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.6)] font-light leading-relaxed">
-                          <strong className="text-[#5eead4] font-mono font-medium">TSU Projection:</strong> Figures derived from an analytical hardware model; physical Extropic TSU silicon is not publicly available.
+                          <strong className="text-[#5eead4] font-mono font-medium">Hardware Note:</strong> The 384.5 ESS/s figure is measured on local hardware. The 520,833 ESS/s rate is an analytical device projection; physical Extropic TSU silicon is not publicly available.
                         </div>
                       </div>
                     </div>
@@ -3635,11 +3666,11 @@ export default function ThermoLabPage() {
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[rgba(250,249,245,0.45)]">Ground Energy:</span>
-                                <span className="text-[rgba(250,249,245,0.65)]">E = 27.56 kcal/mol</span>
+                                <span className="text-[rgba(250,249,245,0.65)]">E = 27.56</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[rgba(250,249,245,0.45)]">Restorative Force:</span>
-                                <span className="text-rose-400">0.000 N (Frozen)</span>
+                                <span className="text-rose-400">0.000 (Frozen)</span>
                               </div>
                             </div>
                           </div>
@@ -3667,11 +3698,11 @@ export default function ThermoLabPage() {
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[rgba(250,249,245,0.45)]">Ground Energy:</span>
-                                <span className="text-[rgba(250,249,245,0.65)]">E = 5.57 kcal/mol</span>
+                                <span className="text-[rgba(250,249,245,0.65)]">E = 5.57</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[rgba(250,249,245,0.45)]">Net Saddle Force:</span>
-                                <span className="text-amber-400">0.000 N (Balanced)</span>
+                                <span className="text-amber-400">0.000 (Balanced)</span>
                               </div>
                             </div>
                           </div>
@@ -3699,11 +3730,11 @@ export default function ThermoLabPage() {
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[rgba(250,249,245,0.45)]">Ground Energy:</span>
-                                <span className="text-[#34d399]">E = -1.83 kcal/mol</span>
+                                <span className="text-[#34d399]">E = -1.83</span>
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-[rgba(250,249,245,0.45)]">Housekeeping Heat:</span>
-                                <span className="text-rose-400 font-medium">3,697.40 J injected</span>
+                                <span className="text-rose-400 font-medium">Q_hk = 3,697.40 dissipated</span>
                               </div>
                             </div>
                           </div>
@@ -3863,7 +3894,7 @@ export default function ThermoLabPage() {
                                       Multiplier y_m(t): <strong>{ym.toFixed(2)}</strong>
                                     </span>
                                     <span className="px-2 py-0.5 rounded bg-[#05070f] border border-[rgba(250,249,245,0.08)] text-rose-300">
-                                      Heat Q_hk: <strong>{qHk.toFixed(1)} J</strong>
+                                      Heat Q_hk: <strong>{qHk.toFixed(1)}</strong>
                                     </span>
                                     <span className={`px-2 py-0.5 rounded bg-[#05070f] border border-[rgba(250,249,245,0.08)] font-medium ${statusColor}`}>
                                       {statusText}
@@ -4113,7 +4144,7 @@ export default function ThermoLabPage() {
                               </div>
                               <div className="flex justify-between py-0.5">
                                 <span className="text-[rgba(250,249,245,0.45)]">Second Law Work &lang;W_diss&rang;:</span>
-                                <span className="text-[#34d399] font-medium">+0.9210 J (&gt; 0 Valid)</span>
+                                <span className="text-[#34d399] font-medium">+0.9210 (&gt; 0 Valid)</span>
                               </div>
                             </div>
                           </div>
@@ -4315,10 +4346,10 @@ export default function ThermoLabPage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
             {[
-              { size: "16 × 16 (256 Spins)", msu: "0.33 MSU/s", speedup: "128× Clock Speedup" },
-              { size: "32 × 32 (1,024 Spins)", msu: "1.30 MSU/s", speedup: "512× Clock Speedup" },
-              { size: "64 × 64 (4,096 Spins)", msu: "6.86 MSU/s", speedup: "2,048× Clock Speedup" },
-              { size: "128 × 128 (16,384 Spins)", msu: "20.18 MSU/s", speedup: "8,192× Clock Speedup" },
+              { size: "16 × 16 (256 Spins)", msu: "0.33 MSU/s", speedup: "128 Parallel Spins/Step" },
+              { size: "32 × 32 (1,024 Spins)", msu: "1.30 MSU/s", speedup: "512 Parallel Spins/Step" },
+              { size: "64 × 64 (4,096 Spins)", msu: "6.86 MSU/s", speedup: "2,048 Parallel Spins/Step" },
+              { size: "128 × 128 (16,384 Spins)", msu: "20.18 MSU/s", speedup: "8,192 Parallel Spins/Step" },
             ].map((item, i) => (
               <div key={i} className="p-5 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)]">
                 <div className="font-mono text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)]">{item.size}</div>
