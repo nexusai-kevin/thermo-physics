@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
-import { DispatcherRoiBenchmark } from "@/components/sections/DispatcherRoiBenchmark";
+import { SiliconRealismWidget } from "@/components/thermo-lab/SiliconRealismWidget";
 
 // ============================================================================
 // TYPES & BENCHMARK METADATA (EXPERIMENTS 1–11)
@@ -25,10 +25,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 1,
     badge: "Station 1 • 1D Ising Chain",
-    title: "The 1D Magnet Line",
+    title: "1D Ferromagnetic Ising Chain",
     subtitle: "Spontaneous Alignment Along a Spin Chain",
     kidStory:
-      "Imagine 16 tiny compass needles in a row that want to point the same way as their left and right neighbors. When the room is super hot (low β), they jiggle and flip like crazy! Freeze the room (high β) and watch them snap into a single team.",
+      "A one-dimensional chain of 16 coupled Ising spins with nearest-neighbor ferromagnetic coupling. At high temperatures (low β), thermal fluctuations dominate and spins fluctuate independently. As temperature drops (high β), spins align into a uniform ferromagnetic ground state.",
     scriptFile: "first_ising.py",
     runtime: "0.210s (1,000 sweeps)",
     keyMetric: "⟨E⟩ = -0.965 (Exact ground state: -2.0)",
@@ -39,10 +39,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 2,
     badge: "Station 2 • 2D Phase Transition",
-    title: "Giant 2D Checkerboard",
+    title: "2D Square-Lattice Ising Model (Onsager Criticality)",
     subtitle: "Onsager Criticality & Spontaneous Symmetry Breaking",
     kidStory:
-      "At high heat, this 16×16 board looks like snowy TV static. Slowly slide the temperature past the magic tipping point (β ≈ 0.44) and watch giant islands of color suddenly freeze out of the chaos!",
+      "A two-dimensional 32×32 Ising lattice exhibiting a second-order phase transition at Onsager's analytical critical temperature (β ≈ 0.4407). Above the critical temperature, thermal noise prevents long-range order; cooling past β_c triggers spontaneous symmetry breaking and macro-domain formation.",
     scriptFile: "run_2d_phase_transition.py",
     runtime: "5.812s (5-temp sweep, 32×32 torus)",
     keyMetric: "|⟨M⟩|: 0.0434 (β=0.20) → 0.9417 (β=0.70)",
@@ -53,10 +53,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 3,
     badge: "Station 3 • NP-Hard Max-Cut",
-    title: "The Monster Rivalry Game",
+    title: "Antiferromagnetic Max-Cut on Erdős–Rényi Graphs",
     subtitle: "Antiferromagnetic Chromatic Block Gibbs Optimizer",
     kidStory:
-      "8 monsters are connected by red rivalry lines—rivals HATE wearing the same jersey! Cool the room down so the physics automatically splits them into Team Cyan vs. Team Coral with the fewest unhappy rivals possible.",
+      "An NP-hard Max-Cut optimization problem on an Erdős–Rényi random graph G(50, 0.20) mapped to an antiferromagnetic Ising Hamiltonian. Annealing drives the system to partition vertices into two subgraphs while maximizing the count of cut edges.",
     scriptFile: "solve_max_cut.py",
     runtime: "7.344s (G(50, 0.20), 243 edges)",
     keyMetric: "70.8% Optimal Cut (172/243 edges vs. 49.9% random)",
@@ -67,10 +67,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 4,
     badge: "Station 4 • Multistate Potts (K=4)",
-    title: "4-Color Paint Party",
+    title: "2D Categorical Potts Model (q = 4)",
     subtitle: "Categorical Factor Graph Domain Clustering",
     kidStory:
-      "Instead of just Up or Down, every tile can pick between 4 neon paint colors! When it's hot, the floor is confetti. As you cool it past β ≈ 1.10, matching colors hug together into glowing territories.",
+      "A 4-state categorical Potts model on a 24×24 periodic lattice. Thermal sampling transitions from a high-entropy disordered distribution to coherent domain clustering at the theoretical transition point β_c = ln(3) ≈ 1.0986.",
     scriptFile: "run_potts_model.py",
     runtime: "2.956s (24×24 torus, K=4 categories)",
     keyMetric: "β_c = ln(1 + √4) = ln(3) ≈ 1.0986",
@@ -81,10 +81,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 5,
     badge: "Station 5 • Clamped DTM Denoiser",
-    title: "The Magic Pixel Eraser",
+    title: "Clamped Ising Denoising Markov Random Field",
     subtitle: "Clamped Observation Layer + Latent Ising Prior",
     kidStory:
-      "Muddy static splashed all over our 8-bit '8' icon! Click 'Clean With Physics' to lock the noisy clue pixels in place while the hidden layer smooths away the dirt specks like magic.",
+      "A Markov Random Field with clamped observation nodes and latent binary prior spins. Binary noisy observations are clamped while Gibbs sampling over the latent layer smooths spatial noise while preserving structural edges.",
     scriptFile: "image_denoiser.py",
     runtime: "0.583s (28×28 latent + 28×28 clamped)",
     keyMetric: "22.07% Noise → 4.97% Error (77.5% noise reduction)",
@@ -95,10 +95,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 6,
     badge: "Station 6 • RBM Associative Memory",
-    title: "The Half-Erased Memory Vault",
+    title: "Bipartite Restricted Boltzmann Machine (RBM)",
     subtitle: "Bipartite Visible–Hidden Pattern Completion",
     kidStory:
-      "Our vault remembers 3 secret symbols: Plus (+), Cross (×), and Square (□). Even if you cover the bottom half of a symbol with random static, the brain neurons recognize the top half and rebuild the missing bottom!",
+      "A bipartite Restricted Boltzmann Machine (64 visible, 32 hidden units) trained on prototype patterns. Clamping observed sub-regions allows associative pattern completion via alternating conditional Gibbs sweeps.",
     scriptFile: "rbm_associative_memory.py",
     runtime: "0.583s (64 Visible × 32 Hidden RBM)",
     keyMetric: "100.0% Cosine Overlap & 100.0% Occluded Bit Recovery",
@@ -109,10 +109,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 7,
     badge: "Station 7 • QUBO Portfolio Vault",
-    title: "The 5-Gem Treasure Vault",
+    title: "Cardinality-Constrained Markowitz QUBO",
     subtitle: "Constrained Markowitz QUBO-to-Ising Optimizer",
     kidStory:
-      "You have 20 treasure chests with different gold rewards and trap risks, and your backpack only holds EXACTLY 5 chests! Slide the penalty dial and cool the vault so physics picks the 5 safest, richest chests.",
+      "A cardinality-constrained Markowitz portfolio selection problem formulated as a QUBO and mapped to an Ising Hamiltonian. Quadratic penalties enforce exact budget selection while minimizing risk and maximizing return.",
     scriptFile: "qubo_portfolio.py",
     runtime: "14.696s (N=20 assets, K=5 budget)",
     keyMetric: "99.1% Budget Feasibility | 94.1% Pareto Match",
@@ -123,10 +123,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 8,
     badge: "Station 8 • Continuous Double-Well",
-    title: "The Analog Skatepark (Two Valley Wells)",
+    title: "Coupled Quartic Double-Well Langevin Chain",
     subtitle: "ContinuousNode & Quartic Potential Barrier-Hopping",
     kidStory:
-      "Real computer chips use smooth voltages, not just 0 and 1! Watch 12 glowing marbles roll inside a W-shaped double valley: when hot, they jump right over the center hill; when frozen, they lock into the left (-1) or right (+1) valley.",
+      "A continuous double-well Langevin oscillator chain with quartic potential wells. At elevated temperatures, particles transit freely across the central barrier; at low temperatures, states localize within one of the two metastable minima.",
     scriptFile: "run_continuous_double_well.py",
     runtime: "2.805s (32 Coupled Continuous Oscillators)",
     keyMetric: "Hop Rate: 38.4%/step (β=0.35) → 0.9%/step (β=4.0)",
@@ -137,10 +137,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 9,
     badge: "Station 9 • NP-Complete 10-City TSP",
-    title: "The Tangled Delivery Route",
+    title: "10-City Traveling Salesperson Permutation QUBO",
     subtitle: "N × N Permutation Matrix QUBO + Chromatic Gibbs",
     kidStory:
-      "A delivery drone has to visit 10 cities in a circle and return home without crossing its own path! At high heat the route is a tangled spiderweb—cool the room or click 'Untangle Route' to watch the strings snap into a clean loop.",
+      "A 10-city Traveling Salesperson Problem encoded as an N×N permutation matrix QUBO. Chromatic block Gibbs updates resolve row and column constraints while minimizing total tour path distance.",
     scriptFile: "solve_tsp.py",
     runtime: "20.110s (10×10 Permutation Lattice, 28 colors)",
     keyMetric: "100.0% Optimal Tour (6.296 vs. 17.986 naive, -65.0%)",
@@ -151,10 +151,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 10,
     badge: "Station 10 • SK Frustrated Spin Glass",
-    title: "The Frozen Glass Maze",
+    title: "Sherrington–Kirkpatrick Frustrated Spin Glass",
     subtitle: "Dense Gaussian Frustration & Parisi Overlap Diagnostics",
     kidStory:
-      "Unlike friendly magnets that all want to point the same way, spin glasses have a dense tangle of conflicting friendships and rivalries! At low temperatures, the system gets trapped in rugged valleys. Measure the Parisi overlap q between two independent twin worlds to see if they find the same valley or explore different secret paths.",
+      "A Sherrington–Kirkpatrick spin glass with dense Gaussian random couplings. Frustration creates a complex rugged energy landscape with many metastable states, characterized by non-trivial Parisi overlap distributions P(q).",
     scriptFile: "experiments/exp10_sk_spin_glass.py",
     runtime: "0.27s (N=24 dense all-to-all)",
     keyMetric: "100% Ground State Match (-15.4266) | RSB ⟨|q|⟩ = 0.5215 vs. Paramagnetic 0.1629",
@@ -165,10 +165,10 @@ const STATIONS: StationSpec[] = [
   {
     id: 11,
     badge: "Station 11 • RNA Folding Ensemble",
-    title: "The RNA Origami Dance",
+    title: "RNA Secondary-Structure Boltzmann Ensemble",
     subtitle: "Thermodynamic Base-Pairing Conformational Ensemble",
     kidStory:
-      "RNA molecules aren't rigid statues—they are flexible dancers that breathe and fold into different shapes! At body temperature (37°C), watch base letters latch together into stable stem-loops; crank up the heat to melt the pairs into a dancing uncoiled ribbon.",
+      "A thermodynamic conformational ensemble of RNA secondary structure base pairing. The energy function models nearest-neighbor stacking, hairpin initiation penalties, and steric exclusion across temperature scales.",
     scriptFile: "experiments/exp11_rna_folding.py",
     runtime: "0.21s (N=24) / 0.31s (N=50)",
     keyMetric: "100% Ground State Match (-10.00 / -66.00 kcal/mol) | S: 5.13 b → 10.66 b",
@@ -179,13 +179,13 @@ const STATIONS: StationSpec[] = [
   {
     id: 12,
     badge: "Station 12 • Power Grid SCUC QUBO",
-    title: "The Industrial Power Grid",
+    title: "Unit Commitment Dispatch QUBO (4-Gen × 6-Hour)",
     subtitle: "Security-Constrained Unit Commitment Resource Dispatch",
     kidStory:
-      "A city needs electricity every hour of the day, but power plants are expensive to fire up and take time to ramp! The physics simulator balances nuclear, coal, gas, and peaker turbines across 6 time intervals to keep the lights on with zero blackouts and the lowest electric bill.",
+      "Security-Constrained Unit Commitment (SCUC) resource dispatch across 4 thermal generators over 6 dispatch intervals. The quadratic Hamiltonian compiles generator operational costs with hard demand-balancing constraints.",
     scriptFile: "thermo_physics/experiments/station_12_grid_scuc.py",
-    runtime: "0.12s (JAX Gibbs) / 0.008s (Extropic TSU)",
-    keyMetric: "Zero Deficit Dispatch | ESS Rate: 41.2k (JAX) vs. 625k ESS/s (TSU)",
+    runtime: "0.12s (JAX Gibbs; Extropic TSU analytical projection: 0.008s)",
+    keyMetric: "Zero Deficit Dispatch",
     physicsFormula: "H(x) = ∑ C_g P_g x_{g,t} + λ ∑ (∑ P_g x_{g,t} - D_t)²",
     engineeringSummary:
       "24-spin quadratic penalty Ising Hamiltonian (4 generators × 6 intervals) compiling linear heat-rate operational costs with quadratic load-balancing constraints. Validated across Classical JAX Block Gibbs and Extropic silicon hardware adapters.",
@@ -196,9 +196,9 @@ const STATIONS: StationSpec[] = [
     title: "Biological Codon Optimization",
     subtitle: "Ribosome-Aware mRNA Synonymous Potts Energy-Based Model",
     kidStory:
-      "When cells make medicines like GLP-1, ribosomes can get stuck on folded mRNA tangles called hairpins! The thermodynamic Potts computer explores 84.9 million codon combinations to maximize translation speed while melting away all sticky secondary loops.",
+      "Synonymous mRNA codon optimization using a discrete Potts model over 15 residue positions. Balances host Codon Adaptation Index (CAI), GC-content homeostasis, and inverted-repeat secondary structure elimination.",
     scriptFile: "thermo_physics/experiments/station_13_codon_optimization.py",
-    runtime: "0.18s (Potts MCMC) / 0.005s (Extropic TSU)",
+    runtime: "0.18s (Potts MCMC; Extropic TSU analytical projection: 0.005s)",
     keyMetric: "4 Hairpins → 0 (100% Resolved) | CAI 0.9326 | Energy Δ: -7.82",
     physicsFormula: "H(c) = - ∑ ln(w_k) + λ_{gc}(GC - 0.50)² + λ_{hp} N_{hairpins}",
     engineeringSummary:
@@ -210,23 +210,23 @@ const STATIONS: StationSpec[] = [
     title: "Protein Side-Chain Packing",
     subtitle: "Macromolecular Rotamer Placement via Potts EBM",
     kidStory:
-      "Proteins fold like complex 3D jigsaw puzzles! When bulky amino acid side chains crowd into a tight beta-hairpin core, choosing the most common angle creates violent atomic collisions. The thermodynamic Potts solver swivels all 24 residues simultaneously to eliminate every clash and lock in an ultra-stable, lowest-energy fold.",
+      "Macromolecular protein side-chain rotamer placement on a 24-residue beta-hairpin. Categorical Potts sampling swivels discrete dihedral rotamers to eliminate Lennard-Jones steric clashes while minimizing overall conformational energy.",
     scriptFile: "thermo_physics/experiments/station_14_sidechain_packing.py",
-    runtime: "0.12s (JAX Gibbs) / 0.003s (Extropic TSU)",
-    keyMetric: "6 Clashes → 0 (100% Resolved) | ΔE: -295.54 kcal/mol | 28,742× TSU Speedup",
+    runtime: "0.12s (JAX Gibbs; Extropic TSU analytical projection: 0.003s)",
+    keyMetric: "6 Clashes → 0 (100% Resolved) | ΔE: -295.54 kcal/mol (TSU acceleration analytically projected)",
     physicsFormula: "H(s) = ∑ h_{i, s_i} + ∑ [V_{LJ}(r_{ij}) + V_{Coulomb}(r_{ij})]",
     engineeringSummary:
       "96-spin categorical Potts model over a 24-residue antiparallel beta-hairpin. Solves non-convex Lennard-Jones (12-6) steric clashes across 1.02 x 10^14 states, mapping directly to Extropic stochastic p-bits for 10M-fold energy efficiency gains.",
   },
-      {
+  {
     id: 15,
     badge: "Station 15 • Thermodynamic SI Cognitive Core",
     title: "4-Organ Synthetic Intelligence (SI) Core",
     subtitle: "Continuous Hopfield, Kramers Curiosity, Potts Arbiter & RTX 5080 QUBO",
     kidStory:
-      "What if an AI thought using real laws of thermodynamics instead of just next-token prediction? It remembers by sliding down energy valleys (Continuous Hopfield), explores when curious (Kramers double-well hopping), agrees on goals with 6 friendly debate spins (Potts), and monitors its own computer brain so it never overheats (Metabolic QUBO)!",
+      "A 4-organ thermodynamic cognitive architecture combining continuous Hopfield associative recall, Kramers barrier escape, Potts goal arbitration, and metabolic VRAM allocation within real-time latency budgets.",
     scriptFile: "thermo_physics/si_core/cognitive_engine.py",
-    runtime: "5.21ms / cognitive tick (Python) / < 0.1ms (TSU)",
+    runtime: "5.21ms / cognitive tick (Python; TSU analytical projection < 0.1ms)",
     keyMetric: "Latency: 5.2ms < 15ms SLA | 4 Organs Coupled | RTX 5080 VRAM Safe",
     physicsFormula: "H_{SI} = E_{Hopfield}(\\xi) + U_{Kramers}(x) + H_{Potts}(\\sigma) + H_{QUBO}(Metabolic)",
     engineeringSummary:
@@ -238,9 +238,9 @@ const STATIONS: StationSpec[] = [
     title: "Non-Equilibrium Hybrid TPU & Frustration Breaking",
     subtitle: "Underdamped BAOAB Langevin Dynamics, Dynamic Clause Memory & Jarzynski-Neal SMC Resampling",
     kidStory:
-      "When computers solve super-hard logic puzzles, standard samplers get trapped in dead-end valleys where gradients vanish! By equipping the thermodynamic processor with dynamic physical clause memory, stuck clauses heat up and warp the energy landscape, kicking trapped oscillators out to achieve 100% perfect satisfaction!",
+      "Underdamped BAOAB Langevin dynamics with dynamic clause memory multipliers y_m(t) and Jarzynski-Neal SMC resampling to overcome topological frustration and energy barriers in hard constraint-satisfaction instances.",
     scriptFile: "thermo_physics/experiments/exp17_phase3_final_boss.py",
-    runtime: "1.58s (BAOAB TPU Langevin) / 0.002s (Extropic TSU)",
+    runtime: "1.58s (BAOAB TPU Langevin; Extropic TSU analytical projection: 0.002s)",
     keyMetric: "0 Violations (100% SAT) | Q_hk = 3,697.4 J | N_eff Resuscitated to 63.8%",
     physicsFormula: "m dv_i = (-∂H/∂x_i - ∑ y_m ∂C_m/∂x_i - γ v_i) dt + √(2γ k_B T) dW_i,  dy_m = (κ C_m - η(y_m - λ_0)) dt",
     engineeringSummary:
@@ -767,7 +767,7 @@ export default function ThermoLabPage() {
   const [selectedFacingPair, setSelectedFacingPair] = useState<number | null>(null);
 
   // --- Station 15: Non-Equilibrium Hybrid TPU Langevin & Frustration Breaking ---
-  const [tpuActiveTab, setTpuActiveTab] = useState<"frustration" | "resampling" | "integrator">("frustration");
+  const [tpuActiveTab, setTpuActiveTab] = useState<"frustration" | "resampling" | "integrator" | "silicon">("frustration");
   const [tpuStep, setTpuStep] = useState<number>(0);
   const [tpuIsPlaying, setTpuIsPlaying] = useState<boolean>(false);
   const [tpuStiffnessAlpha, setTpuStiffnessAlpha] = useState<number>(6.0);
@@ -1258,21 +1258,21 @@ export default function ThermoLabPage() {
         runtime: "0.1187s",
         sampleRate: "42,375 Hz",
         tauInt: "54.61",
-        ess: "45.8",
-        essPerSec: "388.0 ESS/s",
+        ess: "73.2",
+        essPerSec: "384.5 ESS/s (classical simulation baseline)",
         advantage: "1.0x (Classical MCMC Baseline)",
         description: "Vectorized CPU/GPU Gibbs scan subject to critical slowing down on frustrated spin landscapes.",
       };
     }
     return {
-      name: "Extropic TSU Silicon (Drop-in Target)",
-      chipType: "Physical Stochastic Analog Substrate (tsu-z1-dev)",
-      runtime: "0.0080s",
-      sampleRate: "625,000 Hz",
-      tauInt: "0.50",
-      ess: "4,975.2",
-      essPerSec: "621,899 ESS/s",
-      advantage: "1,602.8x Effective Independent Sampling",
+      name: "Extropic TSU (Modeled Projection)",
+      chipType: "Modeled Extropic Z1 projection (1.0W spec), not measured",
+      runtime: "N/A (not measured)",
+      sampleRate: "N/A (hardware not publicly available)",
+      tauInt: "N/A",
+      ess: "N/A",
+      essPerSec: "520,833 ESS/s (modeled projection, not measured)",
+      advantage: "Projection only: no measured TSU run",
       description: "Continuous Langevin noise acceleration overcoming thermodynamic barrier trapping at microsecond latency.",
     };
   }, [selectedBackend]);
@@ -1280,7 +1280,7 @@ export default function ThermoLabPage() {
   // --- Copy / Post to X Quick-Share Text ---
   const shareText = useMemo(
     () =>
-      `Just ran the 14-station Thermodynamic Computing Arcade at β=${globalBeta.toFixed(
+      `Just ran the 16-station Thermodynamic Computing Arcade at β=${globalBeta.toFixed(
         2
       )} (|M|=${magnet2D}, SK RSB ⟨|q|⟩=${skMeanAbsQ}, RNA S=${rnaEntropy}b, Side-Chain ΔE=-295.5kcal, 20.18M spin-updates/s in JAX) powered by @extropic's thrml! ⚡❄️\n\ncc @trevormccrt1 @beffjezos\nLive lab: https://getnexusaisolutions.com/thermo-lab\nRepo: https://github.com/nexusai-kevin/thermo-physics`,
     [globalBeta, magnet2D, skMeanAbsQ, rnaEntropy]
@@ -1308,25 +1308,132 @@ export default function ThermoLabPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#020308] text-[#faf9f5] font-[family-name:var(--font-sans)] selection:bg-[#5eead4]/20 selection:text-[#5eead4] thermo-grain relative">
       {/* ===================================================================
-          STICKY GLOBAL TEMPERATURE CONTROL BAR + SOUND & X SHARE
+          FABLE 5.2 LAB INSTRUMENT STYLES (Cryogenic / Titanium Aesthetic)
       =================================================================== */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/90 border-b border-cyan-500/20 shadow-lg shadow-cyan-950/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .thermo-grain::after {
+          content: "";
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 99;
+          opacity: 0.038;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+        .lab-panel {
+          position: relative;
+          background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(8, 12, 22, 0.92) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 20px;
+          box-shadow: 
+            0 1px 0 0 rgba(255, 255, 255, 0.12) inset,
+            0 0 0 1px rgba(0, 0, 0, 0.8),
+            0 20px 40px -15px rgba(0, 0, 0, 0.75),
+            0 0 35px -12px rgba(6, 182, 212, 0.18);
+          backdrop-filter: blur(16px);
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .lab-panel:hover {
+          border-color: rgba(6, 182, 212, 0.35);
+          box-shadow: 
+            0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
+            0 0 0 1px rgba(6, 182, 212, 0.3),
+            0 28px 56px -16px rgba(0, 0, 0, 0.9),
+            0 0 45px -8px rgba(6, 182, 212, 0.25);
+        }
+        .lab-rivet {
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #e2e8f0 0%, #64748b 45%, #0f172a 100%);
+          box-shadow: 0 0 0 1px #000, 0 1px 1px rgba(255,255,255,0.2) inset;
+        }
+        .thermal-slider {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 8px;
+          border-radius: 999px;
+          background: linear-gradient(to right, #f43f5e 0%, #fb923c 25%, #facc15 50%, #38bdf8 75%, #06b6d4 100%);
+          box-shadow: inset 0 2px 4px rgba(0,0,0,0.8), 0 0 12px rgba(6, 182, 212, 0.3);
+          outline: none;
+          cursor: pointer;
+        }
+        .thermal-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 35% 35%, #ffffff 0%, #67e8f9 45%, #0891b2 100%);
+          cursor: grab;
+          border: 2px solid #ffffff;
+          box-shadow: 0 0 0 1px rgba(0,0,0,0.7), 0 0 16px rgba(6, 182, 212, 0.9);
+          transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .thermal-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.18);
+        }
+        .thermal-slider::-webkit-slider-thumb:active {
+          cursor: grabbing;
+          transform: scale(1.05);
+        }
+        .tactile-btn {
+          transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.15s ease, box-shadow 0.15s ease;
+          touch-action: manipulation;
+        }
+        .tactile-btn:hover {
+          transform: translateY(-2px);
+          filter: brightness(1.12);
+        }
+        .tactile-btn:active {
+          transform: translateY(1px) scale(0.98);
+        }
+      `}} />
+
+      {/* Atmospheric Radial Depth Glows */}
+      <div className="pointer-events-none fixed top-[-120px] left-[-80px] w-[500px] h-[500px] rounded-full bg-cyan-500/10 blur-[130px] z-0" />
+      <div className="pointer-events-none fixed top-[200px] right-[-100px] w-[450px] h-[450px] rounded-full bg-rose-500/8 blur-[140px] z-0" />
+
+      {/* ===================================================================
+          STICKY MASTER CRYOGENIC RHEOSTAT BAR (Hardware Instrumentation)
+      =================================================================== */}
+      <div className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/85 border-b border-cyan-500/25 shadow-2xl shadow-black/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
+          
+          {/* Left: Brand & Return Link */}
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-3 w-3 rounded-full bg-cyan-400 animate-ping" />
-            <span className="font-bold tracking-tight text-sm sm:text-base text-white">
-              THERMO-ARCADE MASTER DIAL
-            </span>
-            <span className="hidden xl:inline-block text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300">
-              14 Stations • 20.18M Spin-Updates/s
+            <a
+              href="https://github.com/nexusai-kevin/thermo-physics"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tactile-btn px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-200 font-mono text-xs flex items-center gap-1.5 transition shadow"
+              title="Nexus Thermodynamic Research on GitHub"
+            >
+              <span className="font-bold">GitHub</span>
+              <span>↗</span>
+            </a>
+
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" />
+              </span>
+              <span className="font-extrabold tracking-tight text-xs sm:text-sm text-white font-mono uppercase">
+                THERMODYNAMIC MASTER CONTROL
+              </span>
+            </div>
+            
+            <span className="hidden xl:inline-block text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 font-bold">
+              16 STATIONS • 20.18M SPINS/S
             </span>
           </div>
 
-          <div className="flex items-center gap-3 flex-1 max-w-lg">
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-400 whitespace-nowrap">
-              🔥 Hot (β=0.1)
+          {/* Center: Precision Thermal Spectrum Slider */}
+          <div className="flex items-center gap-3 flex-1 max-w-md">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-rose-400 whitespace-nowrap flex items-center gap-1">
+              <span className="hidden sm:inline">HIGH TEMP</span> (0.1)
             </span>
             <input
               type="range"
@@ -1335,131 +1442,124 @@ export default function ThermoLabPage() {
               step={0.05}
               value={globalBeta}
               onChange={(e) => handleBetaChange(parseFloat(e.target.value))}
-              className="w-full accent-cyan-400 cursor-pointer h-2 rounded-lg bg-slate-800"
+              className="thermal-slider w-full cursor-pointer"
             />
-            <span className="text-xs font-semibold uppercase tracking-wider text-cyan-300 whitespace-nowrap">
-              ❄️ Cold (β=5.0)
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-300 whitespace-nowrap flex items-center gap-1">
+              <span className="hidden sm:inline">LOW TEMP</span> (5.0)
             </span>
           </div>
 
+          {/* Right: Telemetry Readout & Controls */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono">
-              β = <span className="text-cyan-400 font-bold">{globalBeta.toFixed(2)}</span>
+            <div className="px-3 py-1 rounded-xl bg-slate-900/90 border border-cyan-500/40 text-xs font-mono shadow-inner shadow-cyan-950">
+              <span className="text-slate-400">β =</span>{" "}
+              <span className="text-cyan-400 font-black text-sm tabular-nums">{globalBeta.toFixed(2)}</span>
             </div>
+
             <button
               onClick={() => setSoundEnabled((s) => !s)}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition border ${
+              className={`tactile-btn px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition border ${
                 soundEnabled
-                  ? "bg-emerald-500/15 border-emerald-400/40 text-emerald-300"
+                  ? "bg-emerald-500/15 border-emerald-400/40 text-emerald-300 shadow-sm shadow-emerald-500/20"
                   : "bg-slate-900 border-slate-800 text-slate-400"
               }`}
-              title="Toggle Retro Arcade Audio Clicks"
+              title="Toggle Audio Clicks"
             >
-              {soundEnabled ? "🔊 SFX On" : "🔇 SFX Off"}
+              {soundEnabled ? "SFX: ON" : "SFX: OFF"}
             </button>
+
             <button
               onClick={() => setIsAutoSimulating((v) => !v)}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition border ${
+              className={`tactile-btn px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition border ${
                 isAutoSimulating
-                  ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-200 hover:bg-cyan-500/30"
+                  ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-200 hover:bg-cyan-500/30 shadow-sm shadow-cyan-500/20"
                   : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
               }`}
             >
               {isAutoSimulating ? "⏸ Pause" : "▶ Resume"}
             </button>
+
             <button
               onClick={handleCopyShare}
-              className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs shadow-md shadow-sky-500/20 transition"
+              className="tactile-btn px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs shadow-md shadow-sky-500/20 transition font-mono"
             >
-              {copiedTweet ? "✅ Copied for X!" : "🐦 Copy for X"}
+              {copiedTweet ? "✓ Copied" : "𝕏 Share"}
             </button>
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-sky-400/40 text-sky-300 font-semibold text-xs transition"
-            >
-              Post to 𝕏 ↗
-            </a>
+
             <a
               href="/BENCHMARK_DOSSIER.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition"
-              title="View & Download Full 14-Station Technical Whitepaper"
+              className="tactile-btn px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition font-mono"
+              title="View & Download Full 16-Station Technical Whitepaper"
             >
-              <span>📄 Whitepaper (PDF)</span>
+              <span>Whitepaper</span>
               <span>↗</span>
             </a>
           </div>
+
         </div>
       </div>
 
       {/* ===================================================================
-          HERO HEADER
+          HERO HEADER (Editorial & Scientific Depth)
       =================================================================== */}
-      <header className="relative overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-slate-900/60 via-slate-950 to-slate-950 py-14 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-medium mb-6">
-            <span>⚡ 16-Station Open-Source Thermodynamic Computing Suite • Extropic thrml v0.1.4</span>
+      <header className="relative overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-slate-900/40 via-slate-950 to-slate-950 py-16 px-4 sm:px-6 relative z-10">
+        <div className="max-w-5xl mx-auto text-center space-y-5">
+          
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#05070f] border border-[rgba(250,249,245,0.12)] text-[#5eead4] text-xs font-mono shadow-inner">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#5eead4] animate-pulse" />
+            <span className="font-medium uppercase tracking-[0.18em]">16-Station Thermodynamic Benchmark Suite · Extropic thrml v0.1.4</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+
+          <h1 className="font-[family-name:var(--font-display)] text-3xl sm:text-5xl lg:text-6xl font-normal tracking-[-0.03em] text-[#faf9f5] leading-[0.98]">
             Nexus Thermodynamic Lab:{" "}
-            <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+            <em className="italic font-light text-[#5eead4]">
               How Physics Solves Impossible Puzzles
-            </span>
+            </em>
           </h1>
-          <p className="mt-5 text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Instead of forcing GPUs to crunch deterministic rules one by one,{" "}
-            <strong className="text-white">Thermodynamic Computers</strong> let nature do the math.
-            Slide the temperature dial above (with Web Audio SFX enabled!) to watch 14 physical
-            energy landscapes—from discrete Ising magnets and frustrated SK spin glasses to RNA
-            folding, mRNA codon optimization, and protein side-chain rotamer packing—settle into optimal ground states automatically.
+
+          <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed font-normal">
+            Instead of forcing GPUs to crunch deterministic rules step-by-step,{" "}
+            <strong className="text-white font-bold">Thermodynamic Computers</strong> let nature do the math.
+            Slide the temperature dial above to watch 16 physical energy landscapes—from discrete Ising magnets and frustrated SK spin glasses to RNA folding and protein rotamer packing—relax into optimal ground states automatically.
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <a
-              href="/BENCHMARK_DOSSIER.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/25 transition"
+          {/* Interactive Cryogenic Presets */}
+          <div className="pt-4 flex flex-wrap justify-center gap-3 font-mono text-xs">
+            <button
+              onClick={() => handleBetaChange(0.2)}
+              className="tactile-btn px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-rose-500/40 text-rose-300 font-bold transition shadow"
             >
-              <span>📄 Download 14-Station Whitepaper (HTML/PDF)</span>
-              <span>↗</span>
-            </a>
+              High Temperature (β = 0.20)
+            </button>
+            <button
+              onClick={() => handleBetaChange(0.44)}
+              className="tactile-btn px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-bold transition shadow"
+            >
+              Onsager Critical Point (β = 0.44)
+            </button>
+            <button
+              onClick={() => handleBetaChange(3.5)}
+              className="tactile-btn px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-bold transition shadow"
+            >
+              Low Temperature (β = 3.50)
+            </button>
             <a
               href="https://github.com/nexusai-kevin/thermo-physics"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/25 transition"
+              className="tactile-btn inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black transition shadow-lg shadow-cyan-500/20"
             >
-              <span>GitHub Repo (thermo-physics)</span>
+              <span>GitHub Repo</span>
               <span>↗</span>
             </a>
-            <button
-              onClick={() => handleBetaChange(0.2)}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-rose-500/40 text-rose-300 text-sm font-medium transition"
-            >
-              🔥 Melt All 14 Stations (β = 0.20)
-            </button>
-            <button
-              onClick={() => handleBetaChange(0.44)}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-amber-500/40 text-amber-300 text-sm font-medium transition"
-            >
-              ⚡ Onsager Critical Point (β = 0.44)
-            </button>
-            <button
-              onClick={() => handleBetaChange(3.5)}
-              className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 text-sm font-medium transition"
-            >
-              ❄️ Deep Freeze Ground State (β = 3.50)
-            </button>
           </div>
         </div>
       </header>
 
       {/* ===================================================================
-          14 INTERACTIVE STATIONS GRID
+          16 INTERACTIVE STATIONS GRID
       =================================================================== */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-10">
         {/* ===================================================================
@@ -1495,7 +1595,7 @@ export default function ThermoLabPage() {
                     : "text-slate-400 hover:text-slate-200"
                 }`}
               >
-                <span>⚡ JAX Block Gibbs (Simulated)</span>
+                <span>JAX Block Gibbs (Simulated)</span>
               </button>
               <button
                 onClick={() => {
@@ -1547,9 +1647,6 @@ export default function ThermoLabPage() {
           </div>
         </div>
 
-        {/* NEXUS AI THERMODYNAMIC TASK DISPATCHER & INTERACTIVE ROI BENCHMARK */}
-        <DispatcherRoiBenchmark />
-
         {STATIONS.map((station) => (
           <section
             key={station.id}
@@ -1564,7 +1661,7 @@ export default function ThermoLabPage() {
                     {station.badge}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                    🎒 5th-Grade Playground
+                    Model Overview
                   </span>
                 </div>
 
@@ -1577,11 +1674,11 @@ export default function ThermoLabPage() {
 
                 <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono text-slate-400">
                   <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800">
-                    ⚡ Verified Metric:{" "}
+                    Verified Metric:{" "}
                     <strong className="text-emerald-400">{station.keyMetric}</strong>
                   </span>
                   <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800">
-                    ⏱ JAX Runtime: <strong className="text-cyan-300">{station.runtime}</strong>
+                    Measured Runtime: <strong className="text-cyan-300">{station.runtime}</strong>
                   </span>
                 </div>
               </div>
@@ -2687,7 +2784,6 @@ export default function ThermoLabPage() {
                         <div className="text-lg font-mono font-bold text-amber-300">
                           1.00 sweep
                         </div>
-                        <div className="text-[10px] text-slate-500">τ_int ({selectedBackend === "jax" ? "41.2k" : "625k"} ESS/s)</div>
                       </div>
                     </div>
                   </div>
@@ -3201,7 +3297,7 @@ export default function ThermoLabPage() {
                             Hardware Telemetry
                           </span>
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                            28,742× TSU Speedup
+                            Modeled TSU Projection
                           </span>
                         </div>
                         <div className="text-sm font-semibold text-white">
@@ -3210,25 +3306,17 @@ export default function ThermoLabPage() {
 
                         <div className="space-y-2 text-xs font-mono">
                           <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Sokal Autocorrelation:</span>
-                            <span className="text-amber-300 font-bold">τ_int = 76.8 sweeps</span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Effective Sample Size:</span>
-                            <span className="text-slate-200 font-bold">ESS = 97.7 independent</span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">GPU Sampling Rate:</span>
-                            <span className="text-slate-400 font-bold">18.1 ESS/s (350W TDP)</span>
+                            <span className="text-slate-400">Classical Baseline:</span>
+                            <span className="text-slate-400 font-bold">384.5 ESS/s (classical simulation baseline)</span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-slate-800">
                             <span className="text-slate-400">Extropic TSU Rate:</span>
-                            <span className="text-emerald-400 font-bold">520,833 ESS/s (1.0W)</span>
+                            <span className="text-emerald-400 font-bold">520,833 ESS/s (Modeled Extropic Z1 projection (1.0W spec), not measured)</span>
                           </div>
                         </div>
 
                         <div className="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/40 text-[11px] text-cyan-300/90 leading-relaxed">
-                          ⚡ <strong>10,059,618× Energy Gain:</strong> Continuous physical analog noise overcomes frustrated steric barriers without algorithmic critical slowing down.
+                          ⚡ <strong>Modeled Extropic Z1 projection (1.0W spec), not measured:</strong> TSU figures come from an analytical hardware model; Extropic TSU hardware is not publicly available.
                         </div>
                       </div>
                     </div>
@@ -3500,9 +3588,9 @@ export default function ThermoLabPage() {
                 {station.id === 16 && (
                   <div className="w-full flex flex-col gap-6">
                     {/* Header Banner & Sub-View Switcher */}
-                    <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
+                    <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 flex flex-col gap-5 shadow-2xl">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs border border-cyan-500/40 font-bold">
                             Station 16 • Non-Equilibrium Hybrid TPU
                           </span>
@@ -3513,22 +3601,22 @@ export default function ThermoLabPage() {
                         <h3 className="text-xl font-bold text-white tracking-tight">
                           Underdamped BAOAB Langevin, Auxiliary Memory &amp; SMC Resampling
                         </h3>
-                        <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                        <p className="text-xs text-slate-300 max-w-3xl leading-relaxed">
                           Pushing thermodynamic computing beyond conservative equilibrium: non-conservative auxiliary clause memory multipliers <code className="text-cyan-300 font-mono">y_m(t)</code> warp energy barriers to break topological frustration, while 22-stage Jarzynski-Neal SMC population resampling cures exponential weight collapse.
                         </p>
                       </div>
 
-                      {/* 3 Toggleable View Tabs */}
-                      <div className="flex flex-wrap p-1 rounded-xl bg-slate-950/80 border border-slate-800 gap-1 shrink-0">
+                      {/* 4 Interactive View Switcher Tabs - Responsive Full Width Grid */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 p-1.5 rounded-xl bg-slate-950/90 border border-slate-800 gap-1.5 w-full">
                         <button
                           onClick={() => {
                             playArcadeTone(440, 25);
                             setTpuActiveTab("frustration");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
                             tpuActiveTab === "frustration"
-                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm"
-                              : "text-slate-400 hover:text-slate-200"
+                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm font-bold"
+                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
                           }`}
                         >
                           1. 3-Way SAT Frustration
@@ -3538,10 +3626,10 @@ export default function ThermoLabPage() {
                             playArcadeTone(520, 25);
                             setTpuActiveTab("resampling");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
                             tpuActiveTab === "resampling"
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm"
-                              : "text-slate-400 hover:text-slate-200"
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm font-bold"
+                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
                           }`}
                         >
                           2. SMC Resampling (N=128)
@@ -3551,13 +3639,26 @@ export default function ThermoLabPage() {
                             playArcadeTone(600, 25);
                             setTpuActiveTab("integrator");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
                             tpuActiveTab === "integrator"
-                              ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 shadow-sm"
-                              : "text-slate-400 hover:text-slate-200"
+                              ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 shadow-sm font-bold"
+                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
                           }`}
                         >
                           3. Integrator &amp; Thermometers
+                        </button>
+                        <button
+                          onClick={() => {
+                            playArcadeTone(680, 25);
+                            setTpuActiveTab("silicon");
+                          }}
+                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
+                            tpuActiveTab === "silicon"
+                              ? "bg-violet-500/20 text-violet-300 border border-violet-500/50 shadow-sm font-bold"
+                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
+                          }`}
+                        >
+                          4. Silicon Realism (DAC / Rails)
                         </button>
                       </div>
                     </div>
@@ -3858,6 +3959,11 @@ export default function ThermoLabPage() {
                               </div>
                             );
                           })()}
+                        </div>
+
+                        {/* Phase-4 Silicon Realism & DAC Quantization Widget */}
+                        <div className="pt-2">
+                          <SiliconRealismWidget />
                         </div>
                       </div>
                     )}
@@ -4190,6 +4296,15 @@ export default function ThermoLabPage() {
                             <span>Launch /si-core Visualizer ↗</span>
                           </Link>
                         </div>
+                      </div>
+                    )}
+
+                    {/* =========================================================
+                        SUB-VIEW 4: SILICON REALISM & DAC QUANTIZATION (PHASE 4)
+                    ========================================================= */}
+                    {tpuActiveTab === "silicon" && (
+                      <div className="flex flex-col gap-5">
+                        <SiliconRealismWidget />
                       </div>
                     )}
                   </div>
