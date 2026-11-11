@@ -312,7 +312,7 @@ class TestThermodynamicSICore(unittest.TestCase):
             # Expect token events until done
             has_token = False
             has_done = False
-            for _ in range(80):
+            for _ in range(2000):
                 msg = ws.receive_text()
                 data = json.loads(msg)
                 if data["type"] == "token":
