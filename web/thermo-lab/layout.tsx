@@ -3,14 +3,14 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Thermo Lab — Heat is the computer",
   description:
-    "Thermo Lab — thermodynamic sampling research from Nexus AI Solutions: 16 benchmark experiments, a Potts codon sampler on trial at the Australian Genome Foundry, a Potts dispatcher, and an Ising microgrid solver. MIT open source.",
+    "Thermo Lab — thermodynamic sampling research from Nexus AI Solutions: 16 benchmark experiments, an offline Potts codon sampler for academic biofoundries, a Potts dispatcher, and an Ising microgrid solver. MIT open source.",
   alternates: {
     canonical: "/thermo-lab",
   },
   openGraph: {
     title: "Thermo Lab — Heat is the computer",
     description:
-      "Thermo Lab — thermodynamic sampling research from Nexus AI Solutions: 16 benchmark experiments, a Potts codon sampler on trial at the Australian Genome Foundry, a Potts dispatcher, and an Ising microgrid solver. MIT open source.",
+      "Thermo Lab — thermodynamic sampling research from Nexus AI Solutions: 16 benchmark experiments, an offline Potts codon sampler for academic biofoundries, a Potts dispatcher, and an Ising microgrid solver. MIT open source.",
     url: "/thermo-lab",
     type: "website",
   },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Thermo Lab — Heat is the computer",
     description:
-      "Thermo Lab — thermodynamic sampling research from Nexus AI Solutions: 16 benchmark experiments, a Potts codon sampler on trial at the Australian Genome Foundry, a Potts dispatcher, and an Ising microgrid solver. MIT open source.",
+      "Thermo Lab — thermodynamic sampling research from Nexus AI Solutions: 16 benchmark experiments, an offline Potts codon sampler for academic biofoundries, a Potts dispatcher, and an Ising microgrid solver. MIT open source.",
   },
 };
 

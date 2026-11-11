@@ -1257,10 +1257,10 @@ export default function ThermoLabPage() {
                   <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1" />
                 </svg>
                 <p>
-                  <strong>Trial agreed:</strong> the Australian Genome Foundry at
-                  Macquarie University has agreed to test the codon sampler on past
-                  constructs — results are still to come, likely in January.{" "}
-                  <a href="#codon">Read the trial notes</a>.
+                  <strong>Open academic evaluation:</strong> available for university
+                  biofoundries and synthetic biology research facilities to evaluate
+                  the Potts sampler offline against past expression constructs.{" "}
+                  <a href="#codon">Read the evaluation notes</a>.
                 </p>
               </div>
               <div className="thermo-hero-actions">
@@ -1614,21 +1614,21 @@ export default function ThermoLabPage() {
 
             <div className="thermo-trial">
               <div>
-                <h3>The Australian Genome Foundry trial</h3>
+                <h3>Academic Biofoundry & Research Lab Pilot</h3>
                 <p>
-                  Dr. Felix Meier — Data Scientist and Automation Engineer at the
-                  Australian Genome Foundry, Macquarie University — has agreed to try the
-                  sampler on past constructs: run the offline CLI against designs the
-                  foundry has already built, and check whether expression data exists to
-                  compare against. A reply is expected likely in January.
+                  Built for university biofoundries and synthetic biology research
+                  facilities evaluating offline codon optimization against historical
+                  construct libraries: run the offline CLI against expression designs the
+                  lab has already produced, and benchmark correlations in private.
                 </p>
                 <p>
-                  The tool he received is built for a lab that cannot send sequences out.
+                  The evaluation harness is designed specifically for research facilities
+                  that cannot transmit proprietary or pre-publication sequences off-site.
                   It is MIT open-source, makes zero network calls, and collects zero
-                  telemetry — it runs entirely on the foundry's own machine. Summary
-                  exports contain only aggregate statistics: counts, Spearman ρ, Pearson
-                  r, p-values, and ROC-AUC. Zero sequences and zero construct IDs leave
-                  the lab.
+                  telemetry — running entirely on the laboratory's own infrastructure.
+                  Summary exports contain only aggregate statistics: sample counts, Spearman
+                  ρ, Pearson r, p-values, and ROC-AUC. Zero sequences and zero construct IDs
+                  leave the laboratory.
                 </p>
                 <p>
                   <strong style={{ color: "var(--ink)" }}>Free permanently</strong> for
@@ -1637,9 +1637,9 @@ export default function ThermoLabPage() {
                 <div className="thermo-hero-actions">
                   <a
                     className="thermo-btn thermo-btn-solid"
-                    href="mailto:hello@getnexusaisolutions.com?subject=Codon%20sampler%20—%20academic%20trial"
+                    href="mailto:hello@getnexusaisolutions.com?subject=Codon%20sampler%20—%20academic%20evaluation"
                   >
-                    Ask for the trial CLI
+                    Request the evaluation CLI
                   </a>
                   <a className="thermo-btn thermo-btn-ghost" href="/codon">
                     Read the full codon page
@@ -1650,18 +1650,18 @@ export default function ThermoLabPage() {
                 <p className="big">Try it in three seconds, offline.</p>
                 <p>The built-in demo needs no files and no network:</p>
                 <div className="thermo-codeblock" style={{ marginTop: ".8rem" }}>
-                  <code>python scripts/agf_local_codon_benchmark.py demo</code>
+                  <code>python scripts/biofoundry_codon_benchmark.py demo</code>
                   <button
                     className="thermo-copy-btn"
                     type="button"
                     onClick={() =>
                       handleCopy(
-                        "python scripts/agf_local_codon_benchmark.py demo",
-                        "agf-demo"
+                        "python scripts/biofoundry_codon_benchmark.py demo",
+                        "bio-demo"
                       )
                     }
                   >
-                    {copiedId === "agf-demo" ? "Copied" : "Copy"}
+                    {copiedId === "bio-demo" ? "Copied" : "Copy"}
                   </button>
                 </div>
               </div>
@@ -1672,7 +1672,7 @@ export default function ThermoLabPage() {
             </h3>
             <div className="thermo-codeblock">
               <code>
-                python scripts/agf_local_codon_benchmark.py design --seq "MSKGEEL..."
+                python scripts/biofoundry_codon_benchmark.py design --seq "MSKGEEL..."
                 --host d_discoideum --candidates 5
               </code>
               <button
@@ -1680,17 +1680,17 @@ export default function ThermoLabPage() {
                 type="button"
                 onClick={() =>
                   handleCopy(
-                    'python scripts/agf_local_codon_benchmark.py design --seq "MSKGEEL..." --host d_discoideum --candidates 5',
-                    "agf-cmd-1"
+                    'python scripts/biofoundry_codon_benchmark.py design --seq "MSKGEEL..." --host d_discoideum --candidates 5',
+                    "bio-cmd-1"
                   )
                 }
               >
-                {copiedId === "agf-cmd-1" ? "Copied" : "Copy"}
+                {copiedId === "bio-cmd-1" ? "Copied" : "Copy"}
               </button>
             </div>
             <div className="thermo-codeblock">
               <code>
-                python scripts/agf_local_codon_benchmark.py correlate --csv constructs.csv
+                python scripts/biofoundry_codon_benchmark.py correlate --csv constructs.csv
                 --host s_cerevisiae --enzymes none --summary-out
                 summary_correlations_only.json
               </code>
@@ -1699,12 +1699,12 @@ export default function ThermoLabPage() {
                 type="button"
                 onClick={() =>
                   handleCopy(
-                    "python scripts/agf_local_codon_benchmark.py correlate --csv constructs.csv --host s_cerevisiae --enzymes none --summary-out summary_correlations_only.json",
-                    "agf-cmd-2"
+                    "python scripts/biofoundry_codon_benchmark.py correlate --csv constructs.csv --host s_cerevisiae --enzymes none --summary-out summary_correlations_only.json",
+                    "bio-cmd-2"
                   )
                 }
               >
-                {copiedId === "agf-cmd-2" ? "Copied" : "Copy"}
+                {copiedId === "bio-cmd-2" ? "Copied" : "Copy"}
               </button>
             </div>
             <p className="thermo-note-line">
@@ -2051,8 +2051,8 @@ export default function ThermoLabPage() {
               </a>
               <a href="#codon">
                 <span>
-                  The foundry CLI
-                  <span className="sub">scripts/agf_local_codon_benchmark.py</span>
+                  The biofoundry CLI
+                  <span className="sub">scripts/biofoundry_codon_benchmark.py</span>
                 </span>
                 <svg
                   width="20"
