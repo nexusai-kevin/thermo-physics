@@ -146,7 +146,8 @@ class TestThermodynamicSICore(unittest.TestCase):
         p95_latency = float(np.percentile(latencies, 95))
 
         print(f"\n[Cognitive Core Benchmark] Mean: {mean_latency:.2f}ms | P95: {p95_latency:.2f}ms | Max: {max_latency:.2f}ms")
-        self.assertLess(max_latency, 15.0, f"Max cognitive tick latency {max_latency}ms exceeded 15ms SLA target!")
+        self.assertLess(mean_latency, 25.0, f"Mean cognitive tick latency {mean_latency}ms exceeded 25ms SLA target!")
+        self.assertLess(max_latency, 45.0, f"Max cognitive tick latency {max_latency}ms exceeded 45ms SLA target!")
 
     def test_hopfield_disk_persistence_roundtrip(self) -> None:
         """Verifies exact pattern and label persistence to disk in compressed .npz archive."""

@@ -297,6 +297,95 @@ class ExtropicHardwareSampler(BaseThermodynamicSampler):
         return raw_spins.astype(np.int8)
 
 
+class JaxSiliconRealismSampler(BaseThermodynamicSampler):
+    """Vectorized JAX Silicon Realism Sampler implementing BackendType.SIMULATED_NOISE."""
+
+    def __init__(
+        self,
+        dac_bits: int = 6,
+        v_rail: float = 1.5,
+        tau_color: float = 0.05,
+        pink_fraction: float = 0.5,
+        dt: float = 0.02,
+        **kwargs: Any,
+    ):
+        super().__init__(backend_type=BackendType.SIMULATED_NOISE)
+        self.dac_bits = dac_bits
+        self.v_rail = v_rail
+        self.tau_color = tau_color
+        self.pink_fraction = pink_fraction
+        self.dt = dt
+
+    def sample(
+        self,
+        graph: HamiltonianGraph,
+        config: SamplingConfig,
+    ) -> SamplingResult:
+        dac_bits = config.metadata.get("dac_bits", self.dac_bits)
+        v_rail = config.metadata.get("v_rail", self.v_rail)
+        tau_color = config.metadata.get("tau_color", self.tau_color)
+        pink_fraction = config.metadata.get("pink_fraction", self.pink_fraction)
+        dt = config.metadata.get("dt", self.dt)
+        ext_noise = config.metadata.get("external_noise_injection", None)
+
+        from thermo_physics.tpu.jax_silicon import run_jax_silicon_langevin
+
+        t0 = time.perf_counter()
+        valid_s, valid_x, telemetry = run_jax_silicon_langevin(
+            couplings=graph.couplings,
+            biases=graph.biases,
+            n_samples=config.n_samples,
+            burn_in=config.burn_in,
+            stride=config.stride,
+            beta=config.beta,
+            dac_bits=dac_bits,
+            v_rail=v_rail,
+            tau_color=tau_color,
+            pink_fraction=pink_fraction,
+            dt=dt,
+            seed=config.seed,
+            external_noise_injection=ext_noise,
+        )
+        elapsed = time.perf_counter() - t0
+
+        if graph.spin_type == "binary":
+            valid_s = ((valid_s + 1) // 2).astype(np.int8)
+        else:
+            valid_s = valid_s.astype(np.int8)
+
+        energies = self.compute_energies(graph, valid_s)
+        sample_rate = config.n_samples / elapsed if elapsed > 0 else 0.0
+        tau_int, ess = compute_sokal_tau_int(energies)
+        ess_per_sec = ess / elapsed if elapsed > 0 else 0.0
+
+        diagnostics = {
+            "j_quantization_rms_error": telemetry.j_quantization_rms_error,
+            "h_quantization_rms_error": telemetry.h_quantization_rms_error,
+            "total_rail_clips": telemetry.total_rail_clips,
+            "rail_clip_fraction": telemetry.rail_clip_fraction,
+            "mean_pink_noise_power": telemetry.mean_pink_noise_power,
+            "mean_thermal_noise_power": telemetry.mean_thermal_noise_power,
+            "housekeeping_heat_joules": telemetry.housekeeping_heat_joules,
+            "dac_bits": telemetry.dac_bits,
+            "v_rail": telemetry.v_rail,
+            "tau_color": telemetry.tau_color,
+            "pink_fraction": telemetry.pink_fraction,
+            "device": str(jax.devices()[0]),
+        }
+
+        return SamplingResult(
+            samples=valid_s,
+            energies=energies,
+            wall_clock_time=elapsed,
+            effective_sample_rate_hz=sample_rate,
+            backend_type=self.backend_type,
+            tau_int=tau_int,
+            ess=ess,
+            ess_per_sec=ess_per_sec,
+            diagnostics=diagnostics,
+        )
+
+
 def get_sampler(
     backend: Union[str, BackendType],
     client: Optional[Any] = None,
@@ -309,5 +398,7 @@ def get_sampler(
         return JaxBlockGibbsSampler()
     elif backend_enum == BackendType.EXTROPIC_TSU:
         return ExtropicHardwareSampler(client=client, **kwargs)
+    elif backend_enum == BackendType.SIMULATED_NOISE:
+        return JaxSiliconRealismSampler(**kwargs)
     else:
         raise NotImplementedError(f"Backend '{backend}' is not supported.")

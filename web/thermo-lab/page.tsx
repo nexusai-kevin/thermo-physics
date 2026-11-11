@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SiliconRealismWidget } from "@/components/thermo-lab/SiliconRealismWidget";
 
 // ============================================================================
-// TYPES & BENCHMARK METADATA (EXPERIMENTS 1–11)
+// TYPES AND BENCHMARK METADATA (EXPERIMENTS 1 TO 11)
 // ============================================================================
 
 interface StationSpec {
@@ -53,16 +53,16 @@ const STATIONS: StationSpec[] = [
   {
     id: 3,
     badge: "Station 3 • NP-Hard Max-Cut",
-    title: "Antiferromagnetic Max-Cut on Erdős–Rényi Graphs",
+    title: "Antiferromagnetic Max-Cut on Erdos-Renyi Graphs",
     subtitle: "Antiferromagnetic Chromatic Block Gibbs Optimizer",
     kidStory:
-      "An NP-hard Max-Cut optimization problem on an Erdős–Rényi random graph G(50, 0.20) mapped to an antiferromagnetic Ising Hamiltonian. Annealing drives the system to partition vertices into two subgraphs while maximizing the count of cut edges.",
+      "An NP-hard Max-Cut optimization problem on an Erdos-Renyi random graph G(50, 0.20) mapped to an antiferromagnetic Ising Hamiltonian. Annealing drives the system to partition vertices into two subgraphs while maximizing the count of cut edges.",
     scriptFile: "solve_max_cut.py",
     runtime: "7.344s (G(50, 0.20), 243 edges)",
     keyMetric: "70.8% Optimal Cut (172/243 edges vs. 49.9% random)",
     physicsFormula: "J_{uv} = -1.0  ⇒  min E(s) ⟺ max Cut(s)",
     engineeringSummary:
-      "Greedy largest-first vertex coloring decomposes an arbitrary 50-node Erdős–Rényi graph into 7 conditionally independent color blocks for parallel JAX Gibbs sweeps.",
+      "Greedy largest-first vertex coloring decomposes an arbitrary 50-node Erdos-Renyi graph into 7 conditionally independent color blocks for parallel JAX Gibbs sweeps.",
   },
   {
     id: 4,
@@ -96,7 +96,7 @@ const STATIONS: StationSpec[] = [
     id: 6,
     badge: "Station 6 • RBM Associative Memory",
     title: "Bipartite Restricted Boltzmann Machine (RBM)",
-    subtitle: "Bipartite Visible–Hidden Pattern Completion",
+    subtitle: "Bipartite Visible-Hidden Pattern Completion",
     kidStory:
       "A bipartite Restricted Boltzmann Machine (64 visible, 32 hidden units) trained on prototype patterns. Clamping observed sub-regions allows associative pattern completion via alternating conditional Gibbs sweeps.",
     scriptFile: "rbm_associative_memory.py",
@@ -151,14 +151,14 @@ const STATIONS: StationSpec[] = [
   {
     id: 10,
     badge: "Station 10 • SK Frustrated Spin Glass",
-    title: "Sherrington–Kirkpatrick Frustrated Spin Glass",
+    title: "Sherrington-Kirkpatrick Frustrated Spin Glass",
     subtitle: "Dense Gaussian Frustration & Parisi Overlap Diagnostics",
     kidStory:
-      "A Sherrington–Kirkpatrick spin glass with dense Gaussian random couplings. Frustration creates a complex rugged energy landscape with many metastable states, characterized by non-trivial Parisi overlap distributions P(q).",
+      "A Sherrington-Kirkpatrick spin glass with dense Gaussian random couplings. Frustration creates a complex rugged energy landscape with many metastable states, characterized by non-trivial Parisi overlap distributions P(q).",
     scriptFile: "experiments/exp10_sk_spin_glass.py",
     runtime: "0.27s (N=24 dense all-to-all)",
     keyMetric: "100% Ground State Match (-15.4266) | RSB ⟨|q|⟩ = 0.5215 vs. Paramagnetic 0.1629",
-    physicsFormula: "H(s) = -½ ∑_{i≠j} J_{ij} s_i s_j,  J_{ij} ~ 𝒩(0, 1/N),  q = 1/N ∑ s_i^α s_i^β",
+    physicsFormula: "H(s) = -½ ∑_{i≠j} J_{ij} s_i s_j,  J_{ij} ~ N(0, 1/N),  q = 1/N ∑ s_i^α s_i^β",
     engineeringSummary:
       "Dual non-interacting Markov chain replicas sample dense non-planar all-to-all interactions (N=24, 276 edges), computing empirical Parisi distribution P(q) and confirming exact ground state discovery against 2^24 brute-force enumeration.",
   },
@@ -441,10 +441,10 @@ const GLP1_CODON_DATA: CodonResidue[] = [
 ];
 
 const GLP1_HAIRPINS = [
-  { id: 1, stem1: "GCC", stem2: "GGC", loop: "GAG", residues: "Ala2 — Gly4", baseRange: "nt 4-6 ··· 10-12", status: "Formed in Greedy (Stall Risk)", remedy: "GGA in Potts breaks stem" },
-  { id: 2, stem1: "AGG", stem2: "CCT", loop: "GCA", residues: "Glu3 — Thr5", baseRange: "nt 8-10 ··· 14-16", status: "Formed in Greedy (Stall Risk)", remedy: "ACA in Potts breaks stem" },
-  { id: 3, stem1: "CAC", stem2: "GTG", loop: "CAGCGAC", residues: "His1 — Val10", baseRange: "nt 18-20 ··· 28-30", status: "Formed in Greedy (Severe Stall)", remedy: "TTT + TCT break long loop" },
-  { id: 4, stem1: "CAG", stem2: "CTG", loop: "CGACG", residues: "Ser11 — Leu14", baseRange: "nt 33-35 ··· 40-42", status: "Formed in Greedy (Stall Risk)", remedy: "TCT in Potts eliminates loop" },
+  { id: 1, stem1: "GCC", stem2: "GGC", loop: "GAG", residues: "Ala2 to Gly4", baseRange: "nt 4-6 ··· 10-12", status: "Formed in Greedy (Stall Risk)", remedy: "GGA in Potts breaks stem" },
+  { id: 2, stem1: "AGG", stem2: "CCT", loop: "GCA", residues: "Glu3 to Thr5", baseRange: "nt 8-10 ··· 14-16", status: "Formed in Greedy (Stall Risk)", remedy: "ACA in Potts breaks stem" },
+  { id: 3, stem1: "CAC", stem2: "GTG", loop: "CAGCGAC", residues: "His1 to Val10", baseRange: "nt 18-20 ··· 28-30", status: "Formed in Greedy (Severe Stall)", remedy: "TTT + TCT break long loop" },
+  { id: 4, stem1: "CAG", stem2: "CTG", loop: "CGACG", residues: "Ser11 to Leu14", baseRange: "nt 33-35 ··· 40-42", status: "Formed in Greedy (Stall Risk)", remedy: "TCT in Potts eliminates loop" },
 ];
 
 // ============================================================================
@@ -508,7 +508,7 @@ const HAIRPIN_STRAND2 = [
 export default function ThermoLabPage() {
   const [globalBeta, setGlobalBeta] = useState<number>(1.2);
   const [isAutoSimulating, setIsAutoSimulating] = useState<boolean>(true);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
   const [copiedTweet, setCopiedTweet] = useState<boolean>(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const prevBetaRef = useRef<number>(1.2);
@@ -1280,9 +1280,9 @@ export default function ThermoLabPage() {
   // --- Copy / Post to X Quick-Share Text ---
   const shareText = useMemo(
     () =>
-      `Just ran the 16-station Thermodynamic Computing Arcade at β=${globalBeta.toFixed(
+      `Evaluated the 16-station thermodynamic computing suite at beta=${globalBeta.toFixed(
         2
-      )} (|M|=${magnet2D}, SK RSB ⟨|q|⟩=${skMeanAbsQ}, RNA S=${rnaEntropy}b, Side-Chain ΔE=-295.5kcal, 20.18M spin-updates/s in JAX) powered by @extropic's thrml! ⚡❄️\n\ncc @trevormccrt1 @beffjezos\nLive lab: https://getnexusaisolutions.com/thermo-lab\nRepo: https://github.com/nexusai-kevin/thermo-physics`,
+      )} (|M|=${magnet2D}, SK RSB <|q|>=${skMeanAbsQ}, RNA S=${rnaEntropy}b, Side-Chain deltaE=-295.5kcal, 20.18M spin-updates/s in JAX) via thrml.\n\nLive lab: https://getnexusaisolutions.com/thermo-lab\nRepo: https://github.com/nexusai-kevin/thermo-physics`,
     [globalBeta, magnet2D, skMeanAbsQ, rnaEntropy]
   );
 
@@ -1392,48 +1392,40 @@ export default function ThermoLabPage() {
         }
       `}} />
 
-      {/* Atmospheric Radial Depth Glows */}
-      <div className="pointer-events-none fixed top-[-120px] left-[-80px] w-[500px] h-[500px] rounded-full bg-cyan-500/10 blur-[130px] z-0" />
-      <div className="pointer-events-none fixed top-[200px] right-[-100px] w-[450px] h-[450px] rounded-full bg-rose-500/8 blur-[140px] z-0" />
-
       {/* ===================================================================
           STICKY MASTER CRYOGENIC RHEOSTAT BAR (Hardware Instrumentation)
       =================================================================== */}
-      <div className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/85 border-b border-cyan-500/25 shadow-2xl shadow-black/80">
+      <div className="sticky top-0 z-50 backdrop-blur-md bg-[#020308]/90 border-b border-[rgba(250,249,245,0.08)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3">
           
-          {/* Left: Brand & Return Link */}
+          {/* Left: Brand & Telemetry */}
           <div className="flex items-center gap-3">
             <a
               href="https://github.com/nexusai-kevin/thermo-physics"
               target="_blank"
               rel="noopener noreferrer"
-              className="tactile-btn px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 text-slate-200 font-mono text-xs flex items-center gap-1.5 transition shadow"
+              className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] px-3 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-[rgba(250,249,245,0.7)] hover:border-[rgba(250,249,245,0.3)] hover:text-[#faf9f5] transition-colors"
               title="Nexus Thermodynamic Research on GitHub"
             >
-              <span className="font-bold">GitHub</span>
-              <span>↗</span>
+              GitHub ↗
             </a>
 
             <div className="flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400" />
-              </span>
-              <span className="font-extrabold tracking-tight text-xs sm:text-sm text-white font-mono uppercase">
-                THERMODYNAMIC MASTER CONTROL
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5eead4] animate-pulse" />
+              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#faf9f5]">
+                Thermodynamic Master Control
               </span>
             </div>
             
-            <span className="hidden xl:inline-block text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-400/30 text-cyan-300 font-bold">
-              16 STATIONS • 20.18M SPINS/S
+            <span className="hidden xl:inline-block font-mono text-[10px] uppercase tracking-[0.15em] text-[rgba(250,249,245,0.4)]">
+              // 16 Stations · 20.18M Spins/s
             </span>
           </div>
 
           {/* Center: Precision Thermal Spectrum Slider */}
           <div className="flex items-center gap-3 flex-1 max-w-md">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-rose-400 whitespace-nowrap flex items-center gap-1">
-              <span className="hidden sm:inline">HIGH TEMP</span> (0.1)
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[rgba(250,249,245,0.4)] whitespace-nowrap">
+              High Temp (0.1)
             </span>
             <input
               type="range"
@@ -1444,57 +1436,56 @@ export default function ThermoLabPage() {
               onChange={(e) => handleBetaChange(parseFloat(e.target.value))}
               className="thermal-slider w-full cursor-pointer"
             />
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-cyan-300 whitespace-nowrap flex items-center gap-1">
-              <span className="hidden sm:inline">LOW TEMP</span> (5.0)
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#5eead4] whitespace-nowrap">
+              Low Temp (5.0)
             </span>
           </div>
 
           {/* Right: Telemetry Readout & Controls */}
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="px-3 py-1 rounded-xl bg-slate-900/90 border border-cyan-500/40 text-xs font-mono shadow-inner shadow-cyan-950">
-              <span className="text-slate-400">β =</span>{" "}
-              <span className="text-cyan-400 font-black text-sm tabular-nums">{globalBeta.toFixed(2)}</span>
+          <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+            <div className="px-3 py-1 rounded-full border border-[#5eead4]/30 bg-[#041a1a]/60 text-xs font-mono">
+              <span className="text-[rgba(250,249,245,0.5)]">β =</span>{" "}
+              <span className="text-[#5eead4] font-bold tabular-nums">{globalBeta.toFixed(2)}</span>
             </div>
 
             <button
               onClick={() => setSoundEnabled((s) => !s)}
-              className={`tactile-btn px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition border ${
+              className={`px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-[0.15em] transition border ${
                 soundEnabled
-                  ? "bg-emerald-500/15 border-emerald-400/40 text-emerald-300 shadow-sm shadow-emerald-500/20"
-                  : "bg-slate-900 border-slate-800 text-slate-400"
+                  ? "bg-[#041a1a]/60 border-[#5eead4]/40 text-[#5eead4]"
+                  : "bg-[#05070f] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.4)]"
               }`}
               title="Toggle Audio Clicks"
             >
-              {soundEnabled ? "SFX: ON" : "SFX: OFF"}
+              {soundEnabled ? "Audio: Active" : "Audio: Mute"}
             </button>
 
             <button
               onClick={() => setIsAutoSimulating((v) => !v)}
-              className={`tactile-btn px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition border ${
+              className={`px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-[0.15em] transition border ${
                 isAutoSimulating
-                  ? "bg-cyan-500/20 border-cyan-400/50 text-cyan-200 hover:bg-cyan-500/30 shadow-sm shadow-cyan-500/20"
-                  : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                  ? "bg-[#041a1a]/60 border-[#5eead4]/40 text-[#5eead4]"
+                  : "bg-[#05070f] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.7)] hover:border-[rgba(250,249,245,0.3)]"
               }`}
             >
-              {isAutoSimulating ? "⏸ Pause" : "▶ Resume"}
+              {isAutoSimulating ? "Pause" : "Resume"}
             </button>
 
             <button
               onClick={handleCopyShare}
-              className="tactile-btn px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs shadow-md shadow-sky-500/20 transition font-mono"
+              className="px-3 py-1 rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] hover:border-[rgba(250,249,245,0.3)] text-[rgba(250,249,245,0.7)] hover:text-[#faf9f5] text-[10px] font-mono uppercase tracking-[0.15em] transition"
             >
-              {copiedTweet ? "✓ Copied" : "𝕏 Share"}
+              {copiedTweet ? "✓ Copied" : "Share"}
             </button>
 
             <a
               href="/BENCHMARK_DOSSIER.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="tactile-btn px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/50 text-emerald-300 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-emerald-950/40 transition font-mono"
+              className="px-3 py-1 rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] hover:border-[rgba(250,249,245,0.3)] text-[rgba(250,249,245,0.85)] hover:text-[#faf9f5] text-[10px] font-mono uppercase tracking-[0.15em] transition"
               title="View & Download Full 16-Station Technical Whitepaper"
             >
-              <span>Whitepaper</span>
-              <span>↗</span>
+              Whitepaper ↗
             </a>
           </div>
 
@@ -1504,8 +1495,8 @@ export default function ThermoLabPage() {
       {/* ===================================================================
           HERO HEADER (Editorial & Scientific Depth)
       =================================================================== */}
-      <header className="relative overflow-hidden border-b border-slate-800/80 bg-gradient-to-b from-slate-900/40 via-slate-950 to-slate-950 py-16 px-4 sm:px-6 relative z-10">
-        <div className="max-w-5xl mx-auto text-center space-y-5">
+      <header className="relative overflow-hidden border-b border-[rgba(250,249,245,0.08)] bg-[#020308] py-16 px-4 sm:px-6 relative z-10">
+        <div className="max-w-5xl mx-auto text-center space-y-6">
           
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#05070f] border border-[rgba(250,249,245,0.12)] text-[#5eead4] text-xs font-mono shadow-inner">
             <span className="w-1.5 h-1.5 rounded-full bg-[#5eead4] animate-pulse" />
@@ -1519,40 +1510,39 @@ export default function ThermoLabPage() {
             </em>
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed font-normal">
+          <p className="text-base sm:text-lg text-[rgba(250,249,245,0.68)] max-w-3xl mx-auto leading-relaxed font-light">
             Instead of forcing GPUs to crunch deterministic rules step-by-step,{" "}
-            <strong className="text-white font-bold">Thermodynamic Computers</strong> let nature do the math.
-            Slide the temperature dial above to watch 16 physical energy landscapes—from discrete Ising magnets and frustrated SK spin glasses to RNA folding and protein rotamer packing—relax into optimal ground states automatically.
+            <strong className="text-[#faf9f5] font-normal">Thermodynamic Computers</strong> let nature do the math.
+            Slide the temperature dial above to watch 16 physical energy landscapes relax into optimal ground states automatically.
           </p>
 
           {/* Interactive Cryogenic Presets */}
-          <div className="pt-4 flex flex-wrap justify-center gap-3 font-mono text-xs">
+          <div className="pt-4 flex flex-wrap justify-center gap-3 font-mono text-[11px] uppercase tracking-[0.15em]">
             <button
               onClick={() => handleBetaChange(0.2)}
-              className="tactile-btn px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-rose-500/40 text-rose-300 font-bold transition shadow"
+              className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] px-4 py-2 text-[rgba(250,249,245,0.7)] hover:border-[rgba(250,249,245,0.4)] hover:text-[#faf9f5] transition-colors"
             >
-              High Temperature (β = 0.20)
+              // β = 0.20 · High Temp
             </button>
             <button
               onClick={() => handleBetaChange(0.44)}
-              className="tactile-btn px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-bold transition shadow"
+              className="rounded-full border border-[#f59e0b]/40 bg-[#140e04]/60 px-4 py-2 text-[#f59e0b] hover:border-[#f59e0b] transition-colors"
             >
-              Onsager Critical Point (β = 0.44)
+              // β = 0.44 · Onsager Critical Point
             </button>
             <button
               onClick={() => handleBetaChange(3.5)}
-              className="tactile-btn px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 font-bold transition shadow"
+              className="rounded-full border border-[#5eead4]/40 bg-[#041a1a]/60 px-4 py-2 text-[#5eead4] hover:border-[#5eead4] transition-colors"
             >
-              Low Temperature (β = 3.50)
+              // β = 3.50 · Ground State
             </button>
             <a
               href="https://github.com/nexusai-kevin/thermo-physics"
               target="_blank"
               rel="noopener noreferrer"
-              className="tactile-btn inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black transition shadow-lg shadow-cyan-500/20"
+              className="rounded-full bg-[#faf9f5] px-5 py-2 font-medium text-[#020308] hover:bg-white transition-colors"
             >
-              <span>GitHub Repo</span>
-              <span>↗</span>
+              GitHub Repository ↗
             </a>
           </div>
         </div>
@@ -1565,85 +1555,82 @@ export default function ThermoLabPage() {
         {/* ===================================================================
             PLUGGABLE EXECUTION BACKEND & REAL-TIME TELEMETRY PANEL
         =================================================================== */}
-        <div className="rounded-2xl bg-gradient-to-br from-slate-900/90 via-slate-950 to-slate-900/90 border border-cyan-500/30 p-6 sm:p-8 shadow-2xl space-y-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div className="rounded-2xl border border-[rgba(250,249,245,0.10)] bg-[#060811]/90 p-6 sm:p-8 shadow-2xl backdrop-blur-sm space-y-6">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-[rgba(250,249,245,0.08)] pb-5">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                  Execution Substrate
-                </span>
-                <span className="text-xs text-slate-400 font-mono">Layer 4 Pluggable Hardware Adapter</span>
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] text-[#5eead4]">
+                <span>// execution substrate · layer 4 pluggable adapter</span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white mt-1">
+              <h2 className="font-[family-name:var(--font-display)] text-xl sm:text-2xl font-normal text-[#faf9f5] mt-1 tracking-tight">
                 Thermodynamic Sampling Substrate &amp; Telemetry
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-[rgba(250,249,245,0.55)] mt-1 font-light">
                 Toggle between Classical JAX Block Gibbs simulation and Extropic TSU hardware drop-in targets.
               </p>
             </div>
 
             {/* Backend Toggle */}
-            <div className="flex items-center p-1 rounded-xl bg-slate-950 border border-slate-800">
+            <div className="flex items-center p-1 rounded-full bg-[#020308] border border-[rgba(250,249,245,0.10)] font-mono text-xs">
               <button
                 onClick={() => {
                   playArcadeTone(440, 30);
                   setSelectedBackend("jax");
                 }}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] transition ${
                   selectedBackend === "jax"
-                    ? "bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/30"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-[#faf9f5] text-[#020308] font-medium"
+                    : "text-[rgba(250,249,245,0.6)] hover:text-[#faf9f5]"
                 }`}
               >
-                <span>JAX Block Gibbs (Simulated)</span>
+                JAX Block Gibbs (Simulated)
               </button>
               <button
                 onClick={() => {
                   playArcadeTone(660, 40, "square");
                   setSelectedBackend("extropic");
                 }}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                className={`px-4 py-1.5 rounded-full text-[11px] uppercase tracking-[0.12em] transition ${
                   selectedBackend === "extropic"
-                    ? "bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 shadow-lg shadow-emerald-500/30"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-[#5eead4] text-[#020308] font-medium"
+                    : "text-[rgba(250,249,245,0.6)] hover:text-[#faf9f5]"
                 }`}
               >
-                <span>🔬 Extropic TSU Silicon (Drop-in Target)</span>
+                Extropic TSU Silicon (Drop-in Target)
               </button>
             </div>
           </div>
 
           {/* Real-time Telemetry Readout Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-              <div className="text-[11px] text-slate-400 font-medium">Substrate Mode</div>
-              <div className="text-sm font-mono font-bold text-cyan-300 truncate">{backendTelemetry.name}</div>
-              <div className="text-[10px] text-slate-500 truncate">{backendTelemetry.chipType}</div>
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div className="p-4 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)] space-y-1">
+              <div className="text-[10px] uppercase tracking-[0.15em] text-[rgba(250,249,245,0.4)] font-mono">Substrate Mode</div>
+              <div className="text-sm font-mono text-[#5eead4] truncate">{backendTelemetry.name}</div>
+              <div className="text-[10px] text-[rgba(250,249,245,0.4)] truncate">{backendTelemetry.chipType}</div>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-              <div className="text-[11px] text-slate-400 font-medium">Wall-Clock Latency</div>
-              <div className="text-sm font-mono font-bold text-emerald-400">{backendTelemetry.runtime}</div>
-              <div className="text-[10px] text-slate-500">5,000 Sweeps / Shots</div>
+            <div className="p-4 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)] space-y-1">
+              <div className="text-[10px] uppercase tracking-[0.15em] text-[rgba(250,249,245,0.4)] font-mono">Wall-Clock Latency</div>
+              <div className="text-sm font-mono text-[#faf9f5]">{backendTelemetry.runtime}</div>
+              <div className="text-[10px] text-[rgba(250,249,245,0.4)]">5,000 Sweeps / Shots</div>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-              <div className="text-[11px] text-slate-400 font-medium">Raw Throughput</div>
-              <div className="text-sm font-mono font-bold text-cyan-400">{backendTelemetry.sampleRate}</div>
-              <div className="text-[10px] text-slate-500">Clocked Hardware Rate</div>
+            <div className="p-4 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)] space-y-1">
+              <div className="text-[10px] uppercase tracking-[0.15em] text-[rgba(250,249,245,0.4)] font-mono">Raw Throughput</div>
+              <div className="text-sm font-mono text-[#faf9f5]">{backendTelemetry.sampleRate}</div>
+              <div className="text-[10px] text-[rgba(250,249,245,0.4)]">Clocked Hardware Rate</div>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-              <div className="text-[11px] text-slate-400 font-medium">Sokal MCMC τ_int</div>
-              <div className="text-sm font-mono font-bold text-amber-300">{backendTelemetry.tauInt}</div>
-              <div className="text-[10px] text-slate-500">Autocorrelation Window</div>
+            <div className="p-4 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)] space-y-1">
+              <div className="text-[10px] uppercase tracking-[0.15em] text-[rgba(250,249,245,0.4)] font-mono">Sokal MCMC τ_int</div>
+              <div className="text-sm font-mono text-[#f59e0b]">{backendTelemetry.tauInt}</div>
+              <div className="text-[10px] text-[rgba(250,249,245,0.4)]">Autocorrelation Window</div>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-              <div className="text-[11px] text-slate-400 font-medium">Independent ESS/s</div>
-              <div className="text-sm font-mono font-bold text-emerald-300">{backendTelemetry.essPerSec}</div>
-              <div className="text-[10px] text-slate-500">{backendTelemetry.advantage}</div>
+            <div className="p-4 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)] space-y-1">
+              <div className="text-[10px] uppercase tracking-[0.15em] text-[rgba(250,249,245,0.4)] font-mono">Independent ESS/s</div>
+              <div className="text-sm font-mono text-[#34d399]">{backendTelemetry.essPerSec}</div>
+              <div className="text-[10px] text-[rgba(250,249,245,0.4)]">{backendTelemetry.advantage}</div>
             </div>
           </div>
-          <div className="text-xs text-slate-400 bg-slate-950/50 p-3 rounded-lg border border-slate-800/80 flex items-center justify-between">
-            <span>ℹ️ <strong>Hardware Architecture Note:</strong> {backendTelemetry.description}</span>
-            <span className="font-mono text-cyan-400 text-[11px] font-semibold">{backendTelemetry.advantage}</span>
+          <div className="text-xs text-[rgba(250,249,245,0.55)] bg-[#020308]/40 p-3 rounded-xl border border-[rgba(250,249,245,0.06)] flex items-center justify-between font-light">
+            <span>Hardware Architecture Note: {backendTelemetry.description}</span>
+            <span className="font-mono text-[#5eead4] text-[11px] font-medium">{backendTelemetry.advantage}</span>
           </div>
         </div>
 
@@ -1651,46 +1638,44 @@ export default function ThermoLabPage() {
           <section
             key={station.id}
             id={`station-${station.id}`}
-            className="rounded-2xl bg-slate-900/70 border border-slate-800 hover:border-cyan-500/40 transition-all shadow-xl overflow-hidden scroll-mt-24"
+            className="rounded-2xl border border-[rgba(250,249,245,0.10)] bg-[#060811]/90 hover:border-[rgba(250,249,245,0.22)] transition-all duration-300 shadow-2xl overflow-hidden scroll-mt-24"
           >
             <div className="p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               {/* Left Column: Story & Explanation */}
               <div className="lg:col-span-5 space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                    {station.badge}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                    Model Overview
-                  </span>
+                <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[#5eead4]">
+                  <span>// {station.badge}</span>
                 </div>
 
-                <h2 className="text-2xl font-bold text-white">{station.title}</h2>
-                <p className="text-sm text-cyan-400 font-medium">{station.subtitle}</p>
+                <h2 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl font-normal text-[#faf9f5] tracking-tight">
+                  {station.title}
+                </h2>
+                <p className="text-xs sm:text-sm text-[rgba(250,249,245,0.65)] font-light">
+                  {station.subtitle}
+                </p>
 
-                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 text-sm leading-relaxed">
+                <div className="p-4 sm:p-5 rounded-xl border border-[rgba(250,249,245,0.06)] bg-[#020308]/60 text-xs sm:text-sm font-light leading-relaxed text-[rgba(250,249,245,0.7)]">
                   {station.kidStory}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono text-slate-400">
-                  <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800">
-                    Verified Metric:{" "}
-                    <strong className="text-emerald-400">{station.keyMetric}</strong>
+                <div className="flex flex-wrap items-center gap-3 pt-1 text-xs font-mono text-[rgba(250,249,245,0.65)]">
+                  <span className="px-3 py-1.5 rounded-lg border border-[rgba(250,249,245,0.08)] bg-[#020308]/60">
+                    Verified Metric: <strong className="text-[#34d399] font-normal">{station.keyMetric}</strong>
                   </span>
-                  <span className="px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800">
-                    Measured Runtime: <strong className="text-cyan-300">{station.runtime}</strong>
+                  <span className="px-3 py-1.5 rounded-lg border border-[rgba(250,249,245,0.08)] bg-[#020308]/60">
+                    Runtime: <strong className="text-[#5eead4] font-normal">{station.runtime}</strong>
                   </span>
                 </div>
               </div>
 
               {/* Right Column: Interactive Playable Widget */}
-              <div className="lg:col-span-7 bg-slate-950/90 border border-slate-800/90 rounded-2xl p-5 sm:p-6 flex flex-col items-center justify-center min-h-[260px]">
+              <div className="lg:col-span-7 bg-[#020308]/90 border border-[rgba(250,249,245,0.08)] rounded-xl p-5 sm:p-6 flex flex-col items-center justify-center min-h-[260px] shadow-inner">
                 {/* STATION 1 WIDGET */}
                 {station.id === 1 && (
                   <div className="w-full space-y-5 text-center">
-                    <div className="flex items-center justify-between text-xs text-slate-400 px-2">
-                      <span>Click any magnet pill to flip it manually</span>
-                      <span className="font-mono text-cyan-300">
+                    <div className="flex items-center justify-between text-xs text-[rgba(250,249,245,0.55)] px-2 font-mono">
+                      <span>Click any spin to invert state · 1D nearest-neighbor coupling</span>
+                      <span className="text-[#5eead4]">
                         Alignment |⟨M⟩| = {magnet1D}
                       </span>
                     </div>
@@ -1704,20 +1689,20 @@ export default function ThermoLabPage() {
                               arr.map((s, i) => (i === idx ? -s : s))
                             );
                           }}
-                          className={`h-14 rounded-full flex flex-col items-center justify-center font-bold text-xs transition-all transform hover:scale-105 border ${
+                          className={`h-14 rounded-xl flex flex-col items-center justify-center font-mono text-xs transition-colors border ${
                             spin === 1
-                              ? "bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-500/20"
-                              : "bg-rose-500/25 border-rose-400 text-rose-200 shadow-md shadow-rose-500/20"
+                              ? "bg-[rgba(94,234,212,0.08)] border-[#5eead4]/50 text-[#5eead4]"
+                              : "bg-[rgba(244,63,94,0.08)] border-rose-500/50 text-rose-300"
                           }`}
                         >
-                          <span>{spin === 1 ? "▲" : "▼"}</span>
-                          <span className="text-[10px] opacity-75">
+                          <span className="text-sm">{spin === 1 ? "▲" : "▼"}</span>
+                          <span className="text-[10px] opacity-75 font-mono">
                             {spin === 1 ? "+1" : "-1"}
                           </span>
                         </button>
                       ))}
                     </div>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-[rgba(250,249,245,0.45)] font-light font-mono">
                       Checkerboard Sublattices: Even indices update in Cycle 1, Odd indices update in Cycle 2.
                     </p>
                   </div>
@@ -1727,7 +1712,7 @@ export default function ThermoLabPage() {
                 {station.id === 2 && (
                   <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
                     <div
-                      className="grid gap-1 p-2 bg-slate-900 rounded-xl border border-slate-800"
+                      className="grid gap-1 p-2.5 bg-[#020308] rounded-xl border border-[rgba(250,249,245,0.08)]"
                       style={{ gridTemplateColumns: "repeat(16, minmax(0, 1fr))" }}
                     >
                       {grid2D.map((spin, idx) => (
@@ -1738,40 +1723,42 @@ export default function ThermoLabPage() {
                             setGrid2D((g) => g.map((s, i) => (i === idx ? -s : s)));
                           }}
                           className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[2px] cursor-pointer transition-colors ${
-                            spin === 1 ? "bg-cyan-400" : "bg-rose-500"
+                            spin === 1 ? "bg-[#5eead4]" : "bg-rose-500/80"
                           }`}
                         />
                       ))}
                     </div>
                     <div className="space-y-3 text-left max-w-xs">
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                        <div className="text-xs text-slate-400">Live Order Parameter</div>
-                        <div className="text-2xl font-mono font-bold text-cyan-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-1">
+                        <div className="text-[11px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
+                          Live Order Parameter
+                        </div>
+                        <div className="text-2xl font-mono font-medium text-[#5eead4]">
                           |⟨M⟩| = {magnet2D}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-[rgba(250,249,245,0.55)] font-mono">
                           Onsager Critical Point:{" "}
-                          <span className="text-amber-300 font-mono">βc ≈ 0.4407</span>
+                          <span className="text-amber-300">βc ≈ 0.4407</span>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 font-mono text-[11px]">
                         <button
                           onClick={() => handleBetaChange(0.2)}
-                          className="flex-1 py-1.5 px-3 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-300 text-xs font-semibold"
+                          className="flex-1 py-1.5 px-2 rounded-lg bg-[#05070f] border border-[rgba(250,249,245,0.12)] hover:border-rose-400 text-rose-300 transition-colors"
                         >
-                          β=0.20 (Noise)
+                          β = 0.20
                         </button>
                         <button
                           onClick={() => handleBetaChange(0.44)}
-                          className="flex-1 py-1.5 px-3 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold"
+                          className="flex-1 py-1.5 px-2 rounded-lg bg-[#05070f] border border-[rgba(250,249,245,0.12)] hover:border-amber-400 text-amber-300 transition-colors"
                         >
-                          β=0.44 (Critical)
+                          β = 0.44
                         </button>
                         <button
                           onClick={() => handleBetaChange(0.75)}
-                          className="flex-1 py-1.5 px-3 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-semibold"
+                          className="flex-1 py-1.5 px-2 rounded-lg bg-[#05070f] border border-[rgba(250,249,245,0.12)] hover:border-[#5eead4] text-[#5eead4] transition-colors"
                         >
-                          β=0.75 (Ordered)
+                          β = 0.75
                         </button>
                       </div>
                     </div>
@@ -1781,7 +1768,7 @@ export default function ThermoLabPage() {
                 {/* STATION 3 WIDGET */}
                 {station.id === 3 && (
                   <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
-                    <div className="relative w-56 h-56 bg-slate-900/90 rounded-full border border-slate-800 flex items-center justify-center">
+                    <div className="relative w-56 h-56 bg-[#020308] rounded-full border border-[rgba(250,249,245,0.08)] flex items-center justify-center">
                       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 200 200">
                         {rivalryEdges.map(([u, v], eIdx) => {
                           const angleU = (u / 8) * 2 * Math.PI - Math.PI / 2;
@@ -1798,10 +1785,10 @@ export default function ThermoLabPage() {
                               y1={y1}
                               x2={x2}
                               y2={y2}
-                              stroke={isCut ? "#10b981" : "#f43f5e"}
-                              strokeWidth={isCut ? "2.4" : "1.5"}
-                              strokeDasharray={isCut ? "none" : "4 2"}
-                              opacity={isCut ? 0.9 : 0.5}
+                              stroke={isCut ? "#34d399" : "#f43f5e"}
+                              strokeWidth={isCut ? "2" : "1.2"}
+                              strokeDasharray={isCut ? "none" : "3 2"}
+                              opacity={isCut ? 0.9 : 0.45}
                             />
                           );
                         })}
@@ -1823,27 +1810,29 @@ export default function ThermoLabPage() {
                               left: `${(left / 200) * 100}%`,
                               top: `${(top / 200) * 100}%`,
                             }}
-                            className={`absolute -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center border-2 transition-transform hover:scale-110 ${
+                            className={`absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full font-mono text-xs flex items-center justify-center border transition-colors ${
                               team === 1
-                                ? "bg-cyan-500 border-cyan-200 text-slate-950 shadow-lg shadow-cyan-500/40"
-                                : "bg-rose-500 border-rose-200 text-white shadow-lg shadow-rose-500/40"
+                                ? "bg-[#05070f] border-[#5eead4] text-[#5eead4]"
+                                : "bg-[#05070f] border-rose-500 text-rose-300"
                             }`}
                           >
-                            M{idx + 1}
+                            V{idx + 1}
                           </button>
                         );
                       })}
                     </div>
 
                     <div className="space-y-3 max-w-xs text-left">
-                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-xs text-slate-400">Rivalries Resolved (Cut Edges)</div>
-                        <div className="text-2xl font-mono font-bold text-emerald-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[11px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
+                          Graph Bipartition (Cut Edges)
+                        </div>
+                        <div className="text-2xl font-mono font-medium text-[#34d399] mt-0.5">
                           {happyRivalries} / {rivalryEdges.length} Edges (
                           {Math.round((happyRivalries / rivalryEdges.length) * 100)}%)
                         </div>
-                        <p className="text-xs text-slate-400 mt-1">
-                          Green lines = separated rivals (happy). Red dashed lines = clashing teammates!
+                        <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">
+                          Solid green lines: Satisfied antiferromagnetic cut (J &lt; 0). Dashed lines: Frustrated edge.
                         </p>
                       </div>
                     </div>
@@ -1854,7 +1843,7 @@ export default function ThermoLabPage() {
                 {station.id === 4 && (
                   <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
                     <div
-                      className="grid gap-1.5 p-2.5 bg-slate-900 rounded-xl border border-slate-800"
+                      className="grid gap-1.5 p-3 bg-[#020308] rounded-xl border border-[rgba(250,249,245,0.08)]"
                       style={{ gridTemplateColumns: "repeat(10, minmax(0, 1fr))" }}
                     >
                       {pottsGrid.map((cat, idx) => (
@@ -1866,28 +1855,18 @@ export default function ThermoLabPage() {
                               g.map((c, i) => (i === idx ? (c + 1) % 4 : c))
                             );
                           }}
-                          className={`w-5 h-5 rounded-md cursor-pointer transition-all shadow-sm ${pottsColors[cat]}`}
+                          className={`w-5 h-5 rounded-md cursor-pointer transition-colors shadow-sm ${pottsColors[cat]}`}
                         />
                       ))}
                     </div>
-                    <div className="space-y-2 max-w-xs text-left text-xs text-slate-300">
-                      <div className="font-semibold text-white text-sm">
+                    <div className="space-y-2.5 max-w-xs text-left text-xs text-[rgba(250,249,245,0.7)]">
+                      <div className="font-mono text-xs uppercase tracking-wider text-[#faf9f5]">
                         4-State Categorical Spin Lattice
                       </div>
-                      <p className="text-slate-400 leading-relaxed">
-                        Each tile samples from a 4-way Softmax distribution weighted by how many
-                        neighbors share its paint color. Above{" "}
-                        <span className="text-cyan-300 font-mono">βc = ln(3) ≈ 1.10</span>, matching
-                        color territories lock together.
+                      <p className="text-[rgba(250,249,245,0.55)] font-light leading-relaxed">
+                        Each site samples from a 4-way Softmax distribution conditioned on neighbor consensus. Above{" "}
+                        <span className="text-[#5eead4] font-mono">βc = ln(3) ≈ 1.10</span>, matching categorical domains nucleate and lock.
                       </p>
-                      <div className="pt-2">
-                        <Link
-                          href="/lol-draft"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-semibold text-xs transition"
-                        >
-                          <span>🎮 Play with LoL Draft Solver ↗</span>
-                        </Link>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -1897,33 +1876,33 @@ export default function ThermoLabPage() {
                   <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
                     <div className="flex items-center gap-4">
                       <div>
-                        <div className="text-[11px] text-slate-400 text-center mb-1 font-mono">
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] text-center mb-1.5 font-mono uppercase tracking-wider">
                           Corrupted (22% Noise)
                         </div>
-                        <div className="grid grid-cols-8 gap-0.5 p-1.5 bg-slate-900 rounded-lg border border-slate-800">
+                        <div className="grid grid-cols-8 gap-0.5 p-2 bg-[#020308] rounded-lg border border-[rgba(250,249,245,0.08)]">
                           {noisyDigit.map((v, i) => (
                             <div
                               key={i}
                               className={`w-3.5 h-3.5 rounded-[1px] ${
-                                v === 1 ? "bg-amber-400" : "bg-slate-950"
+                                v === 1 ? "bg-amber-400" : "bg-[#05070f]"
                               }`}
                             />
                           ))}
                         </div>
                       </div>
 
-                      <div className="text-cyan-400 text-xl font-bold">➔</div>
+                      <div className="text-[rgba(250,249,245,0.3)] text-lg font-mono">→</div>
 
                       <div>
-                        <div className="text-[11px] text-slate-400 text-center mb-1 font-mono">
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] text-center mb-1.5 font-mono uppercase tracking-wider">
                           Denoised Latent State
                         </div>
-                        <div className="grid grid-cols-8 gap-0.5 p-1.5 bg-slate-900 rounded-lg border border-cyan-500/30">
+                        <div className="grid grid-cols-8 gap-0.5 p-2 bg-[#020308] rounded-lg border border-[rgba(250,249,245,0.12)]">
                           {denoisedDigit.map((v, i) => (
                             <div
                               key={i}
                               className={`w-3.5 h-3.5 rounded-[1px] ${
-                                v === 1 ? "bg-cyan-400 shadow-sm shadow-cyan-400" : "bg-slate-950"
+                                v === 1 ? "bg-[#5eead4]" : "bg-[#05070f]"
                               }`}
                             />
                           ))}
@@ -1932,24 +1911,26 @@ export default function ThermoLabPage() {
                     </div>
 
                     <div className="space-y-3 max-w-xs text-left">
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-xs text-slate-400">Reconstruction Error</div>
-                        <div className="text-2xl font-mono font-bold text-emerald-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[11px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
+                          Reconstruction Error
+                        </div>
+                        <div className="text-2xl font-mono font-medium text-[#34d399] mt-0.5">
                           {denoisedError}% Misclassified
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 font-mono text-[11px]">
                         <button
                           onClick={handleDenoiseStep}
-                          className="flex-1 py-2 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition"
+                          className="flex-1 py-2 px-2.5 rounded-lg border border-[#5eead4]/40 bg-[#05070f] text-[#5eead4] hover:bg-[#5eead4]/10 transition-colors uppercase tracking-wider"
                         >
-                          🧼 Clean With Physics
+                          Execute Gibbs Sweep
                         </button>
                         <button
                           onClick={handleAddNoise}
-                          className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 font-semibold text-xs transition"
+                          className="flex-1 py-2 px-2.5 rounded-lg border border-[rgba(250,249,245,0.12)] bg-[#05070f] text-amber-300 hover:border-amber-400 transition-colors uppercase tracking-wider"
                         >
-                          💥 Splash Noise
+                          Inject Noise
                         </button>
                       </div>
                     </div>
@@ -1960,37 +1941,39 @@ export default function ThermoLabPage() {
                 {station.id === 6 && (
                   <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="grid grid-cols-8 gap-1 p-2 bg-slate-900 rounded-xl border border-slate-800 relative">
+                      <div className="grid grid-cols-8 gap-1 p-2.5 bg-[#020308] rounded-xl border border-[rgba(250,249,245,0.08)] relative">
                         {rbmState.map((val, idx) => (
                           <div
                             key={idx}
-                            className={`w-4 h-4 rounded-sm transition-all ${
-                              val === 1 ? "bg-cyan-400 shadow-sm shadow-cyan-400" : "bg-slate-950"
+                            className={`w-4 h-4 rounded-sm transition-colors ${
+                              val === 1 ? "bg-[#5eead4]" : "bg-[#05070f]"
                             } ${idx >= 32 ? "border border-amber-400/40" : ""}`}
                           />
                         ))}
                       </div>
-                      <span className="text-[11px] text-amber-300 font-mono">
-                        Bottom 32 spins masked/erased
+                      <span className="text-[10px] text-amber-300 font-mono uppercase tracking-wider">
+                        Bottom 32 spins masked
                       </span>
                     </div>
 
                     <div className="space-y-3 max-w-xs text-left">
-                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-xs text-slate-400">Memory Prototype Match</div>
-                        <div className="text-2xl font-mono font-bold text-cyan-400">
-                          {rbmOverlap}% Pattern Recall
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[11px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
+                          Associative Recall Overlap
+                        </div>
+                        <div className="text-2xl font-mono font-medium text-[#5eead4] mt-0.5">
+                          {rbmOverlap}% Overlap
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 font-mono text-[10px]">
                         {["Plus (+)", "Cross (×)", "Square (□)"].map((label, idx) => (
                           <button
                             key={idx}
                             onClick={() => handleSelectPrototype(idx)}
-                            className={`flex-1 py-1 px-2 rounded-lg text-xs font-semibold border ${
+                            className={`flex-1 py-1.5 px-1.5 rounded-lg border transition-colors ${
                               selectedProtoIdx === idx
-                                ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
-                                : "bg-slate-900 border-slate-800 text-slate-400"
+                                ? "bg-[#05070f] border-[#5eead4] text-[#5eead4]"
+                                : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                             }`}
                           >
                             {label}
@@ -1999,9 +1982,9 @@ export default function ThermoLabPage() {
                       </div>
                       <button
                         onClick={handleRecallMemory}
-                        className="w-full py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition"
+                        className="w-full py-2 rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] hover:border-[#34d399] text-[#34d399] font-mono text-xs uppercase tracking-wider transition-colors"
                       >
-                        ⚡ Reconstruct Erased Half
+                        Reconstruct Occluded Bits
                       </button>
                     </div>
                   </div>
@@ -2010,7 +1993,7 @@ export default function ThermoLabPage() {
                 {/* STATION 7 WIDGET */}
                 {station.id === 7 && (
                   <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
-                    <div className="grid grid-cols-5 gap-2 p-3 bg-slate-900/90 rounded-2xl border border-slate-800 max-w-xs">
+                    <div className="grid grid-cols-5 gap-2 p-3.5 bg-[#020308] rounded-xl border border-[rgba(250,249,245,0.08)] max-w-xs">
                       {selectedAssets.map((sel, idx) => (
                         <button
                           key={idx}
@@ -2020,10 +2003,10 @@ export default function ThermoLabPage() {
                               arr.map((s, i) => (i === idx ? (s ? 0 : 1) : s))
                             );
                           }}
-                          className={`h-11 rounded-xl flex flex-col items-center justify-center font-mono text-xs border transition-all ${
+                          className={`h-11 rounded-lg flex flex-col items-center justify-center font-mono text-xs border transition-colors ${
                             sel
-                              ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-md shadow-emerald-500/30 font-bold"
-                              : "bg-slate-950 border-slate-800 text-slate-500"
+                              ? "bg-[rgba(52,211,153,0.1)] border-[#34d399] text-[#34d399]"
+                              : "bg-[#05070f] border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.4)] hover:text-[#faf9f5]"
                           }`}
                         >
                           <span>A{idx + 1}</span>
@@ -2033,25 +2016,27 @@ export default function ThermoLabPage() {
                     </div>
 
                     <div className="space-y-3 max-w-xs text-left">
-                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                        <div className="text-xs text-slate-400">Selected Backpack Assets</div>
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-1">
+                        <div className="text-[11px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
+                          Selected Portfolio Assets
+                        </div>
                         <div
-                          className={`text-2xl font-mono font-bold ${
-                            quboCount === 5 ? "text-emerald-400" : "text-amber-400"
+                          className={`text-2xl font-mono font-medium ${
+                            quboCount === 5 ? "text-[#34d399]" : "text-amber-400"
                           }`}
                         >
-                          {quboCount} / 5 Assets {quboCount === 5 ? "✅ Valid" : "⚠️ Penalty"}
+                          {quboCount} / 5 Assets {quboCount === 5 ? "(Feasible)" : "(Penalty Active)"}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-[rgba(250,249,245,0.55)] font-mono">
                           Portfolio Return:{" "}
-                          <strong className="text-cyan-300 font-mono">{quboTotalReturn}%</strong>
+                          <strong className="text-[#5eead4]">{quboTotalReturn}%</strong>
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs text-slate-400">
+                      <div className="space-y-1 font-mono text-xs">
+                        <div className="flex justify-between text-[rgba(250,249,245,0.55)]">
                           <span>Hard Constraint Weight (λ)</span>
-                          <span className="font-mono text-cyan-300">{quboLambda.toFixed(2)}</span>
+                          <span className="text-[#5eead4]">{quboLambda.toFixed(2)}</span>
                         </div>
                         <input
                           type="range"
@@ -2060,7 +2045,7 @@ export default function ThermoLabPage() {
                           step={0.05}
                           value={quboLambda}
                           onChange={(e) => setQuboLambda(parseFloat(e.target.value))}
-                          className="w-full accent-emerald-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                          className="w-full accent-[#34d399] cursor-pointer h-1.5 rounded-lg bg-[#020308]"
                         />
                       </div>
                     </div>
@@ -2070,9 +2055,9 @@ export default function ThermoLabPage() {
                 {/* STATION 8 WIDGET */}
                 {station.id === 8 && (
                   <div className="w-full space-y-4">
-                    <div className="flex justify-between text-xs text-slate-400 px-2 font-mono">
+                    <div className="flex justify-between text-xs text-[rgba(250,249,245,0.45)] px-2 font-mono">
                       <span>Left Valley (x ≈ -1.0)</span>
-                      <span className="text-amber-400 font-bold">Center Barrier (x = 0)</span>
+                      <span className="text-amber-300">Center Barrier (x = 0)</span>
                       <span>Right Valley (x ≈ +1.0)</span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -2084,21 +2069,21 @@ export default function ThermoLabPage() {
                         return (
                           <div
                             key={idx}
-                            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-2"
+                            className="p-2.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] flex items-center gap-2"
                           >
-                            <span className="text-[11px] font-mono text-slate-400 w-6">
+                            <span className="text-[11px] font-mono text-[rgba(250,249,245,0.45)] w-6">
                               #{idx + 1}
                             </span>
-                            <div className="flex-1 relative h-6 bg-slate-950 rounded-lg border border-slate-800 flex items-center px-1">
+                            <div className="flex-1 relative h-6 bg-[#020308] rounded-lg border border-[rgba(250,249,245,0.08)] flex items-center px-1">
                               <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-amber-400/40" />
                               <div
                                 style={{ left: `calc(${pct}% - 6px)` }}
                                 className={`absolute w-3 h-3 rounded-full transition-all duration-75 ${
                                   inLeftWell
-                                    ? "bg-cyan-400 shadow-md shadow-cyan-400/60"
+                                    ? "bg-[#5eead4]"
                                     : inRightWell
-                                    ? "bg-emerald-400 shadow-md shadow-emerald-400/60"
-                                    : "bg-rose-400 shadow-md shadow-rose-400/60"
+                                    ? "bg-[#34d399]"
+                                    : "bg-rose-400"
                                 }`}
                               />
                             </div>
@@ -2106,10 +2091,10 @@ export default function ThermoLabPage() {
                         );
                       })}
                     </div>
-                    <div className="flex justify-between items-center text-xs text-slate-400 px-2">
+                    <div className="flex flex-wrap justify-between items-center gap-2 text-xs text-[rgba(250,249,245,0.55)] px-2 font-mono">
                       <span>
                         Mean Analog Amplitude |x|:{" "}
-                        <strong className="text-cyan-300 font-mono">
+                        <strong className="text-[#5eead4]">
                           {(
                             oscillators.reduce((a, v) => a + Math.abs(v), 0) /
                             oscillators.length
@@ -2121,18 +2106,10 @@ export default function ThermoLabPage() {
                           playArcadeTone(740, 45, "sine");
                           setOscillators((prev) => prev.map((x) => -x));
                         }}
-                        className="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 font-semibold"
+                        className="px-3 py-1.5 rounded-lg bg-[#05070f] hover:border-[rgba(250,249,245,0.25)] border border-[rgba(250,249,245,0.12)] text-[#5eead4] uppercase tracking-wider text-[11px] transition-colors"
                       >
-                        🔄 Kick All Marbles Across Barrier
+                        Perturb Oscillators Across Barrier
                       </button>
-                    </div>
-                    <div className="pt-2 text-center">
-                      <Link
-                        href="/middle-earth"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-semibold text-xs transition shadow-sm"
-                      >
-                        <span>🏔️ Open Middle-earth Atlas (Kramers Escape) ↗</span>
-                      </Link>
                     </div>
                   </div>
                 )}
@@ -2140,33 +2117,33 @@ export default function ThermoLabPage() {
                 {/* STATION 9 WIDGET */}
                 {station.id === 9 && (
                   <div className="w-full flex flex-col sm:flex-row items-center justify-around gap-6">
-                    <div className="relative w-56 h-56 bg-slate-900/90 rounded-2xl border border-slate-800 p-2">
+                    <div className="relative w-56 h-56 bg-[#020308] rounded-2xl border border-[rgba(250,249,245,0.08)] p-2">
                       <svg className="w-full h-full" viewBox="0 0 200 200">
                         <polygon
                           points={tspTour
                             .map((cIdx) => `${tspCoords[cIdx].x},${tspCoords[cIdx].y}`)
                             .join(" ")}
-                          fill="rgba(16, 185, 129, 0.08)"
-                          stroke="#10b981"
-                          strokeWidth="2.4"
+                          fill="rgba(52, 211, 153, 0.06)"
+                          stroke="#34d399"
+                          strokeWidth="2"
                         />
                         {tspCoords.map((pt, cIdx) => (
                           <g key={cIdx}>
                             <circle
                               cx={pt.x}
                               cy={pt.y}
-                              r="6.5"
-                              fill="#06b6d4"
-                              stroke="#0f172a"
+                              r="6"
+                              fill="#5eead4"
+                              stroke="#020308"
                               strokeWidth="2"
                             />
                             <text
                               x={pt.x}
-                              y={pt.y - 10}
+                              y={pt.y - 9}
                               textAnchor="middle"
-                              fill="#e2e8f0"
+                              fill="#faf9f5"
                               fontSize="9"
-                              fontWeight="bold"
+                              fontFamily="monospace"
                             >
                               C{cIdx}
                             </text>
@@ -2176,42 +2153,36 @@ export default function ThermoLabPage() {
                     </div>
 
                     <div className="space-y-3 max-w-xs text-left">
-                      <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-xs text-slate-400">Live 10-City Loop Length</div>
-                        <div className="text-2xl font-mono font-bold text-emerald-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[11px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
+                          Live 10-City Tour Distance
+                        </div>
+                        <div className="text-2xl font-mono font-medium text-[#34d399] mt-0.5">
                           L = {tspCurrentLength}
                         </div>
-                        <div className="text-xs text-slate-400 mt-1">
-                          Optimal Perimeter Ring: <span className="text-cyan-300 font-mono">6.29</span>
+                        <div className="text-xs text-[rgba(250,249,245,0.55)] mt-1 font-mono">
+                          Optimal Perimeter Ring: <span className="text-[#5eead4]">6.29</span>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 font-mono text-[11px]">
                         <button
                           onClick={() => {
                             playArcadeTone(880, 60, "sine");
                             setTspTour([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
                           }}
-                          className="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition"
+                          className="flex-1 py-2 px-2.5 rounded-lg border border-[#34d399]/40 bg-[#05070f] text-[#34d399] hover:bg-[#34d399]/10 transition-colors uppercase tracking-wider"
                         >
-                          ✨ Snap to Optimal Ring
+                          Snap to Optimal Ring
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(240, 50, "sawtooth");
                             setTspTour([0, 5, 2, 8, 4, 9, 1, 6, 3, 7]);
                           }}
-                          className="flex-1 py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-rose-300 font-semibold text-xs transition"
+                          className="flex-1 py-2 px-2.5 rounded-lg border border-[rgba(250,249,245,0.12)] bg-[#05070f] text-rose-300 hover:border-rose-400 transition-colors uppercase tracking-wider"
                         >
-                          🌀 Scramble Route
+                          Scramble Tour
                         </button>
-                      </div>
-                      <div className="pt-2">
-                        <Link
-                          href="/middle-earth"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-semibold text-xs transition shadow-sm"
-                        >
-                          <span>🗺️ Open Middle-earth Routing Engine ↗</span>
-                        </Link>
                       </div>
                     </div>
                   </div>
@@ -2221,9 +2192,9 @@ export default function ThermoLabPage() {
                 {station.id === 10 && (
                   <div className="w-full flex flex-col gap-6">
                     {/* Top Controls */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
                       <div className="flex items-center gap-3 flex-1 min-w-[220px]">
-                        <span className="text-xs font-semibold text-slate-300">Temp T:</span>
+                        <span className="text-xs font-mono text-[rgba(250,249,245,0.7)] uppercase tracking-wider">Temp T:</span>
                         <input
                           type="range"
                           min={0.2}
@@ -2231,38 +2202,38 @@ export default function ThermoLabPage() {
                           step={0.05}
                           value={skTemp}
                           onChange={(e) => setSkTemp(parseFloat(e.target.value))}
-                          className="w-full accent-cyan-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                          className="w-full accent-[#5eead4] cursor-pointer h-1.5 rounded-lg bg-[#020308]"
                         />
-                        <span className="text-xs font-mono font-bold text-cyan-300 whitespace-nowrap">
-                          T={skTemp.toFixed(2)} (β={(1 / skTemp).toFixed(2)})
+                        <span className="text-xs font-mono text-[#5eead4] whitespace-nowrap">
+                          T = {skTemp.toFixed(2)} (β = {(1 / skTemp).toFixed(2)})
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
                         <button
                           onClick={() => {
                             playArcadeTone(320, 30);
                             setSkTemp(0.4);
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                          className={`px-3 py-1 rounded-lg border transition-colors ${
                             skTemp === 0.4
-                              ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
-                              : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
+                              ? "bg-[#020308] border-[#5eead4] text-[#5eead4]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          ❄️ Low-T Glass (T=0.40)
+                          Low-T Glass (T = 0.40)
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(580, 30);
                             setSkTemp(2.0);
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                          className={`px-3 py-1 rounded-lg border transition-colors ${
                             skTemp === 2.0
-                              ? "bg-rose-500/20 border-rose-400 text-rose-300"
-                              : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
+                              ? "bg-[#020308] border-rose-400 text-rose-300"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          🔥 High-T Paramagnetic (T=2.00)
+                          High-T Paramagnetic (T = 2.00)
                         </button>
                         <button
                           onClick={() => {
@@ -2270,25 +2241,25 @@ export default function ThermoLabPage() {
                             setSkSeed((s) => s + 1);
                             setSkOverlapHistory([]);
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 text-xs font-semibold transition"
+                          className="px-3 py-1 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.12)] hover:border-[#34d399] text-[#34d399] transition-colors"
                         >
-                          🔄 Resample J_ij (Seed {skSeed})
+                          Resample Couplings J_ij (Seed {skSeed})
                         </button>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
                       {/* Parisi Overlap Histogram */}
-                      <div className="md:col-span-7 p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                      <div className="md:col-span-7 p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-2">
                         <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-slate-300">
+                          <span className="font-mono text-[11px] uppercase tracking-wider text-[rgba(250,249,245,0.7)]">
                             Parisi Overlap P(q) Histogram ({skOverlapHistory.length} Samples)
                           </span>
-                          <span className="text-[11px] font-mono text-cyan-300">
+                          <span className="text-[11px] font-mono text-[#5eead4]">
                             {skTemp < 1.0 ? "Bimodal Glass Valleys" : "Paramagnetic Single Peak"}
                           </span>
                         </div>
-                        <div className="h-28 flex items-end justify-between gap-1 pt-2 pb-1 px-1 bg-slate-950 rounded-lg border border-slate-800">
+                        <div className="h-28 flex items-end justify-between gap-1 pt-2 pb-1 px-1 bg-[#020308] rounded-lg border border-[rgba(250,249,245,0.08)]">
                           {skHistogram.map((pct, idx) => {
                             const isCenter = idx >= 4 && idx <= 6;
                             return (
@@ -2298,17 +2269,17 @@ export default function ThermoLabPage() {
                                   className={`w-full rounded-t-sm transition-all duration-150 ${
                                     isCenter
                                       ? "bg-amber-400/80 group-hover:bg-amber-300"
-                                      : "bg-cyan-400/80 group-hover:bg-cyan-300"
+                                      : "bg-[#5eead4]/80 group-hover:bg-[#5eead4]"
                                   }`}
                                 />
-                                <span className="text-[8px] font-mono text-slate-500 mt-1">
+                                <span className="text-[8px] font-mono text-[rgba(250,249,245,0.4)] mt-1">
                                   {(idx * 0.18 - 0.9).toFixed(1)}
                                 </span>
                               </div>
                             );
                           })}
                         </div>
-                        <div className="flex justify-between text-[10px] text-slate-400 font-mono px-1">
+                        <div className="flex justify-between text-[10px] text-[rgba(250,249,245,0.45)] font-mono px-1">
                           <span>q = -1.0 (Opposite)</span>
                           <span>q = 0.0 (Uncorrelated)</span>
                           <span>q = +1.0 (Identical)</span>
@@ -2317,10 +2288,10 @@ export default function ThermoLabPage() {
 
                       {/* Coupling Matrix Heatmap */}
                       <div className="md:col-span-5 flex flex-col items-center gap-2">
-                        <div className="text-xs text-slate-400 font-mono">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
                           Dense 24×24 Couplings J_ij (276 Edges)
                         </div>
-                        <div className="relative w-36 h-36 bg-slate-950 rounded-lg border border-slate-800 p-1">
+                        <div className="relative w-36 h-36 bg-[#020308] rounded-lg border border-[rgba(250,249,245,0.08)] p-1">
                           <svg className="w-full h-full" viewBox="0 0 24 24">
                             {skMatrix.map((row, r) =>
                               row.map((val, c) => {
@@ -2336,7 +2307,7 @@ export default function ThermoLabPage() {
                                     height={0.9}
                                     fill={
                                       isPos
-                                        ? `rgba(6, 182, 212, ${intensity})`
+                                        ? `rgba(94, 234, 212, ${intensity})`
                                         : `rgba(244, 63, 94, ${intensity})`
                                     }
                                   />
@@ -2345,9 +2316,9 @@ export default function ThermoLabPage() {
                             )}
                           </svg>
                         </div>
-                        <div className="flex items-center gap-3 text-[10px] text-slate-400 font-mono">
+                        <div className="flex items-center gap-3 text-[10px] text-[rgba(250,249,245,0.45)] font-mono">
                           <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-sm bg-cyan-400" /> J &gt; 0 (Ferro)
+                            <span className="w-2 h-2 rounded-sm bg-[#5eead4]" /> J &gt; 0 (Ferro)
                           </span>
                           <span className="flex items-center gap-1">
                             <span className="w-2 h-2 rounded-sm bg-rose-500" /> J &lt; 0 (Frustrated)
@@ -2358,33 +2329,33 @@ export default function ThermoLabPage() {
 
                     {/* Metrics HUD */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Ground State Baseline</div>
-                        <div className="text-lg font-mono font-bold text-emerald-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Ground State Baseline</div>
+                        <div className="text-lg font-mono font-medium text-[#34d399] mt-1">
                           -15.4266
                         </div>
-                        <div className="text-[10px] text-slate-500">Exact 2^24 Brute Force</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Exact 2^24 Brute Force</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Live Sampled Energy</div>
-                        <div className="text-lg font-mono font-bold text-cyan-300">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Live Sampled Energy</div>
+                        <div className="text-lg font-mono font-medium text-[#5eead4] mt-1">
                           {skEnergyA.toFixed(2)}
                         </div>
-                        <div className="text-[10px] text-slate-500">kcal/mol (Replica α)</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">kcal/mol (Replica α)</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Order Parameter ⟨|q|⟩</div>
-                        <div className="text-lg font-mono font-bold text-cyan-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Order Parameter ⟨|q|⟩</div>
+                        <div className="text-lg font-mono font-medium text-[#5eead4] mt-1">
                           {skMeanAbsQ}
                         </div>
-                        <div className="text-[10px] text-slate-500">Twin Replicas Overlap</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Twin Replicas Overlap</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Overlap Variance Var(q)</div>
-                        <div className="text-lg font-mono font-bold text-amber-300">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Overlap Variance Var(q)</div>
+                        <div className="text-lg font-mono font-medium text-amber-300 mt-1">
                           {skVarQ}
                         </div>
-                        <div className="text-[10px] text-slate-500">Multi-Valley Support</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Multi-Valley Support</div>
                       </div>
                     </div>
                   </div>
@@ -2394,91 +2365,91 @@ export default function ThermoLabPage() {
                 {station.id === 11 && (
                   <div className="w-full flex flex-col gap-5">
                     {/* Controls Bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-400">Sequence Tier:</span>
+                    <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                      <div className="flex items-center gap-2 font-mono text-[11px]">
+                        <span className="text-[rgba(250,249,245,0.45)] uppercase tracking-wider">Sequence Tier:</span>
                         <button
                           onClick={() => {
                             playArcadeTone(420, 30);
                             setRnaTier(24);
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                          className={`px-3 py-1 rounded-lg border transition-colors ${
                             rnaTier === 24
-                              ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
-                              : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
+                              ? "bg-[#020308] border-[#5eead4] text-[#5eead4]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          24-nt Switch (M=24)
+                          24-nt Switch (M = 24)
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(520, 30);
                             setRnaTier(50);
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                          className={`px-3 py-1 rounded-lg border transition-colors ${
                             rnaTier === 50
-                              ? "bg-cyan-500/20 border-cyan-400 text-cyan-300"
-                              : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
+                              ? "bg-[#020308] border-[#5eead4] text-[#5eead4]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          50-nt Aptamer Core (M=72)
+                          50-nt Aptamer Core (M = 72)
                         </button>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-400">Thermal Regime:</span>
+                      <div className="flex items-center gap-2 font-mono text-[11px]">
+                        <span className="text-[rgba(250,249,245,0.45)] uppercase tracking-wider">Thermal Regime:</span>
                         <button
                           onClick={() => {
                             playArcadeTone(620, 30, "sine");
                             setRnaTempMode("native");
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                          className={`px-3 py-1 rounded-lg border transition-colors ${
                             rnaTempMode === "native"
-                              ? "bg-emerald-500/20 border-emerald-400 text-emerald-300"
-                              : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
+                              ? "bg-[#020308] border-[#34d399] text-[#34d399]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          ❄️ Native (37°C, β=1.0)
+                          Native Fold (37 °C, β = 1.0)
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(300, 35, "sawtooth");
                             setRnaTempMode("melted");
                           }}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+                          className={`px-3 py-1 rounded-lg border transition-colors ${
                             rnaTempMode === "melted"
-                              ? "bg-rose-500/20 border-rose-400 text-rose-300"
-                              : "bg-slate-800 border-slate-700 text-slate-400 hover:bg-slate-700"
+                              ? "bg-[#020308] border-rose-400 text-rose-300"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          🔥 Melting (T_melt, β=0.2)
+                          Denatured Coil (T_melt, β = 0.2)
                         </button>
                       </div>
                     </div>
 
                     {/* Dynamic Dot-Bracket Banner */}
-                    <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1 text-left">
+                    <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-1.5 text-left">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400 font-semibold">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(250,249,245,0.45)]">
                           Live Sampled Secondary Structure (Dot-Bracket)
                         </span>
-                        <span className="text-emerald-400 font-mono font-bold">
+                        <span className="text-[#34d399] font-mono font-medium">
                           {rnaActivePairs.length} Active Stems
                         </span>
                       </div>
-                      <div className="p-2 rounded-lg bg-slate-950 font-mono text-xs sm:text-sm text-cyan-300 tracking-wider overflow-x-auto break-all border border-slate-800/80">
+                      <div className="p-2.5 rounded-lg bg-[#020308] font-mono text-xs sm:text-sm text-[#5eead4] tracking-wider overflow-x-auto break-all border border-[rgba(250,249,245,0.08)]">
                         {rnaDotBracket}
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
                       {/* Pairing Probability Matrix Heatmap */}
-                      <div className="md:col-span-6 flex flex-col items-center gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800">
-                        <div className="text-xs text-slate-400 font-mono">
+                      <div className="md:col-span-6 flex flex-col items-center gap-2 p-4 bg-[#05070f] rounded-xl border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.45)] font-mono">
                           Pairing Probability Matrix P_ij = ⟨x_ij⟩ ({rnaTier}×{rnaTier})
                         </div>
                         <div
-                          className="relative w-44 h-44 bg-slate-950 rounded-lg border border-slate-800 p-1"
+                          className="relative w-44 h-44 bg-[#020308] rounded-lg border border-[rgba(250,249,245,0.08)] p-1"
                         >
                           <svg className="w-full h-full" viewBox={`0 0 ${rnaTier} ${rnaTier}`}>
                             {rnaPairs.map((p, idx) => {
@@ -2490,92 +2461,89 @@ export default function ThermoLabPage() {
                                     y={p.i}
                                     width={1.2}
                                     height={1.2}
-                                    fill={`rgba(6, 182, 212, ${Math.min(1, prob * 1.4)})`}
+                                    fill={`rgba(94, 234, 212, ${Math.min(1, prob * 1.4)})`}
                                   />
                                   <rect
                                     x={p.i}
                                     y={p.j}
                                     width={1.2}
                                     height={1.2}
-                                    fill={`rgba(6, 182, 212, ${Math.min(1, prob * 1.4)})`}
+                                    fill={`rgba(94, 234, 212, ${Math.min(1, prob * 1.4)})`}
                                   />
                                 </g>
                               );
                             })}
                           </svg>
                         </div>
-                        <span className="text-[10px] text-slate-500 font-mono">
-                          Bright pixels = high marginal pairing occupancy
+                        <span className="text-[10px] text-[rgba(250,249,245,0.4)] font-mono">
+                          Bright pixels: high marginal pairing occupancy
                         </span>
                       </div>
 
                       {/* Conformational Shannon Entropy Meter & Callout */}
                       <div className="md:col-span-6 space-y-3 text-left">
-                        <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                        <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-2">
                           <div className="flex justify-between items-center text-xs">
-                            <span className="text-slate-400 font-semibold">
+                            <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(250,249,245,0.45)]">
                               Conformational Shannon Entropy
                             </span>
-                            <span className="font-mono font-bold text-amber-300">
+                            <span className="font-mono font-medium text-amber-300">
                               {rnaEntropy.toFixed(2)} bits
                             </span>
                           </div>
-                          <div className="h-2.5 w-full bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                          <div className="h-2 w-full bg-[#020308] rounded-full overflow-hidden border border-[rgba(250,249,245,0.08)]">
                             <div
                               style={{ width: `${Math.min(100, (rnaEntropy / 16.0) * 100)}%` }}
                               className={`h-full transition-all duration-300 rounded-full ${
                                 rnaTempMode === "native"
-                                  ? "bg-gradient-to-r from-emerald-500 to-cyan-400"
-                                  : "bg-gradient-to-r from-amber-500 to-rose-500"
+                                  ? "bg-gradient-to-r from-[#34d399] to-[#5eead4]"
+                                  : "bg-gradient-to-r from-amber-400 to-rose-500"
                               }`}
                             />
                           </div>
-                          <div className="flex justify-between text-[10px] font-mono text-slate-500">
-                            <span>0 bits (Frozen State)</span>
-                            <span>{rnaTempMode === "native" ? "Native Basin" : "Melting Chaos"}</span>
+                          <div className="flex justify-between text-[10px] font-mono text-[rgba(250,249,245,0.4)]">
+                            <span>0 bits (Ordered Basin)</span>
+                            <span>{rnaTempMode === "native" ? "Native Fold" : "Denatured"}</span>
                             <span>16 bits (Random Coil)</span>
                           </div>
                         </div>
 
                         {/* Biophysical Scope Callout */}
-                        <div className="p-3 rounded-xl bg-slate-950/90 border border-cyan-500/20 text-[11px] text-slate-400 leading-relaxed">
-                          <strong className="text-cyan-300">Biophysical Model Scope:</strong> Uses
-                          order-of-magnitude nearest-neighbor stacking (σ = -2.0) and affinities (GC =
-                          -3.0, AU = -2.0, GU = -1.0 kcal/mol) to demonstrate thermodynamic sampling,
-                          not full 16-parameter Turner tables.
+                        <div className="p-3.5 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.55)] font-light leading-relaxed">
+                          <strong className="text-[#5eead4] font-medium font-mono">Biophysical Model:</strong> Nearest-neighbor stacking (σ = -2.0) and affinities (GC = -3.0, AU = -2.0, GU = -1.0 kcal/mol) demonstrates thermodynamic conformational sampling.
                         </div>
                       </div>
                     </div>
 
                     {/* Metrics HUD */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Ground State Baseline</div>
-                        <div className="text-lg font-mono font-bold text-emerald-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Ground State Baseline</div>
+                        <div className="text-lg font-mono font-medium text-[#34d399] mt-1">
                           {rnaTier === 24 ? "-10.0000" : "-66.0000"}
                         </div>
-                        <div className="text-[10px] text-slate-500">kcal/mol (MFE)</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">kcal/mol (MFE)</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Live Sampled Energy</div>
-                        <div className="text-lg font-mono font-bold text-cyan-300">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Live Sampled Energy</div>
+                        <div className="text-lg font-mono font-medium text-[#5eead4] mt-1">
                           {rnaEnergy.toFixed(2)}
                         </div>
-                        <div className="text-[10px] text-slate-500">kcal/mol</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">kcal/mol</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Active Contacts (M)</div>
-                        <div className="text-lg font-mono font-bold text-cyan-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Active Contacts (M)</div>
+                        <div className="text-lg font-mono font-medium text-[#5eead4] mt-1">
                           {rnaActivePairs.length} / {rnaPairs.length}
                         </div>
-                        <div className="text-[10px] text-slate-500">Paired Stems</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Paired Stems</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Sokal Autocorrelation</div>
-                        <div className="text-lg font-mono font-bold text-amber-300">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Sokal Autocorrelation</div>
+                        <div className="text-lg font-mono font-medium text-amber-300 mt-1">
                           {rnaTier === 24 ? "38.22" : "7.32"} sweeps
                         </div>
-                        <div className="text-[10px] text-slate-500">MCMC τ_int</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">MCMC τ_int</div>
                       </div>
                     </div>
                   </div>
@@ -2585,9 +2553,9 @@ export default function ThermoLabPage() {
                 {station.id === 12 && (
                   <div className="w-full flex flex-col gap-6">
                     {/* Top Controls */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+                    <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
                       <div className="flex items-center gap-3 flex-1 min-w-[220px]">
-                        <span className="text-xs font-semibold text-slate-300">Penalty Weight λ:</span>
+                        <span className="text-xs font-mono text-[rgba(250,249,245,0.7)] uppercase tracking-wider">Penalty Weight λ:</span>
                         <input
                           type="range"
                           min={0.001}
@@ -2595,13 +2563,13 @@ export default function ThermoLabPage() {
                           step={0.001}
                           value={scucPenaltyWeight}
                           onChange={(e) => setScucPenaltyWeight(parseFloat(e.target.value))}
-                          className="w-full accent-cyan-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                          className="w-full accent-[#5eead4] cursor-pointer h-1.5 rounded-lg bg-[#020308]"
                         />
-                        <span className="text-xs font-mono font-bold text-cyan-300 whitespace-nowrap">
+                        <span className="text-xs font-mono text-[#5eead4] whitespace-nowrap">
                           λ = {scucPenaltyWeight.toFixed(4)}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
                         <button
                           onClick={() => {
                             playArcadeTone(520, 40);
@@ -2612,9 +2580,9 @@ export default function ThermoLabPage() {
                               [0, 1, 0, 0, 0, 0],
                             ]);
                           }}
-                          className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/20 border border-emerald-400 text-emerald-300 hover:bg-emerald-500/30"
+                          className="px-3 py-1 rounded-lg border border-[#34d399]/40 bg-[#020308] text-[#34d399] hover:bg-[#34d399]/10 transition-colors uppercase tracking-wider"
                         >
-                          ⚡ Optimal QUBO Dispatch
+                          Optimal QUBO Dispatch
                         </button>
                         <button
                           onClick={() => {
@@ -2626,9 +2594,9 @@ export default function ThermoLabPage() {
                               [1, 1, 1, 1, 1, 1],
                             ]);
                           }}
-                          className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 border border-slate-700 text-amber-300 hover:bg-slate-700"
+                          className="px-3 py-1 rounded-lg border border-[rgba(250,249,245,0.12)] bg-[#020308] text-amber-300 hover:border-amber-400 transition-colors uppercase tracking-wider"
                         >
-                          🔥 All Units Active (Overgen)
+                          All Units Active
                         </button>
                         <button
                           onClick={() => {
@@ -2640,20 +2608,20 @@ export default function ThermoLabPage() {
                               [0, 0, 0, 0, 0, 0],
                             ]);
                           }}
-                          className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800 border border-slate-700 text-rose-400 hover:bg-slate-700"
+                          className="px-3 py-1 rounded-lg border border-[rgba(250,249,245,0.12)] bg-[#020308] text-rose-300 hover:border-rose-400 transition-colors uppercase tracking-wider"
                         >
-                          ⚠️ Blackout Test (0 MW)
+                          Zero Commitment Baseline
                         </button>
                       </div>
                     </div>
 
                     {/* Interactive 4-Gen x 6-Hour Dispatch Grid */}
-                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-300 font-semibold">
-                          Unit Commitment Matrix x_{"{g,t}"} ∈ &#123;0, 1&#125; (Click Cell to Toggle Commitment)
+                    <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-3">
+                      <div className="flex flex-wrap justify-between items-center gap-2 text-xs">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(250,249,245,0.7)]">
+                          Unit Commitment Matrix x_{"{g,t}"} ∈ &#123;0, 1&#125; (Click Cell to Toggle)
                         </span>
-                        <span className="text-cyan-400 font-mono text-[11px]">
+                        <span className="text-[#5eead4] font-mono text-[11px]">
                           4 Generators × 6 Time Steps = 24 Spins
                         </span>
                       </div>
@@ -2661,29 +2629,29 @@ export default function ThermoLabPage() {
                       <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse text-xs">
                           <thead>
-                            <tr className="border-b border-slate-800 text-slate-400 font-mono text-[11px]">
+                            <tr className="border-b border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.45)] font-mono text-[11px]">
                               <th className="py-2 px-3">Generator Unit</th>
                               <th className="py-2 px-2 text-right">P_max</th>
                               <th className="py-2 px-2 text-right">Cost</th>
                               {scucDemands.map((d, t) => (
                                 <th key={t} className="py-2 px-2 text-center">
                                   <div>H{t + 1}</div>
-                                  <div className="text-[10px] text-cyan-400/80">{d} MW</div>
+                                  <div className="text-[10px] text-[#5eead4]">{d} MW</div>
                                 </th>
                               ))}
                             </tr>
                           </thead>
                           <tbody>
                             {scucGenerators.map((gen, gIdx) => (
-                              <tr key={gen.id} className="border-b border-slate-800/60 hover:bg-slate-800/30">
-                                <td className="py-2.5 px-3 font-semibold text-slate-200">
+                              <tr key={gen.id} className="border-b border-[rgba(250,249,245,0.04)] hover:bg-[#020308]">
+                                <td className="py-2.5 px-3 font-medium text-[#faf9f5]">
                                   <div className="flex items-center gap-2">
                                     <span className={`w-2 h-2 rounded-full ${gen.color.split(" ")[0].replace("text-", "bg-")}`} />
                                     <span>{gen.name}</span>
                                   </div>
                                 </td>
-                                <td className="py-2.5 px-2 text-right font-mono text-slate-400">{gen.capacity} MW</td>
-                                <td className="py-2.5 px-2 text-right font-mono text-slate-400">${gen.cost}/MWh</td>
+                                <td className="py-2.5 px-2 text-right font-mono text-[rgba(250,249,245,0.55)]">{gen.capacity} MW</td>
+                                <td className="py-2.5 px-2 text-right font-mono text-[rgba(250,249,245,0.55)]">${gen.cost}/MWh</td>
                                 {scucDemands.map((_, tIdx) => {
                                   const isOn = scucSchedule[gIdx][tIdx] === 1;
                                   return (
@@ -2697,13 +2665,13 @@ export default function ThermoLabPage() {
                                             return copy;
                                           });
                                         }}
-                                        className={`w-full py-1.5 px-2 rounded-lg font-mono text-xs font-bold transition shadow-sm ${
+                                        className={`w-full py-1.5 px-2 rounded-lg font-mono text-xs transition border ${
                                           isOn
-                                            ? "bg-emerald-500/25 border border-emerald-400 text-emerald-300 shadow-emerald-500/20"
-                                            : "bg-slate-950 border border-slate-800 text-slate-600 hover:text-slate-400 hover:border-slate-700"
+                                            ? "bg-[rgba(52,211,153,0.12)] border-[#34d399] text-[#34d399]"
+                                            : "bg-[#020308] border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.3)] hover:text-[#faf9f5] hover:border-[rgba(250,249,245,0.2)]"
                                         }`}
                                       >
-                                        {isOn ? "[ON]" : "[..]"}
+                                        {isOn ? "ON" : "OFF"}
                                       </button>
                                     </td>
                                   );
@@ -2716,12 +2684,12 @@ export default function ThermoLabPage() {
                     </div>
 
                     {/* Hourly Demand vs. Generation Balance Meter */}
-                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
+                    <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-3">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-300 font-semibold">
+                        <span className="text-[11px] font-mono uppercase tracking-wider text-[rgba(250,249,245,0.7)]">
                           Hourly System Power Balance (Delivered vs. Demand)
                         </span>
-                        <span className="text-slate-400 font-mono text-[11px]">
+                        <span className="text-[rgba(250,249,245,0.45)] font-mono text-[11px]">
                           Target: Balance within ±50 MW
                         </span>
                       </div>
@@ -2738,17 +2706,17 @@ export default function ThermoLabPage() {
                               key={t}
                               className={`p-2.5 rounded-xl border text-center font-mono ${
                                 isBalanced
-                                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                                  ? "bg-[rgba(52,211,153,0.08)] border-[#34d399]/40 text-[#34d399]"
                                   : isDeficit
-                                  ? "bg-rose-500/10 border-rose-500/30 text-rose-300"
-                                  : "bg-amber-500/10 border-amber-500/30 text-amber-300"
+                                  ? "bg-[rgba(244,63,94,0.08)] border-rose-500/40 text-rose-300"
+                                  : "bg-[rgba(245,158,11,0.08)] border-amber-500/40 text-amber-300"
                               }`}
                             >
-                              <div className="text-[10px] text-slate-400">Hour {t + 1}</div>
-                              <div className="text-sm font-bold mt-0.5">{delivered} MW</div>
-                              <div className="text-[10px] text-slate-500">of {demand} MW</div>
-                              <div className="text-[10px] font-bold mt-1">
-                                {delta === 0 ? "✓ EXACT" : delta > 0 ? `+${delta} MW` : `${delta} MW`}
+                              <div className="text-[10px] text-[rgba(250,249,245,0.45)]">Hour {t + 1}</div>
+                              <div className="text-sm font-medium mt-0.5">{delivered} MW</div>
+                              <div className="text-[10px] text-[rgba(250,249,245,0.4)]">of {demand} MW</div>
+                              <div className="text-[10px] font-medium mt-1">
+                                {delta === 0 ? "✓ Exact" : delta > 0 ? `+${delta} MW` : `${delta} MW`}
                               </div>
                             </div>
                           );
@@ -2758,30 +2726,30 @@ export default function ThermoLabPage() {
 
                     {/* Metrics HUD */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Optimal Hamiltonian E*</div>
-                        <div className="text-lg font-mono font-bold text-emerald-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Optimal Hamiltonian E*</div>
+                        <div className="text-lg font-mono font-medium text-[#34d399] mt-1">
                           5451.00
                         </div>
-                        <div className="text-[10px] text-slate-500">Min Global Energy</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Min Global Energy</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Current Energy H(x)</div>
-                        <div className="text-lg font-mono font-bold text-cyan-300">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Current Energy H(x)</div>
+                        <div className="text-lg font-mono font-medium text-[#5eead4] mt-1">
                           {scucTotalEnergy.toFixed(2)}
                         </div>
-                        <div className="text-[10px] text-slate-500">Cost + Penalty</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Cost + Penalty</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Production Cost</div>
-                        <div className="text-lg font-mono font-bold text-cyan-400">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Production Cost</div>
+                        <div className="text-lg font-mono font-medium text-[#5eead4] mt-1">
                           ${(scucTotalGenCost * 100).toFixed(0)}
                         </div>
-                        <div className="text-[10px] text-slate-500">6-Hour Horizon</div>
+                        <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">6-Hour Horizon</div>
                       </div>
-                      <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div className="text-[11px] text-slate-400">Sokal Autocorrelation</div>
-                        <div className="text-lg font-mono font-bold text-amber-300">
+                      <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <div className="text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)] font-mono">Sokal Autocorrelation</div>
+                        <div className="text-lg font-mono font-medium text-amber-300 mt-1">
                           1.00 sweep
                         </div>
                       </div>
@@ -2793,14 +2761,14 @@ export default function ThermoLabPage() {
                 {station.id === 13 && (
                   <div className="w-full flex flex-col gap-6">
                     {/* Top Sliders & Control Preset Bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-900 border border-slate-800">
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
                       {/* GC Balance Slider */}
                       <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-slate-300">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-[rgba(250,249,245,0.7)] uppercase tracking-wider">
                             GC Homeostasis Penalty λ_gc:
                           </span>
-                          <span className="font-mono font-bold text-cyan-300">
+                          <span className="text-[#5eead4]">
                             λ = {codonLambdaGc.toFixed(1)} (Target: 50% GC)
                           </span>
                         </div>
@@ -2811,18 +2779,18 @@ export default function ThermoLabPage() {
                           step={5.0}
                           value={codonLambdaGc}
                           onChange={(e) => setCodonLambdaGc(parseFloat(e.target.value))}
-                          className="w-full accent-cyan-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                          className="w-full accent-[#5eead4] cursor-pointer h-1.5 rounded-lg bg-[#020308]"
                         />
                       </div>
 
                       {/* Hairpin Penalty Slider */}
                       <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-slate-300">
+                        <div className="flex justify-between items-center text-xs font-mono">
+                          <span className="text-[rgba(250,249,245,0.7)] uppercase tracking-wider">
                             Ribosome Hairpin Penalty λ_hp:
                           </span>
-                          <span className="font-mono font-bold text-rose-400">
-                            λ = {codonLambdaHp.toFixed(1)} / hairpin
+                          <span className="text-rose-400">
+                            λ = {codonLambdaHp.toFixed(1)} / stem
                           </span>
                         </div>
                         <input
@@ -2832,50 +2800,50 @@ export default function ThermoLabPage() {
                           step={0.5}
                           value={codonLambdaHp}
                           onChange={(e) => setCodonLambdaHp(parseFloat(e.target.value))}
-                          className="w-full accent-rose-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                          className="w-full accent-rose-400 cursor-pointer h-1.5 rounded-lg bg-[#020308]"
                         />
                       </div>
 
                       {/* View Preset Buttons */}
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
                         <button
                           onClick={() => {
                             playArcadeTone(580, 40);
                             setActiveCodonSequence("thermo");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                          className={`px-3 py-1.5 rounded-lg border transition-colors ${
                             activeCodonSequence === "thermo"
-                              ? "bg-emerald-500/25 border border-emerald-400 text-emerald-300 shadow-emerald-500/20"
-                              : "bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200"
+                              ? "bg-[#020308] border-[#34d399] text-[#34d399]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          🟢 Potts Opt (0 Hairpins)
+                          Potts Optimum (0 Stems)
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(320, 40, "sawtooth");
                             setActiveCodonSequence("greedy");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                          className={`px-3 py-1.5 rounded-lg border transition-colors ${
                             activeCodonSequence === "greedy"
-                              ? "bg-rose-500/25 border border-rose-400 text-rose-300 shadow-rose-500/20"
-                              : "bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200"
+                              ? "bg-[#020308] border-rose-400 text-rose-300"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          ⚠️ Greedy CAI (4 Hairpins)
+                          Greedy CAI Baseline (4 Stems)
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(440, 30);
                             setActiveCodonSequence("comparison");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                          className={`px-3 py-1.5 rounded-lg border transition-colors ${
                             activeCodonSequence === "comparison"
-                              ? "bg-cyan-500/25 border border-cyan-400 text-cyan-300"
-                              : "bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200"
+                              ? "bg-[#020308] border-[#5eead4] text-[#5eead4]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          ⚖️ Dual Alignment
+                          Dual Sequence Alignment
                         </button>
                         <button
                           onClick={() => {
@@ -2883,8 +2851,8 @@ export default function ThermoLabPage() {
                             setCodonLambdaGc(40.0);
                             setCodonLambdaHp(2.0);
                           }}
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-mono text-slate-400 hover:text-slate-200 bg-slate-950 border border-slate-800"
-                          title="Reset penalties to default experimental values"
+                          className="px-2.5 py-1.5 rounded-lg text-xs font-mono text-[rgba(250,249,245,0.45)] hover:text-[#faf9f5] bg-[#020308] border border-[rgba(250,249,245,0.08)] transition-colors"
+                          title="Reset penalties to baseline"
                         >
                           ↺
                         </button>
@@ -2894,140 +2862,137 @@ export default function ThermoLabPage() {
                     {/* Pareto Multi-Objective Comparison Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* Classical Greedy Card */}
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-rose-500/30 space-y-3 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-rose-300 uppercase tracking-wider">
+                          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-rose-400">
                             Single-Objective Baseline
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/10 text-rose-300 border border-rose-500/30">
                             Greedy CAI
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-medium text-[#faf9f5]">
                           Human GLP-1 (15-mer mRNA)
                         </div>
 
                         <div className="space-y-2 text-xs font-mono">
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Codon Adaptation (CAI):</span>
-                            <span className="text-slate-200 font-bold">{codonGreedyMetrics.cai.toFixed(4)} (100%)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Codon Adaptation (CAI):</span>
+                            <span className="text-[#faf9f5] font-medium">{codonGreedyMetrics.cai.toFixed(4)} (100%)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">GC Equilibrium:</span>
-                            <span className="text-amber-300 font-bold">{(codonGreedyMetrics.gc * 100).toFixed(1)}% (+16.7% bias)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">GC Equilibrium:</span>
+                            <span className="text-amber-300 font-medium">{(codonGreedyMetrics.gc * 100).toFixed(1)}% (+16.7% bias)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Ribosome Hairpins:</span>
-                            <span className="text-rose-400 font-bold">{codonGreedyMetrics.hairpins} Stem-Loops (Stall Risk)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Ribosome Hairpins:</span>
+                            <span className="text-rose-400 font-medium">{codonGreedyMetrics.hairpins} Stem-Loops (Stall Risk)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Hamiltonian Energy H:</span>
-                            <span className="text-rose-300 font-bold">{codonGreedyMetrics.totalEnergy.toFixed(2)}</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Hamiltonian Energy H:</span>
+                            <span className="text-rose-300 font-medium">{codonGreedyMetrics.totalEnergy.toFixed(2)}</span>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-rose-950/30 border border-rose-800/40 text-[11px] text-rose-300/90 leading-relaxed">
-                          ⚠️ <strong>Failure Mode:</strong> Greedy choice locks high individual codon frequencies but accumulates 4 inverted-repeat Watson-Crick stems that trap ribosomes during elongation.
+                        <div className="p-3 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.6)] font-light leading-relaxed">
+                          <strong className="text-rose-300 font-mono font-medium">Failure Mode:</strong> Greedy frequency selection accumulates 4 inverted-repeat Watson-Crick stems that induce ribosomal pausing.
                         </div>
                       </div>
 
                       {/* Thermodynamic Potts Card */}
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/40 space-y-3 relative overflow-hidden shadow-lg shadow-emerald-950/20">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                      <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.12)] space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">
+                          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#34d399]">
                             Multi-Objective EBM
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 animate-pulse">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/30">
                             Potts Optimizer
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-medium text-[#faf9f5]">
                           GLP-1 Thermodynamic Optima
                         </div>
 
                         <div className="space-y-2 text-xs font-mono">
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Codon Adaptation (CAI):</span>
-                            <span className="text-emerald-300 font-bold">{codonThermoMetrics.cai.toFixed(4)} (93.3%)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Codon Adaptation (CAI):</span>
+                            <span className="text-[#34d399] font-medium">{codonThermoMetrics.cai.toFixed(4)} (93.3%)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">GC Equilibrium:</span>
-                            <span className="text-emerald-300 font-bold">{(codonThermoMetrics.gc * 100).toFixed(1)}% (Target ~50%)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">GC Equilibrium:</span>
+                            <span className="text-[#34d399] font-medium">{(codonThermoMetrics.gc * 100).toFixed(1)}% (Target ~50%)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Ribosome Hairpins:</span>
-                            <span className="text-emerald-400 font-bold">{codonThermoMetrics.hairpins} Loops (100% Cleared)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Ribosome Hairpins:</span>
+                            <span className="text-[#34d399] font-medium">{codonThermoMetrics.hairpins} Loops (100% Cleared)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Hamiltonian Energy H:</span>
-                            <span className="text-emerald-300 font-bold">{codonThermoMetrics.totalEnergy.toFixed(2)}</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Hamiltonian Energy H:</span>
+                            <span className="text-[#34d399] font-medium">{codonThermoMetrics.totalEnergy.toFixed(2)}</span>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300/90 leading-relaxed">
-                          ✅ <strong>Thermodynamic Solution:</strong> By accepting a minor 6.7% CAI trade-off on 4 residues, the Potts sampler completely dissolves all 4 secondary structure obstacles.
+                        <div className="p-3 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.6)] font-light leading-relaxed">
+                          <strong className="text-[#34d399] font-mono font-medium">Thermodynamic State:</strong> Accepting a minor 6.7% CAI trade-off across 4 positions dissolves all 4 secondary structure obstacles.
                         </div>
                       </div>
 
                       {/* Energy Advantage & Hardware Telemetry Card */}
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-cyan-500/30 space-y-3 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
+                          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#5eead4]">
                             Pareto Advantage
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#5eead4]/10 text-[#5eead4] border border-[#5eead4]/30">
                             ΔH = -{codonEnergyAdvantage.toFixed(2)}
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-medium text-[#faf9f5]">
                           Physical Hardware Projection
                         </div>
 
                         <div className="space-y-2 text-xs font-mono">
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Search Space Size:</span>
-                            <span className="text-cyan-300 font-bold">8.49 × 10⁷ candidates</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Search Space Size:</span>
+                            <span className="text-[#5eead4] font-medium">8.49 × 10⁷ candidates</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">MCMC Convergence:</span>
-                            <span className="text-slate-200 font-bold">15,000 steps (τ_int = 1.0)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">MCMC Convergence:</span>
+                            <span className="text-[#faf9f5] font-medium">15,000 steps (τ_int = 1.0)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Extropic TSU Latency:</span>
-                            <span className="text-emerald-400 font-bold">0.005s (projected)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Extropic TSU Latency:</span>
+                            <span className="text-[#34d399] font-medium">0.005s (projected)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Hardware Speedup:</span>
-                            <span className="text-cyan-300 font-bold">~48,000× vs Single CPU</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Hardware Speedup:</span>
+                            <span className="text-[#5eead4] font-medium">~48,000× vs Single CPU</span>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/40 text-[11px] text-cyan-300/90 leading-relaxed">
-                          🔬 <strong>Hardware Mapping:</strong> Potts spins map to categorical thermodynamic p-bits; simultaneous analog sampling allows multi-objective mRNA co-folding in real time.
+                        <div className="p-3 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.6)] font-light leading-relaxed">
+                          <strong className="text-[#5eead4] font-mono font-medium">Hardware Mapping:</strong> Potts spins map to categorical p-bits; simultaneous analog sampling allows multi-objective mRNA co-folding.
                         </div>
                       </div>
                     </div>
 
                     {/* Interactive 15-Residue Codon Alignment & Ribosome Obstacle Viewer */}
-                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs border-b border-slate-800 pb-3">
+                    <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs border-b border-[rgba(250,249,245,0.08)] pb-3">
                         <div>
-                          <span className="font-semibold text-slate-200">
+                          <span className="font-medium text-[#faf9f5]">
                             Human GLP-1 Bioactive Peptide (15-mer, 45 Nucleotides)
                           </span>
-                          <span className="text-slate-400 ml-2 font-mono text-[11px]">
-                            {activeCodonSequence === "greedy" ? "Displaying Greedy CAI Triplet Track" : activeCodonSequence === "thermo" ? "Displaying Thermodynamic Potts Triplet Track" : "Side-by-Side Synonymous Codon Alignment"}
+                          <span className="text-[rgba(250,249,245,0.45)] ml-2 font-mono text-[11px]">
+                            {activeCodonSequence === "greedy" ? "Displaying Greedy CAI Track" : activeCodonSequence === "thermo" ? "Displaying Thermodynamic Potts Track" : "Side-by-Side Synonymous Codon Alignment"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] font-mono">
-                          <span className="flex items-center gap-1 text-emerald-400">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400" /> Potts Synonymous Swap
+                        <div className="flex items-center gap-3 text-[11px] font-mono">
+                          <span className="flex items-center gap-1.5 text-[#34d399]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#34d399]" /> Potts Synonymous Swap
                           </span>
-                          <span className="flex items-center gap-1 text-rose-400">
-                            <span className="w-2 h-2 rounded-full bg-rose-400" /> Stalling Stem Residue
+                          <span className="flex items-center gap-1.5 text-rose-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> Stalling Stem Residue
                           </span>
                         </div>
                       </div>
@@ -3043,46 +3008,46 @@ export default function ThermoLabPage() {
                           return (
                             <div
                               key={res.idx}
-                              className={`p-2 rounded-xl border text-center transition-all ${
+                              className={`p-2 rounded-xl border text-center transition-colors ${
                                 isChanged
                                   ? showGreedy
-                                    ? "bg-rose-500/10 border-rose-500/40 text-rose-300"
-                                    : "bg-emerald-500/15 border-emerald-400/50 text-emerald-300 shadow-sm shadow-emerald-500/10"
-                                  : "bg-slate-950/80 border-slate-800 text-slate-300"
+                                    ? "bg-[rgba(244,63,94,0.08)] border-rose-500/40 text-rose-300"
+                                    : "bg-[rgba(52,211,153,0.1)] border-[#34d399]/40 text-[#34d399]"
+                                  : "bg-[#020308] border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.65)]"
                               }`}
                             >
-                              <div className="text-[10px] text-slate-500 font-mono">
+                              <div className="text-[9px] text-[rgba(250,249,245,0.4)] font-mono">
                                 #{res.idx}
                               </div>
-                              <div className="text-base font-bold text-white font-mono my-0.5">
+                              <div className="text-base font-medium text-[#faf9f5] font-mono my-0.5">
                                 {res.aa}
                               </div>
-                              <div className="text-[10px] text-slate-400 font-sans">
+                              <div className="text-[9px] text-[rgba(250,249,245,0.45)] font-mono">
                                 {res.name}
                               </div>
 
                               {activeCodonSequence === "comparison" ? (
-                                <div className="mt-2 pt-1 border-t border-slate-800/80 space-y-1">
-                                  <div className="text-[11px] font-mono font-bold text-rose-300 bg-rose-950/40 rounded px-1">
+                                <div className="mt-2 pt-1 border-t border-[rgba(250,249,245,0.08)] space-y-1">
+                                  <div className="text-[10px] font-mono font-medium text-rose-300 bg-[rgba(244,63,94,0.12)] rounded px-1">
                                     {res.greedy}
                                   </div>
-                                  <div className="text-[11px] font-mono font-bold text-emerald-300 bg-emerald-950/40 rounded px-1">
+                                  <div className="text-[10px] font-mono font-medium text-[#34d399] bg-[rgba(52,211,153,0.12)] rounded px-1">
                                     {res.thermo}
                                   </div>
                                 </div>
                               ) : (
-                                <div className="mt-2 pt-1 border-t border-slate-800/80">
-                                  <div className="text-xs font-mono font-bold">
+                                <div className="mt-2 pt-1 border-t border-[rgba(250,249,245,0.08)]">
+                                  <div className="text-xs font-mono font-medium">
                                     {currentCodon}
                                   </div>
-                                  <div className="text-[9px] text-slate-400 font-mono mt-0.5">
+                                  <div className="text-[9px] text-[rgba(250,249,245,0.4)] font-mono mt-0.5">
                                     w={currentW.toFixed(2)}
                                   </div>
                                 </div>
                               )}
 
                               {isChanged && (
-                                <div className="mt-1 text-[8px] font-mono leading-tight px-1 py-0.5 rounded bg-emerald-500/20 text-emerald-300 truncate">
+                                <div className="mt-1 text-[8px] font-mono leading-tight px-1 py-0.5 rounded bg-[#34d399]/15 text-[#34d399] truncate">
                                   {res.note}
                                 </div>
                               )}
@@ -3093,9 +3058,9 @@ export default function ThermoLabPage() {
 
                       {/* 4 Inverted-Repeat Hairpin Detector Table */}
                       <div className="pt-2">
-                        <div className="text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
-                          <span>Watson-Crick Stem-Loop Hairpin Obstacle Detector (L_stem ≥ 3, Loop 3–8 nt)</span>
-                          <span className="text-[11px] font-mono text-cyan-400">
+                        <div className="text-xs font-mono text-[rgba(250,249,245,0.65)] mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <span className="uppercase tracking-wider">Watson-Crick Stem-Loop Hairpin Obstacle Detector (L_stem ≥ 3, Loop 3 to 8 nt)</span>
+                          <span className="text-[10px] text-[#5eead4]">
                             Zero-Dependency Structural Classifier
                           </span>
                         </div>
@@ -3103,7 +3068,7 @@ export default function ThermoLabPage() {
                         <div className="overflow-x-auto">
                           <table className="w-full text-left border-collapse text-xs">
                             <thead>
-                              <tr className="border-b border-slate-800 text-slate-400 font-mono text-[11px]">
+                              <tr className="border-b border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.45)] font-mono text-[11px]">
                                 <th className="py-2 px-2">Hairpin #</th>
                                 <th className="py-2 px-2">5&apos; Stem</th>
                                 <th className="py-2 px-2">Loop Region</th>
@@ -3115,19 +3080,19 @@ export default function ThermoLabPage() {
                             </thead>
                             <tbody>
                               {GLP1_HAIRPINS.map((hp) => (
-                                <tr key={hp.id} className="border-b border-slate-800/50 hover:bg-slate-800/20 font-mono">
-                                  <td className="py-2 px-2 text-slate-300 font-bold">Stem {hp.id}</td>
-                                  <td className="py-2 px-2 text-rose-300 font-bold">{hp.stem1}</td>
-                                  <td className="py-2 px-2 text-slate-400 text-[11px]">{hp.loop}</td>
-                                  <td className="py-2 px-2 text-rose-300 font-bold">{hp.stem2}</td>
-                                  <td className="py-2 px-2 text-slate-300 text-[11px]">{hp.residues}</td>
+                                <tr key={hp.id} className="border-b border-[rgba(250,249,245,0.04)] hover:bg-[#020308] font-mono">
+                                  <td className="py-2 px-2 text-[#faf9f5]">Stem {hp.id}</td>
+                                  <td className="py-2 px-2 text-rose-300">{hp.stem1}</td>
+                                  <td className="py-2 px-2 text-[rgba(250,249,245,0.5)] text-[11px]">{hp.loop}</td>
+                                  <td className="py-2 px-2 text-rose-300">{hp.stem2}</td>
+                                  <td className="py-2 px-2 text-[rgba(250,249,245,0.65)] text-[11px]">{hp.residues}</td>
                                   <td className="py-2 px-2">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                      ⚠️ {hp.status}
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/10 text-rose-300 border border-rose-500/30">
+                                      {hp.status}
                                     </span>
                                   </td>
                                   <td className="py-2 px-2">
-                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/30">
                                       ✓ {hp.remedy}
                                     </span>
                                   </td>
@@ -3145,53 +3110,53 @@ export default function ThermoLabPage() {
                 {station.id === 14 && (
                   <div className="w-full flex flex-col gap-6">
                     {/* Top Controls & View Presets */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-slate-900 border border-slate-800">
+                    <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
                       {/* View Preset Buttons */}
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
                         <button
                           onClick={() => {
                             playArcadeTone(620, 40);
                             setRotamerViewMode("thermo");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+                          className={`px-3 py-1.5 rounded-lg border transition-colors ${
                             rotamerViewMode === "thermo"
-                              ? "bg-emerald-500/25 border border-emerald-400 text-emerald-300 shadow-emerald-500/20"
-                              : "bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200"
+                              ? "bg-[#020308] border-[#34d399] text-[#34d399]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          <span>🟢 Thermodynamic Fold (0 Clashes)</span>
+                          Thermodynamic Fold (0 Clashes)
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(300, 45, "sawtooth");
                             setRotamerViewMode("greedy");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+                          className={`px-3 py-1.5 rounded-lg border transition-colors ${
                             rotamerViewMode === "greedy"
-                              ? "bg-rose-500/25 border border-rose-400 text-rose-300 shadow-rose-500/20"
-                              : "bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200"
+                              ? "bg-[#020308] border-rose-400 text-rose-300"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          <span>🚨 Greedy Dunbrack (6 Clashes)</span>
+                          Greedy Baseline (6 Clashes)
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(480, 30);
                             setRotamerViewMode("radar");
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${
+                          className={`px-3 py-1.5 rounded-lg border transition-colors ${
                             rotamerViewMode === "radar"
-                              ? "bg-cyan-500/25 border border-cyan-400 text-cyan-300"
-                              : "bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200"
+                              ? "bg-[#020308] border-[#5eead4] text-[#5eead4]"
+                              : "bg-[#020308] border-[rgba(250,249,245,0.1)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          <span>🎯 Collision Radar</span>
+                          Interface Contact Map
                         </button>
                       </div>
 
                       {/* Clash Distance Threshold Slider */}
                       <div className="flex items-center gap-3 flex-1 min-w-[220px]">
-                        <span className="text-xs font-semibold text-slate-300 whitespace-nowrap">
+                        <span className="text-xs font-mono text-[rgba(250,249,245,0.7)] whitespace-nowrap uppercase tracking-wider">
                           Clash Threshold:
                         </span>
                         <input
@@ -3201,9 +3166,9 @@ export default function ThermoLabPage() {
                           step={0.1}
                           value={rotamerClashCutoff}
                           onChange={(e) => setRotamerClashCutoff(parseFloat(e.target.value))}
-                          className="w-full accent-rose-400 cursor-pointer h-1.5 rounded-lg bg-slate-800"
+                          className="w-full accent-rose-400 cursor-pointer h-1.5 rounded-lg bg-[#020308]"
                         />
-                        <span className="text-xs font-mono font-bold text-rose-400 whitespace-nowrap">
+                        <span className="text-xs font-mono text-rose-400 whitespace-nowrap">
                           r &lt; {rotamerClashCutoff.toFixed(1)} Å
                         </span>
                       </div>
@@ -3212,144 +3177,141 @@ export default function ThermoLabPage() {
                     {/* Multi-Objective Pareto Comparison HUD */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* Classical Greedy Card */}
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-rose-500/30 space-y-3 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-rose-300 uppercase tracking-wider">
+                          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-rose-400">
                             Single-Objective Baseline
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/10 text-rose-300 border border-rose-500/30">
                             Greedy Dunbrack
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-medium text-[#faf9f5]">
                           24-mer Beta-Hairpin (k=0 Min Strain)
                         </div>
 
                         <div className="space-y-2 text-xs font-mono">
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Total Hamiltonian Energy:</span>
-                            <span className="text-rose-400 font-bold">309.11 kcal/mol</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Total Hamiltonian Energy:</span>
+                            <span className="text-rose-400 font-medium">309.11 kcal/mol</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Dunbrack Self-Energy:</span>
-                            <span className="text-slate-200 font-bold">3.30 kcal/mol (0.14/res)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Dunbrack Self-Energy:</span>
+                            <span className="text-[#faf9f5] font-medium">3.30 kcal/mol (0.14/res)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Lennard-Jones Repulsion:</span>
-                            <span className="text-rose-400 font-bold">+294.97 kcal/mol</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Lennard-Jones Repulsion:</span>
+                            <span className="text-rose-400 font-medium">+294.97 kcal/mol</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Steric Clash Count:</span>
-                            <span className="text-rose-400 font-bold">6 Severe Clashes (min 0.50 Å)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Steric Clash Count:</span>
+                            <span className="text-rose-400 font-medium">6 Severe Clashes (min 0.50 Å)</span>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-rose-950/30 border border-rose-800/40 text-[11px] text-rose-300/90 leading-relaxed">
-                          🚨 <strong>Steric Trap:</strong> Choosing lowest internal torsional strain forces facing bulky residues across the 4.8 Å beta-hairpin interface into direct atomic collision.
+                        <div className="p-3 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.6)] font-light leading-relaxed">
+                          <strong className="text-rose-300 font-mono font-medium">Steric Trap:</strong> Choosing minimum internal torsional strain forces facing bulky residues across the 4.8 Å beta-hairpin interface into direct atomic collision.
                         </div>
                       </div>
 
                       {/* Thermodynamic Potts Card */}
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/40 space-y-3 relative overflow-hidden shadow-lg shadow-emerald-950/20">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                      <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.12)] space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-emerald-300 uppercase tracking-wider">
+                          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#34d399]">
                             Multi-Objective Potts EBM
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 animate-pulse">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/30">
                             Potts Ground State
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-medium text-[#faf9f5]">
                           Relaxed Core Conformation
                         </div>
 
                         <div className="space-y-2 text-xs font-mono">
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Total Hamiltonian Energy:</span>
-                            <span className="text-emerald-300 font-bold">13.57 kcal/mol (ΔE = -295.54)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Total Hamiltonian Energy:</span>
+                            <span className="text-[#34d399] font-medium">13.57 kcal/mol (ΔE = -295.54)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Compensating Torsion:</span>
-                            <span className="text-slate-200 font-bold">12.80 kcal/mol (+9.50 shift)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Compensating Torsion:</span>
+                            <span className="text-[#faf9f5] font-medium">12.80 kcal/mol (+9.50 shift)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Lennard-Jones Dispersion:</span>
-                            <span className="text-emerald-400 font-bold">-8.74 kcal/mol (Attractive Well)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Lennard-Jones Dispersion:</span>
+                            <span className="text-[#34d399] font-medium">-8.74 kcal/mol (Attractive Well)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Steric Clash Count:</span>
-                            <span className="text-emerald-400 font-bold">0 Clashes (min 3.68 Å)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Steric Clash Count:</span>
+                            <span className="text-[#34d399] font-medium">0 Clashes (min 3.68 Å)</span>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-[11px] text-emerald-300/90 leading-relaxed">
-                          ✅ <strong>Thermodynamic Ground State:</strong> Accepting a slight internal strain penalty allows side-chains to interdigitate laterally into the attractive van der Waals well.
+                        <div className="p-3 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.6)] font-light leading-relaxed">
+                          <strong className="text-[#34d399] font-mono font-medium">Ground State:</strong> Accepting a slight internal strain penalty allows side-chains to interdigitate laterally into the attractive van der Waals well.
                         </div>
                       </div>
 
                       {/* Hardware Telemetry Card */}
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-cyan-500/30 space-y-3 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-cyan-300 uppercase tracking-wider">
+                          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#5eead4]">
                             Hardware Telemetry
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                            Modeled TSU Projection
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#5eead4]/10 text-[#5eead4] border border-[#5eead4]/30">
+                            Modeled TSU
                           </span>
                         </div>
-                        <div className="text-sm font-semibold text-white">
+                        <div className="text-sm font-medium text-[#faf9f5]">
                           Extropic TSU vs GPU Baseline
                         </div>
 
                         <div className="space-y-2 text-xs font-mono">
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Classical Baseline:</span>
-                            <span className="text-slate-400 font-bold">384.5 ESS/s (classical simulation baseline)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Classical Baseline:</span>
+                            <span className="text-[rgba(250,249,245,0.65)] font-medium">384.5 ESS/s (simulation)</span>
                           </div>
-                          <div className="flex justify-between py-1 border-b border-slate-800">
-                            <span className="text-slate-400">Extropic TSU Rate:</span>
-                            <span className="text-emerald-400 font-bold">520,833 ESS/s (Modeled Extropic Z1 projection (1.0W spec), not measured)</span>
+                          <div className="flex justify-between py-1 border-b border-[rgba(250,249,245,0.06)]">
+                            <span className="text-[rgba(250,249,245,0.45)]">Extropic TSU Rate:</span>
+                            <span className="text-[#34d399] font-medium">520,833 ESS/s (Modeled Z1, 1.0W spec)</span>
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-lg bg-cyan-950/30 border border-cyan-800/40 text-[11px] text-cyan-300/90 leading-relaxed">
-                          ⚡ <strong>Modeled Extropic Z1 projection (1.0W spec), not measured:</strong> TSU figures come from an analytical hardware model; Extropic TSU hardware is not publicly available.
+                        <div className="p-3 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[11px] text-[rgba(250,249,245,0.6)] font-light leading-relaxed">
+                          <strong className="text-[#5eead4] font-mono font-medium">TSU Projection:</strong> Figures derived from an analytical hardware model; physical Extropic TSU silicon is not publicly available.
                         </div>
                       </div>
                     </div>
 
                     {/* Interactive 24-Residue Antiparallel Beta-Hairpin Visualizer */}
-                    <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs border-b border-slate-800 pb-3">
+                    <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs border-b border-[rgba(250,249,245,0.08)] pb-3">
                         <div>
-                          <span className="font-semibold text-slate-200">
+                          <span className="font-medium text-[#faf9f5]">
                             24-Residue Synthetic Beta-Hairpin Fold (4.8 Å Inter-Strand Spacing)
                           </span>
-                          <span className="text-slate-400 ml-2 font-mono text-[11px]">
+                          <span className="text-[rgba(250,249,245,0.45)] ml-2 font-mono text-[11px]">
                             {rotamerViewMode === "greedy"
-                              ? "Displaying Greedy Dunbrack Unrelaxed Collision Conformation"
-                              : "Displaying Thermodynamic Potts Relaxed Interdigitated Conformation"}
+                              ? "Displaying Greedy Dunbrack Collision Conformation"
+                              : "Displaying Thermodynamic Potts Interdigitated Conformation"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] font-mono">
-                          <span className="flex items-center gap-1 text-rose-400">
-                            <span className="w-2 h-2 rounded-full bg-rose-400 animate-pulse" /> 6 Steric Clashes (&lt; 2.0 Å)
+                        <div className="flex items-center gap-3 text-[11px] font-mono">
+                          <span className="flex items-center gap-1.5 text-rose-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" /> 6 Steric Clashes (&lt; 2.0 Å)
                           </span>
-                          <span className="flex items-center gap-1 text-emerald-400">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400" /> Optimal van der Waals (&gt; 3.6 Å)
+                          <span className="flex items-center gap-1.5 text-[#34d399]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#34d399]" /> Optimal van der Waals (&gt; 3.6 Å)
                           </span>
                         </div>
                       </div>
 
                       {/* Beta-Hairpin Spatial Alignment View */}
-                      <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-4 overflow-x-auto">
+                      <div className="p-4 rounded-xl bg-[#020308] border border-[rgba(250,249,245,0.08)] space-y-4 overflow-x-auto">
                         <div className="min-w-[700px] space-y-3">
                           {/* Strand 1 (Residues 1 to 11) */}
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono font-bold text-slate-400 w-20 whitespace-nowrap">
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-[rgba(250,249,245,0.4)] w-20 whitespace-nowrap">
                               Strand 1 (N→C):
                             </span>
                             <div className="flex-1 grid grid-cols-11 gap-2">
@@ -3364,17 +3326,17 @@ export default function ThermoLabPage() {
                                       playArcadeTone(420, 30);
                                       if (r.pairId) setSelectedFacingPair(r.pairId);
                                     }}
-                                    className={`p-2 rounded-lg border text-center transition ${
+                                    className={`p-2 rounded-lg border text-center transition-colors ${
                                       isClashing
-                                        ? "bg-rose-500/20 border-rose-400 text-rose-200 shadow-md shadow-rose-500/20"
+                                        ? "bg-[rgba(244,63,94,0.1)] border-rose-500/50 text-rose-200"
                                         : isFacing
-                                        ? "bg-emerald-500/15 border-emerald-400/50 text-emerald-200"
-                                        : "bg-slate-900 border-slate-800 text-slate-400"
+                                        ? "bg-[rgba(52,211,153,0.08)] border-[#34d399]/40 text-[#34d399]"
+                                        : "bg-[#05070f] border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.4)]"
                                     }`}
                                   >
-                                    <div className="text-[9px] font-mono text-slate-500">#{r.idx}</div>
-                                    <div className="text-xs font-bold text-white font-mono">{r.name}</div>
-                                    <div className="text-[9px] font-mono mt-0.5 text-slate-400">
+                                    <div className="text-[9px] font-mono text-[rgba(250,249,245,0.4)]">#{r.idx}</div>
+                                    <div className="text-xs font-medium text-[#faf9f5] font-mono">{r.name}</div>
+                                    <div className="text-[9px] font-mono mt-0.5 text-[rgba(250,249,245,0.4)]">
                                       k={rotamerViewMode === "greedy" ? r.kGreedy : r.kThermo}
                                     </div>
                                   </button>
@@ -3385,14 +3347,14 @@ export default function ThermoLabPage() {
 
                           {/* Inter-Strand 4.8 Å Interface Clash Beams */}
                           <div className="flex items-center gap-2 py-1">
-                            <span className="text-[10px] font-mono text-slate-500 w-20 whitespace-nowrap">
+                            <span className="text-[10px] font-mono text-[rgba(250,249,245,0.35)] w-20 whitespace-nowrap">
                               4.8 Å Core:
                             </span>
                             <div className="flex-1 grid grid-cols-11 gap-2 text-center font-mono text-[10px]">
                               {HAIRPIN_STRAND1.map((r) => {
                                 if (r.pairId === null) {
                                   return (
-                                    <div key={r.idx} className="text-slate-700">
+                                    <div key={r.idx} className="text-[rgba(250,249,245,0.15)]">
                                       ···
                                     </div>
                                   );
@@ -3403,13 +3365,13 @@ export default function ThermoLabPage() {
                                 return (
                                   <div
                                     key={r.idx}
-                                    className={`py-1 rounded font-bold border transition ${
+                                    className={`py-1 rounded font-medium border transition-colors ${
                                       isClash
-                                        ? "bg-rose-500/25 border-rose-400 text-rose-300 animate-pulse"
-                                        : "bg-emerald-500/20 border-emerald-400/50 text-emerald-300"
+                                        ? "bg-[rgba(244,63,94,0.1)] border-rose-500/40 text-rose-300"
+                                        : "bg-[rgba(52,211,153,0.1)] border-[#34d399]/40 text-[#34d399]"
                                     }`}
                                   >
-                                    {isClash ? `🚨 ${pair.greedyDist.toFixed(2)} Å` : `✓ ${pair.thermoDist.toFixed(2)} Å`}
+                                    {isClash ? `${pair.greedyDist.toFixed(2)} Å` : `${pair.thermoDist.toFixed(2)} Å`}
                                   </div>
                                 );
                               })}
@@ -3418,7 +3380,7 @@ export default function ThermoLabPage() {
 
                           {/* Strand 2 (Residues 24 down to 14) */}
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-mono font-bold text-slate-400 w-20 whitespace-nowrap">
+                            <span className="text-[10px] font-mono uppercase tracking-wider text-[rgba(250,249,245,0.4)] w-20 whitespace-nowrap">
                               Strand 2 (C←N):
                             </span>
                             <div className="flex-1 grid grid-cols-11 gap-2">
@@ -3433,17 +3395,17 @@ export default function ThermoLabPage() {
                                       playArcadeTone(420, 30);
                                       if (r.pairId) setSelectedFacingPair(r.pairId);
                                     }}
-                                    className={`p-2 rounded-lg border text-center transition ${
+                                    className={`p-2 rounded-lg border text-center transition-colors ${
                                       isClashing
-                                        ? "bg-rose-500/20 border-rose-400 text-rose-200 shadow-md shadow-rose-500/20"
+                                        ? "bg-[rgba(244,63,94,0.1)] border-rose-500/50 text-rose-200"
                                         : isFacing
-                                        ? "bg-emerald-500/15 border-emerald-400/50 text-emerald-200"
-                                        : "bg-slate-900 border-slate-800 text-slate-400"
+                                        ? "bg-[rgba(52,211,153,0.08)] border-[#34d399]/40 text-[#34d399]"
+                                        : "bg-[#05070f] border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.4)]"
                                     }`}
                                   >
-                                    <div className="text-[9px] font-mono text-slate-500">#{r.idx}</div>
-                                    <div className="text-xs font-bold text-white font-mono">{r.name}</div>
-                                    <div className="text-[9px] font-mono mt-0.5 text-slate-400">
+                                    <div className="text-[9px] font-mono text-[rgba(250,249,245,0.4)]">#{r.idx}</div>
+                                    <div className="text-xs font-medium text-[#faf9f5] font-mono">{r.name}</div>
+                                    <div className="text-[9px] font-mono mt-0.5 text-[rgba(250,249,245,0.4)]">
                                       k={rotamerViewMode === "greedy" ? r.kGreedy : r.kThermo}
                                     </div>
                                   </button>
@@ -3456,9 +3418,9 @@ export default function ThermoLabPage() {
 
                       {/* Side-Chain Collision Radar Table */}
                       <div className="pt-2">
-                        <div className="text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
-                          <span>Side-Chain Collision Radar: 6 Inter-Strand Facing Pairs</span>
-                          <span className="text-[11px] font-mono text-cyan-400">
+                        <div className="text-xs font-mono text-[rgba(250,249,245,0.65)] mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <span className="uppercase tracking-wider">Side-Chain Collision Radar: 6 Inter-Strand Facing Pairs</span>
+                          <span className="text-[10px] text-[#5eead4]">
                             Truncated Lennard-Jones (12-6) + Electrostatics
                           </span>
                         </div>
@@ -3466,7 +3428,7 @@ export default function ThermoLabPage() {
                         <div className="overflow-x-auto">
                           <table className="w-full text-left border-collapse text-xs">
                             <thead>
-                              <tr className="border-b border-slate-800 text-slate-400 font-mono text-[11px]">
+                              <tr className="border-b border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.45)] font-mono text-[11px]">
                                 <th className="py-2 px-2">Pair #</th>
                                 <th className="py-2 px-2">Strand 1 Residue</th>
                                 <th className="py-2 px-2">Strand 2 Partner</th>
@@ -3482,103 +3444,83 @@ export default function ThermoLabPage() {
                               {SIDECHAIN_FACING_PAIRS.map((pair) => (
                                 <tr
                                   key={pair.id}
-                                  className={`border-b border-slate-800/50 hover:bg-slate-800/30 font-mono ${
-                                    selectedFacingPair === pair.id ? "bg-cyan-500/10" : ""
+                                  className={`border-b border-[rgba(250,249,245,0.04)] hover:bg-[#020308] font-mono ${
+                                    selectedFacingPair === pair.id ? "bg-[#020308]" : ""
                                   }`}
                                 >
-                                  <td className="py-2 px-2 text-slate-300 font-bold">Pair {pair.id}</td>
-                                  <td className="py-2 px-2 text-amber-300 font-semibold">{pair.resA}</td>
-                                  <td className="py-2 px-2 text-cyan-300 font-semibold">{pair.resB}</td>
-                                  <td className="py-2 px-2 text-rose-400 font-bold">{pair.greedyDist.toFixed(2)} Å</td>
+                                  <td className="py-2 px-2 text-[#faf9f5]">Pair {pair.id}</td>
+                                  <td className="py-2 px-2 text-amber-300">{pair.resA}</td>
+                                  <td className="py-2 px-2 text-[#5eead4]">{pair.resB}</td>
+                                  <td className="py-2 px-2 text-rose-400">{pair.greedyDist.toFixed(2)} Å</td>
                                   <td className="py-2 px-2 text-rose-400">+{pair.greedyLj.toFixed(1)}</td>
-                                  <td className="py-2 px-2 text-emerald-300 text-[11px]">
+                                  <td className="py-2 px-2 text-[#34d399] text-[11px]">
                                     {pair.thermoRotA} / {pair.thermoRotB}
                                   </td>
-                                  <td className="py-2 px-2 text-emerald-400 font-bold">{pair.thermoDist.toFixed(2)} Å</td>
-                                  <td className="py-2 px-2 text-emerald-400">{pair.thermoLj.toFixed(2)}</td>
-                                  <td className="py-2 px-2 text-slate-300 text-[11px] font-sans">{pair.note}</td>
+                                  <td className="py-2 px-2 text-[#34d399]">{pair.thermoDist.toFixed(2)} Å</td>
+                                  <td className="py-2 px-2 text-[#34d399]">{pair.thermoLj.toFixed(2)}</td>
+                                  <td className="py-2 px-2 text-[rgba(250,249,245,0.65)] text-[11px] font-light">{pair.note}</td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
-                        </div>
-
-                        {/* Interactive LoL Draft Solver Cross-Link Showcase */}
-                        <div className="p-4 rounded-xl bg-gradient-to-r from-purple-950/40 via-slate-900 to-cyan-950/40 border border-purple-500/30 flex flex-wrap items-center justify-between gap-3 mt-4">
-                          <div className="space-y-1">
-                            <div className="text-xs font-bold text-white flex items-center gap-2">
-                              <span>🎮 Combinatorial Potts in Action: 5v5 LoL Thermodynamic Draft Solver</span>
-                              <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono text-[10px]">Station 4 + 14</span>
-                            </div>
-                            <p className="text-[11px] text-slate-300">
-                              Apply discrete categorical Potts spin optimization to competitive League of Legends drafting: zero steric role clashes, multi-champion wombo combos, and counter-pick equilibration.
-                            </p>
-                          </div>
-                          <Link
-                            href="/lol-draft"
-                            className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/20 transition flex items-center gap-1.5 shrink-0"
-                          >
-                            <span>Play with LoL Draft Solver ↗</span>
-                          </Link>
                         </div>
                       </div>
                     </div>
                   </div>
                 )}
 
-                                                {/* STATION 15 WIDGET: THERMODYNAMIC SI COGNITIVE CORE */}
+                {/* STATION 15 WIDGET: THERMODYNAMIC SI COGNITIVE CORE */}
                 {station.id === 15 && (
                   <div className="w-full flex flex-col gap-6">
-                    <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-cyan-950/40 border border-cyan-500/30 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+                    <div className="p-7 rounded-2xl bg-[#05070f] border border-[rgba(250,249,245,0.10)] flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs border border-cyan-500/40 font-bold">
-                            Station 15 • Interactive Cybernetic Telemetry
+                        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+                          <span className="px-3 py-0.5 rounded-full bg-[rgba(250,249,245,0.06)] text-[#5eead4] border border-[rgba(250,249,245,0.12)]">
+                            Station 15 · Cybernetic Telemetry
                           </span>
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-xs border border-emerald-500/40 font-semibold">
+                          <span className="px-3 py-0.5 rounded-full bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/30">
                             &lt; 15ms Latency SLA Verified
                           </span>
                         </div>
-                        <h3 className="text-xl font-bold text-white tracking-tight">
-                          Full 4-Organ Autonomous Cognitive Visualizer
+                        <h3 className="font-[family-name:var(--font-display)] text-xl sm:text-2xl font-normal text-[#faf9f5] tracking-tight">
+                          4-Organ Autonomous Cognitive Architecture
                         </h3>
-                        <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-                          Experience the live 4-quadrant real-time telemetry dashboard. Watch Continuous Hopfield memory basins relax, live Kramers Langevin curiosity hopping between Exploit and Explore, 6-node Potts categorical goal consensus, and RTX 5080 16GB VRAM metabolic scheduling.
+                        <p className="text-sm text-[rgba(250,249,245,0.65)] font-light max-w-2xl leading-relaxed">
+                          Continuous Hopfield memory basins relax in DDR5, Kramers Langevin curiosity oscillates between Exploit and Explore, a 6-node Potts network arbitrates goal consensus, and RTX 5080 VRAM scheduling governs metabolic limits.
                         </p>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                      <div className="flex shrink-0">
                         <Link
                           href="/si-core"
-                          className="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/25 transition flex items-center gap-2"
+                          className="rounded-full bg-[#faf9f5] px-6 py-2.5 font-medium text-[#020308] hover:bg-white text-xs uppercase tracking-wider font-mono transition-colors"
                         >
-                          <span className="text-base">⚡</span>
-                          <span>Launch /si-core Visualizer ↗</span>
+                          Launch SI Core Visualizer ↗
                         </Link>
                       </div>
                     </div>
 
                     {/* 4 Organ Quick Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-blue-500/30">
-                        <span className="text-[10px] font-mono text-blue-400 uppercase tracking-wider font-semibold">Organ 1</span>
-                        <h4 className="text-sm font-bold text-white mt-1">Continuous Hopfield</h4>
-                        <p className="text-xs text-slate-400 mt-1">Episodic associative recall in 128GB DDR5 RAM with exponential attractor capacity.</p>
+                      <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <span className="text-[10px] font-mono text-[#5eead4] uppercase tracking-wider">Organ 1</span>
+                        <h4 className="text-sm font-medium text-[#faf9f5] mt-1 font-mono">Continuous Hopfield</h4>
+                        <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">Episodic associative recall in 128GB DDR5 RAM with exponential attractor capacity.</p>
                       </div>
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-rose-500/30">
-                        <span className="text-[10px] font-mono text-rose-400 uppercase tracking-wider font-semibold">Organ 2</span>
-                        <h4 className="text-sm font-bold text-white mt-1">Kramers Curiosity</h4>
-                        <p className="text-xs text-slate-400 mt-1">Bistable double-well potential modulating thermal bath T and barrier escape dynamics.</p>
+                      <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <span className="text-[10px] font-mono text-rose-400 uppercase tracking-wider">Organ 2</span>
+                        <h4 className="text-sm font-medium text-[#faf9f5] mt-1 font-mono">Kramers Curiosity</h4>
+                        <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">Bistable double-well potential modulating thermal bath T and barrier escape dynamics.</p>
                       </div>
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-purple-500/30">
-                        <span className="text-[10px] font-mono text-purple-400 uppercase tracking-wider font-semibold">Organ 3</span>
-                        <h4 className="text-sm font-bold text-white mt-1">Potts Goal Arbiter</h4>
-                        <p className="text-xs text-slate-400 mt-1">6-node categorical Potts spin network equilibrating competing agent drives in &lt;2ms.</p>
+                      <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <span className="text-[10px] font-mono text-purple-400 uppercase tracking-wider">Organ 3</span>
+                        <h4 className="text-sm font-medium text-[#faf9f5] mt-1 font-mono">Potts Goal Arbiter</h4>
+                        <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">6-node categorical Potts spin network equilibrating competing agent drives in &lt;2ms.</p>
                       </div>
-                      <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/30">
-                        <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider font-semibold">Organ 4</span>
-                        <h4 className="text-sm font-bold text-white mt-1">RTX 5080 Metabolism</h4>
-                        <p className="text-xs text-slate-400 mt-1">QUBO hardware governor balancing 16GB VRAM bounds, model latency, and capability.</p>
+                      <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                        <span className="text-[10px] font-mono text-[#34d399] uppercase tracking-wider">Organ 4</span>
+                        <h4 className="text-sm font-medium text-[#faf9f5] mt-1 font-mono">RTX 5080 Metabolism</h4>
+                        <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">QUBO hardware governor balancing 16GB VRAM bounds, model latency, and capability.</p>
                       </div>
                     </div>
                   </div>
@@ -3588,48 +3530,48 @@ export default function ThermoLabPage() {
                 {station.id === 16 && (
                   <div className="w-full flex flex-col gap-6">
                     {/* Header Banner & Sub-View Switcher */}
-                    <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 flex flex-col gap-5 shadow-2xl">
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="px-2.5 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs border border-cyan-500/40 font-bold">
-                            Station 16 • Non-Equilibrium Hybrid TPU
+                    <div className="p-7 rounded-2xl bg-[#05070f] border border-[rgba(250,249,245,0.10)] flex flex-col gap-5 shadow-2xl">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+                          <span className="px-3 py-0.5 rounded-full bg-[rgba(250,249,245,0.06)] text-[#5eead4] border border-[rgba(250,249,245,0.12)]">
+                            Station 16 · Non-Equilibrium Hybrid TPU
                           </span>
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-mono text-xs border border-emerald-500/40 font-semibold">
+                          <span className="px-3 py-0.5 rounded-full bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/30">
                             100% SAT Ground State (0 Violations)
                           </span>
                         </div>
-                        <h3 className="text-xl font-bold text-white tracking-tight">
+                        <h3 className="font-[family-name:var(--font-display)] text-xl sm:text-2xl font-normal text-[#faf9f5] tracking-tight">
                           Underdamped BAOAB Langevin, Auxiliary Memory &amp; SMC Resampling
                         </h3>
-                        <p className="text-xs text-slate-300 max-w-3xl leading-relaxed">
-                          Pushing thermodynamic computing beyond conservative equilibrium: non-conservative auxiliary clause memory multipliers <code className="text-cyan-300 font-mono">y_m(t)</code> warp energy barriers to break topological frustration, while 22-stage Jarzynski-Neal SMC population resampling cures exponential weight collapse.
+                        <p className="text-xs text-[rgba(250,249,245,0.65)] font-light max-w-3xl leading-relaxed">
+                          Pushing thermodynamic computing beyond conservative equilibrium: non-conservative auxiliary clause memory multipliers <code className="text-[#5eead4] font-mono">y_m(t)</code> warp energy barriers to break topological frustration, while 22-stage Jarzynski-Neal SMC population resampling cures exponential weight collapse.
                         </p>
                       </div>
 
                       {/* 4 Interactive View Switcher Tabs - Responsive Full Width Grid */}
-                      <div className="grid grid-cols-2 lg:grid-cols-4 p-1.5 rounded-xl bg-slate-950/90 border border-slate-800 gap-1.5 w-full">
+                      <div className="grid grid-cols-2 lg:grid-cols-4 p-1 rounded-xl bg-[#020308] border border-[rgba(250,249,245,0.08)] gap-1 w-full font-mono text-[11px]">
                         <button
                           onClick={() => {
                             playArcadeTone(440, 25);
                             setTpuActiveTab("frustration");
                           }}
-                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
+                          className={`w-full py-2 px-2.5 rounded-lg transition-colors text-center uppercase tracking-wider ${
                             tpuActiveTab === "frustration"
-                              ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm font-bold"
-                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
+                              ? "bg-[#05070f] text-[#5eead4] border border-[rgba(250,249,245,0.15)] font-medium"
+                              : "text-[rgba(250,249,245,0.45)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          1. 3-Way SAT Frustration
+                          1. SAT Frustration
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(520, 25);
                             setTpuActiveTab("resampling");
                           }}
-                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
+                          className={`w-full py-2 px-2.5 rounded-lg transition-colors text-center uppercase tracking-wider ${
                             tpuActiveTab === "resampling"
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm font-bold"
-                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
+                              ? "bg-[#05070f] text-[#34d399] border border-[rgba(250,249,245,0.15)] font-medium"
+                              : "text-[rgba(250,249,245,0.45)] hover:text-[#faf9f5]"
                           }`}
                         >
                           2. SMC Resampling (N=128)
@@ -3639,23 +3581,23 @@ export default function ThermoLabPage() {
                             playArcadeTone(600, 25);
                             setTpuActiveTab("integrator");
                           }}
-                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
+                          className={`w-full py-2 px-2.5 rounded-lg transition-colors text-center uppercase tracking-wider ${
                             tpuActiveTab === "integrator"
-                              ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 shadow-sm font-bold"
-                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
+                              ? "bg-[#05070f] text-indigo-300 border border-[rgba(250,249,245,0.15)] font-medium"
+                              : "text-[rgba(250,249,245,0.45)] hover:text-[#faf9f5]"
                           }`}
                         >
-                          3. Integrator &amp; Thermometers
+                          3. Integrator &amp; Thermometer
                         </button>
                         <button
                           onClick={() => {
                             playArcadeTone(680, 25);
                             setTpuActiveTab("silicon");
                           }}
-                          className={`w-full py-2 px-2.5 rounded-lg text-xs font-semibold transition text-center flex items-center justify-center gap-1.5 ${
+                          className={`w-full py-2 px-2.5 rounded-lg transition-colors text-center uppercase tracking-wider ${
                             tpuActiveTab === "silicon"
-                              ? "bg-violet-500/20 text-violet-300 border border-violet-500/50 shadow-sm font-bold"
-                              : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
+                              ? "bg-[#05070f] text-violet-300 border border-[rgba(250,249,245,0.15)] font-medium"
+                              : "text-[rgba(250,249,245,0.45)] hover:text-[#faf9f5]"
                           }`}
                         >
                           4. Silicon Realism (DAC / Rails)
@@ -3671,129 +3613,128 @@ export default function ThermoLabPage() {
                         {/* 3-Way Architecture Comparison Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {/* Card 1: Conservative Tanh */}
-                          <div className="p-4 rounded-xl bg-slate-900/80 border border-rose-500/30 flex flex-col justify-between space-y-3">
+                          <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] flex flex-col justify-between space-y-3">
                             <div>
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-mono font-bold text-rose-400 uppercase tracking-wider">
-                                  Baseline A • Conservative
+                                <span className="text-[10px] font-mono text-rose-400 uppercase tracking-[0.18em]">
+                                  Baseline A · Conservative
                                 </span>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/10 text-rose-300 border border-rose-500/30">
                                   Gradient Starved
                                 </span>
                               </div>
-                              <h4 className="text-sm font-bold text-white mt-1">Tanh Relaxation</h4>
-                              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                              <h4 className="text-sm font-medium text-[#faf9f5] mt-1 font-mono">Tanh Relaxation</h4>
+                              <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">
                                 Saturating penalty <code className="text-rose-300 font-mono">tanh(β x)</code> freezes when oscillators reach wells: <code className="text-rose-300 font-mono">sech²(x) → 0</code> vanishes all restorative force.
                               </p>
                             </div>
-                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                            <div className="space-y-1.5 pt-2 border-t border-[rgba(250,249,245,0.06)] text-xs font-mono">
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Violated Clauses:</span>
-                                <span className="text-rose-400 font-bold">2–5 Unsatisfied</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Violated Clauses:</span>
+                                <span className="text-rose-400 font-medium">2 to 5 Unsatisfied</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Ground Energy:</span>
-                                <span className="text-slate-300">E = 27.56 kcal/mol</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Ground Energy:</span>
+                                <span className="text-[rgba(250,249,245,0.65)]">E = 27.56 kcal/mol</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Restorative Force:</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Restorative Force:</span>
                                 <span className="text-rose-400">0.000 N (Frozen)</span>
                               </div>
                             </div>
                           </div>
 
                           {/* Card 2: Conservative Softplus */}
-                          <div className="p-4 rounded-xl bg-slate-900/80 border border-amber-500/30 flex flex-col justify-between space-y-3">
+                          <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] flex flex-col justify-between space-y-3">
                             <div>
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">
-                                  Baseline B • Conservative
+                                <span className="text-[10px] font-mono text-amber-300 uppercase tracking-[0.18em]">
+                                  Baseline B · Conservative
                                 </span>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-300 border border-amber-500/30">
                                   Saddle Trapped
                                 </span>
                               </div>
-                              <h4 className="text-sm font-bold text-white mt-1">Smooth Softplus</h4>
-                              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                                Non-saturating <code className="text-amber-300 font-mono">ln(1+e^u)</code> preserves non-zero gradient flow <code className="text-amber-300 font-mono">σ(u) &gt; 0</code>, but cancels out at symmetric saddle points (<code className="text-amber-300 font-mono">∑ ∇C_m = 0</code>).
+                              <h4 className="text-sm font-medium text-[#faf9f5] mt-1 font-mono">Smooth Softplus</h4>
+                              <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">
+                                Non-saturating <code className="text-amber-300 font-mono">ln(1+e^u)</code> preserves gradient flow <code className="text-amber-300 font-mono">σ(u) &gt; 0</code>, but cancels out at symmetric saddle points (<code className="text-amber-300 font-mono">∑ ∇C_m = 0</code>).
                               </p>
                             </div>
-                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                            <div className="space-y-1.5 pt-2 border-t border-[rgba(250,249,245,0.06)] text-xs font-mono">
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Violated Clauses:</span>
-                                <span className="text-amber-400 font-bold">1 Unsatisfied</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Violated Clauses:</span>
+                                <span className="text-amber-400 font-medium">1 Unsatisfied</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Ground Energy:</span>
-                                <span className="text-slate-300">E = 5.57 kcal/mol</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Ground Energy:</span>
+                                <span className="text-[rgba(250,249,245,0.65)]">E = 5.57 kcal/mol</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Net Saddle Force:</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Net Saddle Force:</span>
                                 <span className="text-amber-400">0.000 N (Balanced)</span>
                               </div>
                             </div>
                           </div>
 
                           {/* Card 3: Non-Conservative Auxiliary Softplus */}
-                          <div className="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/30 flex flex-col justify-between space-y-3 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
+                          <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.12)] flex flex-col justify-between space-y-3">
                             <div>
                               <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider">
-                                  Station 16 • Non-Conservative
+                                <span className="text-[10px] font-mono text-[#34d399] uppercase tracking-[0.18em]">
+                                  Station 16 · Non-Conservative
                                 </span>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/30">
                                   100% SAT (0 Violations)
                                 </span>
                               </div>
-                              <h4 className="text-sm font-bold text-white mt-1">Auxiliary Memory Multipliers</h4>
-                              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                                Persistent clause violations integrate dynamic weights <code className="text-emerald-300 font-mono">dy_m = (κ C_m - η y_m) dt</code>, tilting the potential barrier and violently ejecting the trapped oscillator.
+                              <h4 className="text-sm font-medium text-[#faf9f5] mt-1 font-mono">Auxiliary Memory Multipliers</h4>
+                              <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-1.5 leading-relaxed">
+                                Persistent clause violations integrate dynamic weights <code className="text-[#34d399] font-mono">dy_m = (κ C_m - η y_m) dt</code>, tilting the barrier and ejecting the trapped oscillator.
                               </p>
                             </div>
-                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
+                            <div className="space-y-1.5 pt-2 border-t border-[rgba(250,249,245,0.06)] text-xs font-mono">
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Violated Clauses:</span>
-                                <span className="text-emerald-400 font-extrabold">0 (100% Solved)</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Violated Clauses:</span>
+                                <span className="text-[#34d399] font-medium">0 (100% Solved)</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Ground Energy:</span>
-                                <span className="text-emerald-300">E = -1.83 kcal/mol</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Ground Energy:</span>
+                                <span className="text-[#34d399]">E = -1.83 kcal/mol</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-slate-400">Housekeeping Heat:</span>
-                                <span className="text-rose-400 font-bold">3,697.40 J injected</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Housekeeping Heat:</span>
+                                <span className="text-rose-400 font-medium">3,697.40 J injected</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
                         {/* Interactive Barrier Warping & Oscillator Ejection Simulation */}
-                        <div className="p-5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-4">
-                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-3">
+                        <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-4">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[rgba(250,249,245,0.08)] pb-3">
                             <div>
-                              <span className="text-sm font-bold text-white">
+                              <span className="text-sm font-medium text-[#faf9f5]">
                                 Dynamic Energy Barrier Warping &amp; Escape Simulation
                               </span>
-                              <div className="text-xs text-slate-400 font-mono mt-0.5">
-                                Equation: <code className="text-cyan-300">V(x; y_m) = α(x² - 1)² + y_m(t) · ln(1 + e^(-3.5 x))</code>
+                              <div className="text-xs text-[rgba(250,249,245,0.45)] font-mono mt-0.5">
+                                Equation: <code className="text-[#5eead4]">V(x; y_m) = α(x² - 1)² + y_m(t) · ln(1 + e^(-3.5 x))</code>
                               </div>
                             </div>
 
                             {/* Controls */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 font-mono text-[11px]">
                               <button
                                 onClick={() => {
                                   playArcadeTone(tpuIsPlaying ? 350 : 650, 30);
                                   setTpuIsPlaying(!tpuIsPlaying);
                                 }}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                                className={`px-3 py-1.5 rounded-lg border transition-colors ${
                                   tpuIsPlaying
-                                    ? "bg-amber-500/20 border border-amber-500/40 text-amber-300"
-                                    : "bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/30"
+                                    ? "bg-[#020308] border-amber-400 text-amber-300"
+                                    : "bg-[#020308] border-[rgba(250,249,245,0.12)] text-[#5eead4] hover:border-[#5eead4]"
                                 }`}
                               >
-                                <span>{tpuIsPlaying ? "⏸ Pause" : "▶ Replay Warping"}</span>
+                                <span>{tpuIsPlaying ? "Pause" : "Replay Inversion"}</span>
                               </button>
                               <button
                                 onClick={() => {
@@ -3801,7 +3742,7 @@ export default function ThermoLabPage() {
                                   setTpuIsPlaying(false);
                                   setTpuStep(0);
                                 }}
-                                className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono transition"
+                                className="px-2.5 py-1.5 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.55)] hover:text-[#faf9f5] transition-colors"
                               >
                                 ↺ Reset
                               </button>
@@ -3811,9 +3752,9 @@ export default function ThermoLabPage() {
                                   setTpuIsPlaying(false);
                                   setTpuStep(68);
                                 }}
-                                className="px-2.5 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 text-xs font-mono transition"
+                                className="px-2.5 py-1.5 rounded-lg bg-[#020308] border border-[rgba(250,249,245,0.12)] text-purple-300 hover:border-purple-400 transition-colors"
                               >
-                                ⚡ Jump to Ejection (t=68)
+                                Jump to Inversion (t = 68)
                               </button>
                             </div>
                           </div>
@@ -3861,45 +3802,38 @@ export default function ThermoLabPage() {
                               s < 45
                                 ? "SADDLE TRAPPED (Violation C_m > 0)"
                                 : s <= 68
-                                ? "BARRIER TILTED • EJECTING OSCILLATOR"
+                                ? "BARRIER TILTED · EJECTING OSCILLATOR"
                                 : "GROUND BASIN LOCKED (100% SAT, 0 Violations)";
 
                             const statusColor =
-                              s < 45 ? "text-rose-400" : s <= 68 ? "text-amber-400" : "text-emerald-400";
+                              s < 45 ? "text-rose-400" : s <= 68 ? "text-amber-400" : "text-[#34d399]";
 
                             return (
                               <div className="space-y-3">
-                                <div className="relative bg-slate-950 rounded-xl p-4 border border-slate-800 overflow-hidden">
+                                <div className="relative bg-[#020308] rounded-xl p-4 border border-[rgba(250,249,245,0.08)] overflow-hidden">
                                   <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-44">
                                     <defs>
                                       <linearGradient id="gradCurve" x1="0%" y1="0%" x2="100%" y2="0%">
                                         <stop offset="0%" stopColor="#f43f5e" />
                                         <stop offset="50%" stopColor="#f59e0b" />
-                                        <stop offset="100%" stopColor="#10b981" />
+                                        <stop offset="100%" stopColor="#34d399" />
                                       </linearGradient>
-                                      <filter id="glowCircle" x="-50%" y="-50%" width="200%" height="200%">
-                                        <feGaussianBlur in="SourceGraphic" stdDeviation="4" />
-                                        <feMerge>
-                                          <feMergeNode />
-                                          <feMergeNode in="SourceGraphic" />
-                                        </feMerge>
-                                      </filter>
                                     </defs>
 
-                                    <line x1="0" y1={svgH - 25} x2={svgW} y2={svgH - 25} stroke="#1e293b" strokeWidth="1" />
-                                    <line x1={xToSvg(0)} y1="10" x2={xToSvg(0)} y2={svgH - 25} stroke="#1e293b" strokeDasharray="3 3" />
+                                    <line x1="0" y1={svgH - 25} x2={svgW} y2={svgH - 25} stroke="rgba(250,249,245,0.1)" strokeWidth="1" />
+                                    <line x1={xToSvg(0)} y1="10" x2={xToSvg(0)} y2={svgH - 25} stroke="rgba(250,249,245,0.1)" strokeDasharray="3 3" />
 
                                     <text x={xToSvg(-1.0)} y={svgH - 8} fill="#f43f5e" fontSize="10" fontFamily="monospace" textAnchor="middle">
                                       Violated Basin (x ≈ -1.0)
                                     </text>
-                                    <text x={xToSvg(0.0)} y={svgH - 8} fill="#64748b" fontSize="10" fontFamily="monospace" textAnchor="middle">
-                                      Saddle (x=0)
+                                    <text x={xToSvg(0.0)} y={svgH - 8} fill="rgba(250,249,245,0.4)" fontSize="10" fontFamily="monospace" textAnchor="middle">
+                                      Saddle (x = 0)
                                     </text>
-                                    <text x={xToSvg(1.0)} y={svgH - 8} fill="#10b981" fontSize="10" fontFamily="monospace" textAnchor="middle">
+                                    <text x={xToSvg(1.0)} y={svgH - 8} fill="#34d399" fontSize="10" fontFamily="monospace" textAnchor="middle">
                                       Satisfied Basin (x ≈ +1.0)
                                     </text>
 
-                                    <path d={dStr} fill="none" stroke="url(#gradCurve)" strokeWidth="3" strokeLinecap="round" />
+                                    <path d={dStr} fill="none" stroke="url(#gradCurve)" strokeWidth="2.5" strokeLinecap="round" />
 
                                     {s >= 45 && s <= 68 && (
                                       <line
@@ -3908,40 +3842,39 @@ export default function ThermoLabPage() {
                                         x2={pSvgX + 32}
                                         y2={pSvgY - 12}
                                         stroke="#f59e0b"
-                                        strokeWidth="3"
+                                        strokeWidth="2"
                                       />
                                     )}
 
                                     <circle
                                       cx={pSvgX}
                                       cy={pSvgY}
-                                      r="7"
-                                      fill={s >= 68 ? "#10b981" : s >= 45 ? "#f59e0b" : "#f43f5e"}
-                                      filter="url(#glowCircle)"
+                                      r="6"
+                                      fill={s >= 68 ? "#34d399" : s >= 45 ? "#f59e0b" : "#f43f5e"}
                                     />
-                                    <circle cx={pSvgX} cy={pSvgY} r="3" fill="#ffffff" />
+                                    <circle cx={pSvgX} cy={pSvgY} r="2.5" fill="#faf9f5" />
                                   </svg>
 
-                                  <div className="absolute top-3 left-4 flex flex-wrap gap-2 text-[11px] font-mono">
-                                    <span className="px-2 py-0.5 rounded bg-slate-900/90 border border-slate-700 text-slate-300">
-                                      Time Step: <strong className="text-white">{s} / 100</strong>
+                                  <div className="absolute top-3 left-4 flex flex-wrap gap-2 text-[10px] font-mono">
+                                    <span className="px-2 py-0.5 rounded bg-[#05070f] border border-[rgba(250,249,245,0.08)] text-[rgba(250,249,245,0.65)]">
+                                      Step: <strong className="text-[#faf9f5]">{s} / 100</strong>
                                     </span>
-                                    <span className="px-2 py-0.5 rounded bg-slate-900/90 border border-cyan-500/30 text-cyan-300">
+                                    <span className="px-2 py-0.5 rounded bg-[#05070f] border border-[rgba(250,249,245,0.08)] text-[#5eead4]">
                                       Multiplier y_m(t): <strong>{ym.toFixed(2)}</strong>
                                     </span>
-                                    <span className="px-2 py-0.5 rounded bg-slate-900/90 border border-rose-500/30 text-rose-300">
+                                    <span className="px-2 py-0.5 rounded bg-[#05070f] border border-[rgba(250,249,245,0.08)] text-rose-300">
                                       Heat Q_hk: <strong>{qHk.toFixed(1)} J</strong>
                                     </span>
-                                    <span className={`px-2 py-0.5 rounded bg-slate-900/90 border border-slate-700 font-bold ${statusColor}`}>
+                                    <span className={`px-2 py-0.5 rounded bg-[#05070f] border border-[rgba(250,249,245,0.08)] font-medium ${statusColor}`}>
                                       {statusText}
                                     </span>
                                   </div>
                                 </div>
 
-                                <div className="space-y-1">
-                                  <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                                <div className="space-y-1 font-mono">
+                                  <div className="flex justify-between text-[10px] text-[rgba(250,249,245,0.4)]">
                                     <span>t = 0 (Trapped in Saddle)</span>
-                                    <span>t = 68 (Dynamic Barrier Inversion &amp; Ejection)</span>
+                                    <span>t = 68 (Dynamic Barrier Inversion)</span>
                                     <span>t = 100 (Equilibrated Ground State)</span>
                                   </div>
                                   <input
@@ -3953,7 +3886,7 @@ export default function ThermoLabPage() {
                                       setTpuIsPlaying(false);
                                       setTpuStep(parseInt(e.target.value, 10));
                                     }}
-                                    className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                                    className="w-full h-1.5 bg-[#020308] rounded-lg appearance-none cursor-pointer accent-[#5eead4]"
                                   />
                                 </div>
                               </div>
@@ -3973,26 +3906,26 @@ export default function ThermoLabPage() {
                     ========================================================= */}
                     {tpuActiveTab === "resampling" && (
                       <div className="flex flex-col gap-5">
-                        <div className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                           <div>
-                            <span className="text-sm font-bold text-white">
+                            <span className="text-sm font-medium text-[#faf9f5]">
                               Jarzynski-Neal Sequential Monte Carlo (SMC) Trajectory Population
                             </span>
-                            <p className="text-xs text-slate-400 mt-0.5">
+                            <p className="text-xs text-[rgba(250,249,245,0.55)] font-light mt-0.5">
                               Steep thermal quenches cause exponential dissipation variance (O(N)), collapsing unresampled weights onto a single walker.
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-1 p-1 bg-slate-950 rounded-xl border border-slate-800 shrink-0">
+                          <div className="flex items-center gap-1 p-1 bg-[#020308] rounded-xl border border-[rgba(250,249,245,0.08)] shrink-0 font-mono text-[11px]">
                             <button
                               onClick={() => {
                                 playArcadeTone(300, 30, "sawtooth");
                                 setTpuResamplingMode("no_smc");
                               }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                              className={`px-3 py-1.5 rounded-lg transition-colors ${
                                 tpuResamplingMode === "no_smc"
-                                  ? "bg-rose-500/20 text-rose-300 border border-rose-500/50 shadow-sm"
-                                  : "text-slate-400 hover:text-slate-200"
+                                  ? "bg-[#05070f] text-rose-300 border border-rose-500/40"
+                                  : "text-[rgba(250,249,245,0.45)] hover:text-[#faf9f5]"
                               }`}
                             >
                               Without Resampling (Collapsed)
@@ -4002,10 +3935,10 @@ export default function ThermoLabPage() {
                                 playArcadeTone(580, 30);
                                 setTpuResamplingMode("with_smc");
                               }}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                              className={`px-3 py-1.5 rounded-lg transition-colors ${
                                 tpuResamplingMode === "with_smc"
-                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-sm"
-                                  : "text-slate-400 hover:text-slate-200"
+                                  ? "bg-[#05070f] text-[#34d399] border border-[#34d399]/40"
+                                  : "text-[rgba(250,249,245,0.45)] hover:text-[#faf9f5]"
                               }`}
                             >
                               With 22-Stage SMC Resampling
@@ -4014,56 +3947,50 @@ export default function ThermoLabPage() {
                         </div>
 
                         {tpuResamplingMode === "no_smc" ? (
-                          <div className="p-3.5 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-base">⚠️</span>
-                              <span>
-                                <strong>CRITICAL TRAJECTORY COLLAPSE:</strong> Kish Effective Sample Size dropped to <strong>N_eff = 1.55 / 48 (3.2%)</strong>. Walker #1 holds 96.8% of total ensemble weight; 47 walkers are statistically dead.
-                              </span>
+                          <div className="p-3.5 rounded-xl bg-[#05070f] border border-rose-500/40 text-rose-300 text-xs flex flex-wrap items-center justify-between gap-3 font-mono">
+                            <div>
+                              <strong className="text-rose-400">TRAJECTORY COLLAPSE:</strong> Kish Effective Sample Size dropped to <strong>N_eff = 1.55 / 48 (3.2%)</strong>. Walker #1 holds 96.8% of total ensemble weight; 47 walkers are statistically dead.
                             </div>
-                            <span className="font-mono font-bold text-rose-400 whitespace-nowrap">N_eff = 1.55 (3.2%)</span>
+                            <span className="font-bold whitespace-nowrap">N_eff = 1.55 (3.2%)</span>
                           </div>
                         ) : (
-                          <div className="p-3.5 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-base">✅</span>
-                              <span>
-                                <strong>HEALTHY RESAMPLE RESUSCITATION:</strong> 22 systematic resampling stages maintained Kish ratio above 50% across the full quench. Mean <strong>N_eff = 30.63 / 48 (63.8%)</strong>. Free energy: <strong>Δ(βF) = -1,773.18</strong>.
-                              </span>
+                          <div className="p-3.5 rounded-xl bg-[#05070f] border border-[#34d399]/40 text-[#34d399] text-xs flex flex-wrap items-center justify-between gap-3 font-mono">
+                            <div>
+                              <strong className="text-[#34d399]">RESAMPLE RESUSCITATION:</strong> 22 systematic resampling stages maintained Kish ratio above 50% across the full quench. Mean <strong>N_eff = 30.63 / 48 (63.8%)</strong>. Free energy: <strong>Δ(βF) = -1,773.18</strong>.
                             </div>
-                            <span className="font-mono font-bold text-emerald-400 whitespace-nowrap">N_eff = 30.63 (63.8%)</span>
+                            <span className="font-bold whitespace-nowrap">N_eff = 30.63 (63.8%)</span>
                           </div>
                         )}
 
-                        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-3">
-                          <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
-                            <span className="text-slate-300 font-semibold font-mono">
+                        <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-3">
+                          <div className="flex justify-between items-center text-xs border-b border-[rgba(250,249,245,0.08)] pb-2 font-mono">
+                            <span className="text-[rgba(250,249,245,0.7)]">
                               Trajectory Ensemble Normalized Weight Distribution (B = 48 Walkers, N = 128 Spins)
                             </span>
-                            <span className="text-slate-400 font-mono text-[11px]">
-                              {tpuResamplingMode === "no_smc" ? "Unresampled Exp(-ΔΣ)" : "SMC Uniform Reset (1/B) + Resampled"}
+                            <span className="text-[rgba(250,249,245,0.4)] text-[11px]">
+                              {tpuResamplingMode === "no_smc" ? "Unresampled Exp(-ΔΣ)" : "SMC Uniform Reset (1/B)"}
                             </span>
                           </div>
 
-                          <div className="grid grid-cols-12 sm:grid-cols-24 lg:grid-cols-48 gap-1 items-end h-36 bg-slate-950/90 rounded-lg p-2.5 border border-slate-800">
+                          <div className="grid grid-cols-12 sm:grid-cols-24 lg:grid-cols-48 gap-1 items-end h-36 bg-[#020308] rounded-lg p-2.5 border border-[rgba(250,249,245,0.08)]">
                             {Array.from({ length: 48 }).map((_, idx) => {
                               let pct = 0;
-                              let barColor = "bg-emerald-500";
+                              let barColor = "bg-[#34d399]";
                               if (tpuResamplingMode === "no_smc") {
                                 if (idx === 0) {
                                   pct = 96.8;
-                                  barColor = "bg-rose-500 shadow-md shadow-rose-500/50";
+                                  barColor = "bg-rose-500";
                                 } else if (idx === 1) {
                                   pct = 2.1;
                                   barColor = "bg-rose-400/60";
                                 } else {
                                   pct = 0.05;
-                                  barColor = "bg-slate-800";
+                                  barColor = "bg-[rgba(250,249,245,0.05)]";
                                 }
                               } else {
                                 const seedVal = Math.sin(idx * 7.3) * 0.45;
                                 pct = 2.08 + seedVal;
-                                barColor = "bg-emerald-400 hover:bg-emerald-300";
+                                barColor = "bg-[#5eead4]";
                               }
 
                               const hPx = Math.max(4, (pct / 100.0) * 115);
@@ -4083,33 +4010,33 @@ export default function ThermoLabPage() {
                             })}
                           </div>
 
-                          <div className="flex justify-between items-center text-[11px] font-mono text-slate-500 pt-1">
+                          <div className="flex justify-between items-center text-[10px] font-mono text-[rgba(250,249,245,0.35)] pt-1">
                             <span>Walker #01</span>
                             <span>Walker #24</span>
                             <span>Walker #48</span>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
-                            <div className="text-[10px] text-slate-400 font-mono uppercase">Problem Scale</div>
-                            <div className="text-base font-mono font-bold text-white mt-0.5">N=128, M=545</div>
-                            <div className="text-[10px] text-cyan-400 mt-0.5">Continuous 3-SAT</div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                          <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                            <div className="text-[10px] text-[rgba(250,249,245,0.4)] font-mono uppercase">Problem Scale</div>
+                            <div className="text-base font-mono font-medium text-[#faf9f5] mt-1">N=128, M=545</div>
+                            <div className="text-[10px] text-[#5eead4] font-mono mt-0.5">Continuous 3-SAT</div>
                           </div>
-                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
-                            <div className="text-[10px] text-slate-400 font-mono uppercase">Kish Ratio Gain</div>
-                            <div className="text-base font-mono font-bold text-emerald-400 mt-0.5">3.2% → 63.8%</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">19.9× Resuscitation</div>
+                          <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                            <div className="text-[10px] text-[rgba(250,249,245,0.4)] font-mono uppercase">Kish Ratio Gain</div>
+                            <div className="text-base font-mono font-medium text-[#34d399] mt-1">3.2% → 63.8%</div>
+                            <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">19.9× Resuscitation</div>
                           </div>
-                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
-                            <div className="text-[10px] text-slate-400 font-mono uppercase">SMC Stages</div>
-                            <div className="text-base font-mono font-bold text-cyan-400 mt-0.5">22 Events</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5">Threshold N_eff/B &lt; 0.5</div>
+                          <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                            <div className="text-[10px] text-[rgba(250,249,245,0.4)] font-mono uppercase">SMC Stages</div>
+                            <div className="text-base font-mono font-medium text-[#5eead4] mt-1">22 Events</div>
+                            <div className="text-[10px] text-[rgba(250,249,245,0.45)] font-mono mt-0.5">Threshold N_eff/B &lt; 0.5</div>
                           </div>
-                          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
-                            <div className="text-[10px] text-slate-400 font-mono uppercase">Free Energy Δ(βF)</div>
-                            <div className="text-base font-mono font-bold text-purple-300 mt-0.5">-1,773.18</div>
-                            <div className="text-[10px] text-emerald-400 mt-0.5">Jarzynski Log-Sum-Exp</div>
+                          <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                            <div className="text-[10px] text-[rgba(250,249,245,0.4)] font-mono uppercase">Free Energy Δ(βF)</div>
+                            <div className="text-base font-mono font-medium text-purple-300 mt-1">-1,773.18</div>
+                            <div className="text-[10px] text-[#34d399] font-mono mt-0.5">Jarzynski Log-Sum-Exp</div>
                           </div>
                         </div>
                       </div>
@@ -4121,99 +4048,98 @@ export default function ThermoLabPage() {
                     {tpuActiveTab === "integrator" && (
                       <div className="flex flex-col gap-5">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="p-5 rounded-xl bg-slate-900/80 border border-rose-500/40 space-y-3">
+                          <div className="p-5 rounded-xl bg-[#05070f] border border-rose-500/30 space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-rose-400 uppercase tracking-wider">
-                                Classical Baseline • Euler-Maruyama
+                              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-rose-400">
+                                Classical Baseline · Euler-Maruyama
                               </span>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-rose-500/10 text-rose-300 border border-rose-500/30">
                                 Runaway Divergence
                               </span>
                             </div>
-                            <div className="text-sm font-semibold text-white">
+                            <div className="text-sm font-medium text-[#faf9f5]">
                               Non-Symplectic First-Order Drift Discretization
                             </div>
-                            <p className="text-xs text-slate-400 leading-relaxed">
+                            <p className="text-xs text-[rgba(250,249,245,0.55)] font-light leading-relaxed">
                               When potential curvature exceeds <code className="text-rose-300 font-mono">ω dt ≈ 2</code>, Euler-Maruyama experiences violent energy pump resonance. Velocity explodes without bound.
                             </p>
-                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
-                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
-                                <span className="text-slate-400">Divergence Point:</span>
-                                <span className="text-rose-400 font-bold">Step 277 (Blowup)</span>
+                            <div className="space-y-1.5 pt-2 border-t border-[rgba(250,249,245,0.06)] text-xs font-mono">
+                              <div className="flex justify-between py-0.5 border-b border-[rgba(250,249,245,0.04)]">
+                                <span className="text-[rgba(250,249,245,0.45)]">Divergence Point:</span>
+                                <span className="text-rose-400 font-medium">Step 277 (Blowup)</span>
                               </div>
-                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
-                                <span className="text-slate-400">Velocity Norm ||v||:</span>
-                                <span className="text-rose-400 font-bold">80.35 (&gt; 50 threshold)</span>
+                              <div className="flex justify-between py-0.5 border-b border-[rgba(250,249,245,0.04)]">
+                                <span className="text-[rgba(250,249,245,0.45)]">Velocity Norm ||v||:</span>
+                                <span className="text-rose-400 font-medium">80.35 (&gt; 50 threshold)</span>
                               </div>
-                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
-                                <span className="text-slate-400">FDT Equipartition Error:</span>
-                                <span className="text-rose-400 font-bold">82.4% (Violated)</span>
+                              <div className="flex justify-between py-0.5 border-b border-[rgba(250,249,245,0.04)]">
+                                <span className="text-[rgba(250,249,245,0.45)]">FDT Equipartition Error:</span>
+                                <span className="text-rose-400 font-medium">82.4% (Violated)</span>
                               </div>
                               <div className="flex justify-between py-0.5">
-                                <span className="text-slate-400">First Law Conservation:</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">First Law Conservation:</span>
                                 <span className="text-rose-400">Failed (Energy → +∞)</span>
                               </div>
                             </div>
                           </div>
 
-                          <div className="p-5 rounded-xl bg-slate-900/80 border border-emerald-500/40 space-y-3 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+                          <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.12)] space-y-3">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                                Station 16 Core • BAOAB Symplectic
+                              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-[#34d399]">
+                                Station 16 Core · BAOAB Symplectic
                               </span>
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/30">
                                 Exact First Law
                               </span>
                             </div>
-                            <div className="text-sm font-semibold text-white">
+                            <div className="text-sm font-medium text-[#faf9f5]">
                               Leimkuhler-Matthews Symplectic Operator Splitting
                             </div>
-                            <p className="text-xs text-slate-400 leading-relaxed">
-                              Splits drift, diffusion, and dissipation into symmetric operators: preserves phase-space measure and yields exact marginal spatial Boltzmann distributions up to <code className="text-emerald-300 font-mono">O(dt²)</code>.
+                            <p className="text-xs text-[rgba(250,249,245,0.55)] font-light leading-relaxed">
+                              Splits drift, diffusion, and dissipation into symmetric operators: preserves phase-space measure and yields exact marginal spatial Boltzmann distributions up to <code className="text-[#34d399] font-mono">O(dt²)</code>.
                             </p>
-                            <div className="space-y-1.5 pt-2 border-t border-slate-800 text-xs font-mono">
-                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
-                                <span className="text-slate-400">Integrator Stability:</span>
-                                <span className="text-emerald-400 font-bold">100% Stable (H = 7.01)</span>
+                            <div className="space-y-1.5 pt-2 border-t border-[rgba(250,249,245,0.06)] text-xs font-mono">
+                              <div className="flex justify-between py-0.5 border-b border-[rgba(250,249,245,0.04)]">
+                                <span className="text-[rgba(250,249,245,0.45)]">Integrator Stability:</span>
+                                <span className="text-[#34d399] font-medium">100% Stable (H = 7.01)</span>
                               </div>
-                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
-                                <span className="text-slate-400">First Law Energy Error:</span>
-                                <span className="text-emerald-400 font-bold">&lt; 10^(-10) Exact</span>
+                              <div className="flex justify-between py-0.5 border-b border-[rgba(250,249,245,0.04)]">
+                                <span className="text-[rgba(250,249,245,0.45)]">First Law Energy Error:</span>
+                                <span className="text-[#34d399] font-medium">&lt; 10^(-10) Exact</span>
                               </div>
-                              <div className="flex justify-between py-0.5 border-b border-slate-800/60">
-                                <span className="text-slate-400">FDT Equipartition Error:</span>
-                                <span className="text-cyan-300 font-bold">17.3% in stiff regime</span>
+                              <div className="flex justify-between py-0.5 border-b border-[rgba(250,249,245,0.04)]">
+                                <span className="text-[rgba(250,249,245,0.45)]">FDT Equipartition Error:</span>
+                                <span className="text-[#5eead4] font-medium">17.3% in stiff regime</span>
                               </div>
                               <div className="flex justify-between py-0.5">
-                                <span className="text-slate-400">Second Law Work &lang;W_diss&rang;:</span>
-                                <span className="text-emerald-400 font-bold">+0.9210 J (&gt; 0 Valid)</span>
+                                <span className="text-[rgba(250,249,245,0.45)]">Second Law Work &lang;W_diss&rang;:</span>
+                                <span className="text-[#34d399] font-medium">+0.9210 J (&gt; 0 Valid)</span>
                               </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-4">
-                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
+                        <div className="p-5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] space-y-4">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-[rgba(250,249,245,0.08)] pb-3">
                             <div>
-                              <span className="text-sm font-bold text-white">
+                              <span className="text-sm font-medium text-[#faf9f5]">
                                 Dual Thermometer Audit: Configurational (T_conf) vs. Kinetic (T_kin)
                               </span>
-                              <div className="text-xs text-slate-400 font-mono mt-0.5">
-                                Formula: <code className="text-cyan-300">k_B T_conf = ⟨||∇H||²⟩ / ⟨ΔH⟩</code> vs. <code className="text-amber-300">k_B T_kin = ⟨m v²⟩</code>
+                              <div className="text-xs text-[rgba(250,249,245,0.45)] font-mono mt-0.5">
+                                Formula: <code className="text-[#5eead4]">k_B T_conf = ⟨||∇H||²⟩ / ⟨ΔH⟩</code> vs. <code className="text-amber-300">k_B T_kin = ⟨m v²⟩</code>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-3 text-xs font-mono">
-                              <span className="text-slate-400">Stiffness α_well:</span>
-                              <span className="px-2 py-0.5 rounded bg-slate-800 text-cyan-300 font-bold">
+                              <span className="text-[rgba(250,249,245,0.45)]">Stiffness α_well:</span>
+                              <span className="px-2.5 py-0.5 rounded bg-[#020308] border border-[rgba(250,249,245,0.12)] text-[#5eead4] font-medium">
                                 {tpuStiffnessAlpha.toFixed(1)}
                               </span>
                             </div>
                           </div>
 
-                          <div className="space-y-1">
-                            <div className="flex justify-between text-[11px] font-mono text-slate-400">
+                          <div className="space-y-1 font-mono">
+                            <div className="flex justify-between text-[10px] text-[rgba(250,249,245,0.4)]">
                               <span>α = 1.0 (Harmonic Well)</span>
                               <span>α = 6.0 (Baseline Stiff)</span>
                               <span>α = 10.0 (Extreme Curvature)</span>
@@ -4228,7 +4154,7 @@ export default function ThermoLabPage() {
                                 playArcadeTone(380 + parseFloat(e.target.value) * 30, 20);
                                 setTpuStiffnessAlpha(parseFloat(e.target.value));
                               }}
-                              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                              className="w-full h-1.5 bg-[#020308] rounded-lg appearance-none cursor-pointer accent-[#5eead4]"
                             />
                           </div>
 
@@ -4240,37 +4166,37 @@ export default function ThermoLabPage() {
                             const errConf = 0.38;
 
                             return (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                                <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 font-mono">
+                                <div className="p-3.5 rounded-xl bg-[#020308] border border-[rgba(250,249,245,0.08)] space-y-2">
                                   <div className="flex justify-between items-center text-xs">
-                                    <span className="text-slate-400 font-mono">Kinetic Thermometer (T_kin):</span>
-                                    <span className="text-amber-400 font-mono font-bold">{tKin.toFixed(3)} K</span>
+                                    <span className="text-[rgba(250,249,245,0.55)]">Kinetic (T_kin):</span>
+                                    <span className="text-amber-300 font-medium">{tKin.toFixed(3)} K</span>
                                   </div>
-                                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                  <div className="w-full h-1.5 bg-[#05070f] rounded-full overflow-hidden">
                                     <div
                                       style={{ width: `${(tKin / 1.05) * 100}%` }}
                                       className="h-full bg-amber-400 rounded-full transition-all duration-200"
                                     />
                                   </div>
-                                  <div className="flex justify-between text-[11px] text-slate-500 font-mono">
+                                  <div className="flex justify-between text-[10px] text-[rgba(250,249,245,0.4)]">
                                     <span>Lag Error: {errKin.toFixed(1)}%</span>
                                     <span>Target: 1.000 K</span>
                                   </div>
                                 </div>
 
-                                <div className="p-3.5 rounded-xl bg-slate-950 border border-cyan-500/30 space-y-2">
+                                <div className="p-3.5 rounded-xl bg-[#020308] border border-[rgba(250,249,245,0.12)] space-y-2">
                                   <div className="flex justify-between items-center text-xs">
-                                    <span className="text-cyan-300 font-mono font-semibold">Configurational Thermometer (T_conf):</span>
-                                    <span className="text-emerald-400 font-mono font-bold">{tConf.toFixed(3)} K</span>
+                                    <span className="text-[#5eead4] font-medium">Configurational (T_conf):</span>
+                                    <span className="text-[#34d399] font-medium">{tConf.toFixed(3)} K</span>
                                   </div>
-                                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                                  <div className="w-full h-1.5 bg-[#05070f] rounded-full overflow-hidden">
                                     <div
                                       style={{ width: `${(tConf / 1.05) * 100}%` }}
-                                      className="h-full bg-emerald-400 rounded-full transition-all duration-200"
+                                      className="h-full bg-[#34d399] rounded-full transition-all duration-200"
                                     />
                                   </div>
-                                  <div className="flex justify-between text-[11px] text-slate-400 font-mono">
-                                    <span className="text-emerald-400 font-semibold">Error: {errConf.toFixed(1)}% (Exact Boltzmann)</span>
+                                  <div className="flex justify-between text-[10px] text-[rgba(250,249,245,0.4)]">
+                                    <span className="text-[#34d399]">Error: {errConf.toFixed(1)}% (Exact Boltzmann)</span>
                                     <span>Target: 1.000 K</span>
                                   </div>
                                 </div>
@@ -4279,21 +4205,21 @@ export default function ThermoLabPage() {
                           })()}
                         </div>
 
-                        <div className="p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-cyan-950/40 border border-blue-500/30 flex flex-wrap items-center justify-between gap-3">
+                        <div className="p-4 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] flex flex-wrap items-center justify-between gap-3">
                           <div className="space-y-1">
-                            <div className="text-xs font-bold text-white flex items-center gap-2">
-                              <span>🧠 Upstream System: 4-Organ Synthetic Intelligence (SI) Core</span>
-                              <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono text-[10px]">Station 15</span>
+                            <div className="text-xs font-medium text-[#faf9f5] flex items-center gap-2">
+                              <span>Upstream System: 4-Organ Synthetic Intelligence (SI) Core</span>
+                              <span className="px-2 py-0.5 rounded bg-[rgba(250,249,245,0.06)] text-[#5eead4] font-mono text-[10px]">Station 15</span>
                             </div>
-                            <p className="text-[11px] text-slate-300">
+                            <p className="text-[11px] text-[rgba(250,249,245,0.55)] font-light">
                               Couples Continuous Hopfield episodic memory, Kramers Langevin curiosity hopping, 6-node Potts goal consensus, and RTX 5080 metabolic VRAM scheduling.
                             </p>
                           </div>
                           <Link
                             href="/si-core"
-                            className="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-600/20 transition flex items-center gap-1.5 shrink-0"
+                            className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#020308] hover:border-[rgba(250,249,245,0.3)] text-[#5eead4] px-4 py-2 font-mono text-xs uppercase tracking-wider transition-colors shrink-0"
                           >
-                            <span>Launch /si-core Visualizer ↗</span>
+                            Explore SI Core ↗
                           </Link>
                         </div>
                       </div>
@@ -4318,33 +4244,33 @@ export default function ThermoLabPage() {
             <div className="border-t border-slate-800/80 bg-slate-950/60 px-6 sm:px-8 py-3">
               <button
                 onClick={() => toggleAccordion(station.id)}
-                className="w-full flex items-center justify-between text-xs font-mono text-slate-400 hover:text-cyan-300 transition py-1"
+                className="w-full flex items-center justify-between text-xs font-mono text-[rgba(250,249,245,0.55)] hover:text-[#5eead4] transition-colors py-1 uppercase tracking-wider"
               >
                 <span>
-                  🔧 ENGINEER DEEP DIVE — Hamiltonian, JAX Speedup &amp; Reproducible Script (
-                  <code className="text-cyan-400">{station.scriptFile}</code>)
+                  // Engineer Deep Dive · Hamiltonian &amp; Reproducible Script (
+                  <code className="text-[#5eead4] lowercase">{station.scriptFile}</code>)
                 </span>
-                <span>{openAccordion[station.id] ? "▲ Hide Spec" : "▼ Expand Spec"}</span>
+                <span className="text-[10px]">{openAccordion[station.id] ? "▲ Collapse" : "▼ Expand"}</span>
               </button>
 
               {openAccordion[station.id] && (
-                <div className="mt-3 pt-3 border-t border-slate-800/60 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pb-2">
-                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <div className="text-slate-400 font-semibold mb-1">Hamiltonian / Objective</div>
-                    <code className="text-cyan-300 font-mono">{station.physicsFormula}</code>
+                <div className="mt-3 pt-3 border-t border-[rgba(250,249,245,0.06)] grid grid-cols-1 md:grid-cols-3 gap-4 text-xs pb-2">
+                  <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-[rgba(250,249,245,0.4)] font-mono mb-1.5">Hamiltonian / Objective</div>
+                    <code className="text-[#5eead4] font-mono text-[11px]">{station.physicsFormula}</code>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800">
-                    <div className="text-slate-400 font-semibold mb-1">
+                  <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)]">
+                    <div className="text-[10px] uppercase tracking-[0.18em] text-[rgba(250,249,245,0.4)] font-mono mb-1.5">
                       Block Gibbs Architecture
                     </div>
-                    <p className="text-slate-300 leading-relaxed">{station.engineeringSummary}</p>
+                    <p className="text-[rgba(250,249,245,0.65)] font-light leading-relaxed">{station.engineeringSummary}</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col justify-between">
+                  <div className="p-3.5 rounded-xl bg-[#05070f] border border-[rgba(250,249,245,0.08)] flex flex-col justify-between">
                     <div>
-                      <div className="text-slate-400 font-semibold mb-1">
+                      <div className="text-[10px] uppercase tracking-[0.18em] text-[rgba(250,249,245,0.4)] font-mono mb-1.5">
                         Reproduce via thrml-bench CLI
                       </div>
-                      <code className="text-emerald-400 font-mono">
+                      <code className="text-[#34d399] font-mono text-[11px]">
                         uv run thrml-bench run --exp {station.id}
                       </code>
                     </div>
@@ -4352,7 +4278,7 @@ export default function ThermoLabPage() {
                       href={`https://github.com/nexusai-kevin/thermo-physics/blob/main/${station.scriptFile}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-1 text-cyan-400 hover:underline font-semibold"
+                      className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono text-[#5eead4] hover:underline"
                     >
                       <span>Inspect {station.scriptFile} on GitHub</span>
                       <span>↗</span>
@@ -4367,13 +4293,13 @@ export default function ThermoLabPage() {
         {/* ===================================================================
             HARDWARE PERFORMANCE & SCALING BENCHMARK FOOTER CARD
         =================================================================== */}
-        <section className="rounded-2xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-cyan-500/30 p-6 sm:p-8 shadow-2xl">
+        <section className="rounded-2xl border border-[rgba(250,249,245,0.10)] bg-[#060811]/90 p-7 sm:p-9 shadow-2xl backdrop-blur-sm">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                Initiative 3 • Hardware Scaling Telemetry
+              <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#5eead4]">
+                // Initiative 3 · Hardware Scaling Telemetry
               </span>
-              <h3 className="text-2xl font-bold text-white mt-1">
+              <h3 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl font-normal text-[#faf9f5] mt-1 tracking-tight">
                 Multi-Scale 2-Color Block Gibbs Throughput (L = 16 → 128)
               </h3>
             </div>
@@ -4381,7 +4307,7 @@ export default function ThermoLabPage() {
               href="https://github.com/nexusai-kevin/thermo-physics/blob/main/BENCHMARKS.md"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 text-xs font-bold hover:bg-cyan-500/25 transition"
+              className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] px-5 py-2 font-mono text-[11px] uppercase tracking-[0.15em] text-[#faf9f5] hover:border-[rgba(250,249,245,0.3)] transition-colors"
             >
               View Full BENCHMARKS.md Index ↗
             </a>
@@ -4394,12 +4320,12 @@ export default function ThermoLabPage() {
               { size: "64 × 64 (4,096 Spins)", msu: "6.86 MSU/s", speedup: "2,048× Clock Speedup" },
               { size: "128 × 128 (16,384 Spins)", msu: "20.18 MSU/s", speedup: "8,192× Clock Speedup" },
             ].map((item, i) => (
-              <div key={i} className="p-4 rounded-xl bg-slate-950/90 border border-slate-800">
-                <div className="text-xs text-slate-400">{item.size}</div>
-                <div className="text-xl font-mono font-extrabold text-emerald-400 mt-1">
+              <div key={i} className="p-5 rounded-xl bg-[#020308]/60 border border-[rgba(250,249,245,0.08)]">
+                <div className="font-mono text-[10px] uppercase tracking-wider text-[rgba(250,249,245,0.4)]">{item.size}</div>
+                <div className="text-xl font-mono font-medium text-[#5eead4] mt-2">
                   {item.msu}
                 </div>
-                <div className="text-xs font-mono text-amber-300 mt-1">{item.speedup}</div>
+                <div className="text-xs font-mono text-[rgba(250,249,245,0.65)] mt-1">{item.speedup}</div>
               </div>
             ))}
           </div>
@@ -4408,33 +4334,29 @@ export default function ThermoLabPage() {
         {/* ===================================================================
             COMMUNITY, UPSTREAM CONTRIBUTION & QUICKSTART TUTORIAL BANNER
         =================================================================== */}
-        <section className="rounded-2xl bg-gradient-to-r from-indigo-950/60 via-slate-900 to-cyan-950/60 border border-indigo-500/30 p-6 sm:p-8 shadow-2xl">
+        <section className="rounded-2xl border border-[rgba(250,249,245,0.10)] bg-[#060811]/90 p-7 sm:p-9 shadow-2xl backdrop-blur-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-bold mb-2">
-                <span>🚀 Community &amp; Upstream Alignment</span>
+              <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-[#5eead4] mb-2">
+                // Community &amp; Upstream Alignment
               </div>
-              <h3 className="text-2xl font-bold text-white">
+              <h3 className="font-[family-name:var(--font-display)] text-2xl sm:text-3xl font-normal text-[#faf9f5] tracking-tight">
                 Contribute, Replicate &amp; Run the Code
               </h3>
-              <p className="text-slate-300 text-sm max-w-2xl mt-1 leading-relaxed">
-                Connect directly with our open-source thermodynamic computing research on Extropic’s <code className="text-cyan-300 font-mono">thrml</code> ecosystem. Inspect our active upstream PR, run the end-to-end interactive Jupyter tutorial, or explore the reproducibility repository.
+              <p className="text-[rgba(250,249,245,0.65)] text-sm font-light max-w-2xl mt-2 leading-relaxed">
+                Connect directly with our open-source thermodynamic computing research on Extropic’s <code className="text-[#5eead4] font-mono">thrml</code> ecosystem. Inspect our active upstream PR, run the end-to-end interactive Jupyter tutorial, or explore the reproducibility repository.
               </p>
             </div>
 
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.12em]">
               {/* Benchmark Dossier Whitepaper */}
               <a
                 href="/BENCHMARK_DOSSIER.html"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-2 px-4 py-3 rounded-xl bg-cyan-500/15 border border-cyan-400/40 text-cyan-300 hover:bg-cyan-500/25 transition text-xs font-bold shadow-lg"
+                className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] px-4 py-2.5 text-[#faf9f5] hover:border-[rgba(250,249,245,0.3)] transition-colors"
               >
-                <span className="text-cyan-400 text-sm">📄</span>
-                <div className="text-left">
-                  <div className="text-[10px] text-cyan-400/80 uppercase tracking-wider">Audit Whitepaper</div>
-                  <div>16-Station Dossier (HTML/PDF) ↗</div>
-                </div>
+                16-Station Dossier ↗
               </a>
 
               {/* Upstream PR #79 */}
@@ -4442,13 +4364,9 @@ export default function ThermoLabPage() {
                 href="https://github.com/extropic-ai/thrml/pull/79"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/25 transition text-xs font-bold shadow-lg"
+                className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] px-4 py-2.5 text-[#5eead4] hover:border-[#5eead4] transition-colors"
               >
-                <span className="text-emerald-400 text-sm">⚡</span>
-                <div className="text-left">
-                  <div className="text-[10px] text-emerald-400/80 uppercase tracking-wider">Upstream Contribution</div>
-                  <div>PR #79 on extropic-ai/thrml ↗</div>
-                </div>
+                PR #79 on thrml ↗
               </a>
 
               {/* Open in Colab */}
@@ -4456,13 +4374,9 @@ export default function ThermoLabPage() {
                 href="https://colab.research.google.com/github/nexusai-kevin/thermo-physics/blob/main/notebooks/quickstart_tutorial.ipynb"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-300 hover:bg-amber-500/25 transition text-xs font-bold shadow-lg"
+                className="rounded-full border border-[rgba(250,249,245,0.12)] bg-[#05070f] px-4 py-2.5 text-[#f59e0b] hover:border-[#f59e0b] transition-colors"
               >
-                <img
-                  src="https://colab.research.google.com/assets/colab-badge.svg"
-                  alt="Open in Colab"
-                  className="h-5"
-                />
+                Open in Colab ↗
               </a>
 
               {/* GitHub Repository */}
@@ -4470,9 +4384,9 @@ export default function ThermoLabPage() {
                 href="https://github.com/nexusai-kevin/thermo-physics"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-200 hover:bg-slate-700/80 transition text-xs font-bold shadow-lg"
+                className="rounded-full bg-[#faf9f5] px-5 py-2.5 font-medium text-[#020308] hover:bg-white transition-colors"
               >
-                <span>📂 GitHub Repo ↗</span>
+                GitHub Repository ↗
               </a>
             </div>
           </div>
