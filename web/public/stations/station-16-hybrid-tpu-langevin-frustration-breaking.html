@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Station 16 — Hybrid TPU Langevin, Frustration Breaking</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#eef1f0;
+    --panel:#ffffff;
+    --panel-2:#f4f7f6;
+    --ink:#12211f;
+    --ink-soft:#47605c;
+    --line:#cfdbd8;
+    --teal:#0e7c6f;
+    --teal-bright:#12a594;
+    --teal-soft:#d8efea;
+    --amber:#d97706;
+    --amber-bright:#f59e0b;
+    --amber-soft:#fcefd8;
+    --red:#c2410c;
+    --chip-sat:#e3f2ee;
+    --chip-sat-edge:#9fd4c8;
+    --chip-vio:#fde3cf;
+    --chip-vio-edge:#f0a35e;
+    --shadow:0 1px 2px rgba(18,33,31,.06),0 8px 24px rgba(18,33,31,.06);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0b1211;
+      --panel:#121c1a;
+      --panel-2:#0f1715;
+      --ink:#e6f0ee;
+      --ink-soft:#93aaa5;
+      --line:#263734;
+      --teal:#2dd4bf;
+      --teal-bright:#5eead4;
+      --teal-soft:#123330;
+      --amber:#fbbf24;
+      --amber-bright:#f59e0b;
+      --amber-soft:#33270f;
+      --red:#fb923c;
+      --chip-sat:#14312c;
+      --chip-sat-edge:#1f5a4f;
+      --chip-vio:#3a2410;
+      --chip-vio-edge:#92581c;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.45;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+
+  /* ---------- header ---------- */
+  header.top{padding:14px 2px 18px}
+  .station-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:10px}
+  .station-tag{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.14em;
+    border:1.5px solid var(--ink);border-radius:999px;padding:5px 12px;text-transform:uppercase;
+  }
+  .station-tag.alt{border-color:var(--line);color:var(--ink-soft)}
+  .live-dot{display:inline-flex;align-items:center;gap:7px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-soft)}
+  .live-dot i{width:9px;height:9px;border-radius:50%;background:var(--amber-bright);display:inline-block}
+  .live-dot.running i{background:var(--teal-bright);animation:pulse 1.1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.45)}}
+  h1{font-size:clamp(30px,5.2vw,52px);line-height:1.04;font-weight:800;letter-spacing:-.02em;margin:0 0 12px}
+  h1 .accent{color:var(--teal)}
+  .lede{font-size:clamp(15px,2vw,18px);color:var(--ink-soft);max-width:760px;margin:0}
+  .lede strong{color:var(--ink);font-weight:600}
+
+  /* ---------- bento grid ---------- */
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+  .tile{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:18px;min-width:0;
+  }
+  .tile h2{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin:0 0 4px;color:var(--ink)}
+  .tile .sub{font-size:13px;color:var(--ink-soft);margin:0 0 12px}
+  .span-field{grid-column:span 8}
+  .span-side{grid-column:span 4}
+  .span-third{grid-column:span 4}
+  .span-half{grid-column:span 6}
+  .span-full{grid-column:span 12}
+  @media (max-width:900px){
+    .span-field,.span-side,.span-third,.span-half{grid-column:span 12}
+  }
+
+  /* ---------- clause field ---------- */
+  .field-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px}
+  .big-counter{display:flex;align-items:baseline;gap:10px}
+  .big-counter .num{
+    font-family:"IBM Plex Mono",monospace;font-size:clamp(52px,8vw,84px);font-weight:600;line-height:.95;
+    color:var(--amber);font-variant-numeric:tabular-nums;transition:color .3s;
+  }
+  .big-counter .num.zero{color:var(--teal)}
+  .big-counter .lbl{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);max-width:110px;line-height:1.3}
+  .sat-badge{
+    font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;border-radius:8px;
+    padding:8px 14px;background:var(--amber-soft);color:var(--amber);border:1px solid var(--chip-vio-edge);
+  }
+  .sat-badge.solved{background:var(--teal-soft);color:var(--teal);border-color:var(--chip-sat-edge)}
+  .clause-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:16px}
+  @media (max-width:560px){.clause-grid{grid-template-columns:repeat(6,1fr)}}
+  .clause{
+    aspect-ratio:1.35;border-radius:7px;border:1px solid var(--chip-sat-edge);background:var(--chip-sat);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--teal);
+    transition:background .35s,border-color .35s,color .35s,transform .35s;
+    user-select:none;
+  }
+  .clause.vio{background:var(--chip-vio);border-color:var(--chip-vio-edge);color:var(--red);transform:translateY(-2px)}
+  .field-foot{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-soft)}
+  .field-foot b{color:var(--ink);font-weight:600}
+  .progress-track{height:8px;border-radius:99px;background:var(--panel-2);border:1px solid var(--line);overflow:hidden;margin-top:14px}
+  .progress-fill{height:100%;background:var(--teal-bright);width:0%;transition:width .3s}
+
+  /* ---------- controls ---------- */
+  .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  button{
+    font-family:inherit;font-size:14px;font-weight:600;border-radius:9px;border:1px solid var(--line);
+    background:var(--panel-2);color:var(--ink);padding:10px 14px;cursor:pointer;min-height:40px;
+  }
+  button:hover{border-color:var(--teal)}
+  button.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+  @media (prefers-color-scheme: dark){button.primary{color:#06231f}}
+  button.primary:hover{background:var(--teal-bright)}
+  button:active{transform:translateY(1px)}
+  .ctl{margin-bottom:14px}
+  .ctl label{display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:6px}
+  .ctl label output{font-family:"IBM Plex Mono",monospace;color:var(--teal);font-weight:600}
+  input[type="range"]{width:100%;accent-color:var(--teal);min-height:32px;cursor:pointer}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0 2px;border-top:1px dashed var(--line)}
+  .toggle-row .t-lbl{font-size:13.5px;font-weight:600}
+  .toggle-row .t-sub{font-size:12px;color:var(--ink-soft)}
+  .switch{position:relative;display:inline-flex;padding:4px;cursor:pointer;flex:none}
+  .switch input{
+    appearance:none;-webkit-appearance:none;width:52px;height:30px;margin:0;cursor:pointer;flex:none;
+    border-radius:99px;background:var(--line);position:relative;transition:background .2s;border:none;min-height:30px;
+  }
+  .switch input::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--panel);transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .switch input:checked{background:var(--teal)}
+  .switch input:checked::after{left:25px}
+  .switch input:focus-visible{outline:2px solid var(--teal-bright);outline-offset:2px}
+
+  /* ---------- metrics ---------- */
+  .metric-num{font-family:"IBM Plex Mono",monospace;font-size:clamp(34px,4.5vw,46px);font-weight:600;line-height:1;color:var(--teal);font-variant-numeric:tabular-nums}
+  .metric-num.amber{color:var(--amber)}
+  .metric-lbl{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-top:8px}
+  .metric-note{font-size:13px;color:var(--ink-soft);margin-top:4px}
+  .disclaimer{font-size:11px;color:var(--ink-soft);margin-top:12px;line-height:1.4;border-top:1px dashed var(--line);padding-top:8px}
+
+  /* ---------- race chart ---------- */
+  .race-wrap{position:relative}
+  svg.race{width:100%;height:190px;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:18px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;margin-top:8px}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .swatch{width:22px;height:4px;border-radius:2px;display:inline-block}
+  .race-readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .race-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel-2)}
+  .race-card .rc-name{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .race-card .rc-val{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:600;margin-top:2px}
+  .race-card .rc-state{font-size:12px;color:var(--ink-soft)}
+  .stall-note{font-size:13px;color:var(--ink-soft);margin-top:12px}
+  .stall-note b{color:var(--amber)}
+
+  /* ---------- mechanism tiles ---------- */
+  .mech-num{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--teal);font-weight:600;letter-spacing:.1em}
+  .mech h3{font-size:17px;margin:6px 0 6px;font-weight:700}
+  .mech p{font-size:13.5px;color:var(--ink-soft);margin:0}
+  .baoab{display:flex;gap:5px;margin-top:12px;flex-wrap:wrap}
+  .baoab span{
+    font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;border:1px solid var(--line);
+    border-radius:7px;padding:5px 9px;background:var(--panel-2);
+  }
+  .baoab span.hot{border-color:var(--teal);color:var(--teal)}
+
+  /* ---------- run command ---------- */
+  .cmd-tile{display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify-content:space-between}
+  .cmd-box{
+    font-family:"IBM Plex Mono",monospace;font-size:clamp(14px,2.4vw,18px);background:var(--panel-2);
+    border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;white-space:nowrap;flex:1;min-width:240px;
+  }
+  .cmd-box .prompt{color:var(--teal);font-weight:600}
+  .copy-btn{flex:none}
+  .copy-btn.copied{background:var(--teal);color:#fff;border-color:var(--teal)}
+  footer{margin-top:22px;font-size:12px;color:var(--ink-soft);text-align:center;line-height:1.6}
+  @media (prefers-reduced-motion: reduce){
+    .live-dot.running i{animation:none}
+    .clause,.progress-fill{transition:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="station-row">
+      <span class="station-tag"><a href="/thermo-lab" style="color:var(--muted);text-decoration:none;margin-right:10px;font-weight:600">← All 16 Stations</a> Station 16</span>
+      <span class="station-tag alt">Exp 16 · Thermo Lab</span>
+      <span class="live-dot" id="liveDot"><i></i><span id="liveDotText">solver idle — field frustrated</span></span>
+    </div>
+    <h1>Hybrid TPU Langevin,<br /><span class="accent">frustration breaking.</span></h1>
+    <p class="lede">Underdamped <strong>BAOAB Langevin dynamics</strong> with <strong>dynamic clause memory</strong> and <strong>Jarzynski–Neal resampling</strong>, built to escape the frustration that freezes conservative solvers. Momentum carries the search through the flat, stuck regions where cautious solvers stall — and the clause field below drains to zero.</p>
+  </header>
+
+  <div class="bento">
+
+    <!-- ===== Clause field ===== -->
+    <section class="tile span-field" aria-label="Live clause field">
+      <div class="field-head">
+        <div>
+          <h2>Clause field</h2>
+          <p class="sub">60 clauses in the demo instance. Amber = violated, teal = satisfied. Watch them drain.</p>
+        </div>
+        <span class="sat-badge" id="satBadge">UNSAT</span>
+      </div>
+      <div class="big-counter">
+        <span class="num" id="vioNum">42</span>
+        <span class="lbl">violations remaining</span>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="progFill"></div></div>
+      <div class="clause-grid" id="clauseGrid" aria-hidden="true"></div>
+      <div class="field-foot">
+        <span>momentum <b id="momOut">0.00</b></span>
+        <span>clause memory <b id="memOut">0 clauses</b></span>
+        <span>resamples <b id="resOut">0</b></span>
+        <span>solver clock <b id="clockOut">0.00 s</b></span>
+        <span>steps <b id="stepOut">0</b></span>
+      </div>
+    </section>
+
+    <!-- ===== Controls ===== -->
+    <section class="tile span-side" aria-label="Solver controls">
+      <h2>Langevin controls</h2>
+      <p class="sub">Run the dynamics, then bend the physics and run it again.</p>
+      <div class="btn-row">
+        <button class="primary" id="runBtn" type="button">▶ Run Langevin</button>
+        <button id="resetBtn" type="button">↺ Re-frustrate</button>
+        <button id="resampleBtn" type="button">⇈ Resample</button>
+      </div>
+      <div class="ctl">
+        <label for="dtSlider">Step size Δt <output id="dtOut">0.14</output></label>
+        <input type="range" id="dtSlider" min="0.04" max="0.30" step="0.01" value="0.14" />
+      </div>
+      <div class="ctl">
+        <label for="gammaSlider">Friction γ <output id="gammaOut">0.55</output></label>
+        <input type="range" id="gammaSlider" min="0.05" max="1.60" step="0.05" value="0.55" />
+      </div>
+      <div class="ctl">
+        <label for="tempSlider">Temperature T <output id="tempOut">0.35</output></label>
+        <input type="range" id="tempSlider" min="0.02" max="1.20" step="0.01" value="0.35" />
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="t-lbl">Dynamic clause memory</div>
+          <div class="t-sub">Off, the hybrid stalls like a conservative solver.</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="memToggle" checked aria-label="Dynamic clause memory" />
+        </label>
+      </div>
+    </section>
+
+    <!-- ===== Published metrics ===== -->
+    <section class="tile span-third" aria-label="Published result: violations">
+      <h2>Benchmark result</h2>
+      <div class="metric-num">0</div>
+      <div class="metric-lbl">Violations</div>
+      <p class="metric-note">The frustrated field fully resolved — no clause left broken.</p>
+      <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+    </section>
+    <section class="tile span-third" aria-label="Published result: SAT rate">
+      <h2>Benchmark result</h2>
+      <div class="metric-num">100%</div>
+      <div class="metric-lbl">SAT</div>
+      <p class="metric-note">Every clause in the instance satisfied at the end of the run.</p>
+      <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+    </section>
+    <section class="tile span-third" aria-label="Published result: solve time">
+      <h2>Benchmark result</h2>
+      <div class="metric-num">1.58s</div>
+      <div class="metric-lbl">Solve time</div>
+      <p class="metric-note">Wall-clock for the hybrid run to reach zero violations.</p>
+      <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+    </section>
+
+    <!-- ===== Race vs baseline ===== -->
+    <section class="tile span-full" aria-label="Hybrid versus conservative baseline">
+      <h2>The stall, side by side</h2>
+      <p class="sub">Both solvers attack the same frustrated instance. The conservative baseline burns its budget circling the last few clauses; the hybrid's momentum breaks through.</p>
+      <div class="race-wrap">
+        <svg class="race" id="raceSvg" viewBox="0 0 720 190" preserveAspectRatio="none" role="img" aria-label="Chart of violations over time for the hybrid solver and the conservative baseline">
+          <g id="raceGrid"></g>
+          <polyline id="baseLine" fill="none" stroke="var(--amber-bright)" stroke-width="2.5" points="" />
+          <polyline id="hybLine" fill="none" stroke="var(--teal-bright)" stroke-width="2.5" points="" />
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--teal-bright)"></i> Hybrid TPU Langevin</span>
+        <span><i class="swatch" style="background:var(--amber-bright)"></i> Conservative baseline</span>
+      </div>
+      <div class="race-readouts">
+        <div class="race-card">
+          <div class="rc-name" style="color:var(--teal)">Hybrid</div>
+          <div class="rc-val" id="hybVal">42</div>
+          <div class="rc-state" id="hybState">frustrated — waiting to run</div>
+        </div>
+        <div class="race-card">
+          <div class="rc-name" style="color:var(--amber)">Conservative baseline</div>
+          <div class="rc-val" id="baseVal">42</div>
+          <div class="rc-state" id="baseState">frustrated — waiting to run</div>
+        </div>
+      </div>
+      <p class="stall-note">Published comparison: where conservative baselines stall at <b>1 to 5</b> violations, the hybrid reaches <b style="color:var(--teal)">0</b>.</p>
+      <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+    </section>
+
+    <!-- ===== Mechanism ===== -->
+    <section class="tile span-third mech">
+      <div class="mech-num">01 — THE INTEGRATOR</div>
+      <h3>Underdamped BAOAB</h3>
+      <p>The variables carry momentum, so the search coasts across flat regions of the energy landscape instead of diffusing. Each step splits into five exact pieces:</p>
+      <div class="baoab" aria-hidden="true">
+        <span>B</span><span>A</span><span class="hot">O</span><span>A</span><span>B</span>
+      </div>
+      <p style="margin-top:10px">Kick, drift, thermostat, drift, kick — the O step is where friction and noise keep the trajectory honest.</p>
+    </section>
+    <section class="tile span-third mech">
+      <div class="mech-num">02 — THE MEMORY</div>
+      <h3>Dynamic clause memory</h3>
+      <p>Clauses that keep getting violated are remembered and weighted harder, so the solver stops re-breaking the same constraints. Toggle it off in the controls and watch the hybrid stall like the baseline.</p>
+    </section>
+    <section class="tile span-third mech">
+      <div class="mech-num">03 — THE ESCAPE</div>
+      <h3>Jarzynski–Neal resampling</h3>
+      <p>When the trajectory does lodge in a frustrated pocket, momenta are resampled and trajectories reweighted — a principled kick that restarts the momentum without throwing away the state. Hit <strong>Resample</strong> mid-run to fire one manually.</p>
+    </section>
+
+    <!-- ===== Run command ===== -->
+    <section class="tile span-full cmd-tile" aria-label="Run command">
+      <div>
+        <h2>Run it yourself</h2>
+        <p class="sub" style="margin:0">Experiment 16 from the thermo-lab bench.</p>
+      </div>
+      <div class="cmd-box"><span class="prompt">$</span> uv run thrml-bench run --exp 16</div>
+      <button class="copy-btn" id="copyBtn" type="button">Copy command</button>
+    </section>
+
+  </div>
+
+  <footer>
+    Station 16 of the thermo lab · Exp 16 — Hybrid TPU Langevin, frustration breaking.<br />
+    All figures on this page: simulated benchmark result, results may vary (not customer results). The clause field above is a live interactive model of the dynamics, driven by the controls.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var N = 60;               // clauses in the demo instance
+  var START = 42;           // violations at frustration
+  var TICK_MS = 50;
+
+  // --- state ---
+  var hyb = START;          // hybrid violations (float, displayed rounded)
+  var vel = 0;              // Langevin momentum on violation count
+  var base = START;         // baseline violations (float)
+  var baseStall = 3;        // where the baseline gets stuck (1..5)
+  var running = false;
+  var solved = false;
+  var steps = 0;
+  var clock = 0;
+  var resamples = 0;
+  var timer = null;
+  var hybHist = [START], baseHist = [START];
+  var vioSet = {};          // which clause indices are violated
+
+  // --- elements ---
+  var grid = document.getElementById('clauseGrid');
+  var vioNum = document.getElementById('vioNum');
+  var satBadge = document.getElementById('satBadge');
+  var progFill = document.getElementById('progFill');
+  var momOut = document.getElementById('momOut');
+  var memOut = document.getElementById('memOut');
+  var resOut = document.getElementById('resOut');
+  var clockOut = document.getElementById('clockOut');
+  var stepOut = document.getElementById('stepOut');
+  var runBtn = document.getElementById('runBtn');
+  var liveDot = document.getElementById('liveDot');
+  var liveDotText = document.getElementById('liveDotText');
+  var hybVal = document.getElementById('hybVal');
+  var baseVal = document.getElementById('baseVal');
+  var hybState = document.getElementById('hybState');
+  var baseState = document.getElementById('baseState');
+  var hybLine = document.getElementById('hybLine');
+  var baseLine = document.getElementById('baseLine');
+  var raceGrid = document.getElementById('raceGrid');
+
+  var dtS = document.getElementById('dtSlider'), dtO = document.getElementById('dtOut');
+  var gS = document.getElementById('gammaSlider'), gO = document.getElementById('gammaOut');
+  var tS = document.getElementById('tempSlider'), tO = document.getElementById('tempOut');
+  var memToggle = document.getElementById('memToggle');
+
+  // build clause chips
+  var chips = [];
+  for (var i = 0; i < N; i++){
+    var c = document.createElement('div');
+    c.className = 'clause';
+    c.textContent = 'C' + (i + 1);
+    grid.appendChild(c);
+    chips.push(c);
+  }
+  // chart gridlines
+  var gridHtml = '';
+  [0, 10, 20, 30, 40].forEach(function(v){
+    var y = 175 - (v / 45) * 160;
+    gridHtml += '<line x1="8" x2="712" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"/>' +
+      '<text x="10" y="' + (y - 4) + '" font-size="10" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">' + v + '</text>';
+  });
+  raceGrid.innerHTML = gridHtml;
+
+  function pickViolated(count){
+    vioSet = {};
+    var idx = [];
+    for (var k = 0; k < N; k++) idx.push(k);
+    // partial shuffle
+    for (var k = idx.length - 1; k > 0; k--){
+      var j = Math.floor(Math.random() * (k + 1));
+      var t = idx[k]; idx[k] = idx[j]; idx[j] = t;
+    }
+    for (var k = 0; k < count && k < N; k++) vioSet[idx[k]] = true;
+  }
+
+  function render(){
+    var hv = Math.max(0, Math.round(hyb));
+    var bv = Math.max(0, Math.round(base));
+    vioNum.textContent = hv;
+    vioNum.classList.toggle('zero', hv === 0);
+    // re-pick violated set when count changes
+    if (Object.keys(vioSet).length !== hv) pickViolated(hv);
+    for (var k = 0; k < N; k++){
+      chips[k].classList.toggle('vio', !!vioSet[k]);
+    }
+    progFill.style.width = ((START - hv) / START * 100) + '%';
+    momOut.textContent = vel.toFixed(2);
+    memOut.textContent = memToggle.checked ? (Math.min(N, steps > 0 ? 18 + Math.floor(steps / 3) : 0) + ' clauses') : 'off';
+    resOut.textContent = resamples;
+    clockOut.textContent = clock.toFixed(2) + ' s';
+    stepOut.textContent = steps;
+    hybVal.textContent = hv;
+    baseVal.textContent = bv;
+    if (solved){
+      satBadge.textContent = 'SAT — 0 violations';
+      satBadge.classList.add('solved');
+      hybState.textContent = 'solved in ' + clock.toFixed(2) + ' s of solver time';
+    } else {
+      satBadge.textContent = running ? 'RUNNING' : 'UNSAT';
+      satBadge.classList.remove('solved');
+      hybState.textContent = running ? 'draining…' : (hv >= START ? 'frustrated — waiting to run' : 'partially drained — paused');
+    }
+    if (bv <= baseStall + 0.6 && steps > 12){
+      baseState.textContent = 'stalled at ' + bv + ' — circling the same clauses';
+    } else {
+      baseState.textContent = running ? 'descending cautiously…' : (bv >= START ? 'frustrated — waiting to run' : 'paused');
+    }
+    // chart
+    hybLine.setAttribute('points', toPoints(hybHist));
+    baseLine.setAttribute('points', toPoints(baseHist));
+  }
+
+  function toPoints(hist){
+    var maxLen = 140;
+    var pts = [];
+    var n = hist.length;
+    for (var k = 0; k < n; k++){
+      var x = 8 + (k / (maxLen - 1)) * 704;
+      var y = 175 - (Math.min(45, hist[k]) / 45) * 160;
+      pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+    }
+    return pts.join(' ');
+  }
+
+  function gauss(){
+    var u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function tick(){
+    var dt = parseFloat(dtS.value);
+    var gamma = parseFloat(gS.value);
+    var temp = parseFloat(tS.value);
+    var memory = memToggle.checked;
+    steps++;
+    clock += dt * 0.11; // solver-time scaling for the readout
+
+    // --- Hybrid: underdamped Langevin on violation count ---
+    // restoring force grows with violations; clause memory steepens it.
+    var kForce = memory ? 0.16 : 0.045;
+    var force = -kForce * hyb;
+    // frustrated pocket: without memory, a barrier near 4 violations pushes back
+    if (!memory && hyb > 1.2 && hyb < 7){
+      force += 0.55 * Math.exp(-Math.pow(hyb - 3.4, 2) / 2.2);
+    }
+    vel += force * dt * 2.4;
+    vel *= Math.max(0, 1 - gamma * dt * 0.9);         // O-step friction
+    vel += gauss() * Math.sqrt(Math.max(0.001, temp)) * dt * 3.2; // O-step noise
+    hyb += vel * dt * 2.4;
+    if (hyb < 0){ hyb = 0; vel = Math.abs(vel) * 0.25; }
+    if (hyb > N){ hyb = N; vel = 0; }
+    // settle: at (near) zero with low momentum, lock in
+    if (hyb <= 0.45 && Math.abs(vel) < 0.9 && memory){
+      hyb = 0; vel = 0; solved = true; stopRun();
+    }
+
+    // --- Conservative baseline: greedy descent into a stall ---
+    if (base > baseStall){
+      base -= (0.55 + Math.random() * 0.5) * dt * 4 * (base / START + 0.25);
+      if (base < baseStall) base = baseStall;
+    } else {
+      // jitter around the stall point, never escaping
+      base = baseStall + Math.sin(steps * 0.7) * 0.45 + (Math.random() - 0.5) * 0.3;
+      if (base < 1) base = 1;
+    }
+
+    hybHist.push(hyb); if (hybHist.length > 140) hybHist.shift();
+    baseHist.push(base); if (baseHist.length > 140) baseHist.shift();
+    render();
+  }
+
+  function startRun(){
+    if (solved){ reset(); }
+    if (running) return;
+    running = true;
+    runBtn.textContent = '❚❚ Pause';
+    liveDot.classList.add('running');
+    liveDotText.textContent = 'Langevin dynamics running';
+    timer = setInterval(tick, TICK_MS);
+  }
+  function stopRun(){
+    running = false;
+    runBtn.textContent = solved ? '▶ Run again' : '▶ Run Langevin';
+    liveDot.classList.remove('running');
+    liveDotText.textContent = solved ? 'solved — field at zero violations' : 'solver paused';
+    if (timer){ clearInterval(timer); timer = null; }
+    render();
+  }
+  function reset(){
+    stopRun();
+    hyb = START; base = START; vel = 0;
+    steps = 0; clock = 0; resamples = 0; solved = false;
+    baseStall = 1 + Math.floor(Math.random() * 5); // 1..5
+    hybHist = [START]; baseHist = [START];
+    vioSet = {}; pickViolated(START);
+    liveDotText.textContent = 'solver idle — field frustrated';
+    runBtn.textContent = '▶ Run Langevin';
+    render();
+  }
+
+  runBtn.addEventListener('click', function(){
+    if (running) stopRun(); else startRun();
+  });
+  document.getElementById('resetBtn').addEventListener('click', reset);
+  document.getElementById('resampleBtn').addEventListener('click', function(){
+    resamples++;
+    vel += (Math.random() < 0.5 ? -1 : 1) * (1.6 + Math.random() * 1.6);
+    if (!running && !solved) startRun();
+    render();
+  });
+  function bindSlider(s, o){ s.addEventListener('input', function(){ o.textContent = parseFloat(s.value).toFixed(2); }); }
+  bindSlider(dtS, dtO); bindSlider(gS, gO); bindSlider(tS, tO);
+  memToggle.addEventListener('change', render);
+
+  // copy command
+  var copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', function(){
+    var cmd = 'uv run thrml-bench run --exp 16';
+    function done(){
+      copyBtn.textContent = 'Copied ✓';
+      copyBtn.classList.add('copied');
+      setTimeout(function(){ copyBtn.textContent = 'Copy command'; copyBtn.classList.remove('copied'); }, 1800);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(cmd).then(done, done);
+    } else { done(); }
+  });
+
+  pickViolated(START);
+  render();
+})();
+</script>
+</body>
+</html>

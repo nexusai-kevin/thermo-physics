@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Station 5 — Clamped Ising Denoiser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    color-scheme: light dark;
+    --bg:#edf1f0;
+    --bg-grain:#e4eae8;
+    --surface:#ffffff;
+    --surface-2:#f4f7f6;
+    --surface-3:#e9efed;
+    --ink:#0e1a1c;
+    --ink-2:#43545a;
+    --ink-3:#71828a;
+    --line:#d3dddb;
+    --line-strong:#b9c8c5;
+    --teal:#0b7a72;
+    --teal-bright:#0e9c8f;
+    --teal-deep:#084f4a;
+    --spin-up:#0b7a72;
+    --spin-up-soft:#3aa79c;
+    --spin-down:#dfe9e6;
+    --spin-down-line:#c3d2ce;
+    --coral:#d9481f;
+    --coral-soft:#fbe9e2;
+    --amber:#b97d10;
+    --good:#0b7a72;
+    --term-bg:#0d1517;
+    --term-ink:#c9f2e9;
+    --term-dim:#6f8f8a;
+    --shadow:0 1px 2px rgba(14,26,28,.05),0 10px 30px -18px rgba(14,26,28,.25);
+    --radius:18px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0a1113;
+      --bg-grain:#0d1517;
+      --surface:#121d20;
+      --surface-2:#162326;
+      --surface-3:#1b2b2f;
+      --ink:#e8f1ef;
+      --ink-2:#a9bcba;
+      --ink-3:#71868a;
+      --line:#24363a;
+      --line-strong:#31464b;
+      --teal:#2dd4bf;
+      --teal-bright:#2dd4bf;
+      --teal-deep:#99f6e4;
+      --spin-up:#14b8a6;
+      --spin-up-soft:#0f766e;
+      --spin-down:#1d2f33;
+      --spin-down-line:#2a3f44;
+      --coral:#ff6b4a;
+      --coral-soft:#3a2019;
+      --amber:#e0a93e;
+      --good:#2dd4bf;
+      --term-bg:#070c0e;
+      --term-ink:#c9f2e9;
+      --term-dim:#5f7a76;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -20px rgba(0,0,0,.7);
+    }
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 500px at 85% -10%, var(--bg-grain), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:16px;
+    line-height:1.5;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;}
+  .wrap{max-width:1220px;margin:0 auto;padding:28px 18px 56px;}
+
+  /* ---------- header ---------- */
+  header.top{padding:10px 2px 22px;}
+  .station-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:14px;}
+  .station-tag{
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;letter-spacing:.14em;
+    color:var(--teal-deep);background:var(--surface);border:1px solid var(--line-strong);
+    padding:7px 12px;border-radius:999px;
+  }
+  @media (prefers-color-scheme: dark){.station-tag{color:var(--teal);}}
+  .station-row .crumb{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-3);letter-spacing:.06em;}
+  .live-dot{display:inline-flex;align-items:center;gap:7px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-2);}
+  .live-dot i{width:8px;height:8px;border-radius:50%;background:var(--teal-bright);display:inline-block;animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  @media (prefers-reduced-motion: reduce){.live-dot i{animation:none}}
+  h1{font-size:clamp(30px,5.2vw,52px);line-height:1.04;font-weight:700;letter-spacing:-.02em;margin:0 0 12px;max-width:16ch;}
+  h1 .accent{color:var(--teal);}
+  .lede{max-width:62ch;color:var(--ink-2);font-size:clamp(15.5px,2vw,17.5px);margin:0;}
+  .lede strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- bento grid ---------- */
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
+  .tile{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px;min-width:0;
+  }
+  .tile-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .tile-title{font-size:15px;font-weight:600;letter-spacing:-.01em;margin:0;}
+  .tile-kicker{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.1em;color:var(--ink-3);text-transform:uppercase;}
+  .span-field{grid-column:span 8;}
+  .span-side{grid-column:span 4;}
+  .span-third{grid-column:span 4;}
+  .span-half{grid-column:span 6;}
+  @media (max-width:960px){
+    .span-field,.span-side,.span-third,.span-half{grid-column:span 12;}
+  }
+
+  /* ---------- field tile ---------- */
+  .panels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  @media (max-width:620px){.panels{grid-template-columns:1fr;}}
+  .panel{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:10px;}
+  .panel-label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px;}
+  .panel-label .name{font-size:12.5px;font-weight:600;}
+  .panel-label .tag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;color:var(--ink-3);text-transform:uppercase;}
+  .panel-label .err{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;}
+  .panel-label .err.bad{color:var(--coral);}
+  .panel-label .err.good{color:var(--teal);}
+  .panel canvas{display:block;width:100%;height:auto;border-radius:6px;image-rendering:pixelated;background:var(--spin-down);}
+  .panel.latent{border-color:var(--teal);border-width:1.5px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font-size:12.5px;color:var(--ink-2);}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .swatch{width:13px;height:13px;border-radius:3.5px;display:inline-block;flex:none;}
+  .sw-up{background:var(--spin-up);}
+  .sw-down{background:var(--spin-down);border:1px solid var(--spin-down-line);}
+  .sw-err{background:var(--coral);}
+  .flow-strip{display:flex;align-items:center;gap:10px;margin-top:16px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;flex-wrap:wrap;}
+  .flow-strip .f-num{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:17px;}
+  .flow-strip .f-label{font-size:11.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;}
+  .flow-strip .arrow{color:var(--teal);font-weight:700;font-size:18px;}
+  .flow-strip .f-num.bad{color:var(--coral);}
+  .flow-strip .f-num.good{color:var(--teal);}
+  .meter{flex:1 1 140px;height:8px;border-radius:99px;background:var(--surface-3);overflow:hidden;min-width:120px;}
+  .meter i{display:block;height:100%;background:var(--teal-bright);border-radius:99px;transition:width .25s ease;width:0%;}
+
+  /* ---------- controls ---------- */
+  .ctl{margin-bottom:16px;}
+  .ctl:last-of-type{margin-bottom:6px;}
+  .ctl-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:10px;}
+  .ctl-row label{font-size:13.5px;font-weight:500;}
+  .ctl-row output{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;color:var(--teal-deep);}
+  @media (prefers-color-scheme: dark){.ctl-row output{color:var(--teal);}}
+  .ctl .hint{font-size:12px;color:var(--ink-3);margin-top:4px;}
+  input[type="range"]{width:100%;accent-color:var(--teal);height:36px;cursor:pointer;margin:0;}
+  .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  button{
+    font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;
+    border-radius:10px;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink);
+    padding:10px 14px;min-height:44px;display:inline-flex;align-items:center;gap:8px;justify-content:center;
+  }
+  button:hover{border-color:var(--teal);}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--teal-bright);outline-offset:2px;}
+  button.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+  @media (prefers-color-scheme: dark){button.primary{color:#06231f;}}
+  button.primary:hover{background:var(--teal-bright);}
+  button svg{width:15px;height:15px;flex:none;}
+  .seg{display:flex;background:var(--surface-3);border:1px solid var(--line);border-radius:11px;padding:3px;gap:3px;}
+  .seg button{flex:1;border:0;background:transparent;min-height:38px;padding:7px 6px;font-size:13px;border-radius:8px;color:var(--ink-2);}
+  .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(14,26,28,.15);}
+  .seg-label{font-size:13.5px;font-weight:500;margin-bottom:6px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
+  .toggle-row .t-label{font-size:13.5px;font-weight:500;}
+  .toggle-row .t-hint{font-size:12px;color:var(--ink-3);}
+  .switch{position:relative;width:52px;height:32px;flex:none;border-radius:99px;background:var(--surface-3);border:1px solid var(--line-strong);padding:0;min-height:32px;}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--surface);border:1px solid var(--line-strong);transition:left .18s ease;}
+  .switch[aria-checked="true"]{background:var(--teal);border-color:var(--teal);}
+  .switch[aria-checked="true"]::after{left:23px;}
+
+  /* ---------- readouts ---------- */
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .ro{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;}
+  .ro .ro-label{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:3px;}
+  .ro .ro-value{font-family:"IBM Plex Mono",monospace;font-size:clamp(20px,2.4vw,26px);font-weight:600;line-height:1.15;}
+  .ro .ro-value.good{color:var(--teal);}
+  .ro .ro-value.bad{color:var(--coral);}
+  .ro .ro-sub{font-size:12px;color:var(--ink-2);margin-top:2px;}
+  .status-line{margin-top:12px;font-size:13px;color:var(--ink-2);display:flex;gap:8px;align-items:flex-start;}
+  .status-line .dot{width:8px;height:8px;border-radius:50%;background:var(--teal-bright);margin-top:6px;flex:none;}
+  .fineprint{font-size:11.5px;color:var(--ink-3);margin-top:10px;line-height:1.45;}
+
+  /* ---------- benchmark ---------- */
+  .bench-hero{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+  .bench-hero .from{font-family:"IBM Plex Mono",monospace;font-size:clamp(24px,3vw,32px);font-weight:600;color:var(--coral);}
+  .bench-hero .to{font-family:"IBM Plex Mono",monospace;font-size:clamp(24px,3vw,32px);font-weight:600;color:var(--teal);}
+  .bench-hero .arr{font-size:22px;color:var(--ink-3);}
+  .bench-hero .cap{width:100%;font-size:13px;color:var(--ink-2);}
+  .bench-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  .bench-stat{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;}
+  .bench-stat .b-value{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;}
+  .bench-stat .b-label{font-size:12.5px;color:var(--ink-2);}
+  .sim-label{
+    display:block;margin-top:8px;font-size:10.5px;line-height:1.4;color:var(--ink-3);
+    font-family:"IBM Plex Mono",monospace;letter-spacing:.02em;
+  }
+  .bench-note{margin-top:12px;}
+
+  /* ---------- chart ---------- */
+  .chart-box{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 12px 6px;}
+  .chart-box svg{display:block;width:100%;height:auto;}
+  .chart-axis{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);padding:4px 2px 6px;}
+  .chart-legend{display:flex;gap:16px;font-size:12px;color:var(--ink-2);margin-top:6px;flex-wrap:wrap;}
+  .chart-legend i{width:16px;height:3px;border-radius:2px;display:inline-block;vertical-align:middle;margin-right:6px;}
+
+  /* ---------- how it works ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media (max-width:700px){.steps{grid-template-columns:1fr;}}
+  .step{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--surface-2);}
+  .step .s-num{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--teal);margin-bottom:6px;}
+  .step h3{font-size:14.5px;margin:0 0 6px;font-weight:600;}
+  .step p{font-size:13.5px;color:var(--ink-2);margin:0;}
+  .formula{
+    margin-top:14px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;font-family:"IBM Plex Mono",monospace;font-size:13.5px;overflow-x:auto;white-space:nowrap;
+  }
+  .formula .fv{color:var(--teal);font-weight:600;}
+  @media (max-width:700px){
+    .formula{white-space:normal;overflow-x:visible;font-size:12.5px;line-height:1.7;}
+  }
+  .formula-cap{font-size:12.5px;color:var(--ink-3);margin-top:8px;}
+
+  /* ---------- run command ---------- */
+  .term{background:var(--term-bg);border-radius:12px;padding:16px;}
+  .term-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;}
+  .term .t-dots{display:flex;gap:6px;}
+  .term .t-dots i{width:10px;height:10px;border-radius:50%;background:#2b3f42;display:block;}
+  .term code{font-family:"IBM Plex Mono",monospace;font-size:14.5px;color:var(--term-ink);display:block;overflow-x:auto;white-space:nowrap;padding-bottom:2px;}
+  .term code .prompt{color:var(--term-dim);}
+  .term .t-note{font-size:12.5px;color:var(--term-dim);margin-top:10px;font-family:"IBM Plex Mono",monospace;}
+  .copy-btn{min-height:38px;padding:7px 12px;font-size:12.5px;background:#16262a;border-color:#2b3f42;color:#c9f2e9;border-radius:8px;flex:none;}
+  .copy-btn:hover{border-color:var(--teal-bright);}
+  .hamil{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+  @media (max-width:520px){.hamil{grid-template-columns:1fr;}}
+  .hamil .h-cell{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .hamil .h-label{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);}
+  .hamil .h-value{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;margin-top:2px;}
+  .hamil .h-sub{font-size:12px;color:var(--ink-2);}
+
+  footer{margin-top:26px;padding:18px 4px 0;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:space-between;}
+  footer p{margin:0;font-size:12.5px;color:var(--ink-3);max-width:70ch;}
+  footer .mono{font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="station-row">
+      <span class="station-tag"><a href="/thermo-lab" style="color:var(--muted);text-decoration:none;margin-right:10px;font-weight:600">← All 16 Stations</a> STATION 05 · EXP 5</span>
+      <span class="crumb">THERMO COMPUTING LAB</span>
+      <span class="live-dot"><i></i><span id="liveState">sampler running in your browser</span></span>
+    </div>
+    <h1>The clamped Ising <span class="accent">denoiser</span></h1>
+    <p class="lede">A <strong>Markov random field</strong> with <strong>clamped observation nodes</strong> and a <strong>latent Ising prior</strong>. <strong>Gibbs sampling</strong> over the latent layer smooths noise while keeping structural edges. The field below is live — corrupt it, then watch the sampler pull the signal back out of the noise.</p>
+  </header>
+
+  <div class="bento">
+
+    <!-- ======== FIELD ======== -->
+    <section class="tile span-field" aria-label="Live denoising field">
+      <div class="tile-head">
+        <h2 class="tile-title">The field, live</h2>
+        <span class="tile-kicker">44 × 32 spins · Gibbs sampler</span>
+      </div>
+      <div class="panels">
+        <div class="panel">
+          <div class="panel-label">
+            <span><span class="name">Hidden signal</span><br /><span class="tag">ground truth</span></span>
+            <span class="err mono" id="errTruth">—</span>
+          </div>
+          <canvas id="cvTruth" width="440" height="320" aria-label="Ground truth spin pattern"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-label">
+            <span><span class="name">Observed</span><br /><span class="tag">clamped nodes y</span></span>
+            <span class="err bad mono" id="errObs">—</span>
+          </div>
+          <canvas id="cvObs" width="440" height="320" aria-label="Noisy clamped observation grid. Activate cells by clicking to flip an observation spin."></canvas>
+        </div>
+        <div class="panel latent">
+          <div class="panel-label">
+            <span><span class="name">Latent layer</span><br /><span class="tag">Ising prior x</span></span>
+            <span class="err good mono" id="errLat">—</span>
+          </div>
+          <canvas id="cvLat" width="440" height="320" aria-label="Denoised latent spin grid produced by Gibbs sampling"></canvas>
+        </div>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><i class="swatch sw-up"></i>spin +1</span>
+        <span><i class="swatch sw-down"></i>spin −1</span>
+        <span><i class="swatch sw-err"></i>pixel still wrong (when marking is on)</span>
+        <span>Tip: click the Observed grid to flip a clamped spin by hand.</span>
+      </div>
+      <div class="flow-strip" role="status" aria-label="Noise reduction summary">
+        <div>
+          <div class="f-label">Observed error</div>
+          <div class="f-num bad" id="flowObs">—</div>
+        </div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div>
+          <div class="f-label">Latent error</div>
+          <div class="f-num good" id="flowLat">—</div>
+        </div>
+        <div class="meter" aria-hidden="true"><i id="flowMeter"></i></div>
+        <div>
+          <div class="f-label">Noise removed</div>
+          <div class="f-num" id="flowRed">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== CONTROLS ======== -->
+    <section class="tile span-side" aria-label="Sampler controls">
+      <div class="tile-head">
+        <h2 class="tile-title">Controls</h2>
+        <span class="tile-kicker">Hamiltonian knobs</span>
+      </div>
+
+      <div class="seg-label" id="patLabel">Hidden signal</div>
+      <div class="seg" role="group" aria-labelledby="patLabel">
+        <button type="button" data-pattern="glyph" aria-pressed="true">Glyph 5</button>
+        <button type="button" data-pattern="rings" aria-pressed="false">Rings</button>
+        <button type="button" data-pattern="blocks" aria-pressed="false">Blocks</button>
+      </div>
+
+      <div style="height:16px"></div>
+
+      <div class="ctl">
+        <div class="ctl-row">
+          <label for="noiseRange">Observation noise</label>
+          <output id="noiseOut" for="noiseRange">22%</output>
+        </div>
+        <input type="range" id="noiseRange" min="2" max="45" step="1" value="22" />
+        <div class="hint">Share of clamped spins flipped away from the signal. Changing it re-corrupts the field.</div>
+      </div>
+
+      <div class="ctl">
+        <div class="ctl-row">
+          <label for="jRange">Neighbour coupling J</label>
+          <output id="jOut" for="jRange">1.00</output>
+        </div>
+        <input type="range" id="jRange" min="0" max="2" step="0.05" value="1" />
+        <div class="hint">The latent prior. Higher J smooths harder — too high and real edges melt.</div>
+      </div>
+
+      <div class="ctl">
+        <div class="ctl-row">
+          <label for="kRange">Clamp strength κ</label>
+          <output id="kOut" for="kRange">0.80</output>
+        </div>
+        <input type="range" id="kRange" min="0" max="2" step="0.05" value="0.8" />
+        <div class="hint">How hard each latent spin is pulled toward its clamped observation.</div>
+      </div>
+
+      <div class="ctl">
+        <div class="ctl-row">
+          <label for="betaRange">Inverse temperature β</label>
+          <output id="betaOut" for="betaRange">1.00</output>
+        </div>
+        <input type="range" id="betaRange" min="0.3" max="2.5" step="0.05" value="1" />
+        <div class="hint">Cold (high β) freezes the field early; warm keeps it exploring.</div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="primary" id="btnPlay" aria-pressed="true">
+          <svg id="icoPause" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="2.5" y="2" width="4" height="12" rx="1"/><rect x="9.5" y="2" width="4" height="12" rx="1"/></svg>
+          <svg id="icoPlay" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="display:none"><path d="M4 2.3v11.4c0 .9 1 1.5 1.8 1L14 9a1.2 1.2 0 0 0 0-2L5.8 1.3C5 .8 4 1.4 4 2.3Z"/></svg>
+          <span id="playLabel">Pause sampler</span>
+        </button>
+        <button type="button" id="btnStep">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2.5 2.3v11.4c0 .9 1 1.5 1.8 1L12 9a1.2 1.2 0 0 0 0-2L4.3 1.3c-.8-.5-1.8.1-1.8 1Z"/><rect x="12.6" y="2" width="1.8" height="12" rx=".9"/></svg>
+          One sweep
+        </button>
+        <button type="button" id="btnCorrupt">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 1.8v3h-3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Re-corrupt
+        </button>
+      </div>
+
+      <div class="toggle-row">
+        <div>
+          <div class="t-label">Mark error pixels</div>
+          <div class="t-hint">Latent spins that still disagree with the signal, in rust.</div>
+        </div>
+        <button type="button" class="switch" id="swErrors" role="switch" aria-checked="true" aria-label="Mark error pixels"></button>
+      </div>
+    </section>
+
+    <!-- ======== LIVE READOUTS ======== -->
+    <section class="tile span-third" aria-label="Live readouts from the in-browser sampler">
+      <div class="tile-head">
+        <h2 class="tile-title">Live readouts</h2>
+        <span class="tile-kicker">this browser · your settings</span>
+      </div>
+      <div class="readouts">
+        <div class="ro">
+          <div class="ro-label">Latent error</div>
+          <div class="ro-value good" id="roErr">—</div>
+          <div class="ro-sub">vs. hidden signal</div>
+        </div>
+        <div class="ro">
+          <div class="ro-label">Noise removed</div>
+          <div class="ro-value" id="roRed">—</div>
+          <div class="ro-sub">relative to observed</div>
+        </div>
+        <div class="ro">
+          <div class="ro-label">Sweeps</div>
+          <div class="ro-value" id="roSweeps">0</div>
+          <div class="ro-sub">full passes over the field</div>
+        </div>
+        <div class="ro">
+          <div class="ro-label">Spin flips</div>
+          <div class="ro-value" id="roFlips">0</div>
+          <div class="ro-sub">accepted this run</div>
+        </div>
+        <div class="ro">
+          <div class="ro-label">Energy / spin</div>
+          <div class="ro-value" id="roEnergy">—</div>
+          <div class="ro-sub">Hamiltonian of the latent layer</div>
+        </div>
+        <div class="ro">
+          <div class="ro-label">Magnetisation</div>
+          <div class="ro-value" id="roMag">—</div>
+          <div class="ro-sub">mean latent spin ⟨x⟩</div>
+        </div>
+      </div>
+      <div class="status-line"><span class="dot"></span><span id="statusText">Sampler running. Watch isolated flipped spins get outvoted by their neighbours.</span></div>
+      <p class="fineprint">These six numbers are the live demo running on this page with your slider settings — they are not the benchmark figures on the right.</p>
+    </section>
+
+    <!-- ======== PUBLISHED BENCHMARK ======== -->
+    <section class="tile span-third" aria-label="Published benchmark result">
+      <div class="tile-head">
+        <h2 class="tile-title">Published benchmark</h2>
+        <span class="tile-kicker">Exp 5 · ledger</span>
+      </div>
+      <div class="bench-hero">
+        <span class="from">22.07%</span>
+        <span class="arr" aria-hidden="true">→</span>
+        <span class="to">4.97%</span>
+        <span class="cap">Pixel error, noisy observation to denoised output.</span>
+        <span class="sim-label">simulated benchmark result, results may vary (not customer results)</span>
+      </div>
+      <div class="bench-grid">
+        <div class="bench-stat">
+          <div class="b-value">77.5%</div>
+          <div class="b-label">noise reduction</div>
+          <span class="sim-label">simulated benchmark result, results may vary (not customer results)</span>
+        </div>
+        <div class="bench-stat">
+          <div class="b-value">0.583s</div>
+          <div class="b-label">run time</div>
+          <span class="sim-label">simulated benchmark result, results may vary (not customer results)</span>
+        </div>
+      </div>
+      <p class="fineprint bench-note">Recorded for Experiment 5 in the thermo-lab ledger. The demo on this page re-implements the same model at interactive size, so its numbers will differ.</p>
+    </section>
+
+    <!-- ======== CHART ======== -->
+    <section class="tile span-third" aria-label="Error over sweeps chart">
+      <div class="tile-head">
+        <h2 class="tile-title">Error vs. sweeps</h2>
+        <span class="tile-kicker">live trace</span>
+      </div>
+      <div class="chart-box">
+        <svg id="chart" viewBox="0 0 320 150" role="img" aria-label="Line chart of latent error percentage falling over Gibbs sweeps">
+          <g id="chartGrid"></g>
+          <line id="chartObsLine" x1="34" x2="312" y1="20" y2="20" stroke="var(--coral)" stroke-width="1" stroke-dasharray="4 4" opacity=".65"/>
+          <polyline id="chartLat" fill="none" stroke="var(--teal)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points=""/>
+          <circle id="chartDot" r="3.5" fill="var(--teal)" cx="-10" cy="-10"/>
+        </svg>
+        <div class="chart-axis"><span>0%</span><span>error · sweeps →</span><span id="chartTop">45%</span></div>
+      </div>
+      <div class="chart-legend">
+        <span><i style="background:var(--teal)"></i>latent error</span>
+        <span><i style="background:var(--coral)"></i>observed error (fixed)</span>
+      </div>
+      <div class="hamil">
+        <div class="h-cell">
+          <div class="h-label">Coupling term −J Σ xᵢxⱼ</div>
+          <div class="h-value" id="hCouple">—</div>
+          <div class="h-sub">rewards neighbours that agree</div>
+        </div>
+        <div class="h-cell">
+          <div class="h-label">Clamp term −κ Σ xᵢyᵢ</div>
+          <div class="h-value" id="hClamp">—</div>
+          <div class="h-sub">rewards fidelity to the observation</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======== HOW IT WORKS ======== -->
+    <section class="tile span-half" aria-label="How the denoiser works">
+      <div class="tile-head">
+        <h2 class="tile-title">How it works</h2>
+        <span class="tile-kicker">Markov random field</span>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="s-num">01 · CLAMP</div>
+          <h3>Observations are pinned</h3>
+          <p>The noisy image enters as observation nodes y, clamped — fixed for the whole run. They are evidence, never updated.</p>
+        </div>
+        <div class="step">
+          <div class="s-num">02 · PRIOR</div>
+          <h3>Latent spins prefer company</h3>
+          <p>Behind them sits a latent Ising layer x. Its prior rewards neighbours that agree, which is what “smooth” means here — except at real edges, where the evidence is strong on both sides.</p>
+        </div>
+        <div class="step">
+          <div class="s-num">03 · SAMPLE</div>
+          <h3>Gibbs sweeps settle it</h3>
+          <p>Each sweep revisits every latent spin and re-draws it from its conditional distribution. Isolated noise flips get outvoted; structural edges survive because whole neighbourhoods back them.</p>
+        </div>
+      </div>
+      <div class="formula" aria-label="Gibbs conditional probability formula">P(x<sub>i</sub> = +1 | rest) = σ( 2β · ( <span class="fv">J</span>·Σ<sub>j∼i</sub> x<sub>j</sub> + <span class="fv">κ</span>·y<sub>i</sub> ) )</div>
+      <p class="formula-cap">The probability of a latent spin pointing up, given its four neighbours and its clamped observation. The three sliders on this page are exactly the J, κ and β in this equation.</p>
+    </section>
+
+    <!-- ======== RUN COMMAND ======== -->
+    <section class="tile span-half" aria-label="Run command">
+      <div class="tile-head">
+        <h2 class="tile-title">Run it yourself</h2>
+        <span class="tile-kicker">thrml-bench · exp 5</span>
+      </div>
+      <div class="term">
+        <div class="term-head">
+          <div class="t-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <button type="button" class="copy-btn" id="btnCopy">Copy</button>
+        </div>
+        <code><span class="prompt">$ </span><span id="runCmd">uv run thrml-bench run --exp 5</span></code>
+        <div class="t-note"># reproduces the published benchmark for this station</div>
+      </div>
+      <p class="fineprint" style="margin-top:12px">The command runs the full Experiment 5 benchmark — the clamped Ising denoiser — and reports the noise-to-error figures published above.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Station 05 of the thermo computing lab — a Markov random field with clamped observation nodes and a latent Ising prior, denoised by Gibbs sampling over the latent layer.</p>
+    <p class="mono">THERMALBITS · BY NEXUS AI SOLUTIONS</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var W = 44, H = 32, N = W * H, CELL = 10;
+
+  /* ---------- state ---------- */
+  var truth = new Int8Array(N);
+  var obs   = new Int8Array(N);
+  var lat   = new Int8Array(N);
+  var params = { noise: 0.22, J: 1.0, kappa: 0.8, beta: 1.0 };
+  var pattern = "glyph";
+  var running = true;
+  var showErrors = true;
+  var sweeps = 0, flips = 0;
+  var errObsPct = 0, errLatPct = 0;
+  var history = [];           /* latent error per sweep */
+  var staleCount = 0, bestErr = Infinity;
+  var rafId = null;
+
+  /* ---------- dom ---------- */
+  function $(id){ return document.getElementById(id); }
+  var cvT = $("cvTruth"), cvO = $("cvObs"), cvL = $("cvLat");
+  var ctxT = cvT.getContext("2d"), ctxO = cvO.getContext("2d"), ctxL = cvL.getContext("2d");
+
+  function colors(){
+    var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return dark
+      ? { up:"#14b8a6", down:"#1d2f33", err:"#ff6b4a" }
+      : { up:"#0b7a72", down:"#dfe9e6", err:"#d9481f" };
+  }
+
+  /* ---------- patterns ---------- */
+  function inside(x, y, x0, x1, y0, y1){ return x >= x0 && x < x1 && y >= y0 && y < y1; }
+  function makeTruth(){
+    var cx = W / 2, cy = H / 2;
+    for (var y = 0; y < H; y++){
+      for (var x = 0; x < W; x++){
+        var v = -1;
+        if (pattern === "glyph"){
+          /* a thick-stroke numeral 5 */
+          if (inside(x, y, 13, 32, 4, 8)) v = 1;          /* top bar */
+          else if (inside(x, y, 13, 18, 4, 17)) v = 1;    /* upper-left stem */
+          else if (inside(x, y, 13, 31, 13, 18)) v = 1;   /* middle bar */
+          else if (inside(x, y, 26, 32, 13, 28)) v = 1;   /* lower-right stem */
+          else if (inside(x, y, 12, 32, 24, 28)) v = 1;   /* bottom bar */
+        } else if (pattern === "rings"){
+          var dx = (x - cx) / 1.28, dy = y - cy;
+          var r = Math.sqrt(dx * dx + dy * dy);
+          if (Math.floor(r / 2.6) % 2 === 0 && r < 15.5) v = 1;
+        } else { /* blocks */
+          var bx = Math.floor(x / 7), by = Math.floor(y / 6);
+          v = ((bx + by) % 2 === 0) ? 1 : -1;
+          var ddx = x - cx, ddy = (y - cy) * 1.35;
+          if (Math.sqrt(ddx * ddx + ddy * ddy) < 8) v = -v;  /* inverted disc cut */
+        }
+        truth[y * W + x] = v;
+      }
+    }
+  }
+
+  /* ---------- corruption ---------- */
+  function corrupt(){
+    for (var i = 0; i < N; i++){
+      obs[i] = (Math.random() < params.noise) ? -truth[i] : truth[i];
+      lat[i] = obs[i];
+    }
+    sweeps = 0; flips = 0; history = []; staleCount = 0; bestErr = Infinity;
+    measure();
+  }
+
+  /* ---------- measurement ---------- */
+  function mismatch(a){
+    var m = 0;
+    for (var i = 0; i < N; i++) if (a[i] !== truth[i]) m++;
+    return m / N * 100;
+  }
+  function hamiltonian(){
+    var couple = 0, clamp = 0, pairs = 0;
+    for (var y = 0; y < H; y++){
+      for (var x = 0; x < W; x++){
+        var i = y * W + x;
+        if (x + 1 < W){ couple += lat[i] * lat[i + 1]; pairs++; }
+        if (y + 1 < H){ couple += lat[i] * lat[i + W]; pairs++; }
+        clamp += lat[i] * obs[i];
+      }
+    }
+    return {
+      coupleTerm: -params.J * couple,
+      clampTerm: -params.kappa * clamp,
+      perSpin: (-params.J * couple - params.kappa * clamp) / N
+    };
+  }
+  function measure(){
+    errObsPct = mismatch(obs);
+    errLatPct = mismatch(lat);
+  }
+
+  /* ---------- gibbs ---------- */
+  function sweep(){
+    var order = new Int32Array(N);
+    var i, t, tmp;
+    for (i = 0; i < N; i++) order[i] = i;
+    for (i = N - 1; i > 0; i--){ t = Math.floor(Math.random() * (i + 1)); tmp = order[i]; order[i] = order[t]; order[t] = tmp; }
+    var J = params.J, k = params.kappa, b = params.beta;
+    for (var o = 0; o < N; o++){
+      i = order[o];
+      var x = i % W, y = (i / W) | 0;
+      var s = 0;
+      if (x > 0) s += lat[i - 1];
+      if (x < W - 1) s += lat[i + 1];
+      if (y > 0) s += lat[i - W];
+      if (y < H - 1) s += lat[i + W];
+      var field = J * s + k * obs[i];
+      var p = 1 / (1 + Math.exp(-2 * b * field));
+      var nv = (Math.random() < p) ? 1 : -1;
+      if (nv !== lat[i]){ lat[i] = nv; flips++; }
+    }
+    sweeps++;
+  }
+
+  /* ---------- rendering ---------- */
+  function draw(ctx, arr, markErrors){
+    var c = colors();
+    for (var y = 0; y < H; y++){
+      for (var x = 0; x < W; x++){
+        var i = y * W + x;
+        ctx.fillStyle = (arr[i] === 1) ? c.up : c.down;
+        ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+        if (markErrors && arr[i] !== truth[i]){
+          ctx.fillStyle = c.err;
+          ctx.fillRect(x * CELL + 3, y * CELL + 3, 4, 4);
+        }
+      }
+    }
+  }
+  function fmt(v, d){ return v.toFixed(d === undefined ? 2 : d); }
+
+  function render(){
+    measure();
+    draw(ctxT, truth, false);
+    draw(ctxO, obs, false);
+    draw(ctxL, lat, showErrors);
+
+    $("errObs").textContent = fmt(errObsPct) + "% wrong";
+    $("errLat").textContent = fmt(errLatPct) + "% wrong";
+    $("flowObs").textContent = fmt(errObsPct) + "%";
+    $("flowLat").textContent = fmt(errLatPct) + "%";
+    var red = errObsPct > 0 ? (errObsPct - errLatPct) / errObsPct * 100 : 0;
+    $("flowRed").textContent = fmt(Math.max(0, red), 1) + "%";
+    $("flowMeter").style.width = Math.max(0, Math.min(100, red)) + "%";
+
+    $("roErr").textContent = fmt(errLatPct) + "%";
+    $("roRed").textContent = fmt(Math.max(0, red), 1) + "%";
+    $("roSweeps").textContent = sweeps.toLocaleString("en-US");
+    $("roFlips").textContent = flips.toLocaleString("en-US");
+    var ham = hamiltonian();
+    $("roEnergy").textContent = fmt(ham.perSpin, 3);
+    var m = 0; for (var i = 0; i < N; i++) m += lat[i];
+    $("roMag").textContent = fmt(m / N, 3);
+    $("hCouple").textContent = fmt(ham.coupleTerm, 1);
+    $("hClamp").textContent = fmt(ham.clampTerm, 1);
+
+    drawChart(red);
+  }
+
+  var CH = { x0: 34, x1: 312, y0: 8, y1: 128, top: 45 };
+  (function buildGrid(){
+    var g = $("chartGrid"), s = "";
+    [0, 15, 30, 45].forEach(function(v){
+      var y = CH.y1 - (v / CH.top) * (CH.y1 - CH.y0);
+      s += '<line x1="' + CH.x0 + '" x2="' + CH.x1 + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)" stroke-width="1"/>';
+      s += '<text x="' + (CH.x0 - 5) + '" y="' + (y + 3.5) + '" text-anchor="end" font-size="9.5" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">' + v + '</text>';
+    });
+    g.innerHTML = s;
+  })();
+
+  function drawChart(){
+    var yObs = CH.y1 - (errObsPct / CH.top) * (CH.y1 - CH.y0);
+    var line = $("chartObsLine");
+    line.setAttribute("y1", yObs); line.setAttribute("y2", yObs);
+    if (history.length < 2){ $("chartLat").setAttribute("points", ""); return; }
+    var pts = history.map(function(v, idx){
+      var x = CH.x0 + (idx / (history.length - 1)) * (CH.x1 - CH.x0);
+      var y = CH.y1 - (Math.min(v, CH.top) / CH.top) * (CH.y1 - CH.y0);
+      return x.toFixed(1) + "," + y.toFixed(1);
+    });
+    $("chartLat").setAttribute("points", pts.join(" "));
+    var last = pts[pts.length - 1].split(",");
+    var dot = $("chartDot");
+    dot.setAttribute("cx", last[0]); dot.setAttribute("cy", last[1]);
+  }
+
+  /* ---------- main loop ---------- */
+  var statusEl = $("statusText");
+  function setStatus(msg){ statusEl.textContent = msg; }
+  function frame(){
+    if (!running) return;
+    sweep(); sweep();
+    measure();
+    history.push(errLatPct);
+    if (history.length > 240) history.shift();
+    if (errLatPct < bestErr - 0.05){ bestErr = errLatPct; staleCount = 0; }
+    else staleCount++;
+    render();
+    if (staleCount > 90){
+      setRunning(false);
+      setStatus("Settled. The latent error has held steady for a while — the field is at equilibrium under these settings. Re-corrupt or move a slider to run it again.");
+      return;
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+  function setRunning(on){
+    running = on;
+    $("btnPlay").setAttribute("aria-pressed", on ? "true" : "false");
+    $("icoPause").style.display = on ? "" : "none";
+    $("icoPlay").style.display = on ? "none" : "";
+    $("playLabel").textContent = on ? "Pause sampler" : "Run sampler";
+    $("liveState").textContent = on ? "sampler running in your browser" : "sampler paused";
+    if (on){ staleCount = 0; rafId = requestAnimationFrame(frame); }
+    else if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  /* ---------- controls ---------- */
+  function bindRange(id, outId, key, format, onChange){
+    var el = $(id);
+    el.addEventListener("input", function(){
+      var v = parseFloat(el.value);
+      params[key] = key === "noise" ? v / 100 : v;
+      $(outId).textContent = format(v);
+      if (onChange) onChange();
+      if (!running) render();
+    });
+  }
+  bindRange("noiseRange", "noiseOut", "noise", function(v){ return v + "%"; }, function(){
+    corrupt(); render();
+    setStatus("Re-corrupted at the new noise level. The latent layer restarts from the observation.");
+    if (!running) setRunning(true);
+  });
+  bindRange("jRange", "jOut", "J", function(v){ return v.toFixed(2); });
+  bindRange("kRange", "kOut", "kappa", function(v){ return v.toFixed(2); });
+  bindRange("betaRange", "betaOut", "beta", function(v){ return v.toFixed(2); });
+
+  $("btnPlay").addEventListener("click", function(){
+    setRunning(!running);
+    if (running) setStatus("Sampler running. Watch isolated flipped spins get outvoted by their neighbours.");
+    else setStatus("Paused mid-run. The latent layer is frozen exactly as the sampler left it.");
+  });
+  $("btnStep").addEventListener("click", function(){
+    if (running) setRunning(false);
+    sweep(); measure(); history.push(errLatPct);
+    if (history.length > 240) history.shift();
+    render();
+    setStatus("Stepped one sweep — every latent spin re-drawn once, in random order.");
+  });
+  $("btnCorrupt").addEventListener("click", function(){
+    corrupt(); render();
+    setStatus("Fresh corruption applied. Same signal, new noise — the sampler starts from the observation.");
+    if (!running) setRunning(true);
+  });
+
+  var segBtns = document.querySelectorAll(".seg button");
+  segBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      segBtns.forEach(function(b){ b.setAttribute("aria-pressed", "false"); });
+      btn.setAttribute("aria-pressed", "true");
+      pattern = btn.getAttribute("data-pattern");
+      makeTruth(); corrupt(); render();
+      setStatus("New hidden signal loaded and corrupted. The truth panel changed — the sampler only ever sees the noisy middle panel.");
+      if (!running) setRunning(true);
+    });
+  });
+
+  $("swErrors").addEventListener("click", function(){
+    showErrors = !showErrors;
+    this.setAttribute("aria-checked", showErrors ? "true" : "false");
+    render();
+  });
+
+  /* click the observation grid to flip a clamped spin */
+  cvO.style.cursor = "pointer";
+  cvO.addEventListener("click", function(ev){
+    var r = cvO.getBoundingClientRect();
+    var x = Math.floor((ev.clientX - r.left) / r.width * W);
+    var y = Math.floor((ev.clientY - r.top) / r.height * H);
+    if (x < 0 || x >= W || y < 0 || y >= H) return;
+    var i = y * W + x;
+    obs[i] = -obs[i];
+    lat[i] = obs[i];
+    render();
+    setStatus("Clamped spin flipped by hand at (" + x + ", " + y + "). Its latent partner now has to decide whether to believe it.");
+  });
+
+  $("btnCopy").addEventListener("click", function(){
+    var btn = this, text = $("runCmd").textContent;
+    function done(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy"; }, 1600); }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, done);
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta); done();
+    }
+  });
+
+  if (window.matchMedia){
+    var mq = window.matchMedia("(prefers-color-scheme: dark)");
+    if (mq.addEventListener) mq.addEventListener("change", render);
+  }
+
+  /* ---------- go ---------- */
+  makeTruth();
+  corrupt();
+  render();
+  setRunning(true);
+})();
+</script>
+</body>
+</html>

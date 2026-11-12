@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Station 14 — Side-Chain Rotamer Packing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+      * { box-sizing: border-box; }
+      :root {
+        --bg: #edf2f0;
+        --card: #ffffff;
+        --card-2: #f4f8f6;
+        --ink: #132019;
+        --muted: #5a6d64;
+        --line: #d7e1dc;
+        --teal: #0c7a67;
+        --teal-bright: #0fa188;
+        --teal-soft: #ddf0ea;
+        --amber: #c77400;
+        --lime: #5d9410;
+        --red: #d92c1f;
+        --red-soft: #fdeceb;
+        --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #08110d;
+          --card: #101b15;
+          --card-2: #0c1510;
+          --ink: #e4efe9;
+          --muted: #8fa79b;
+          --line: #22352b;
+          --teal: #2fbf9f;
+          --teal-bright: #3fd8b8;
+          --teal-soft: #123128;
+          --amber: #eda33a;
+          --lime: #9ccb45;
+          --red: #ff6a5c;
+          --red-soft: #331512;
+        }
+      }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        line-height: 1.45;
+      }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 18px 16px 40px; }
+      .bento {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 14px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 20px;
+        min-width: 0;
+      }
+      .span12 { grid-column: span 12; }
+      .span7 { grid-column: span 12; }
+      .span5 { grid-column: span 12; }
+      .span4 { grid-column: span 12; }
+      @media (min-width: 860px) {
+        .span7 { grid-column: span 7; }
+        .span5 { grid-column: span 5; }
+        .span4 { grid-column: span 4; }
+        .span8 { grid-column: span 8; }
+      }
+      /* ---------- intro ---------- */
+      .intro { padding: 26px 26px 22px; }
+      .station-tag {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-family: var(--mono); font-size: 12px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase; color: var(--teal);
+      }
+      .station-tag::before {
+        content: ""; width: 9px; height: 9px; border-radius: 50%;
+        background: var(--teal-bright);
+        box-shadow: 0 0 0 3px var(--teal-soft);
+      }
+      h1 {
+        margin: 10px 0 8px; font-size: clamp(28px, 4.6vw, 44px);
+        line-height: 1.08; font-weight: 700; letter-spacing: -0.015em;
+      }
+      .lede { margin: 0; max-width: 62ch; font-size: 16.5px; color: var(--ink); }
+      .lede strong { color: var(--teal); font-weight: 600; }
+      .simlabel {
+        font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+        letter-spacing: .02em;
+      }
+      .runbar {
+        margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch;
+      }
+      .cmd {
+        flex: 1 1 320px; display: flex; align-items: center; gap: 10px;
+        background: var(--card-2); border: 1px solid var(--line); border-radius: 10px;
+        padding: 10px 14px; font-family: var(--mono); font-size: 14.5px;
+        overflow-x: auto; white-space: nowrap;
+      }
+      .cmd .prompt { color: var(--teal); font-weight: 600; user-select: none; }
+      .btn {
+        appearance: none; border: 1px solid var(--line); background: var(--card);
+        color: var(--ink); font-family: var(--sans); font-size: 14.5px; font-weight: 600;
+        border-radius: 10px; padding: 9px 18px; cursor: pointer; min-height: 44px;
+      }
+      .btn:hover { border-color: var(--teal); }
+      .btn:focus-visible, input[type="range"]:focus-visible, .res-node:focus-visible, .chip:focus-visible {
+        outline: 2px solid var(--teal-bright); outline-offset: 2px;
+      }
+      .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+      @media (prefers-color-scheme: dark) { .btn-primary { color: #06231b; } }
+      .btn-primary:hover { background: var(--teal-bright); border-color: var(--teal-bright); }
+      .btn[disabled] { opacity: .55; cursor: default; }
+      /* ---------- stage ---------- */
+      .stage-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 6px; }
+      .stage-head h2, .card h2 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+      .stage-head .hint { font-size: 13px; color: var(--muted); }
+      .stage-wrap { position: relative; }
+      svg.hairpin { width: 100%; height: auto; display: block; }
+      .clash-badge {
+        position: absolute; bottom: 6px; right: 6px;
+        font-family: var(--mono); font-size: 13px; font-weight: 600;
+        padding: 7px 12px; border-radius: 999px;
+        background: var(--red-soft); color: var(--red); border: 1px solid var(--red);
+        transition: background .3s, color .3s, border-color .3s;
+      }
+      .clash-badge.ok { background: var(--teal-soft); color: var(--teal); border-color: var(--teal); }
+      .status-line {
+        margin-top: 10px; font-family: var(--mono); font-size: 13.5px; color: var(--muted);
+        min-height: 1.45em;
+      }
+      .status-line b { color: var(--ink); font-weight: 600; }
+      /* SVG pieces */
+      .backbone { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linecap: round; opacity: .55; }
+      .res-node { cursor: pointer; }
+      .res-node .core { fill: var(--card); stroke: var(--ink); stroke-width: 1.6; }
+      .res-node text { font-family: var(--mono); font-size: 11.5px; font-weight: 600; fill: var(--ink); text-anchor: middle; pointer-events: none; }
+      .res-node.clashing .core { stroke: var(--red); stroke-width: 2.6; }
+      .arm { transition: transform .45s cubic-bezier(.34,1.3,.5,1); }
+      .arm line { stroke-width: 4; stroke-linecap: round; }
+      .arm circle { stroke: var(--card); stroke-width: 1.5; }
+      .arm.s0 line, .arm.s0 circle { stroke: var(--teal); fill: var(--teal); }
+      .arm.s1 line, .arm.s1 circle { stroke: var(--amber); fill: var(--amber); }
+      .arm.s2 line, .arm.s2 circle { stroke: var(--lime); fill: var(--lime); }
+      .arm.clashing line { stroke: var(--red); }
+      .arm.clashing circle { fill: var(--red); stroke: var(--red); }
+      .clash-link { stroke: var(--red); stroke-width: 1.8; stroke-dasharray: 4 4; opacity: .85; }
+      .clash-burst { fill: var(--red); }
+      .term-label { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+      @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+      .clashing-halo { fill: none; stroke: var(--red); stroke-width: 1.6; opacity: .7; animation: pulse 1.1s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        .arm { transition: none; }
+        .clashing-halo { animation: none; }
+      }
+      /* ---------- readouts ---------- */
+      .readouts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .readout {
+        background: var(--card-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+      }
+      .readout .k { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+      .readout .v { font-family: var(--mono); font-size: 27px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+      .readout .v small { font-size: 13px; color: var(--muted); font-weight: 500; }
+      .readout .v.bad { color: var(--red); }
+      .readout .v.good { color: var(--teal); }
+      .readout.wide { grid-column: span 2; }
+      .spark { width: 100%; height: 44px; display: block; margin-top: 4px; }
+      .spark polyline { fill: none; stroke: var(--teal); stroke-width: 2; }
+      .spark .zero { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+      /* ---------- controls ---------- */
+      .controls .row { display: flex; flex-wrap: wrap; gap: 10px; }
+      .slider-block { margin-top: 18px; }
+      .slider-block label {
+        display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 500; margin-bottom: 6px;
+      }
+      .slider-block label output { font-family: var(--mono); color: var(--teal); font-weight: 600; }
+      input[type="range"] { width: 100%; accent-color: var(--teal); min-height: 32px; cursor: pointer; }
+      .slider-note { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+      /* ---------- benchmark ---------- */
+      .bench-rows { margin-top: 12px; display: grid; gap: 0; }
+      .bench-row {
+        display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+        padding: 11px 0; border-top: 1px solid var(--line);
+      }
+      .bench-row:first-child { border-top: none; padding-top: 2px; }
+      .bench-row .bk { font-size: 14px; color: var(--muted); }
+      .bench-row .bv { font-family: var(--mono); font-size: 19px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .bench-row .bv .from { color: var(--red); }
+      .bench-row .bv .arrow { color: var(--muted); font-weight: 400; }
+      .bench-row .bv .to { color: var(--teal); }
+      .bench .simlabel { display: block; margin-top: 12px; }
+      /* ---------- LJ chart / legend / chips ---------- */
+      .lj-svg { width: 100%; height: auto; display: block; margin-top: 8px; }
+      .lj-svg text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+      .card p.body { font-size: 14.5px; color: var(--ink); margin: 8px 0 0; }
+      .card p.body .muted { color: var(--muted); }
+      .rot-list { margin-top: 12px; display: grid; gap: 10px; }
+      .rot-item { display: flex; gap: 12px; align-items: flex-start; background: var(--card-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+      .rot-item .swatch { width: 14px; height: 14px; border-radius: 4px; margin-top: 3px; flex: none; }
+      .rot-item .rn { font-family: var(--mono); font-weight: 600; font-size: 14.5px; }
+      .rot-item .rd { font-size: 13px; color: var(--muted); }
+      .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+      .chip {
+        font-family: var(--mono); font-size: 12.5px; font-weight: 500;
+        border: 1px solid var(--line); background: var(--card-2); color: var(--ink);
+        border-radius: 8px; padding: 7px 9px; cursor: pointer; min-height: 36px;
+      }
+      .chip b { font-weight: 600; }
+      .chip[data-s="0"] b { color: var(--teal); }
+      .chip[data-s="1"] b { color: var(--amber); }
+      .chip[data-s="2"] b { color: var(--lime); }
+      .chip.clashing { border-color: var(--red); background: var(--red-soft); }
+      @media (max-width: 480px) {
+        .cmd { font-size: 13px; }
+        .intro { padding: 20px 18px 18px; }
+        .card { padding: 16px; }
+      }
+      .foot { margin-top: 16px; font-size: 12.5px; color: var(--muted); font-family: var(--mono); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="bento">
+
+        <!-- Intro -->
+        <section class="card span12 intro">
+          <span class="station-tag"><a href="/thermo-lab" style="color:var(--muted);text-decoration:none;margin-right:10px;font-weight:600">← All 16 Stations</a> Station 14 · Thermo Lab</span>
+          <h1>Side-Chain Rotamer Packing</h1>
+          <p class="lede">
+            Rotamer placement on a <strong>24-residue beta-hairpin</strong>. Each side chain sits in one of a few
+            discrete dihedral rotamers, and bulky neighbours collide — Lennard-Jones steric clashes that blow up
+            the energy. <strong>Categorical Potts sampling</strong> swivels the discrete rotamers, one categorical
+            variable per residue, until every clash is rotated away.
+          </p>
+          <div class="runbar">
+            <div class="cmd" role="group" aria-label="Run command">
+              <span class="prompt">$</span><span id="cmdText">uv run thrml-bench run --exp 14</span>
+            </div>
+            <button class="btn" id="copyBtn" type="button">Copy command</button>
+          </div>
+          <p class="simlabel" style="margin:14px 0 0;">All published figures on this page: simulated benchmark result, results may vary (not customer results).</p>
+        </section>
+
+        <!-- Hairpin stage -->
+        <section class="card span7" aria-label="Beta-hairpin rotamer stage">
+          <div class="stage-head">
+            <h2>The hairpin, live</h2>
+            <span class="hint">Tap any residue to swivel its rotamer by hand.</span>
+          </div>
+          <div class="stage-wrap">
+            <div class="clash-badge" id="clashBadge">6 clashes</div>
+            <svg class="hairpin" id="hairpinSvg" viewBox="0 0 440 566" role="img"
+                 aria-label="Diagram of a 24-residue beta-hairpin. Side chains swivel between rotamer states; clashing pairs are marked in red."></svg>
+          </div>
+          <p class="status-line" id="statusLine">Benchmark start loaded — <b>6 steric clashes</b>, steric penalty <b>295.54 kcal/mol</b>.</p>
+        </section>
+
+        <!-- Readouts + controls + benchmark -->
+        <div class="span5" style="display:grid; gap:14px; align-content:start; min-width:0;">
+
+          <section class="card" aria-label="Live readouts">
+            <h2>Live readouts</h2>
+            <div class="readouts" style="margin-top:12px;">
+              <div class="readout">
+                <div class="k">Steric clashes</div>
+                <div class="v bad" id="roClashes">6</div>
+              </div>
+              <div class="readout">
+                <div class="k">Steric energy</div>
+                <div class="v" id="roEnergy">295.54 <small>kcal/mol</small></div>
+              </div>
+              <div class="readout">
+                <div class="k">ΔE vs benchmark start</div>
+                <div class="v" id="roDelta">0.00 <small>kcal/mol</small></div>
+              </div>
+              <div class="readout">
+                <div class="k">Temperature</div>
+                <div class="v" id="roTemp">— <small>kcal/mol</small></div>
+              </div>
+              <div class="readout wide">
+                <div class="k">Steric energy per sweep</div>
+                <svg class="spark" id="spark" viewBox="0 0 300 44" preserveAspectRatio="none" aria-hidden="true">
+                  <line class="zero" x1="0" y1="40" x2="300" y2="40"></line>
+                  <polyline id="sparkLine" points=""></polyline>
+                </svg>
+              </div>
+            </div>
+          </section>
+
+          <section class="card controls" aria-label="Packing controls">
+            <h2>Packing controls</h2>
+            <div class="row" style="margin-top:12px;">
+              <button class="btn btn-primary" id="annealBtn" type="button">Run packing anneal</button>
+              <button class="btn" id="scrambleBtn" type="button">Scramble</button>
+              <button class="btn" id="resetBtn" type="button">Reset to benchmark start</button>
+            </div>
+            <div class="slider-block">
+              <label for="tempSlider">Anneal start temperature <output id="tempOut">30 kcal/mol</output></label>
+              <input type="range" id="tempSlider" min="2" max="80" step="1" value="30" />
+              <p class="slider-note">Higher temperatures let the sampler accept clash-forming swivels and escape traps; it cools as it packs. Metropolis acceptance on the Potts energy, one categorical rotamer variable per residue.</p>
+            </div>
+          </section>
+
+          <section class="card bench" aria-label="Published benchmark">
+            <h2>Published benchmark — Exp 14</h2>
+            <div class="bench-rows">
+              <div class="bench-row">
+                <span class="bk">Steric clashes</span>
+                <span class="bv"><span class="from">6</span> <span class="arrow">→</span> <span class="to">0</span></span>
+              </div>
+              <div class="bench-row">
+                <span class="bk">ΔE</span>
+                <span class="bv">−295.54 kcal/mol</span>
+              </div>
+              <div class="bench-row">
+                <span class="bk">Runtime</span>
+                <span class="bv">0.12 s</span>
+              </div>
+              <div class="bench-row">
+                <span class="bk">System</span>
+                <span class="bv">24 residues</span>
+              </div>
+            </div>
+            <span class="simlabel">simulated benchmark result, results may vary (not customer results)</span>
+          </section>
+        </div>
+
+        <!-- LJ curve -->
+        <section class="card span7" aria-label="Lennard-Jones potential">
+          <h2>Why a clash costs so much: the Lennard-Jones wall</h2>
+          <svg class="lj-svg" id="ljSvg" viewBox="0 0 560 240" role="img"
+               aria-label="Lennard-Jones potential curve: energy rises steeply when two atoms are pushed closer than their equilibrium distance."></svg>
+          <p class="body">
+            Two non-bonded atoms follow <span style="font-family:var(--mono); font-size:13.5px;">E(r) = 4ε[(σ/r)<sup>12</sup> − (σ/r)<sup>6</sup>]</span>.
+            Sit a contact at the well minimum (r ≈ 1.12σ) and it is mildly favourable. Push it just 25% closer and the
+            r<sup>−12</sup> repulsion wall takes over — that is a steric clash. Rotamer packing never moves atoms continuously;
+            it jumps each side chain between discrete χ<sub>1</sub> wells until no contact sits on the wall.
+            <span class="muted">Curve drawn from the Lennard-Jones formula; the demo above scores each clashing facing pair with a fixed penalty from this wall.</span>
+          </p>
+        </section>
+
+        <!-- Rotamer legend -->
+        <section class="card span5" aria-label="Rotamer states">
+          <h2>The three χ<sub>1</sub> rotamers</h2>
+          <div class="rot-list">
+            <div class="rot-item">
+              <span class="swatch" style="background:var(--teal);"></span>
+              <div><span class="rn">gauche+ · χ<sub>1</sub> = −60°</span><div class="rd">Side chain splayed up-left of the backbone direction — retracted from a facing partner.</div></div>
+            </div>
+            <div class="rot-item">
+              <span class="swatch" style="background:var(--amber);"></span>
+              <div><span class="rn">trans · χ<sub>1</sub> = 180°</span><div class="rd">Side chain extended straight across the hairpin core. Longest reach — the clash-prone state when the facing residue reaches too.</div></div>
+            </div>
+            <div class="rot-item">
+              <span class="swatch" style="background:var(--lime);"></span>
+              <div><span class="rn">gauche− · χ<sub>1</sub> = +60°</span><div class="rd">Side chain splayed down-right — the other retracted well. Packing is choosing, per residue, which well to sit in.</div></div>
+            </div>
+          </div>
+          <p class="body"><span class="muted">Facing pairs across the core clash when their combined reach overlaps: a trans side chain against anything but a fully retracted partner. The Potts sampler scores every facing pair and swivels the offenders.</span></p>
+        </section>
+
+        <!-- Residue chips -->
+        <section class="card span12" aria-label="Residue rotamer states">
+          <h2>All 24 residues — current rotamer</h2>
+          <div class="chips" id="chips"></div>
+          <p class="foot">g+ = gauche+ (−60°) · t = trans (180°) · g− = gauche− (+60°). Tap a chip or a residue on the hairpin to cycle its rotamer. Clash penalties per facing pair are the demo's scoring of the Lennard-Jones wall; the published Exp 14 figures are in the benchmark card.</p>
+        </section>
+
+      </div>
+    </div>
+
+    <script>
+    (function () {
+      "use strict";
+      var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      /* ---------- model ----------
+         24 residues, two strands of 12. Residue i (1-based) faces residue 25-i.
+         State per residue: 0 = gauche+ (-60), 1 = trans (180), 2 = gauche- (+60).
+         Reach toward the facing partner: trans reaches 1.0, gauche states 0.35.
+         A facing pair clashes when combined reach > 1.3 (i.e. any pair involving trans).
+         Each facing pair carries a fixed LJ-wall penalty; the six pairs clashing in the
+         benchmark start sum to exactly 295.54 kcal/mol, the published delta E. */
+      var SEQ = ["I","V","T","S","A","Q","G","D","N","T","K","V","E","L","A","V","S","G","A","D","T","V","K","A"];
+      var PAIR_PENALTY = [62.40, 55.18, 48.92, 47.35, 44.61, 37.08, 51.26, 39.84, 58.73, 41.55, 36.29, 52.97]; // index = row 0..11
+      var REACH = [0.35, 1.0, 0.35];
+      var STATE_NAME = ["g+", "t", "g−"];
+      var STATE_ANGLE = [-60, 0, 60]; // degrees relative to facing direction
+
+      // Build the state array explicitly by residue (1..24): left strand 1..12 top->bottom, right strand 24..13 top->bottom.
+      function buildBenchmark() {
+        var st = new Array(24);
+        // rows 0..11; left residue = row+1, right residue = 24-row
+        var rows = [
+          [1,1],[1,2],[0,1],[2,1],[1,1],[0,1],   // rows 0-5: at least one trans -> clash
+          [0,2],[2,0],[0,0],[2,2],[0,2],[2,0]    // rows 6-11: both gauche -> no clash
+        ];
+        for (var r = 0; r < 12; r++) {
+          st[r] = rows[r][0];        // residue r+1 (left)
+          st[23 - r] = rows[r][1];   // residue 24-r (right)
+        }
+        return st;
+      }
+
+      var state = buildBenchmark();
+      var running = false;
+      var timer = null;
+      var history = [];
+
+      function pairClash(row) {
+        var a = state[row], b = state[23 - row];
+        return (REACH[a] + REACH[b]) > 1.3;
+      }
+      function computeEnergy() {
+        var e = 0, c = 0;
+        for (var r = 0; r < 12; r++) if (pairClash(r)) { e += PAIR_PENALTY[r]; c++; }
+        return { energy: e, clashes: c };
+      }
+      var BENCH_E = computeEnergy().energy; // 295.54
+
+      /* ---------- geometry ---------- */
+      var LX = 138, RX = 302, Y0 = 60, DY = 36;
+      function pos(res) { // res 1..24 -> {x, y, dir} dir=+1 faces right, -1 faces left
+        if (res <= 12) return { x: LX, y: Y0 + (res - 1) * DY, dir: 1 };
+        return { x: RX, y: Y0 + (24 - res) * DY, dir: -1 };
+      }
+
+      /* ---------- build SVG ---------- */
+      var NS = "http://www.w3.org/2000/svg";
+      var svg = document.getElementById("hairpinSvg");
+      function el(name, attrs) {
+        var n = document.createElementNS(NS, name);
+        for (var k in attrs) n.setAttribute(k, attrs[k]);
+        return n;
+      }
+      // backbone path
+      var d = "M " + LX + " " + Y0;
+      for (var i = 2; i <= 12; i++) d += " L " + LX + " " + (Y0 + (i - 1) * DY);
+      var yBot = Y0 + 11 * DY;
+      d += " C " + LX + " " + (yBot + 44) + ", " + RX + " " + (yBot + 44) + ", " + RX + " " + yBot;
+      for (var j = 14; j <= 24; j++) d += " L " + RX + " " + (Y0 + (24 - j) * DY);
+      svg.appendChild(el("path", { d: d, "class": "backbone" }));
+
+      var clashLayer = el("g", {}); svg.appendChild(clashLayer);
+      var armGroups = [], nodeGroups = [];
+
+      for (var res = 1; res <= 24; res++) {
+        (function (res) {
+          var p = pos(res);
+          // arm group, rotated about the node centre
+          var g = el("g", { "class": "arm s0" });
+          g.style.transformOrigin = p.x + "px " + p.y + "px";
+          var len = 58;
+          var x2 = p.x + p.dir * len;
+          var line = el("line", { x1: p.x, y1: p.y, x2: x2, y2: p.y });
+          var knob = el("circle", { cx: x2, cy: p.y, r: 7.5 });
+          g.appendChild(line); g.appendChild(knob);
+          svg.appendChild(g);
+          armGroups[res] = g;
+
+          var ng = el("g", { "class": "res-node", tabindex: "0", role: "button",
+            "aria-label": "Residue " + res + " (" + SEQ[res - 1] + ") — activate to swivel rotamer" });
+          var halo = el("circle", { cx: p.x, cy: p.y, r: 19, "class": "clashing-halo", visibility: "hidden" });
+          var core = el("circle", { cx: p.x, cy: p.y, r: 13.5, "class": "core" });
+          var tx = el("text", { x: p.x, y: p.y + 4 });
+          tx.textContent = SEQ[res - 1];
+          ng.appendChild(halo); ng.appendChild(core); ng.appendChild(tx);
+          svg.appendChild(ng);
+          nodeGroups[res] = { g: ng, halo: halo };
+          function cycle() { if (!running) { state[res - 1] = (state[res - 1] + 1) % 3; render("manual"); } }
+          ng.addEventListener("click", cycle);
+          ng.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); cycle(); } });
+        })(res);
+      }
+      // termini labels
+      var tN = el("text", { x: LX - 16, y: Y0 - 14, "class": "term-label" }); tN.textContent = "N"; svg.appendChild(tN);
+      var tC = el("text", { x: RX + 8, y: Y0 - 14, "class": "term-label" }); tC.textContent = "C"; svg.appendChild(tC);
+
+      /* ---------- chips ---------- */
+      var chipsWrap = document.getElementById("chips");
+      var chipEls = [];
+      for (var c = 1; c <= 24; c++) {
+        (function (res) {
+          var b = document.createElement("button");
+          b.type = "button"; b.className = "chip";
+          b.addEventListener("click", function () { if (!running) { state[res - 1] = (state[res - 1] + 1) % 3; render("manual"); } });
+          chipsWrap.appendChild(b);
+          chipEls[res] = b;
+        })(c);
+      }
+
+      /* ---------- render ---------- */
+      var roClashes = document.getElementById("roClashes"),
+          roEnergy = document.getElementById("roEnergy"),
+          roDelta = document.getElementById("roDelta"),
+          roTemp = document.getElementById("roTemp"),
+          badge = document.getElementById("clashBadge"),
+          statusLine = document.getElementById("statusLine"),
+          sparkLine = document.getElementById("sparkLine");
+
+      function fmt(x) { return x.toFixed(2); }
+
+      function render(source) {
+        var m = computeEnergy();
+        // arms
+        for (var res = 1; res <= 24; res++) {
+          var p = pos(res);
+          var s = state[res - 1];
+          var row = res <= 12 ? res - 1 : 24 - res;
+          var cl = pairClash(row);
+          var g = armGroups[res];
+          g.setAttribute("class", "arm s" + s + (cl ? " clashing" : ""));
+          var ang = STATE_ANGLE[s] * p.dir;
+          g.style.transform = "rotate(" + ang + "deg)";
+          var ng = nodeGroups[res];
+          ng.g.setAttribute("class", "res-node" + (cl ? " clashing" : ""));
+          ng.halo.setAttribute("visibility", cl ? "visible" : "hidden");
+          var chip = chipEls[res];
+          chip.setAttribute("data-s", s);
+          chip.className = "chip" + (cl ? " clashing" : "");
+          chip.innerHTML = res + " " + SEQ[res - 1] + " · <b>" + STATE_NAME[s] + "</b>";
+        }
+        // clash links between facing knobs' nodes
+        while (clashLayer.firstChild) clashLayer.removeChild(clashLayer.firstChild);
+        for (var r = 0; r < 12; r++) {
+          if (!pairClash(r)) continue;
+          var a = pos(r + 1), b = pos(24 - r);
+          clashLayer.appendChild(el("line", { x1: a.x + 16, y1: a.y, x2: b.x - 16, y2: b.y, "class": "clash-link" }));
+          var mx = (a.x + b.x) / 2, my = a.y;
+          var burst = el("path", { d: "M " + (mx - 7) + " " + my + " l 4 -6 l 3 8 l 4 -8 l 3 8 l 4 -6 Z", "class": "clash-burst" });
+          clashLayer.appendChild(burst);
+        }
+        // readouts
+        roClashes.textContent = m.clashes;
+        roClashes.className = "v " + (m.clashes ? "bad" : "good");
+        roEnergy.innerHTML = fmt(m.energy) + " <small>kcal/mol</small>";
+        var dE = m.energy - BENCH_E;
+        roDelta.innerHTML = (dE > 0 ? "+" : (dE < 0 ? "−" : "")) + fmt(Math.abs(dE)) + " <small>kcal/mol</small>";
+        roDelta.className = "v " + (m.energy === 0 ? "good" : "");
+        badge.textContent = m.clashes === 0 ? "Packed — 0 clashes" : m.clashes + (m.clashes === 1 ? " clash" : " clashes");
+        badge.className = "clash-badge" + (m.clashes === 0 ? " ok" : "");
+        if (source === "manual") {
+          statusLine.innerHTML = m.clashes === 0
+            ? "Hand-packed — <b>0 clashes</b>. Every side chain sits in a retracted well."
+            : "Manual swivel — <b>" + m.clashes + (m.clashes === 1 ? " clash" : " clashes") + "</b> remain, steric penalty <b>" + fmt(m.energy) + " kcal/mol</b>.";
+        }
+        // sparkline
+        if (history.length > 1) {
+          var maxE = Math.max.apply(null, history.concat([1]));
+          var pts = history.map(function (e, idx) {
+            var x = (idx / (history.length - 1)) * 300;
+            var y = 40 - (e / maxE) * 36;
+            return x.toFixed(1) + "," + y.toFixed(1);
+          }).join(" ");
+          sparkLine.setAttribute("points", pts);
+        }
+        return m;
+      }
+
+      /* ---------- anneal ---------- */
+      var annealBtn = document.getElementById("annealBtn");
+      var tempSlider = document.getElementById("tempSlider");
+      var tempOut = document.getElementById("tempOut");
+      tempSlider.addEventListener("input", function () { tempOut.textContent = tempSlider.value + " kcal/mol"; });
+
+      function setRunning(on) {
+        running = on;
+        annealBtn.disabled = on;
+        document.getElementById("scrambleBtn").disabled = on;
+        document.getElementById("resetBtn").disabled = on;
+      }
+
+      function anneal() {
+        if (running) return;
+        var m0 = computeEnergy();
+        if (m0.clashes === 0) {
+          statusLine.innerHTML = "Already packed — <b>0 clashes</b>, steric penalty <b>0.00 kcal/mol</b>. Scramble or reset to run it again.";
+          return;
+        }
+        setRunning(true);
+        history = [m0.energy];
+        var T0 = parseFloat(tempSlider.value);
+        var sweep = 0, MAX = 90;
+        statusLine.innerHTML = "Annealing — categorical Potts sampler swivelling rotamers…";
+        function step() {
+          var T = Math.max(0.4, T0 * Math.pow(0.90, sweep));
+          for (var k = 0; k < 2; k++) { // two sweeps per tick
+            for (var n = 0; n < 24; n++) {
+              var idx = Math.floor(Math.random() * 24);
+              var old = state[idx];
+              var ns = Math.floor(Math.random() * 3);
+              if (ns === old) continue;
+              var eBefore = computeEnergy().energy;
+              state[idx] = ns;
+              var eAfter = computeEnergy().energy;
+              var d = eAfter - eBefore;
+              if (d > 0 && Math.random() > Math.exp(-d / T)) state[idx] = old;
+            }
+            sweep++;
+            history.push(computeEnergy().energy);
+            if (history.length > 220) history.shift();
+          }
+          roTemp.innerHTML = T.toFixed(1) + " <small>kcal/mol</small>";
+          var m = render();
+          statusLine.innerHTML = "Annealing — sweep <b>" + sweep + "</b> · T <b>" + T.toFixed(1) + " kcal/mol</b> · <b>" + m.clashes + "</b> clashes left.";
+          if ((m.clashes === 0 && sweep >= 8) || sweep >= MAX) {
+            clearInterval(timer); timer = null;
+            setRunning(false);
+            roTemp.innerHTML = "0.4 <small>kcal/mol</small>";
+            var fin = computeEnergy();
+            if (fin.clashes === 0) {
+              statusLine.innerHTML = "Packed in <b>" + sweep + " sweeps</b> — <b>0 clashes</b>, steric penalty <b>0.00 kcal/mol</b>. Run ΔE: <b>−" + fmt(m0.energy) + " kcal/mol</b>.";
+            } else {
+              statusLine.innerHTML = "Anneal ended at <b>" + fin.clashes + "</b> clashes — raise the start temperature or run it again to escape the trap.";
+            }
+            render();
+            return;
+          }
+        }
+        if (REDUCED) {
+          // run synchronously to completion without animation
+          var guard = 0;
+          while (computeEnergy().clashes > 0 && guard < 400) { guard++;
+            var T2 = Math.max(0.4, T0 * Math.pow(0.90, guard));
+            for (var n2 = 0; n2 < 24; n2++) {
+              var i2 = Math.floor(Math.random() * 24), o2 = state[i2], s2 = Math.floor(Math.random() * 3);
+              if (s2 === o2) continue;
+              var eb = computeEnergy().energy; state[i2] = s2; var ea = computeEnergy().energy;
+              if (ea - eb > 0 && Math.random() > Math.exp(-(ea - eb) / T2)) state[i2] = o2;
+            }
+            history.push(computeEnergy().energy);
+          }
+          setRunning(false);
+          roTemp.innerHTML = "0.4 <small>kcal/mol</small>";
+          var finR = computeEnergy();
+          statusLine.innerHTML = finR.clashes === 0
+            ? "Packed — <b>0 clashes</b>, steric penalty <b>0.00 kcal/mol</b>. Run ΔE: <b>−" + fmt(m0.energy) + " kcal/mol</b>."
+            : "Anneal ended at <b>" + finR.clashes + "</b> clashes — run it again to escape the trap.";
+          render();
+        } else {
+          timer = setInterval(step, 55);
+        }
+      }
+      annealBtn.addEventListener("click", anneal);
+
+      document.getElementById("scrambleBtn").addEventListener("click", function () {
+        for (var i = 0; i < 24; i++) state[i] = Math.floor(Math.random() * 3);
+        history = [computeEnergy().energy];
+        roTemp.innerHTML = "— <small>kcal/mol</small>";
+        var m = render();
+        statusLine.innerHTML = "Scrambled — <b>" + m.clashes + "</b> clashes, steric penalty <b>" + fmt(m.energy) + " kcal/mol</b>. Run the anneal to pack it.";
+      });
+      document.getElementById("resetBtn").addEventListener("click", function () {
+        state = buildBenchmark();
+        history = [BENCH_E];
+        roTemp.innerHTML = "— <small>kcal/mol</small>";
+        render();
+        statusLine.innerHTML = "Benchmark start loaded — <b>6 steric clashes</b>, steric penalty <b>295.54 kcal/mol</b>.";
+      });
+
+      /* ---------- copy ---------- */
+      var copyBtn = document.getElementById("copyBtn");
+      copyBtn.addEventListener("click", function () {
+        var text = document.getElementById("cmdText").textContent;
+        function done() { copyBtn.textContent = "Copied"; setTimeout(function () { copyBtn.textContent = "Copy command"; }, 1600); }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, done);
+        } else {
+          var ta = document.createElement("textarea");
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); } catch (e) {}
+          document.body.removeChild(ta); done();
+        }
+      });
+
+      /* ---------- LJ curve ---------- */
+      (function drawLJ() {
+        var s = document.getElementById("ljSvg");
+        var W = 560, H = 240, x0 = 46, x1 = 540, yTop = 18, yBot = 196;
+        var rMin = 0.72, rMax = 2.6, eMax = 3.2, eMin = -1.25;
+        function X(r) { return x0 + (r - rMin) / (rMax - rMin) * (x1 - x0); }
+        function Y(e) { return yBot - (e - eMin) / (eMax - eMin) * (yBot - yTop); }
+        function lj(r) { var a = Math.pow(1 / r, 6); return 4 * (a * a - a); }
+        var g = el("g", {});
+        // zero line
+        g.appendChild(el("line", { x1: x0, y1: Y(0), x2: x1, y2: Y(0), stroke: "var(--line)", "stroke-width": 1 }));
+        // axes labels
+        var pts = "";
+        for (var r = rMin; r <= rMax; r += 0.01) {
+          var e = Math.min(lj(r), eMax);
+          pts += (pts ? " L " : "M ") + X(r).toFixed(1) + " " + Y(e).toFixed(1);
+        }
+        g.appendChild(el("path", { d: pts, fill: "none", stroke: "var(--teal)", "stroke-width": 2.4 }));
+        // well minimum marker
+        var rWell = Math.pow(2, 1 / 6);
+        g.appendChild(el("circle", { cx: X(rWell), cy: Y(-1), r: 4.5, fill: "var(--teal)" }));
+        var t1 = el("text", { x: X(rWell) + 8, y: Y(-1) + 16 }); t1.textContent = "packed contact · r ≈ 1.12σ · E = −ε"; g.appendChild(t1);
+        // clash marker
+        var rClash = 0.85, eClash = lj(rClash);
+        g.appendChild(el("circle", { cx: X(rClash), cy: Y(Math.min(eClash, eMax)), r: 4.5, fill: "var(--red)" }));
+        var t2 = el("text", { x: X(rClash) + 6, y: 30 }); t2.textContent = "clash · r ≈ 0.85σ · E ≈ +" + eClash.toFixed(1) + "ε and climbing"; g.appendChild(t2);
+        var t3 = el("text", { x: x0, y: H - 14 }); t3.textContent = "r / σ →"; g.appendChild(t3);
+        var t4 = el("text", { x: x0, y: 12 }); t4.textContent = "E / ε"; g.appendChild(t4);
+        s.appendChild(g);
+      })();
+
+      /* ---------- init ---------- */
+      history = [BENCH_E];
+      render();
+      if (!REDUCED) setTimeout(anneal, 900);
+    })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Station 10 — SK Frustrated Spin Glass</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#e9f1f4;
+        --bg-glow:#ffffff;
+        --panel:#f7fbfc;
+        --panel-2:#eef5f7;
+        --ink:#10222b;
+        --ink-soft:#3d5a66;
+        --ink-faint:#6d8a94;
+        --line:#c7d9de;
+        --line-strong:#a9c4cc;
+        --up:#0284c7;
+        --up-soft:#bae6fd;
+        --down:#ea580c;
+        --down-soft:#fed7aa;
+        --accent:#0e7490;
+        --accent-ink:#ffffff;
+        --good:#047857;
+        --bad:#dc2626;
+        --chip:#10222b;
+        --chip-ink:#a5f3fc;
+        --shadow:0 1px 2px rgba(16,34,43,.06),0 8px 24px rgba(16,34,43,.06);
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#070d12;
+          --bg-glow:#0d1a21;
+          --panel:#0c161d;
+          --panel-2:#0a1219;
+          --ink:#e6f4f8;
+          --ink-soft:#a8c3cc;
+          --ink-faint:#6f8f99;
+          --line:#1d323c;
+          --line-strong:#2b4753;
+          --up:#38bdf8;
+          --up-soft:#0c3a52;
+          --down:#fb923c;
+          --down-soft:#4a2a10;
+          --accent:#22d3ee;
+          --accent-ink:#06222b;
+          --good:#34d399;
+          --bad:#f87171;
+          --chip:#e6f4f8;
+          --chip-ink:#0b3b4a;
+          --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+        }
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0;
+        font-family:"IBM Plex Sans",system-ui,sans-serif;
+        color:var(--ink);
+        background:
+          radial-gradient(1100px 500px at 85% -10%, var(--bg-glow), transparent 60%),
+          linear-gradient(160deg, var(--bg) 0%, var(--bg) 55%, var(--panel-2) 100%);
+        background-attachment:fixed;
+        line-height:1.5;
+      }
+      /* faint fracture lines over the whole page */
+      body::before{
+        content:""; position:fixed; inset:0; pointer-events:none; opacity:.5; z-index:0;
+        background-image:
+          linear-gradient(115deg, transparent 0 46%, var(--line) 46%, transparent calc(46% + 1px), transparent 78%, var(--line) 78%, transparent calc(78% + 1px)),
+          linear-gradient(24deg, transparent 0 62%, var(--line) 62%, transparent calc(62% + 1px), transparent 90%);
+        background-size:340px 340px, 520px 520px;
+        mask-image:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.08) 70%);
+        -webkit-mask-image:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.08) 70%);
+      }
+      .wrap{position:relative; z-index:1; max-width:1180px; margin:0 auto; padding:20px 16px 40px}
+      .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+      button, [role="button"], select, summary, input:not([type="checkbox"],[type="radio"]){min-height:2.25rem}
+      button{font:inherit; cursor:pointer}
+
+      .bento{display:grid; grid-template-columns:repeat(12,1fr); gap:14px}
+      .tile{
+        background:linear-gradient(180deg, var(--panel), var(--panel-2));
+        border:1px solid var(--line);
+        border-radius:10px;
+        box-shadow:var(--shadow);
+        padding:20px;
+        min-width:0;
+      }
+      .tile h2{font-size:.82rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 12px}
+      .tile h2 .h2-note{text-transform:none; letter-spacing:0; font-weight:400}
+
+      /* header tile */
+      .hero{grid-column:1/-1; padding:26px 28px}
+      .hero-top{display:flex; flex-wrap:wrap; gap:10px 18px; align-items:baseline; justify-content:space-between}
+      .station-tag{font-family:"IBM Plex Mono",monospace; font-size:.8rem; color:var(--accent); font-weight:600; letter-spacing:.14em; text-transform:uppercase}
+      .station-count{font-family:"IBM Plex Mono",monospace; font-size:.8rem; color:var(--ink-faint)}
+      .hero h1{font-size:clamp(1.9rem, 4.6vw, 3rem); line-height:1.08; font-weight:700; margin:10px 0 10px; letter-spacing:-.015em}
+      .hero h1 .thin{font-weight:400; color:var(--ink-soft)}
+      .hero p.lede{font-size:1.06rem; color:var(--ink-soft); max-width:62ch; margin:0 0 18px}
+      .runrow{display:flex; flex-wrap:wrap; gap:10px; align-items:stretch}
+      .runchip{
+        display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+        background:var(--chip); color:var(--chip-ink);
+        border-radius:8px; padding:8px 8px 8px 16px;
+        font-family:"IBM Plex Mono",monospace; font-size:.92rem;
+        max-width:100%;
+      }
+      .runchip code{overflow-wrap:anywhere}
+      .copybtn{
+        background:transparent; border:1px solid currentColor; color:inherit;
+        border-radius:6px; padding:4px 12px; font-size:.8rem; font-family:"IBM Plex Sans",sans-serif;
+        min-height:2.25rem; flex:none;
+      }
+      .copybtn:active{transform:translateY(1px)}
+      .hero-meta{display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:16px; font-size:.9rem; color:var(--ink-soft)}
+      .hero-meta b{color:var(--ink); font-weight:600}
+
+      /* benchmark tile */
+      .bench{grid-column:span 5}
+      .bench-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px 18px}
+      .bench .fig{border-top:2px solid var(--line-strong); padding-top:8px}
+      .bench .fig .v{font-family:"IBM Plex Mono",monospace; font-size:1.55rem; font-weight:600; line-height:1.15}
+      .bench .fig .v small{font-size:.95rem; color:var(--ink-soft); font-weight:400}
+      .bench .fig .k{font-size:.85rem; color:var(--ink-soft); margin-top:2px}
+      .bench .fig.wide{grid-column:1/-1}
+      .disclaimer{margin:16px 0 0; font-size:.78rem; color:var(--ink-faint); border:1px dashed var(--line-strong); border-radius:8px; padding:8px 10px}
+
+      /* replicas tile */
+      .replicas{grid-column:span 7; grid-row:span 2}
+      .rep-head{display:flex; flex-wrap:wrap; gap:8px 16px; align-items:baseline; justify-content:space-between; margin-bottom:6px}
+      .rep-wrap{display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:start; margin-top:10px}
+      .rep-label{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px}
+      .rep-label .name{font-weight:600; font-size:.95rem}
+      .rep-label .e{font-family:"IBM Plex Mono",monospace; font-size:.9rem; color:var(--ink-soft)}
+      .spin-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:5px}
+      .spin{
+        aspect-ratio:1; border-radius:6px; border:1px solid var(--line-strong);
+        display:flex; align-items:center; justify-content:center;
+        font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:clamp(.8rem,2.4vw,1.05rem);
+        cursor:pointer; user-select:none; padding:0; min-height:0;
+        transition:background-color .18s ease, color .18s ease, transform .12s ease;
+      }
+      .spin.up{background:var(--up-soft); color:var(--up); border-color:var(--up)}
+      .spin.down{background:var(--down-soft); color:var(--down); border-color:var(--down)}
+      .spin:active{transform:scale(.92)}
+      .spin:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+      .q-dial{text-align:center; padding-top:26px; min-width:86px}
+      .q-dial .q-v{font-family:"IBM Plex Mono",monospace; font-size:1.7rem; font-weight:600; line-height:1.1}
+      .q-dial .q-k{font-size:.78rem; color:var(--ink-faint); margin-top:2px}
+      .q-bar{height:8px; border-radius:99px; background:var(--panel-2); border:1px solid var(--line); margin-top:10px; position:relative; overflow:hidden}
+      .q-bar i{position:absolute; top:0; bottom:0; background:linear-gradient(90deg, var(--down), var(--up)); border-radius:99px}
+      .rep-foot{margin-top:14px; font-size:.86rem; color:var(--ink-soft); display:flex; flex-wrap:wrap; gap:6px 20px}
+      .rep-foot b{color:var(--ink)}
+
+      /* controls tile */
+      .controls{grid-column:span 5}
+      .t-row{display:flex; align-items:baseline; justify-content:space-between; gap:12px}
+      .t-val{font-family:"IBM Plex Mono",monospace; font-size:1.5rem; font-weight:600}
+      .t-val small{font-size:.85rem; color:var(--ink-soft); font-weight:400}
+      input[type="range"]{width:100%; accent-color:var(--accent); height:2.25rem; cursor:pointer}
+      .t-scale{display:flex; justify-content:space-between; font-size:.75rem; color:var(--ink-faint); font-family:"IBM Plex Mono",monospace; margin-top:-4px}
+      .regime{margin-top:10px; font-size:.9rem; color:var(--ink-soft); min-height:1.4em}
+      .regime b{color:var(--ink)}
+      .btn-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px}
+      .btn{
+        border:1px solid var(--line-strong); background:var(--panel); color:var(--ink);
+        border-radius:8px; padding:8px 14px; font-size:.9rem; font-weight:500; min-height:2.5rem;
+      }
+      .btn:hover{border-color:var(--accent)}
+      .btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600}
+      .btn[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+      .status{margin-top:12px; font-size:.88rem; color:var(--ink-soft); min-height:1.35em}
+      .status .mono{color:var(--ink)}
+      .live-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px}
+      .live-stats .ls{border-top:2px solid var(--line); padding-top:6px}
+      .live-stats .ls .v{font-family:"IBM Plex Mono",monospace; font-size:1.05rem; font-weight:600}
+      .live-stats .ls .k{font-size:.75rem; color:var(--ink-faint)}
+
+      /* P(q) tile */
+      .pq{grid-column:span 7}
+      .pq svg{width:100%; height:auto; display:block}
+      .pq-stats{display:flex; flex-wrap:wrap; gap:6px 22px; font-size:.88rem; color:var(--ink-soft); margin-top:10px}
+      .pq-stats b{color:var(--ink); font-family:"IBM Plex Mono",monospace; font-weight:600}
+      .pq .btn-row{margin-top:10px}
+
+      /* frustration tile */
+      .frust{grid-column:span 5}
+      .frust svg{width:100%; height:auto; display:block; max-width:300px; margin:0 auto}
+      .frust p{font-size:.92rem; color:var(--ink-soft); margin:10px 0 0}
+      .frust p b{color:var(--ink)}
+      .frust .big-frac{font-family:"IBM Plex Mono",monospace; font-size:1.3rem; font-weight:600; color:var(--ink)}
+
+      /* trace tile */
+      .trace{grid-column:span 7}
+      .trace canvas{width:100%; height:150px; display:block}
+      .legend{display:flex; gap:18px; font-size:.82rem; color:var(--ink-soft); margin-top:8px; flex-wrap:wrap}
+      .legend .sw{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; vertical-align:-1px}
+      .legend .gs-line{color:var(--good)}
+
+      /* model tile */
+      .model{grid-column:span 5}
+      .model .eq{
+        font-family:"IBM Plex Mono",monospace; font-size:1rem; background:var(--panel-2);
+        border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin:0 0 12px; overflow-wrap:anywhere;
+      }
+      .model p{font-size:.92rem; color:var(--ink-soft); margin:0 0 10px}
+      .model p b{color:var(--ink)}
+      .model ul{margin:0; padding-left:18px; font-size:.92rem; color:var(--ink-soft)}
+      .model li{margin-bottom:6px}
+      .model li b{color:var(--ink)}
+
+      footer{margin-top:18px; font-size:.82rem; color:var(--ink-faint); display:flex; flex-wrap:wrap; gap:6px 20px; justify-content:space-between}
+
+      @media (max-width:900px){
+        .bench,.replicas,.controls,.pq,.frust,.trace,.model{grid-column:1/-1; grid-row:auto}
+        .rep-wrap{grid-template-columns:1fr 1fr}
+        .q-dial{grid-column:1/-1; order:3; padding-top:4px}
+        .q-dial .q-bar{max-width:340px; margin-left:auto; margin-right:auto}
+      }
+      @media (max-width:480px){
+        .wrap{padding:14px 10px 32px}
+        .tile{padding:16px}
+        .hero{padding:20px}
+        .bench-grid{grid-template-columns:1fr 1fr}
+        .live-stats{grid-template-columns:repeat(3,1fr)}
+      }
+      @media (prefers-reduced-motion: reduce){
+        .spin{transition:none}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="bento">
+
+        <!-- ===== Header ===== -->
+        <section class="tile hero">
+          <div class="hero-top">
+            <span class="station-tag"><a href="/thermo-lab" style="color:var(--muted);text-decoration:none;margin-right:10px;font-weight:600">← All 16 Stations</a> Thermo Lab · Station 10</span>
+            <span class="station-count mono">Exp 10 / 16</span>
+          </div>
+          <h1>SK Frustrated <span class="thin">Spin Glass</span></h1>
+          <p class="lede">A Sherrington–Kirkpatrick spin glass with dense Gaussian couplings. Twin replicas sample the rugged landscape and produce the Parisi overlap distribution. Below, the same model runs live: two replicas of 24 spins, one shared web of random couplings, and a temperature dial that takes them from a molten paramagnet down into the frozen, frustrated glass.</p>
+          <div class="runrow">
+            <div class="runchip">
+              <code id="runcmd">uv run thrml-bench run --exp 10</code>
+              <button class="copybtn" id="copybtn" type="button">Copy</button>
+            </div>
+          </div>
+          <div class="hero-meta">
+            <span>Model · <b>Sherrington–Kirkpatrick</b></span>
+            <span>Couplings · <b>dense Gaussian, all-to-all</b></span>
+            <span>Observable · <b>Parisi overlap P(q)</b></span>
+          </div>
+        </section>
+
+        <!-- ===== Twin replicas ===== -->
+        <section class="tile replicas" aria-label="Twin replicas, live">
+          <div class="rep-head">
+            <h2 style="margin:0">Twin replicas · live sampling</h2>
+            <span class="mono" style="font-size:.8rem;color:var(--ink-faint)">N = 24 spins each · tap a spin to flip it</span>
+          </div>
+          <div class="rep-wrap">
+            <div>
+              <div class="rep-label"><span class="name">Replica A</span><span class="e">E<sub>A</sub> <span id="eA">—</span></span></div>
+              <div class="spin-grid" id="gridA" role="group" aria-label="Replica A spins"></div>
+            </div>
+            <div class="q-dial">
+              <div class="q-v" id="qVal">+0.00</div>
+              <div class="q-k">overlap q<br />A · B agreement</div>
+              <div class="q-bar"><i id="qFill" style="left:50%;width:0%"></i></div>
+            </div>
+            <div>
+              <div class="rep-label"><span class="name">Replica B</span><span class="e">E<sub>B</sub> <span id="eB">—</span></span></div>
+              <div class="spin-grid" id="gridB" role="group" aria-label="Replica B spins"></div>
+            </div>
+          </div>
+          <div class="rep-foot">
+            <span>Best energy found this session · <b class="mono" id="bestE">—</b></span>
+            <span>Exact ground state of this instance · <b class="mono">−16.9836</b></span>
+            <span id="matchNote">The annealer below hunts for it.</span>
+          </div>
+        </section>
+
+        <!-- ===== Published benchmark ===== -->
+        <section class="tile bench" aria-label="Published benchmark">
+          <h2>Benchmark · Exp 10</h2>
+          <div class="bench-grid">
+            <div class="fig">
+              <div class="v">100%</div>
+              <div class="k">ground state match</div>
+            </div>
+            <div class="fig">
+              <div class="v">−15.4266</div>
+              <div class="k">ground state energy found</div>
+            </div>
+            <div class="fig">
+              <div class="v">2<sup>24</sup></div>
+              <div class="k">exact enumeration checked against — every configuration</div>
+            </div>
+            <div class="fig">
+              <div class="v">0.27<small> s</small></div>
+              <div class="k">runtime</div>
+            </div>
+          </div>
+          <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+        </section>
+
+        <!-- ===== Controls ===== -->
+        <section class="tile controls" aria-label="Sampler controls">
+          <h2>Temperature &amp; sampler</h2>
+          <div class="t-row">
+            <label for="temp" style="font-weight:600">Temperature</label>
+            <span class="t-val"><span id="tVal">0.80</span> <small>T</small></span>
+          </div>
+          <input type="range" id="temp" min="0" max="1000" value="430" aria-label="Temperature, logarithmic scale from 0.05 to 2.5" />
+          <div class="t-scale"><span>0.05 · frozen</span><span>0.6 · glass transition zone</span><span>2.50 · molten</span></div>
+          <p class="regime" id="regime"></p>
+          <div class="btn-row">
+            <button class="btn primary" id="annealBtn" type="button">Anneal ↓</button>
+            <button class="btn" id="quenchBtn" type="button">Hunt ground state</button>
+            <button class="btn" id="scrambleBtn" type="button">Scramble</button>
+            <button class="btn" id="pauseBtn" type="button" aria-pressed="false">Pause</button>
+          </div>
+          <p class="status" id="status" role="status">Sampling. Spins flip by Metropolis acceptance at the dialled temperature.</p>
+          <div class="live-stats">
+            <div class="ls"><div class="v" id="sweeps">0</div><div class="k">sweeps run</div></div>
+            <div class="ls"><div class="v" id="accept">—</div><div class="k">flip acceptance</div></div>
+            <div class="ls"><div class="v" id="magnet">—</div><div class="k">|m| replica A</div></div>
+          </div>
+        </section>
+
+        <!-- ===== Parisi P(q) ===== -->
+        <section class="tile pq" aria-label="Parisi overlap distribution">
+          <h2>Parisi overlap distribution P(q) <span class="h2-note">— built live from the two replicas above</span></h2>
+          <svg id="pqSvg" viewBox="0 0 640 240" role="img" aria-label="Histogram of the overlap q between replica A and replica B"></svg>
+          <div class="pq-stats">
+            <span>samples · <b id="pqN">0</b></span>
+            <span>⟨q⟩ · <b id="pqMean">—</b></span>
+            <span>⟨q²⟩ · <b id="pqQ2">—</b></span>
+            <span>spread σ<sub>q</sub> · <b id="pqSd">—</b></span>
+          </div>
+          <div class="btn-row">
+            <button class="btn" id="pqReset" type="button">Reset histogram</button>
+          </div>
+          <p style="font-size:.9rem;color:var(--ink-soft);margin:12px 0 0">Hot, the replicas ignore each other and P(q) piles up at zero. Cold, they fall into related valleys of the same landscape and the distribution spreads toward ±q — the fingerprint of a spin glass, and the quantity Parisi's replica theory predicts.</p>
+        </section>
+
+        <!-- ===== Frustration ===== -->
+        <section class="tile frust" aria-label="Frustration, live">
+          <h2>Frustration · one triangle, live</h2>
+          <svg id="triSvg" viewBox="0 0 300 235" role="img" aria-label="A triangle of three coupled spins from replica A, showing which bonds are satisfied"></svg>
+          <p id="triText">—</p>
+          <p><span class="big-frac">1,014 of 2,024</span><br />triangles in this coupling instance are frustrated — the product of their three bonds is negative, so no spin assignment can satisfy all three at once. That impossibility, repeated across every triangle, is what makes the landscape rugged.</p>
+        </section>
+
+        <!-- ===== Energy trace ===== -->
+        <section class="tile trace" aria-label="Energy trace">
+          <h2>Energy trace · both replicas</h2>
+          <canvas id="traceCv" width="900" height="300" aria-label="Sparkline of replica energies over time"></canvas>
+          <div class="legend">
+            <span><span class="sw" style="background:var(--up)"></span>Replica A</span>
+            <span><span class="sw" style="background:var(--down)"></span>Replica B</span>
+            <span class="gs-line">- - exact ground state of this instance, −16.9836</span>
+          </div>
+        </section>
+
+        <!-- ===== Model ===== -->
+        <section class="tile model" aria-label="The model">
+          <h2>The model</h2>
+          <p class="eq">H = − Σ<sub>i&lt;j</sub> J<sub>ij</sub> s<sub>i</sub> s<sub>j</sub>,&nbsp; s<sub>i</sub> = ±1,&nbsp; J<sub>ij</sub> ~ 𝒩(0, 1/N)</p>
+          <ul>
+            <li><b>Dense couplings.</b> Every spin talks to all 23 others — 276 bonds, each drawn from a Gaussian. Roughly half pull toward alignment, half against it.</li>
+            <li><b>Overlap.</b> q = (1/N) Σ s<sub>i</sub><sup>A</sup> s<sub>i</sub><sup>B</sup> measures how alike two independently sampled copies of the same system are.</li>
+            <li><b>The dashboard's instance</b> is one fixed draw of the couplings. Its ground state, −16.9836, was verified by enumerating all 2<sup>24</sup> configurations — the same exact check the benchmark reports.</li>
+            <li><b>Run it yourself:</b> <span class="mono">uv run thrml-bench run --exp 10</span></li>
+          </ul>
+        </section>
+
+      </div>
+
+      <footer>
+        <span>Station 10 · SK Frustrated Spin Glass · Thermo Lab</span>
+        <span>Published figures: simulated benchmark result, results may vary (not customer results)</span>
+      </footer>
+    </div>
+
+    <script>
+    (function(){
+      "use strict";
+      /* ============ Instance: one fixed draw of SK couplings, N = 24 ============
+         J_ij ~ N(0, 1/N), upper triangle in row-major order, values rounded to 6dp.
+         Exact ground state of THIS instance (full 2^24 enumeration): -16.983616. */
+      var N = 24;
+      var JFLAT = [-0.229671,-0.039683,0.255182,0.374226,-0.07503,-0.344453,-0.126036,-0.133974,0.118195,-0.220071,0.148117,0.136463,0.449273,-0.026755,-0.078527,0.173711,-0.016809,-0.076597,0.046539,-0.30617,0.325278,0.18161,-0.06184,0.036289,-0.022876,-0.069542,-0.332498,-0.045734,-0.132144,-0.157677,0.359402,0.008314,0.183993,-0.039059,-0.16144,-0.159181,-0.243878,-0.077032,0.463418,0.001299,-0.090292,-0.011016,-0.263153,0.235345,0.235636,0.281292,-0.316173,0.040392,-0.121047,0.393639,-0.159867,-0.346751,0.140952,0.225702,0.191092,0.0802,-0.468705,-0.126207,0.018803,0.379681,-0.3842,-0.12648,0.206309,-0.195438,-0.440751,0.154821,-0.150735,0.184448,-0.04106,-0.212983,-0.377355,-0.236186,-0.093834,-0.243305,-0.319626,-0.441163,0.175118,-0.099967,-0.041335,0.292999,-0.054034,0.454864,0.142998,-0.283318,0.277457,-0.119851,0.46062,-0.189947,0.286594,-0.172991,0.317779,0.17995,0.171748,0.105684,-0.135213,0.196239,0.162133,0.06457,-0.153339,0.377547,0.110546,-0.545043,-0.473963,-0.293597,-0.01995,-0.45793,0.135446,0.309788,-0.195612,-0.236039,0.217942,0.207457,0.064018,0.294333,0.196629,0.074258,-0.036231,-0.308654,0.226,-0.198388,-0.39078,-0.167571,0.146935,-0.032335,0.287316,-0.019456,0.269454,-0.031052,0.216451,0.115094,0.221226,0.019843,0.046327,0.162204,-0.071089,-0.191029,0.235192,-0.026494,0.049596,-0.339771,-0.027893,0.116733,-0.285144,0.388194,-0.188443,0.054918,0.361321,-0.167767,0.005614,-0.111064,-0.31278,0.151512,0.208877,-0.122513,-0.276992,0.02114,0.492797,-0.077665,-0.154357,0.031958,-0.137627,0.066481,0.078022,-0.040995,-0.397467,0.120419,0.239224,-0.262889,0.271683,-0.002667,-0.340924,-0.187591,-0.050972,0.017561,0.05305,-0.291561,0.093993,0.102585,-0.106046,-0.13325,-0.331695,-0.029672,-0.254737,-0.447826,0.280242,-0.010753,-0.158732,0.123384,0.428753,-0.073424,-0.102857,0.102333,-0.009327,0.17113,0.053298,0.072733,-0.142174,0.013416,-0.072493,0.294443,-0.001154,0.171564,0.033256,-0.076201,-0.00779,0.217563,-0.081693,0.032474,-0.2587,0.254968,0.095907,0.041331,-0.11,-0.091397,0.308602,-0.174829,0.073504,-0.272744,-0.240301,-0.46458,0.028092,0.237013,0.282669,-0.173624,0.336426,-0.086557,0.139963,0.306961,-0.18145,-0.219642,0.033648,-0.303767,-0.024109,-0.176421,0.300213,0.260322,0.171853,0.064987,0.263638,0.100676,0.162246,-0.104093,0.146445,0.323493,-0.27086,-0.076365,0.252405,-0.007741,0.432365,0.290236,-0.276724,0.26811,0.05539,0.318349,0.18479,-0.275699,0.286261,0.033282,-0.059012,-0.061978,-0.099733,0.161478,0.071421,-0.256863,0.013575,0.275189,0.089964,0.02814,0.074739,0.147024,-0.231379,-0.086794,-0.068696,-0.037757,0.00672,0.314261];
+      var GS = -16.983616;
+      var J = [];
+      (function(){ var k=0; for(var i=0;i<N;i++){ J.push(new Float64Array(N)); } for(var a=0;a<N;a++) for(var b=a+1;b<N;b++){ var v=JFLAT[k++]; J[a][b]=v; J[b][a]=v; } })();
+
+      function energy(s){ var E=0; for(var i=0;i<N;i++) for(var j=i+1;j<N;j++) E -= J[i][j]*s[i]*s[j]; return E; }
+      function field(s,i){ var h=0; for(var j=0;j<N;j++) if(j!==i) h += J[i][j]*s[j]; return h; }
+      function randSpin(){ var s=new Int8Array(N); for(var i=0;i<N;i++) s[i]=Math.random()<0.5?-1:1; return s; }
+
+      var A = randSpin(), B = randSpin();
+      var EA = energy(A), EB = energy(B);
+      var bestE = Math.min(EA, EB);
+      var sweeps = 0, attCount = 0, accCount = 0;
+
+      /* ============ DOM ============ */
+      function el(id){ return document.getElementById(id); }
+      var gridA = el("gridA"), gridB = el("gridB");
+      function buildGrid(grid, rep){
+        var cells = [];
+        for(var i=0;i<N;i++){
+          (function(i){
+            var b = document.createElement("button");
+            b.type = "button"; b.className = "spin"; b.dataset.i = i;
+            b.setAttribute("aria-label", "Flip spin " + (i+1));
+            b.addEventListener("click", function(){
+              rep.s[i] *= -1;
+              if(rep === ra) EA = energy(A); else EB = energy(B);
+              noteBest(); renderReplicas();
+            });
+            grid.appendChild(b); cells.push(b);
+          })(i);
+        }
+        return cells;
+      }
+      var ra = { s: A }, rb = { s: B };
+      var cellsA = buildGrid(gridA, ra), cellsB = buildGrid(gridB, rb);
+
+      function paintGrid(cells, s){
+        for(var i=0;i<N;i++){
+          var up = s[i] > 0;
+          cells[i].className = "spin " + (up ? "up" : "down");
+          cells[i].textContent = up ? "↑" : "↓";
+        }
+      }
+      function overlap(){ var q=0; for(var i=0;i<N;i++) q += A[i]*B[i]; return q/N; }
+      function fmt(x, d){ return (x<0?"−":"+") + Math.abs(x).toFixed(d); }
+      function fmtE(x){ return (x<0?"−":"+") + Math.abs(x).toFixed(4); }
+
+      function noteBest(){
+        if(EA < bestE) bestE = EA;
+        if(EB < bestE) bestE = EB;
+        el("bestE").textContent = fmtE(bestE);
+        if(Math.abs(bestE - GS) < 1e-9){
+          el("matchNote").innerHTML = "<b>Ground state reached</b> — matches the exact enumeration.";
+        }
+      }
+
+      function renderReplicas(){
+        paintGrid(cellsA, A); paintGrid(cellsB, B);
+        el("eA").textContent = fmtE(EA);
+        el("eB").textContent = fmtE(EB);
+        var q = overlap();
+        el("qVal").textContent = fmt(q, 2);
+        var fill = el("qFill");
+        var w = Math.abs(q) * 50;
+        fill.style.width = w + "%";
+        fill.style.left = (q < 0 ? 50 - w : 50) + "%";
+        var m = 0; for(var i=0;i<N;i++) m += A[i];
+        el("magnet").textContent = Math.abs(m/N).toFixed(2);
+      }
+
+      /* ============ Sampler ============ */
+      var T = 0.8, running = true, annealing = false, annealP = 0;
+      function sweep(s, temp){
+        for(var a=0;a<N;a++){
+          var i = (Math.random()*N)|0;
+          var dE = 2 * s[i] * field(s, i);
+          attCount++;
+          if(dE <= 0 || Math.random() < Math.exp(-dE/temp)){ s[i] *= -1; accCount++; }
+        }
+      }
+
+      /* ============ P(q) histogram ============ */
+      var BINS = 25, bins = new Array(BINS).fill(0), pqCount = 0, pqSum = 0, pqSum2 = 0;
+      var pqSvg = el("pqSvg");
+      function drawPQ(){
+        var max = 1; for(var i=0;i<BINS;i++) if(bins[i]>max) max=bins[i];
+        var W=640, H=240, base=205, top=18, bw=W/BINS;
+        var cs = getComputedStyle(document.documentElement);
+        var up = cs.getPropertyValue("--up").trim(), down = cs.getPropertyValue("--down").trim();
+        var line = cs.getPropertyValue("--line-strong").trim(), faint = cs.getPropertyValue("--ink-faint").trim();
+        var s = "";
+        s += '<line x1="0" y1="'+base+'" x2="'+W+'" y2="'+base+'" stroke="'+line+'" stroke-width="1"/>';
+        s += '<line x1="'+(W/2)+'" y1="'+top+'" x2="'+(W/2)+'" y2="'+base+'" stroke="'+line+'" stroke-width="1" stroke-dasharray="3 4"/>';
+        for(var i2=0;i2<BINS;i2++){
+          var h = (bins[i2]/max) * (base-top-8);
+          var qv = -1 + i2*(2/(BINS-1));
+          var col = qv < 0 ? down : (qv > 0 ? up : faint);
+          s += '<rect x="'+(i2*bw+2)+'" y="'+(base-h)+'" width="'+(bw-4)+'" height="'+h+'" rx="2" fill="'+col+'" opacity="0.85"/>';
+        }
+        s += '<text x="6" y="'+(base+22)+'" font-size="12" fill="'+faint+'" font-family="IBM Plex Mono, monospace">q = −1 · replicas opposite</text>';
+        s += '<text x="'+(W/2)+'" y="'+(base+22)+'" font-size="12" fill="'+faint+'" text-anchor="middle" font-family="IBM Plex Mono, monospace">0</text>';
+        s += '<text x="'+(W-6)+'" y="'+(base+22)+'" font-size="12" fill="'+faint+'" text-anchor="end" font-family="IBM Plex Mono, monospace">replicas identical · q = +1</text>';
+        pqSvg.innerHTML = s;
+        el("pqN").textContent = pqCount.toLocaleString("en-US");
+        if(pqCount > 0){
+          var mean = pqSum/pqCount, q2 = pqSum2/pqCount;
+          el("pqMean").textContent = fmt(mean, 3);
+          el("pqQ2").textContent = q2.toFixed(3);
+          el("pqSd").textContent = Math.sqrt(Math.max(0, q2 - mean*mean)).toFixed(3);
+        }
+      }
+      el("pqReset").addEventListener("click", function(){
+        bins = new Array(BINS).fill(0); pqCount = 0; pqSum = 0; pqSum2 = 0;
+        el("pqMean").textContent = "—"; el("pqQ2").textContent = "—"; el("pqSd").textContent = "—";
+        drawPQ();
+      });
+
+      /* ============ Energy trace ============ */
+      var cv = el("traceCv"), ctx = cv.getContext("2d");
+      var traceA = [], traceB = [], TRACE_MAX = 260;
+      function drawTrace(){
+        var W = cv.width, H = cv.height;
+        var cs = getComputedStyle(document.documentElement);
+        var up = cs.getPropertyValue("--up").trim(), down = cs.getPropertyValue("--down").trim();
+        var good = cs.getPropertyValue("--good").trim(), line = cs.getPropertyValue("--line").trim(), faint = cs.getPropertyValue("--ink-faint").trim();
+        ctx.clearRect(0,0,W,H);
+        var lo = -20, hi = 8;
+        function Y(e){ return H - 26 - ((e - lo)/(hi - lo)) * (H - 46); }
+        function X(i, n){ return 8 + (i/Math.max(1,TRACE_MAX-1)) * (W - 16); }
+        ctx.strokeStyle = line; ctx.lineWidth = 1;
+        [-15,-10,-5,0].forEach(function(g){
+          ctx.beginPath(); ctx.moveTo(8, Y(g)); ctx.lineTo(W-8, Y(g)); ctx.stroke();
+          ctx.fillStyle = faint; ctx.font = "20px 'IBM Plex Mono', monospace";
+          ctx.fillText((g<0?"−"+Math.abs(g):""+g), 12, Y(g) - 5);
+        });
+        ctx.strokeStyle = good; ctx.setLineDash([7,6]); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(8, Y(GS)); ctx.lineTo(W-8, Y(GS)); ctx.stroke(); ctx.setLineDash([]);
+        function plot(tr, col){
+          if(tr.length < 2) return;
+          ctx.strokeStyle = col; ctx.lineWidth = 2.4; ctx.beginPath();
+          for(var i=0;i<tr.length;i++){ var x=X(i), y=Y(tr[i]); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+          ctx.stroke();
+        }
+        plot(traceA, up); plot(traceB, down);
+      }
+
+      /* ============ Frustration triangle ============ */
+      var frustTris = [];
+      for(var i=0;i<N;i++) for(var j=i+1;j<N;j++) for(var k=j+1;k<N;k++)
+        if(J[i][j]*J[j][k]*J[i][k] < 0) frustTris.push([i,j,k]);
+      var triSvg = el("triSvg");
+      function drawTriangle(){
+        var t = frustTris[(Math.random()*frustTris.length)|0];
+        var pos = [[150,38],[52,178],[248,178]];
+        var cs = getComputedStyle(document.documentElement);
+        var up = cs.getPropertyValue("--up").trim(), down = cs.getPropertyValue("--down").trim();
+        var good = cs.getPropertyValue("--good").trim(), bad = cs.getPropertyValue("--bad").trim(), ink = cs.getPropertyValue("--ink").trim();
+        var pairs = [[0,1],[1,2],[2,0]], unsat = 0, s = "";
+        pairs.forEach(function(p){
+          var a = t[p[0]], b = t[p[1]];
+          var sat = J[a][b] * A[a] * A[b] > 0;
+          if(!sat) unsat++;
+          s += '<line x1="'+pos[p[0]][0]+'" y1="'+pos[p[0]][1]+'" x2="'+pos[p[1]][0]+'" y2="'+pos[p[1]][1]+'" stroke="'+(sat?good:bad)+'" stroke-width="'+(sat?3:4)+'" '+(sat?"":'stroke-dasharray="6 4"')+'/>';
+          var mx = (pos[p[0]][0]+pos[p[1]][0])/2, my = (pos[p[0]][1]+pos[p[1]][1])/2;
+          s += '<text x="'+mx+'" y="'+(my-7)+'" font-size="12.5" text-anchor="middle" fill="'+ink+'" font-family="IBM Plex Mono, monospace">J = '+(J[a][b]<0?"−":"+")+Math.abs(J[a][b]).toFixed(2)+'</text>';
+        });
+        t.forEach(function(idx, n){
+          var upSpin = A[idx] > 0;
+          s += '<circle cx="'+pos[n][0]+'" cy="'+pos[n][1]+'" r="21" fill="'+(upSpin?up:down)+'" opacity="0.18"/>';
+          s += '<circle cx="'+pos[n][0]+'" cy="'+pos[n][1]+'" r="21" fill="none" stroke="'+(upSpin?up:down)+'" stroke-width="2.5"/>';
+          s += '<text x="'+pos[n][0]+'" y="'+(pos[n][1]+6)+'" font-size="17" text-anchor="middle" fill="'+(upSpin?up:down)+'" font-weight="600">'+(upSpin?"↑":"↓")+'</text>';
+          s += '<text x="'+pos[n][0]+'" y="'+(pos[n][1]+40)+'" font-size="11.5" text-anchor="middle" fill="'+ink+'" font-family="IBM Plex Mono, monospace">s'+(idx+1)+'</text>';
+        });
+        triSvg.innerHTML = s;
+        el("triText").innerHTML = "Spins s" + (t[0]+1) + ", s" + (t[1]+1) + ", s" + (t[2]+1) + " of replica A, right now: <b>" + unsat + " of 3 bonds unsatisfied</b> (dashed red). " +
+          (unsat === 3 ? "All three bonds want the impossible at once." : "One bond always has to lose — the best arrangement still leaves it paying energy.");
+      }
+
+      /* ============ Controls ============ */
+      var slider = el("temp");
+      function sliderT(){ var f = slider.value/1000; return 0.05 * Math.pow(2.5/0.05, f); }
+      function setSliderFromT(t){
+        var f = Math.log(t/0.05) / Math.log(2.5/0.05);
+        slider.value = Math.round(Math.max(0, Math.min(1, f)) * 1000);
+      }
+      function regimeText(t){
+        if(t < 0.25) return "<b>Frozen glass.</b> Flips are almost all rejected uphill — each replica is trapped in one valley, and P(q) freezes wherever the replicas landed.";
+        if(t < 0.6) return "<b>Deep in the glass phase.</b> The replicas creep between nearby valleys; the overlap distribution spreads as they settle into related states.";
+        if(t < 1.1) return "<b>Glass transition zone.</b> Valleys open and close — replicas partly agree, partly wander. Watch P(q) broaden and narrow.";
+        return "<b>Paramagnetic melt.</b> Thermal noise overwhelms the couplings; spins flip almost freely and the replicas barely resemble each other.";
+      }
+      function syncT(){
+        T = sliderT();
+        el("tVal").textContent = T.toFixed(2);
+        el("regime").innerHTML = regimeText(T);
+      }
+      slider.addEventListener("input", function(){ annealing = false; syncT(); });
+
+      el("pauseBtn").addEventListener("click", function(){
+        running = !running;
+        this.textContent = running ? "Pause" : "Resume";
+        this.setAttribute("aria-pressed", running ? "false" : "true");
+        el("status").textContent = running ? "Sampling." : "Paused — the replicas hold their current states.";
+      });
+
+      el("scrambleBtn").addEventListener("click", function(){
+        A = randSpin(); B = randSpin(); ra.s = A; rb.s = B;
+        EA = energy(A); EB = energy(B);
+        traceA.length = 0; traceB.length = 0;
+        noteBest(); renderReplicas(); drawTriangle();
+        el("status").textContent = "Both replicas re-randomised. Watch them cool into the landscape from a hot start.";
+      });
+
+      el("annealBtn").addEventListener("click", function(){
+        annealing = true; annealP = 0;
+        el("status").textContent = "Annealing: temperature sweeping 2.50 → 0.05 while both replicas sample.";
+      });
+
+      el("quenchBtn").addEventListener("click", function(){
+        /* multi-restart anneal, same schedule family verified against the exact GS */
+        var best = null, bestFound = Infinity;
+        for(var r=0;r<8;r++){
+          var s = randSpin();
+          var SW = 420;
+          for(var sw=0; sw<SW; sw++){
+            var tt = 2.0 * Math.pow(0.04/2.0, sw/SW);
+            sweep(s, tt);
+          }
+          var e = energy(s);
+          if(e < bestFound){ bestFound = e; best = Int8Array.from(s); }
+        }
+        A = best; ra.s = A; EA = bestFound;
+        noteBest(); renderReplicas(); drawTriangle();
+        if(Math.abs(bestFound - GS) < 1e-9){
+          el("status").innerHTML = "Hunt over: replica A now sits at <span class='mono'>" + fmtE(bestFound) + "</span> — the <b>exact ground state</b> of this instance, matching the full 2²⁴ enumeration.";
+        } else {
+          el("status").innerHTML = "Hunt over: best found <span class='mono'>" + fmtE(bestFound) + "</span>, still above the exact ground state −16.9836. The landscape wins this round — hunt again.";
+        }
+      });
+
+      el("copybtn").addEventListener("click", function(){
+        var btn = this, txt = el("runcmd").textContent;
+        function done(){ btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = "Copy"; }, 1600); }
+        if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, done); }
+        else {
+          var ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta);
+          ta.select(); try { document.execCommand("copy"); } catch(e){} document.body.removeChild(ta); done();
+        }
+      });
+
+      /* ============ Main loop ============ */
+      var frame = 0;
+      function tick(){
+        if(running){
+          if(annealing){
+            annealP += 1/330; /* ~5.5 s at 60 fps */
+            if(annealP >= 1){ annealing = false; setSliderFromT(0.08); syncT(); el("status").textContent = "Anneal complete — replicas settled at T = 0.08. Raise the temperature to melt them again."; }
+            else { var tt = 2.5 * Math.pow(0.05/2.5, annealP); setSliderFromT(tt); el("tVal").textContent = tt.toFixed(2); el("regime").innerHTML = regimeText(tt); T = tt; }
+          }
+          var per = 5;
+          for(var k=0;k<per;k++){ sweep(A, T); sweep(B, T); sweeps++; }
+          EA = energy(A); EB = energy(B);
+          noteBest();
+          var q = overlap();
+          var bi = Math.round((q + 1) / 2 * (BINS - 1));
+          bins[bi]++; pqCount++; pqSum += q; pqSum2 += q*q;
+          traceA.push(EA); traceB.push(EB);
+          if(traceA.length > TRACE_MAX){ traceA.shift(); traceB.shift(); }
+          renderReplicas();
+          el("sweeps").textContent = sweeps.toLocaleString("en-US");
+          el("accept").textContent = attCount ? Math.round(100*accCount/attCount) + "%" : "—";
+          if(frame % 6 === 0) drawPQ();
+          if(frame % 3 === 0) drawTrace();
+          if(frame % 150 === 0) drawTriangle();
+        }
+        frame++;
+        requestAnimationFrame(tick);
+      }
+
+      /* theme changes repaint the SVG/canvas colors */
+      if(window.matchMedia){
+        var mq = window.matchMedia("(prefers-color-scheme: dark)");
+        if(mq.addEventListener) mq.addEventListener("change", function(){ drawPQ(); drawTrace(); drawTriangle(); });
+      }
+
+      syncT(); noteBest(); renderReplicas(); drawPQ(); drawTrace(); drawTriangle();
+      requestAnimationFrame(tick);
+    })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Station 11 — RNA Folding Ensemble</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+      * { box-sizing: border-box; }
+      :root {
+        --bg: #eef3f1;
+        --tile: #ffffff;
+        --tile-2: #f6faf8;
+        --ink: #10201d;
+        --muted: #57706a;
+        --faint: #8ba39d;
+        --line: #d7e2de;
+        --line-strong: #b9cdc7;
+        --accent: #0e7c86;
+        --accent-ink: #ffffff;
+        --accent-soft: #e2f2f0;
+        --coral: #d6542f;
+        --base-a: #b97a08;
+        --base-u: #0e7c86;
+        --base-g: #3565c4;
+        --base-c: #bd4462;
+        --pair-gc: #0e7c86;
+        --pair-au: #c07f13;
+        --pair-gu: #849b95;
+        --ghost: #a9bfba;
+        --track: #dce7e3;
+        --shadow: 0 1px 2px rgba(16, 48, 44, .05), 0 8px 24px -18px rgba(16, 48, 44, .25);
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a1413;
+          --tile: #111e1c;
+          --tile-2: #0d1917;
+          --ink: #e4efec;
+          --muted: #9db4ae;
+          --faint: #6d8881;
+          --line: #223632;
+          --line-strong: #33514b;
+          --accent: #2fb3bf;
+          --accent-ink: #06201f;
+          --accent-soft: #123330;
+          --coral: #f0764f;
+          --base-a: #e0a63e;
+          --base-u: #2fb3bf;
+          --base-g: #7ea2e8;
+          --base-c: #e07f96;
+          --pair-gc: #2fb3bf;
+          --pair-au: #e0a63e;
+          --pair-gu: #7d968f;
+          --ghost: #3d5a54;
+          --track: #1d2f2c;
+          --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.7);
+          color-scheme: dark;
+        }
+      }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+      .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 20px 56px; }
+
+      /* ---------- header ---------- */
+      .station-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 14px; }
+      .chip {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 12px; font-weight: 600; letter-spacing: .08em;
+        padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: 999px;
+        color: var(--muted); background: var(--tile);
+      }
+      .chip.live { color: var(--accent); border-color: var(--accent); }
+      .chip .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 6px; vertical-align: 1px; }
+      h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; margin: 0 0 10px; font-weight: 700; letter-spacing: -0.015em; }
+      .lede { font-size: clamp(16px, 2.2vw, 19px); color: var(--muted); max-width: 62ch; margin: 0; }
+      .lede strong { color: var(--ink); font-weight: 600; }
+
+      /* ---------- bento grid ---------- */
+      .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 26px; }
+      .tile {
+        background: var(--tile); border: 1px solid var(--line); border-radius: 14px;
+        padding: 18px; box-shadow: var(--shadow); min-width: 0;
+      }
+      .tile-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+      .tile-label {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--faint);
+      }
+      .tile-title { font-size: 16px; font-weight: 600; margin: 2px 0 0; }
+      .tile-note { font-size: 12.5px; color: var(--muted); }
+      .viz { grid-column: span 8; grid-row: span 2; display: flex; flex-direction: column; }
+      .controls { grid-column: span 4; }
+      .readouts { grid-column: span 4; }
+      .dotplot { grid-column: span 4; }
+      .energy { grid-column: span 4; }
+      .model { grid-column: span 4; }
+      .results { grid-column: span 7; }
+      .runcmd { grid-column: span 5; }
+
+      /* ---------- arc diagram ---------- */
+      .viz-stage { flex: 1; display: flex; align-items: center; }
+      #arcSvg { width: 100%; height: auto; display: block; }
+      .base-letter { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 600; cursor: pointer; }
+      .base-sel-ring { fill: none; stroke: var(--coral); stroke-width: 1.6; }
+      .arc { fill: none; stroke-linecap: round; }
+      .arc-new { animation: arcIn .45s ease both; }
+      @keyframes arcIn { from { opacity: 0; } to { opacity: 1; } }
+      @media (prefers-reduced-motion: reduce) { .arc-new { animation: none; } }
+      .viz-status {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--muted);
+        border-top: 1px dashed var(--line); padding-top: 12px; margin-top: 8px;
+        display: flex; flex-wrap: wrap; gap: 6px 18px;
+      }
+      .viz-status b { color: var(--ink); font-weight: 600; }
+      .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+      .legend span::before { content: ""; display: inline-block; width: 18px; height: 3px; border-radius: 2px; margin-right: 7px; vertical-align: middle; background: var(--sw, var(--accent)); }
+      .legend .lg-gc { --sw: var(--pair-gc); } .legend .lg-au { --sw: var(--pair-au); } .legend .lg-gu { --sw: var(--pair-gu); }
+      .legend .lg-ghost { --sw: var(--ghost); }
+
+      /* ---------- controls ---------- */
+      .ctl-block { margin-bottom: 20px; }
+      .ctl-block:last-child { margin-bottom: 0; }
+      .ctl-label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+      .ctl-label .val { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; color: var(--accent); font-weight: 600; }
+      input[type="range"] { width: 100%; accent-color: var(--accent); height: 32px; cursor: pointer; }
+      .scale-marks { display: flex; justify-content: space-between; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 10.5px; color: var(--faint); margin-top: 2px; }
+      .seg { display: flex; background: var(--track); border-radius: 10px; padding: 3px; gap: 3px; }
+      .seg button {
+        flex: 1; border: 0; background: transparent; color: var(--muted); border-radius: 8px;
+        font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 6px; cursor: pointer; min-height: 38px;
+      }
+      .seg button[aria-pressed="true"] { background: var(--tile); color: var(--ink); box-shadow: 0 1px 3px rgba(10,40,36,.18); }
+      .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+      .btn {
+        border: 1px solid var(--line-strong); background: var(--tile); color: var(--ink);
+        font: inherit; font-size: 13.5px; font-weight: 600; border-radius: 9px;
+        padding: 9px 14px; cursor: pointer; min-height: 40px;
+      }
+      .btn:hover { border-color: var(--accent); color: var(--accent); }
+      .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+      .btn.primary:hover { filter: brightness(1.07); color: var(--accent-ink); }
+      .btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+      .ctl-hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+      /* ---------- readouts ---------- */
+      .readout-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+      .ro { border-top: 2px solid var(--track); padding-top: 8px; }
+      .ro .ro-k { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+      .ro .ro-v { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 21px; font-weight: 600; line-height: 1.25; }
+      .ro .ro-v small { font-size: 12px; color: var(--faint); font-weight: 500; }
+      .ro .ro-v.good { color: var(--accent); }
+      .match-banner {
+        margin-top: 14px; border-radius: 10px; padding: 10px 12px; font-size: 13.5px; font-weight: 600;
+        background: var(--accent-soft); color: var(--accent); display: none;
+      }
+      .match-banner.on { display: block; }
+
+      /* ---------- dot plot ---------- */
+      #dotCanvas { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 10px; background: var(--tile-2); cursor: crosshair; }
+      .dot-read { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12.5px; color: var(--muted); margin-top: 10px; min-height: 1.4em; }
+      .dot-read b { color: var(--ink); }
+
+      /* ---------- energy ---------- */
+      .e-row { margin-bottom: 12px; }
+      .e-row .e-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+      .e-row .e-top .e-v { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 600; }
+      .e-bar { height: 8px; border-radius: 4px; background: var(--track); overflow: hidden; }
+      .e-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width .35s ease; }
+      .e-fill.neg2 { background: var(--base-g); } .e-fill.pos { background: var(--coral); }
+      @media (prefers-reduced-motion: reduce) { .e-fill { transition: none; } }
+      .e-total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
+      .e-total .t-k { font-weight: 600; font-size: 14px; }
+      .e-total .t-v { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 24px; font-weight: 600; }
+
+      /* ---------- model ---------- */
+      .model ul { margin: 0; padding: 0; list-style: none; }
+      .model li { padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+      .model li:first-child { border-top: 0; padding-top: 2px; }
+      .model li b { display: block; font-size: 13.5px; }
+      .model li span { color: var(--muted); font-size: 13px; }
+      .affinity { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+      .affinity .af {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11.5px; font-weight: 600;
+        border: 1px solid var(--line-strong); border-radius: 6px; padding: 3px 8px; color: var(--muted);
+      }
+
+      /* ---------- results ---------- */
+      .fig-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+      .fig { border-top: 3px solid var(--accent); padding-top: 10px; }
+      .fig .f-v { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: clamp(24px, 3.4vw, 34px); font-weight: 600; line-height: 1.1; }
+      .fig .f-k { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+      .disclaimer {
+        margin-top: 16px; font-size: 12.5px; color: var(--muted);
+        border: 1px dashed var(--line-strong); border-radius: 9px; padding: 9px 12px;
+      }
+      .disclaimer b { color: var(--ink); }
+
+      /* ---------- run command ---------- */
+      .cmd-box {
+        display: flex; align-items: center; gap: 10px; background: var(--tile-2);
+        border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+      }
+      .cmd-box code {
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 14.5px; font-weight: 500;
+        flex: 1; min-width: 0; overflow-wrap: anywhere;
+      }
+      .cmd-box code::before { content: "$ "; color: var(--faint); }
+      .copy-btn { flex: none; }
+      .run-note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+      .seq-line { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; margin-top: 12px; border-top: 1px dashed var(--line); padding-top: 10px; }
+      .seq-line b { color: var(--ink); }
+
+      footer { margin-top: 30px; font-size: 12.5px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 6px 20px; }
+
+      @media (max-width: 1020px) {
+        .viz { grid-column: span 12; grid-row: auto; }
+        .controls, .readouts, .dotplot, .energy, .model { grid-column: span 6; }
+        .results, .runcmd { grid-column: span 12; }
+        .fig-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 620px) {
+        .wrap { padding: 20px 14px 44px; }
+        .controls, .readouts, .dotplot, .energy, .model { grid-column: span 12; }
+        .tile { padding: 15px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="station-row">
+          <span class="chip">STATION 11 · EXP 11</span>
+          <span class="chip">THERMO LAB · 1 OF 16 STATIONS</span>
+          <span class="chip live"><span class="dot"></span>LIVE SAMPLER IN BROWSER</span>
+        </div>
+        <h1>RNA Folding Ensemble</h1>
+        <p class="lede">
+          Boltzmann sampling of RNA secondary structure with <strong>stacking</strong>, <strong>affinities</strong>,
+          and <strong>steric exclusion</strong>. Exact at N&nbsp;=&nbsp;24, scaled to a 50-nt riboswitch at
+          N&nbsp;=&nbsp;50. Drag the temperature and watch the ensemble melt and refold — every arc below is drawn
+          exactly from the Boltzmann distribution, computed live by partition function.
+        </p>
+      </header>
+
+      <div class="grid">
+        <!-- ======== ARC DIAGRAM ======== -->
+        <section class="tile viz" aria-label="Live secondary structure diagram">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">Secondary structure</div>
+              <h2 class="tile-title" id="vizTitle">Hairpin · N = 24</h2>
+            </div>
+            <div class="seg" role="group" aria-label="Diagram mode" style="min-width: 190px;">
+              <button type="button" id="modeSample" aria-pressed="true">Sample</button>
+              <button type="button" id="modeEnsemble" aria-pressed="false">Ensemble</button>
+            </div>
+          </div>
+          <div class="viz-stage">
+            <svg id="arcSvg" role="img" aria-label="Arc diagram of the currently sampled RNA secondary structure"></svg>
+          </div>
+          <div class="legend" aria-hidden="true">
+            <span class="lg-gc">G–C pair</span>
+            <span class="lg-au">A–U pair</span>
+            <span class="lg-gu">G–U wobble</span>
+            <span class="lg-ghost">Ground state (below axis)</span>
+          </div>
+          <div class="viz-status" id="vizStatus"></div>
+        </section>
+
+        <!-- ======== CONTROLS ======== -->
+        <section class="tile controls" aria-label="Sampler controls">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">Controls</div>
+              <h2 class="tile-title">Ensemble dial</h2>
+            </div>
+          </div>
+
+          <div class="ctl-block">
+            <div class="ctl-label">
+              <label for="tempSlider">Temperature T</label>
+              <span class="val" id="tempVal">T = 0.90 · β = 1.11</span>
+            </div>
+            <input type="range" id="tempSlider" min="0.2" max="3" step="0.01" value="0.9" aria-describedby="tempHint" />
+            <div class="scale-marks"><span>0.20 · frozen</span><span>1.0</span><span>3.0 · melted</span></div>
+            <p class="ctl-hint" id="tempHint">Low T locks the chain into its ground-state fold. High T melts the stems into a flickering soup of short-lived pairs.</p>
+          </div>
+
+          <div class="ctl-block">
+            <div class="ctl-label"><span>Sequence length</span><span class="val" id="lenVal">N = 24</span></div>
+            <div class="seg" role="group" aria-label="Sequence length">
+              <button type="button" id="len24" aria-pressed="true">N = 24 · exact</button>
+              <button type="button" id="len50" aria-pressed="false">N = 50 · riboswitch</button>
+            </div>
+          </div>
+
+          <div class="ctl-block">
+            <div class="ctl-label"><span>Sampler</span></div>
+            <div class="btn-row">
+              <button type="button" class="btn primary" id="resampleBtn">↻ Resample</button>
+              <button type="button" class="btn" id="annealBtn">Anneal to ground state</button>
+              <button type="button" class="btn" id="autoBtn" aria-pressed="true">Auto-sample: on</button>
+            </div>
+            <p class="ctl-hint">Tip: tap any base letter in the diagram to inspect its pairing partners.</p>
+          </div>
+        </section>
+
+        <!-- ======== LIVE READOUTS ======== -->
+        <section class="tile readouts" aria-label="Live readouts">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">Live readouts</div>
+              <h2 class="tile-title">This sample</h2>
+            </div>
+            <span class="tile-note">demo sampler</span>
+          </div>
+          <div class="readout-list">
+            <div class="ro"><div class="ro-k">Base pairs formed</div><div class="ro-v" id="roPairs">–</div></div>
+            <div class="ro"><div class="ro-k">Ground-state overlap</div><div class="ro-v" id="roOverlap">–</div></div>
+            <div class="ro"><div class="ro-k">Ensemble entropy S, est.</div><div class="ro-v" id="roEntropy">–</div></div>
+            <div class="ro"><div class="ro-k">P(ground state), ensemble</div><div class="ro-v" id="roPground">–</div></div>
+            <div class="ro"><div class="ro-k">Extra pairs beyond ground state</div><div class="ro-v" id="roExtra">–</div></div>
+            <div class="ro"><div class="ro-k">Samples drawn</div><div class="ro-v" id="roCount">0</div></div>
+          </div>
+          <div class="match-banner" id="matchBanner">Exact ground-state structure sampled — every ground-state pair present, no extras.</div>
+        </section>
+
+        <!-- ======== DOT PLOT ======== -->
+        <section class="tile dotplot" aria-label="Base-pair probability matrix">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">Pair probabilities</div>
+              <h2 class="tile-title">Boltzmann dot plot</h2>
+            </div>
+            <span class="tile-note">240 draws</span>
+          </div>
+          <canvas id="dotCanvas" width="520" height="520"></canvas>
+          <div class="dot-read" id="dotRead">Hover or tap the matrix to read the pairing frequency at the current temperature.</div>
+        </section>
+
+        <!-- ======== ENERGY ======== -->
+        <section class="tile energy" aria-label="Energy breakdown">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">Hamiltonian</div>
+              <h2 class="tile-title">Energy of this fold</h2>
+            </div>
+            <span class="tile-note">demo model units</span>
+          </div>
+          <div class="e-row">
+            <div class="e-top"><span>Pair affinities</span><span class="e-v" id="ePairV">–</span></div>
+            <div class="e-bar"><div class="e-fill" id="ePair" style="width:0%"></div></div>
+          </div>
+          <div class="e-row">
+            <div class="e-top"><span>Stacking bonus</span><span class="e-v" id="eStackV">–</span></div>
+            <div class="e-bar"><div class="e-fill neg2" id="eStack" style="width:0%"></div></div>
+          </div>
+          <div class="e-row">
+            <div class="e-top"><span>Loop entropy penalty</span><span class="e-v" id="eLoopV">–</span></div>
+            <div class="e-bar"><div class="e-fill pos" id="eLoop" style="width:0%"></div></div>
+          </div>
+          <div class="e-total"><span class="t-k">ΔG of sampled fold</span><span class="t-v" id="eTotal">–</span></div>
+          <p class="tile-note" style="margin-top:10px;">Demo model&rsquo;s ground-state ΔG for the demo sequence: <span id="eGround" style="font-family:'IBM Plex Mono',monospace;">–</span>. A browser-demo figure, not a benchmark result.</p>
+        </section>
+
+        <!-- ======== MODEL ======== -->
+        <section class="tile model" aria-label="Model ingredients">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">The physics</div>
+              <h2 class="tile-title">Three ingredients</h2>
+            </div>
+            <span class="tile-note">demo parameters</span>
+          </div>
+          <ul>
+            <li>
+              <b>Affinities</b>
+              <span>Each candidate pair carries a base-pair affinity; G–C binds hardest, the G–U wobble barely holds. The browser demo scores them:</span>
+              <span class="affinity"><span class="af">G–C · 2.2</span><span class="af">A–U · 1.4</span><span class="af">G–U · 0.6</span></span>
+            </li>
+            <li>
+              <b>Stacking</b>
+              <span>Adjacent pairs in a stem stabilise each other (+1.6 in the demo model), which is why folds grow long unbroken stems instead of scattered pairs.</span>
+            </li>
+            <li>
+              <b>Steric exclusion</b>
+              <span>One partner per base, a minimum hairpin loop of 3 unpaired bases, and no crossing pairs — built into the partition function, so forbidden structures carry exactly zero weight.</span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- ======== PUBLISHED RESULTS ======== -->
+        <section class="tile results" aria-label="Published benchmark results">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">Benchmark · Exp 11</div>
+              <h2 class="tile-title">Published results</h2>
+            </div>
+          </div>
+          <div class="fig-grid">
+            <div class="fig"><div class="f-v">100%</div><div class="f-k">Ground state match — the headline metric</div></div>
+            <div class="fig"><div class="f-v">7/7</div><div class="f-k">Tests passing</div></div>
+            <div class="fig"><div class="f-v">0.21 s</div><div class="f-k">Runtime at N = 24 (exact)</div></div>
+            <div class="fig"><div class="f-v">0.31 s</div><div class="f-k">Runtime at N = 50 (riboswitch)</div></div>
+          </div>
+          <p class="disclaimer"><b>Label for every figure in this tile:</b> simulated benchmark result, results may vary (not customer results).</p>
+        </section>
+
+        <!-- ======== RUN COMMAND ======== -->
+        <section class="tile runcmd" aria-label="Run it yourself">
+          <div class="tile-head">
+            <div>
+              <div class="tile-label">Reproduce it</div>
+              <h2 class="tile-title">Run Exp 11</h2>
+            </div>
+          </div>
+          <div class="cmd-box">
+            <code id="runCmd">uv run thrml-bench run --exp 11</code>
+            <button type="button" class="btn copy-btn" id="copyBtn">Copy</button>
+          </div>
+          <p class="run-note">Runs the full Boltzmann ensemble benchmark — exact at N = 24 and scaled to the 50-nt riboswitch at N = 50 — and checks the sampled ground state against the known fold.</p>
+          <p class="seq-line" id="seqLine"></p>
+        </section>
+      </div>
+
+      <footer>
+        <span>Station 11 — RNA Folding Ensemble · Thermo Lab</span>
+        <span>Live tiles run a miniature exact sampler in your browser on an illustrative demo sequence; published figures are the benchmark&rsquo;s.</span>
+      </footer>
+    </div>
+
+    <script>
+    (function () {
+      "use strict";
+      var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      /* ============ demo sequences & ground truth (illustrative, for the browser sampler) ============ */
+      function revcomp(s) {
+        var c = { A: "U", U: "A", G: "C", C: "G" };
+        return s.split("").reverse().map(function (x) { return c[x]; }).join("");
+      }
+      function hairpinPairs(start, stem, loop) {
+        var out = [];
+        for (var k = 0; k < stem; k++) out.push([start + k, start + 2 * stem + loop - 1 - k]);
+        return out;
+      }
+      var DATA = {
+        24: {
+          label: "Hairpin · N = 24",
+          seq: "GUACCAUCGA" + "GAAA" + revcomp("GUACCAUCGA"),
+          ground: hairpinPairs(0, 10, 4)
+        },
+        50: {
+          label: "Riboswitch · N = 50",
+          seq: ("GAUCGCAUG" + "GAAA" + revcomp("GAUCGCAUG")) + "AAAAAA" + ("CGAUUGCAC" + "UUAA" + revcomp("CGAUUGCAC")),
+          ground: hairpinPairs(0, 9, 4).concat(hairpinPairs(28, 9, 4))
+        }
+      };
+
+      /* ============ demo energy model ============ */
+      var SCORE = { GC: 2.2, AU: 1.4, GU: 0.6 };
+      var STACK = 1.6, LOOP_COST = 0.35, MIN_LOOP = 4; // j-i >= 4  =>  >= 3 unpaired bases in a hairpin loop
+
+      function pairType(a, b) {
+        var s = a + b;
+        if (s === "GC" || s === "CG") return "GC";
+        if (s === "AU" || s === "UA") return "AU";
+        if (s === "GU" || s === "UG") return "GU";
+        return null;
+      }
+
+      var state = {
+        N: 24, T: 0.9, mode: "sample",
+        candidates: [], candByKey: {}, groundSet: {}, groundPairs: [],
+        ctx: null, freq: {}, batchN: 240, batchExact: 0,
+        sample: [], sampleCount: 0,
+        selected: -1, auto: true, annealTimer: null
+      };
+
+      function buildCandidates() {
+        var seq = DATA[state.N].seq, N = state.N;
+        var cand = [], byKey = {}, i, j, t;
+        for (i = 0; i < N; i++) for (j = i + MIN_LOOP; j < N; j++) {
+          t = pairType(seq[i], seq[j]);
+          if (t) { var c = { i: i, j: j, type: t }; cand.push(c); byKey[i + "," + j] = c; }
+        }
+        state.candidates = cand;
+        state.candByKey = byKey;
+        state.groundSet = {};
+        DATA[state.N].ground.forEach(function (p) { state.groundSet[p[0] + "," + p[1]] = true; });
+        state.groundPairs = DATA[state.N].ground;
+      }
+
+      /* ---- exact partition function (McCaskill-style DP with stacking + hairpin loop cost) ---- */
+      function computeQ(T) {
+        var seq = DATA[state.N].seq, N = state.N;
+        var Q = [], Qb = [], i, j, len;
+        for (i = 0; i < N; i++) { Q.push(new Float64Array(N)); Qb.push(new Float64Array(N)); }
+        function q(a, b) { return a > b ? 1 : Q[a][b]; }
+        var eS = Math.exp(STACK / T), eL = Math.exp(-LOOP_COST / T);
+        for (len = 1; len <= N; len++) {
+          for (i = 0; i + len - 1 < N; i++) {
+            j = i + len - 1;
+            if (j - i >= MIN_LOOP) {
+              var t = pairType(seq[i], seq[j]);
+              if (t) {
+                var R = (i + 1 > j - 1) ? eL : Q[i + 1][j - 1] + (eS - 1) * Qb[i + 1][j - 1] + (eL - 1);
+                Qb[i][j] = Math.exp(SCORE[t] / T) * R;
+              }
+            }
+            if (i === j) { Q[i][j] = 1; }
+            else {
+              var s = q(i, j - 1), k;
+              for (k = i; k <= j; k++) if (Qb[k][j]) s += q(i, k - 1) * Qb[k][j];
+              Q[i][j] = s;
+            }
+          }
+        }
+        return { Q: Q, Qb: Qb, q: q, T: T };
+      }
+
+      /* ---- stochastic backtracking: exact Boltzmann draws ---- */
+      function sampleQ(ctx, i, j, out) {
+        if (i >= j) return;
+        var Q = ctx.Q, Qb = ctx.Qb, q = ctx.q;
+        var r = Math.random() * Q[i][j];
+        var wU = q(i, j - 1);
+        if (r < wU) { sampleQ(ctx, i, j - 1, out); return; }
+        r -= wU;
+        for (var k = i; k <= j; k++) {
+          var w = q(i, k - 1) * (Qb[k][j] || 0);
+          if (!w) continue;
+          if (r < w) {
+            out.push({ i: k, j: j, type: pairType(DATA[state.N].seq[k], DATA[state.N].seq[j]) });
+            sampleQ(ctx, i, k - 1, out);
+            sampleInside(ctx, k + 1, j - 1, out);
+            return;
+          }
+          r -= w;
+        }
+        sampleQ(ctx, i, j - 1, out);
+      }
+      function sampleInside(ctx, a, b, out) {
+        if (a > b) return;
+        var Q = ctx.Q, Qb = ctx.Qb, T = ctx.T;
+        var eS = Math.exp(STACK / T), eL = Math.exp(-LOOP_COST / T);
+        var wStack = eS * (Qb[a][b] || 0), wEmpty = eL;
+        var wMid = Math.max(0, Q[a][b] - 1 - (Qb[a][b] || 0));
+        var r = Math.random() * (wStack + wEmpty + wMid);
+        if (r < wStack) {
+          out.push({ i: a, j: b, type: pairType(DATA[state.N].seq[a], DATA[state.N].seq[b]) });
+          sampleInside(ctx, a + 1, b - 1, out);
+          return;
+        }
+        r -= wStack;
+        if (r < wEmpty) return;
+        sampleMid(ctx, a, b, true, out);
+      }
+      function sampleMid(ctx, i, j, forbidTop, out) {
+        var Q = ctx.Q, Qb = ctx.Qb, q = ctx.q;
+        var total = Q[i][j] - 1 - (forbidTop ? (Qb[i][j] || 0) : 0);
+        if (total <= 0) return;
+        var r = Math.random() * total;
+        var wUn = q(i, j - 1) - 1;
+        if (r < wUn) { sampleMid(ctx, i, j - 1, false, out); return; }
+        r -= wUn;
+        for (var k = i; k <= j; k++) {
+          if (forbidTop && k === i) continue;
+          var w = q(i, k - 1) * (Qb[k][j] || 0);
+          if (!w) continue;
+          if (r < w) {
+            out.push({ i: k, j: j, type: pairType(DATA[state.N].seq[k], DATA[state.N].seq[j]) });
+            sampleQ(ctx, i, k - 1, out);
+            sampleInside(ctx, k + 1, j - 1, out);
+            return;
+          }
+          r -= w;
+        }
+      }
+      function drawStructure() {
+        var out = [];
+        sampleQ(state.ctx, 0, state.N - 1, out);
+        return out;
+      }
+      function isExact(s) {
+        if (s.length !== state.groundPairs.length) return false;
+        return s.every(function (p) { return state.groundSet[p.i + "," + p.j]; });
+      }
+
+      /* ---- ensemble batch: frequencies, exact-share, entropy estimate ---- */
+      function refreshEnsemble() {
+        state.ctx = computeQ(state.T);
+        var freq = {}, exact = 0, r, s, n;
+        for (r = 0; r < state.batchN; r++) {
+          s = drawStructure();
+          if (isExact(s)) exact++;
+          for (n = 0; n < s.length; n++) {
+            var key = s[n].i + "," + s[n].j;
+            freq[key] = (freq[key] || 0) + 1;
+          }
+        }
+        state.freq = freq;
+        state.batchExact = exact;
+        state.sample = drawStructure();
+        state.sampleCount++;
+      }
+      function pairFreq(i, j) { return (state.freq[i + "," + j] || 0) / state.batchN; }
+      function ensembleEntropy() {
+        var S = 0;
+        state.candidates.forEach(function (c) {
+          var p = pairFreq(c.i, c.j);
+          if (p > 0 && p < 1) S += -(p * Math.log(p) + (1 - p) * Math.log(1 - p));
+        });
+        return S;
+      }
+
+      function energyOf(pairs) {
+        var set = {}, pairE = 0, stackE = 0;
+        pairs.forEach(function (p) { set[p.i + "," + p.j] = true; pairE -= SCORE[p.type]; });
+        pairs.forEach(function (p) { if (set[(p.i + 1) + "," + (p.j - 1)]) stackE -= STACK; });
+        var loops = 0;
+        pairs.forEach(function (p) {
+          var inner = pairs.some(function (q) { return p.i < q.i && q.j < p.j; });
+          if (!inner) loops++;
+        });
+        return { pair: pairE, stack: stackE, loop: LOOP_COST * loops, total: pairE + stackE + LOOP_COST * loops };
+      }
+      function groundEnergy() {
+        return energyOf(state.groundPairs.map(function (p) {
+          return { i: p[0], j: p[1], type: pairType(DATA[state.N].seq[p[0]], DATA[state.N].seq[p[1]]) };
+        }));
+      }
+
+      /* ============ arc diagram ============ */
+      var svg = document.getElementById("arcSvg");
+      var NS = "http://www.w3.org/2000/svg";
+      function el(name, attrs) {
+        var e = document.createElementNS(NS, name);
+        for (var k in attrs) e.setAttribute(k, attrs[k]);
+        return e;
+      }
+      var BASE_COLOR = { A: "var(--base-a)", U: "var(--base-u)", G: "var(--base-g)", C: "var(--base-c)" };
+      var PAIR_COLOR = { GC: "var(--pair-gc)", AU: "var(--pair-au)", GU: "var(--pair-gu)" };
+
+      function renderDiagram(animate) {
+        var N = state.N, seq = DATA[N].seq;
+        var sp = N <= 24 ? 21 : 15.4;
+        var padX = 16, W = (N - 1) * sp + padX * 2;
+        var baseY = 168, H = 252;
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+        function x(i) { return padX + i * sp; }
+        function arcPath(i, j, above) {
+          var x1 = x(i), x2 = x(j), mid = (x1 + x2) / 2;
+          var h = Math.min(14 + (j - i) * sp * 0.46, above ? baseY - 26 : 44);
+          var cy = above ? baseY - 2 * h : baseY + 2 * h;
+          return "M " + x1 + " " + baseY + " Q " + mid + " " + cy + " " + x2 + " " + baseY;
+        }
+
+        state.groundPairs.forEach(function (p) {
+          svg.appendChild(el("path", { d: arcPath(p[0], p[1], false), "class": "arc", stroke: "var(--ghost)", "stroke-width": 1.6, "stroke-dasharray": "4 3", opacity: 0.75 }));
+        });
+
+        var arcs = [];
+        if (state.mode === "sample") {
+          arcs = state.sample.map(function (p) { return { i: p.i, j: p.j, type: p.type, o: 0.95, w: 2.6 }; });
+        } else {
+          state.candidates.forEach(function (c) {
+            var f = pairFreq(c.i, c.j);
+            if (f > 0.03) arcs.push({ i: c.i, j: c.j, type: c.type, o: 0.08 + 0.85 * f, w: 1 + 1.8 * f });
+          });
+          arcs.sort(function (a, b) { return a.o - b.o; });
+        }
+        arcs.forEach(function (a) {
+          var hl = state.selected >= 0 && (a.i === state.selected || a.j === state.selected);
+          var path = el("path", {
+            d: arcPath(a.i, a.j, true), "class": "arc" + (animate && !REDUCED ? " arc-new" : ""),
+            stroke: hl ? "var(--coral)" : PAIR_COLOR[a.type],
+            "stroke-width": hl ? a.w + 1.2 : a.w, opacity: hl ? 1 : a.o
+          });
+          var title = el("title", {});
+          title.textContent = "Pair " + (a.i + 1) + "–" + (a.j + 1) + " (" + seq[a.i] + "–" + seq[a.j] + ", " + a.type + ")";
+          path.appendChild(title);
+          svg.appendChild(path);
+        });
+
+        svg.appendChild(el("line", { x1: padX - 6, y1: baseY, x2: W - padX + 6, y2: baseY, stroke: "var(--line-strong)", "stroke-width": 1.4 }));
+
+        for (var i = 0; i < N; i++) {
+          if (i === state.selected) {
+            svg.appendChild(el("circle", { cx: x(i), cy: baseY + 17, r: sp * 0.44, "class": "base-sel-ring" }));
+          }
+          var t = el("text", {
+            x: x(i), y: baseY + 21, "text-anchor": "middle",
+            "class": "base-letter", fill: BASE_COLOR[seq[i]],
+            "font-size": N <= 24 ? 13.5 : 11.5, "data-i": i
+          });
+          t.textContent = seq[i];
+          (function (idx, node) {
+            node.addEventListener("click", function () {
+              state.selected = state.selected === idx ? -1 : idx;
+              renderAll(false);
+            });
+          })(i, t);
+          svg.appendChild(t);
+          var num = el("text", {
+            x: x(i), y: baseY + 64, "text-anchor": "middle",
+            fill: "var(--faint)", "font-size": 8.5, "font-family": "'IBM Plex Mono', monospace"
+          });
+          if (N <= 24 || (i + 1) % 5 === 0 || i === 0) num.textContent = i + 1;
+          svg.appendChild(num);
+        }
+      }
+
+      /* ============ dot plot ============ */
+      var canvas = document.getElementById("dotCanvas");
+      var ctx2 = canvas.getContext("2d");
+      function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+      function renderDotPlot() {
+        var N = state.N, size = canvas.width, cell = size / N;
+        var accent = cssVar("--accent") || "#0e7c86";
+        var coral = cssVar("--coral") || "#d6542f";
+        ctx2.clearRect(0, 0, size, size);
+        state.candidates.forEach(function (c) {
+          var f = pairFreq(c.i, c.j);
+          if (f < 0.02) return;
+          ctx2.globalAlpha = 0.12 + 0.88 * f;
+          ctx2.fillStyle = state.groundSet[c.i + "," + c.j] ? coral : accent;
+          var r = Math.max(1.2, cell * 0.36 * (0.4 + 0.6 * f));
+          ctx2.beginPath();
+          ctx2.arc((c.i + 0.5) * cell, (c.j + 0.5) * cell, r, 0, Math.PI * 2);
+          ctx2.fill();
+        });
+        ctx2.globalAlpha = 1;
+      }
+      var dotRead = document.getElementById("dotRead");
+      function dotInspect(evt) {
+        var rect = canvas.getBoundingClientRect();
+        var cx = (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left;
+        var cy = (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top;
+        var N = state.N;
+        var i = Math.floor(cx / rect.width * N), j = Math.floor(cy / rect.height * N);
+        if (i < 0 || j < 0 || i >= N || j >= N) return;
+        if (i > j) { var tmp = i; i = j; j = tmp; }
+        var seq = DATA[N].seq, t = pairType(seq[i], seq[j]);
+        if (!t || j - i < MIN_LOOP) {
+          dotRead.innerHTML = "Positions <b>" + (i + 1) + "–" + (j + 1) + "</b> (" + seq[i] + "–" + seq[j] + "): not a pairable combination.";
+          return;
+        }
+        var f = pairFreq(i, j);
+        dotRead.innerHTML = "f(" + (i + 1) + ", " + (j + 1) + ") = <b>" + f.toFixed(2) + "</b> · " +
+          seq[i] + "–" + seq[j] + " " + t + " pair, seen in " + Math.round(f * state.batchN) + " of " + state.batchN + " draws" +
+          (state.groundSet[i + "," + j] ? " · <b>ground-state pair</b>" : "") + " at T = " + state.T.toFixed(2);
+      }
+      canvas.addEventListener("mousemove", dotInspect);
+      canvas.addEventListener("click", dotInspect);
+
+      /* ============ readouts ============ */
+      function fmtPct(x) { return (x * 100).toFixed(0) + "%"; }
+      function renderReadouts() {
+        var groundHit = 0;
+        state.sample.forEach(function (p) { if (state.groundSet[p.i + "," + p.j]) groundHit++; });
+        var overlap = state.groundPairs.length ? groundHit / state.groundPairs.length : 0;
+        var extra = state.sample.length - groundHit;
+        var exact = isExact(state.sample);
+        var e = energyOf(state.sample);
+        var g = groundEnergy();
+
+        document.getElementById("roPairs").innerHTML = state.sample.length + " <small>/ " + state.groundPairs.length + " in ground state</small>";
+        var ov = document.getElementById("roOverlap");
+        ov.textContent = fmtPct(overlap);
+        ov.className = "ro-v" + (overlap >= 0.999 ? " good" : "");
+        document.getElementById("roEntropy").innerHTML = ensembleEntropy().toFixed(1) + " <small>nats</small>";
+        var pg = state.batchExact / state.batchN;
+        document.getElementById("roPground").textContent = pg < 0.005 ? "< 0.5%" : (pg * 100).toFixed(pg < 0.1 ? 1 : 0) + "%";
+        document.getElementById("roExtra").textContent = extra;
+        document.getElementById("roCount").textContent = state.sampleCount;
+        document.getElementById("matchBanner").className = "match-banner" + (exact && state.mode === "sample" ? " on" : "");
+
+        document.getElementById("ePairV").textContent = e.pair.toFixed(2);
+        document.getElementById("eStackV").textContent = e.stack.toFixed(2);
+        document.getElementById("eLoopV").textContent = "+" + e.loop.toFixed(2);
+        document.getElementById("eTotal").textContent = e.total.toFixed(2);
+        document.getElementById("eGround").textContent = g.total.toFixed(2);
+        var scale = Math.max(1, Math.abs(g.pair), Math.abs(g.stack));
+        document.getElementById("ePair").style.width = Math.min(100, Math.abs(e.pair) / scale * 100) + "%";
+        document.getElementById("eStack").style.width = Math.min(100, Math.abs(e.stack) / scale * 100) + "%";
+        document.getElementById("eLoop").style.width = Math.min(100, e.loop / 2 * 100) + "%";
+
+        var sel = state.selected, selTxt = "";
+        if (sel >= 0) {
+          var seq = DATA[state.N].seq;
+          var partners = state.candidates.filter(function (c) { return c.i === sel || c.j === sel; })
+            .map(function (c) { return { other: c.i === sel ? c.j : c.i, f: pairFreq(c.i, c.j) }; })
+            .sort(function (a, b) { return b.f - a.f; }).slice(0, 3);
+          selTxt = "<span>Base <b>" + (sel + 1) + " (" + seq[sel] + ")</b> top partners: " +
+            partners.map(function (x) { return (x.other + 1) + " (f=" + x.f.toFixed(2) + ")"; }).join(", ") + "</span>";
+        }
+        document.getElementById("vizStatus").innerHTML =
+          "<span>Sample <b>#" + state.sampleCount + "</b></span>" +
+          "<span>T = <b>" + state.T.toFixed(2) + "</b></span>" +
+          "<span>Mode: <b>" + (state.mode === "sample" ? "single sample" : "full ensemble") + "</b></span>" +
+          "<span>Overlap: <b>" + fmtPct(overlap) + "</b></span>" + selTxt;
+      }
+
+      function renderAll(animate) {
+        renderDiagram(animate);
+        renderDotPlot();
+        renderReadouts();
+      }
+
+      /* ============ controls ============ */
+      var slider = document.getElementById("tempSlider");
+      var tempVal = document.getElementById("tempVal");
+      function syncTemp() {
+        tempVal.textContent = "T = " + state.T.toFixed(2) + " · β = " + (1 / state.T).toFixed(2);
+      }
+      var tempPending = false;
+      slider.addEventListener("input", function () {
+        stopAnneal();
+        state.T = parseFloat(slider.value);
+        syncTemp();
+        if (!tempPending) {
+          tempPending = true;
+          requestAnimationFrame(function () {
+            tempPending = false;
+            refreshEnsemble();
+            renderAll(false);
+          });
+        }
+      });
+
+      function setLength(n) {
+        state.N = n;
+        state.selected = -1;
+        document.getElementById("len24").setAttribute("aria-pressed", n === 24 ? "true" : "false");
+        document.getElementById("len50").setAttribute("aria-pressed", n === 50 ? "true" : "false");
+        document.getElementById("lenVal").textContent = "N = " + n;
+        document.getElementById("vizTitle").textContent = DATA[n].label;
+        document.getElementById("seqLine").innerHTML = "<b>Demo sequence (" + n + " nt, browser sampler only — illustrative, not the benchmark&rsquo;s sequence):</b> 5′-" + DATA[n].seq + "-3′";
+        buildCandidates();
+        refreshEnsemble();
+        renderAll(true);
+      }
+      document.getElementById("len24").addEventListener("click", function () { stopAnneal(); setLength(24); });
+      document.getElementById("len50").addEventListener("click", function () { stopAnneal(); setLength(50); });
+
+      function setMode(m) {
+        state.mode = m;
+        document.getElementById("modeSample").setAttribute("aria-pressed", m === "sample" ? "true" : "false");
+        document.getElementById("modeEnsemble").setAttribute("aria-pressed", m === "ensemble" ? "true" : "false");
+        renderAll(false);
+      }
+      document.getElementById("modeSample").addEventListener("click", function () { setMode("sample"); });
+      document.getElementById("modeEnsemble").addEventListener("click", function () { setMode("ensemble"); });
+
+      document.getElementById("resampleBtn").addEventListener("click", function () {
+        stopAnneal();
+        if (state.mode !== "sample") setMode("sample");
+        state.sample = drawStructure();
+        state.sampleCount++;
+        renderAll(true);
+      });
+
+      var autoBtn = document.getElementById("autoBtn");
+      autoBtn.addEventListener("click", function () {
+        state.auto = !state.auto;
+        autoBtn.setAttribute("aria-pressed", state.auto ? "true" : "false");
+        autoBtn.textContent = "Auto-sample: " + (state.auto ? "on" : "off");
+      });
+      setInterval(function () {
+        if (state.auto && state.mode === "sample" && !state.annealTimer && !document.hidden) {
+          state.sample = drawStructure();
+          state.sampleCount++;
+          renderDiagram(true);
+          renderReadouts();
+        }
+      }, 2100);
+
+      /* anneal: sweep T down to near-frozen, redrawing from the exact ensemble at each step */
+      function stopAnneal() {
+        if (state.annealTimer) { cancelAnimationFrame(state.annealTimer); state.annealTimer = null; }
+      }
+      document.getElementById("annealBtn").addEventListener("click", function () {
+        stopAnneal();
+        if (state.mode !== "sample") setMode("sample");
+        var endT = 0.22;
+        if (REDUCED) {
+          state.T = endT; slider.value = String(endT); syncTemp();
+          refreshEnsemble();
+          for (var k = 0; k < 40 && !isExact(state.sample); k++) state.sample = drawStructure();
+          renderAll(false);
+          return;
+        }
+        var t0 = performance.now(), dur = 1900, startT = Math.max(state.T, 2.3);
+        function step(now) {
+          var f = Math.min(1, (now - t0) / dur);
+          state.T = startT * Math.pow(endT / startT, f);
+          slider.value = String(state.T);
+          syncTemp();
+          state.ctx = computeQ(state.T);
+          state.sample = drawStructure();
+          state.sampleCount++;
+          renderDiagram(false);
+          renderReadouts();
+          if (f < 1) { state.annealTimer = requestAnimationFrame(step); }
+          else {
+            state.annealTimer = null;
+            refreshEnsemble();
+            for (var k2 = 0; k2 < 40 && !isExact(state.sample); k2++) state.sample = drawStructure();
+            renderAll(true);
+          }
+        }
+        state.annealTimer = requestAnimationFrame(step);
+      });
+
+      /* copy run command */
+      var copyBtn = document.getElementById("copyBtn");
+      copyBtn.addEventListener("click", function () {
+        var text = document.getElementById("runCmd").textContent;
+        function done() {
+          copyBtn.textContent = "Copied ✓";
+          setTimeout(function () { copyBtn.textContent = "Copy"; }, 1600);
+        }
+        function fallback() {
+          var ta = document.createElement("textarea");
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); done(); } catch (e) { copyBtn.textContent = "Select & copy"; }
+          document.body.removeChild(ta);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, fallback);
+        } else fallback();
+      });
+
+      /* ============ init ============ */
+      buildCandidates();
+      document.getElementById("seqLine").innerHTML = "<b>Demo sequence (24 nt, browser sampler only — illustrative, not the benchmark&rsquo;s sequence):</b> 5′-" + DATA[24].seq + "-3′";
+      syncTemp();
+      refreshEnsemble();
+      renderAll(false);
+    })();
+    </script>
+  </body>
+</html>

@@ -1,10 +1,10 @@
-# Editorial Redesign Gameplan (Dr. Felix Meier / `drfelixmeier.com/research` Style)
+# Editorial Redesign Gameplan (Academic Research Bench Style)
 
-This specification translates the exact typography, surface tokens, scrollytelling layout, and micro-interaction patterns extracted from `https://www.drfelixmeier.com/research/` into an actionable execution plan for the thermodynamic pages in `C:\Users\mcder\Desktop\nexus-site-temp`.
+This specification translates the typography, surface tokens, scrollytelling layout, and micro-interaction patterns into an actionable execution plan for the thermodynamic pages in `C:\Users\mcder\Desktop\nexus-site-temp`.
 
 ---
 
-## 1. Why `drfelixmeier.com/research/` Looks So Good (Extracted Design DNA)
+## 1. Editorial Research Design DNA
 
 1. **Three-Font Editorial Typography Stack**:
    - **Display / Headlines (`--font-display`)**: **`Fraunces`** (Google Font, variable optical size `opsz 9..144`, weights `300, 400, 500`, normal & italic). Headlines use `font-normal leading-[0.95] tracking-[-0.03em] text-[clamp(40px,6.5vw,96px)]`, with the second half of the sentence wrapped in an italicized, lightweight accent span:
@@ -61,7 +61,7 @@ Edit `C:\Users\mcder\Desktop\nexus-site-temp\src\app\(thermo)\layout.tsx`:
    - `--color-ink-faint: rgba(250, 249, 245, 0.38)`
    - `--color-line: rgba(250, 249, 245, 0.10)`
 3. Add the subtle fixed SVG `fractalNoise` overlay right inside the layout wrapper (`aria-hidden="true"`).
-4. Style the `<header>` and `<nav>` like `drfelixmeier.com`:
+4. Style the `<header>` and `<nav>` with a minimalist editorial research top bar:
    - Minimal top bar (`border-b border-[var(--color-line)] bg-[#020308]/85 backdrop-blur-md px-[5vw] py-4`).
    - Left brand link in `font-mono text-[11px] uppercase tracking-[0.2em] text-[var(--color-ink-dim)]`.
    - Right links (`GitHub · thermo-physics`, `Contact`) as subtle `font-mono text-[11px] uppercase tracking-[0.15em]` pills.
@@ -70,7 +70,7 @@ Edit `C:\Users\mcder\Desktop\nexus-site-temp\src\app\(thermo)\layout.tsx`:
 ---
 
 ### Task 2: Redesign `src/components/thermo-pages/ThermoChrome.tsx` to Editorial Layout
-Update `ThermoChrome.tsx` so `<ThermoHero />`, `<ThermoCompare />`, and `<ThermoAuditForm />` adopt the Felix Meier editorial layout:
+Update `ThermoChrome.tsx` so `<ThermoHero />`, `<ThermoCompare />`, and `<ThermoAuditForm />` adopt the academic editorial layout:
 1. **`<ThermoHero />` Props & Markup**:
    - Accept an optional `indexLabel?: string` (e.g. `"01 / 03 · /codon"`), `accentColor?: string` (default `"#5eead4"`), and `headlineAccent?: string` (optional italicized second part of `h1` or render `h1` in `font-[family-name:var(--font-display)] font-normal leading-[0.96] tracking-[-0.03em] text-[clamp(38px,6vw,88px)] text-[var(--color-ink)]`).
    - **CRITICAL CHECK-SITE CONSTRAINT**: `scripts/check-site.mjs` checks that `<h1>` contains the exact string configured in `VERTICALS` (`"Codons anneal into place."`, `"Watch tasks fall into place."`, `"Four generators. One night."`). Keep the text inside `<h1>` identical in plain text, wrapping the final words in `<em className="italic font-light text-[color:var(--accent)]">...</em>` so `stripTags(h1)` still yields the exact string!
@@ -96,7 +96,7 @@ Update `ThermoChrome.tsx` so `<ThermoHero />`, `<ThermoCompare />`, and `<Thermo
 ### Task 3: Apply Per-Room Accents & Editorial Cards on `/codon`, `/dispatcher`, and `/microgrid`
 1. **`src/app/(thermo)/codon/page.tsx`**:
    - Set `--accent: #5eead4` (teal).
-   - Ensure `d_discoideum` (*Dictyostelium discoideum*, ~27% coding GC) is listed in Card 1 (`Supported Host Profiles`), and Card 2 states `Optional Assembly & Synthesis Exclusions (Off by Default)` so it matches Felix's workflow.
+   - Ensure `d_discoideum` (*Dictyostelium discoideum*, ~27% coding GC) is listed in Card 1 (`Supported Host Profiles`), and Card 2 states `Optional Assembly & Synthesis Exclusions (Off by Default)` so it matches biofoundry workflows.
    - Style the 4 Biofoundry Architecture cards as `arbor-card` blocks (`rounded-2xl border border-[var(--color-line)] bg-[#060811]/80 p-6 md:p-8 opacity-80 hover:opacity-100 transition-opacity duration-500`) with `font-mono text-[11px] uppercase tracking-[0.18em] text-[color:var(--accent)]` kickers (`// 01 · host tables`, `// 02 · optional synthesis rules`, `// 03 · potts hamiltonian`, `// 04 · air-gapped cli`).
 2. **`src/app/(thermo)/dispatcher/page.tsx`**:
    - Set `--accent: #f59e0b` (warm amber).

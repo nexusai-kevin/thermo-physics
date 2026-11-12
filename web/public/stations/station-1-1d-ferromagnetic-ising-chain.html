@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Station 1 — 1D Ferromagnetic Ising Chain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#edf2f0; --panel:#ffffff; --panel-2:#f4f8f6; --ink:#0e1f1d; --muted:#57706b;
+    --line:#d3ded9; --up:#077a72; --up-soft:#d7efec; --down:#e0521f; --down-soft:#fde3d8;
+    --accent:#0b6e99; --gold:#b07d10; --track:#dbe6e2;
+    --shadow:0 1px 2px rgba(14,31,29,.06),0 10px 28px rgba(14,31,29,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0a1312; --panel:#12201d; --panel-2:#0f1a18; --ink:#e7f1ee; --muted:#93aca6;
+      --line:#243a35; --up:#2dd4bf; --up-soft:#0d3530; --down:#fb7a4a; --down-soft:#3d2013;
+      --accent:#4cc3e6; --gold:#e3b341; --track:#22332f;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 20px 56px}
+  /* header */
+  .topline{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .station-tag{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .station-tag b{color:var(--ink)}
+  .live-dot{display:inline-flex;align-items:center;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+  .live-dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--up);box-shadow:0 0 0 4px var(--up-soft)}
+  h1{font-size:clamp(30px,5.2vw,52px);line-height:1.04;font-weight:800;letter-spacing:-.02em;margin:0 0 12px;max-width:16ch}
+  .lede{font-size:clamp(16px,2vw,19px);color:var(--muted);max-width:62ch;margin:0}
+  .lede strong{color:var(--ink);font-weight:600}
+  .phase-strip{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0 18px}
+  .phase{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+  .phase h3{margin:0 0 4px;font-size:14px;display:flex;align-items:center;gap:8px}
+  .phase p{margin:0;font-size:13.5px;color:var(--muted)}
+  .swatch{width:12px;height:12px;border-radius:3px;flex:none}
+  /* bento */
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow);min-width:0}
+  .card h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-family:"IBM Plex Mono",monospace;color:var(--muted);margin:0 0 14px;font-weight:600}
+  .span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}
+  /* spin chain */
+  .chain-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between}
+  .temp-read{font-family:"IBM Plex Mono",monospace;font-size:14px}
+  .temp-read b{font-size:22px}
+  .regime{font-weight:600;color:var(--accent)}
+  .chain{display:flex;align-items:stretch;gap:0;margin:18px 0 6px;flex-wrap:nowrap}
+  .spin-wrap{display:flex;align-items:center;flex:1 1 0;min-width:0}
+  .spin{flex:1 1 auto;width:100%;min-width:0;aspect-ratio:.82;border:2px solid transparent;border-radius:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:4px 0;transition:transform .28s ease,background .25s ease,border-color .25s ease;font-family:inherit}
+  .spin svg{width:clamp(14px,2.4vw,24px);height:clamp(14px,2.4vw,24px);transition:transform .28s ease}
+  .spin .idx{font-family:"IBM Plex Mono",monospace;font-size:9px;opacity:.75}
+  .spin.up{background:var(--up-soft);color:var(--up);border-color:var(--up)}
+  .spin.down{background:var(--down-soft);color:var(--down);border-color:var(--down)}
+  .spin.down svg{transform:rotate(180deg)}
+  .spin.flip{animation:pop .3s ease}
+  @keyframes pop{40%{transform:scale(1.14)}}
+  .bond{flex:0 0 5px;height:3px;border-radius:2px;background:var(--track);align-self:center}
+  .bond.aligned{background:var(--up)}
+  .bond.anti{background:var(--down)}
+  .chain-note{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+  /* energy bar */
+  .ebar{margin-top:16px}
+  .ebar-track{position:relative;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--up) 0%,var(--track) 55%,var(--down) 100%)}
+  .ebar-marker{position:absolute;top:-5px;width:3px;height:22px;border-radius:2px;background:var(--ink);transform:translateX(-50%)}
+  .ebar-marker.pub{background:var(--gold);width:2px;height:18px;top:-3px}
+  .ebar-scale{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin-top:6px}
+  .ebar-cap{font-size:11.5px;color:var(--muted);margin-top:6px}
+  /* controls */
+  .controls{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+  .slider-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .slider-row label{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;white-space:nowrap}
+  input[type=range]{flex:1 1 220px;min-height:44px;accent-color:var(--accent);cursor:pointer}
+  .tval{font-family:"IBM Plex Mono",monospace;font-size:15px;min-width:118px}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  button.btn{min-height:44px;padding:10px 16px;border-radius:11px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font-family:"Archivo",sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+  button.btn:hover{border-color:var(--accent);color:var(--accent)}
+  button.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  button.btn.primary:hover{opacity:.88;color:var(--bg)}
+  button.btn.preset[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  /* readouts */
+  .big-e{font-family:"IBM Plex Mono",monospace;font-size:clamp(38px,4.5vw,52px);font-weight:600;line-height:1;letter-spacing:-.02em}
+  .big-e small{font-size:14px;color:var(--muted);letter-spacing:0}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .stat{border-top:2px solid var(--line);padding-top:8px}
+  .stat .k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-family:"IBM Plex Mono",monospace}
+  .stat .v{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:600;margin-top:2px}
+  .mbar{height:8px;border-radius:4px;background:var(--track);margin-top:14px;position:relative;overflow:hidden}
+  .mbar-fill{position:absolute;top:0;bottom:0;background:var(--up);transition:all .2s ease}
+  /* chart */
+  canvas#trace{width:100%;height:190px;display:block}
+  .chart-cap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:12px;color:var(--muted);margin-top:8px;font-family:"IBM Plex Mono",monospace}
+  /* benchmark */
+  .bench-list{display:grid;gap:0}
+  .bench-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line)}
+  .bench-row:last-child{border-bottom:none}
+  .bench-row .k{font-size:14px;color:var(--muted)}
+  .bench-row .v{font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:600;white-space:nowrap}
+  .disclaimer{margin-top:14px;font-size:12px;line-height:1.45;color:var(--gold);border:1px solid var(--gold);border-radius:10px;padding:9px 11px;font-weight:600}
+  /* physics */
+  .ham{font-family:"IBM Plex Mono",monospace;font-size:clamp(17px,2.6vw,23px);background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;overflow-x:auto;white-space:nowrap}
+  .phys p{font-size:14.5px;color:var(--muted);margin:0 0 10px}
+  .phys p strong{color:var(--ink)}
+  .phys ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--muted)}
+  .phys li{margin-bottom:6px}
+  /* run */
+  .runbox{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+  .runbox code{flex:1 1 260px;background:#0d1b19;color:#7ef0d4;border-radius:12px;padding:16px 18px;font-family:"IBM Plex Mono",monospace;font-size:15px;display:flex;align-items:center;overflow-x:auto;white-space:nowrap}
+  @media (prefers-color-scheme: light){.runbox code{background:#10201d;color:#8df5da}}
+  .run-note{font-size:13px;color:var(--muted);margin:12px 0 0}
+  footer{margin-top:22px;font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  @media (max-width:900px){
+    .ham{white-space:normal;font-size:16px}
+    .span8,.span7,.span6,.span5,.span4{grid-column:span 12}
+    .phase-strip{grid-template-columns:1fr}
+    .chain{flex-wrap:wrap;row-gap:8px}
+    .spin-wrap{flex:1 1 10%}
+    .bond{display:none}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .spin,.spin svg{transition:none}
+    .spin.flip{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topline">
+    <span class="station-tag"><a href="/thermo-lab" style="color:var(--muted);text-decoration:none;margin-right:10px;font-weight:600">← All 16 Stations</a> Station <b>01</b> · Experiment 1 · Thermo Lab</span>
+    <span class="live-dot">Live simulation running in your browser</span>
+  </div>
+
+  <h1>The 1D Ferromagnetic Ising Chain</h1>
+  <p class="lede"><strong>Sixteen coupled spins</strong> with nearest-neighbour ferromagnetic coupling. Hot, the spins fluctuate independently; cooled, they settle into the uniform ground state. Drag the temperature and watch the chain decide — every spin below is simulated live, and you can click any spin to flip it yourself.</p>
+
+  <div class="phase-strip">
+    <div class="phase">
+      <h3><span class="swatch" style="background:var(--down)"></span> Hot — disordered</h3>
+      <p>Thermal energy overwhelms the coupling. Spins flip freely, neighbours ignore each other, magnetisation hovers near zero and the energy stays high.</p>
+    </div>
+    <div class="phase">
+      <h3><span class="swatch" style="background:var(--up)"></span> Cold — the ground state</h3>
+      <p>The coupling wins. Flips that break alignment are rejected, domains merge, and the chain locks into one uniform direction at the exact ground state, E = −2.0. <em style="font-style:normal;color:var(--gold);font-weight:600">Simulated benchmark result, results may vary (not customer results).</em></p>
+    </div>
+  </div>
+
+  <div class="bento">
+
+    <!-- LIVE CHAIN LAB -->
+    <section class="card span8" aria-label="Live Ising chain simulation">
+      <div class="chain-head">
+        <h2 style="margin:0">The chain — live</h2>
+        <span class="temp-read">T = <b id="tBig">1.20</b> · <span class="regime" id="regime">Fluctuating</span></span>
+      </div>
+
+      <div class="chain" id="chain" role="group" aria-label="Sixteen spins. Activate a spin to flip it."></div>
+      <p class="chain-note">Teal = spin up, orange = spin down. The links between spins are the ferromagnetic bonds — teal when neighbours agree, orange where a domain wall sits. The chain wraps around: spin 16 is also coupled to spin 1. Click any spin to flip it.</p>
+
+      <div class="ebar" aria-hidden="true">
+        <div class="ebar-track">
+          <div class="ebar-marker pub" id="pubMarker" style="left:25.9%"></div>
+          <div class="ebar-marker" id="eMarker" style="left:50%"></div>
+        </div>
+        <div class="ebar-scale"><span>−2.0 ground</span><span>−1.0</span><span>0</span><span>+1.0</span><span>+2.0</span></div>
+        <p class="ebar-cap">Black marker: live energy. Gold marker: the published benchmark ⟨E⟩ = −0.965 — simulated benchmark result, results may vary (not customer results).</p>
+      </div>
+
+      <div class="controls">
+        <div class="slider-row">
+          <label for="temp">Temperature T</label>
+          <input type="range" id="temp" min="0.1" max="4" step="0.01" value="1.2" aria-describedby="tval" />
+          <span class="tval" id="tval">T = 1.20 · β = 0.83</span>
+        </div>
+        <div class="btnrow" role="group" aria-label="Temperature presets">
+          <button class="btn preset" data-t="0.15" aria-pressed="false">❄ Freeze · 0.15</button>
+          <button class="btn preset" data-t="0.7" aria-pressed="false">Cool · 0.70</button>
+          <button class="btn preset" data-t="1.2" aria-pressed="true">Room · 1.20</button>
+          <button class="btn preset" data-t="3.2" aria-pressed="false">Hot · 3.20</button>
+        </div>
+        <div class="btnrow">
+          <button class="btn primary" id="playBtn">Pause</button>
+          <button class="btn" id="stepBtn">Step 1 sweep</button>
+          <button class="btn" id="annealBtn">Anneal — cool to ground</button>
+          <button class="btn" id="randBtn">Randomise</button>
+          <button class="btn" id="alignBtn">Align all ↑</button>
+          <button class="btn" id="resetBtn">Reset readouts</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIVE READOUTS -->
+    <section class="card span4" aria-label="Live readouts">
+      <h2>Live readouts</h2>
+      <div class="big-e"><span id="eNow">0.00</span> <small>energy E now</small></div>
+      <div class="stat-grid">
+        <div class="stat"><div class="k">Live ⟨E⟩ · last 200 sweeps</div><div class="v" id="eAvg">—</div></div>
+        <div class="stat"><div class="k">Magnetisation M</div><div class="v" id="mNow">0.00</div></div>
+        <div class="stat"><div class="k">Domain walls</div><div class="v" id="walls">0 / 16</div></div>
+        <div class="stat"><div class="k">Sweeps run</div><div class="v" id="sweeps">0</div></div>
+        <div class="stat"><div class="k">Flips accepted</div><div class="v" id="accRate">—</div></div>
+        <div class="stat"><div class="k">Spins up</div><div class="v" id="upCount">8 / 16</div></div>
+      </div>
+      <div class="k mono" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:16px">Alignment |M|</div>
+      <div class="mbar"><div class="mbar-fill" id="mFill" style="left:50%;width:0%"></div></div>
+      <p style="font-size:12.5px;color:var(--muted);margin:10px 0 0">Cool the chain and watch live ⟨E⟩ sink toward the ground state at −2.0 — and compare it against the published benchmark in the card below (simulated benchmark result, results may vary (not customer results)).</p>
+    </section>
+
+    <!-- ENERGY TRACE -->
+    <section class="card span8" aria-label="Energy trace">
+      <h2>Energy trace — every sweep, as it happens</h2>
+      <canvas id="trace" width="800" height="190"></canvas>
+      <div class="chart-cap"><span>dashed line: exact ground state −2.0 · simulated benchmark result, results may vary (not customer results)</span><span id="traceCap">0 sweeps recorded</span></div>
+    </section>
+
+    <!-- PUBLISHED BENCHMARK -->
+    <section class="card span4" aria-label="Published benchmark">
+      <h2>Published benchmark · Exp 1</h2>
+      <div class="bench-list">
+        <div class="bench-row"><span class="k">Mean energy ⟨E⟩</span><span class="v">−0.965</span></div>
+        <div class="bench-row"><span class="k">Exact ground state</span><span class="v">−2.0</span></div>
+        <div class="bench-row"><span class="k">Runtime</span><span class="v">0.210 s</span></div>
+        <div class="bench-row"><span class="k">Sweeps</span><span class="v">1,000</span></div>
+        <div class="bench-row"><span class="k">System</span><span class="v">16 spins</span></div>
+      </div>
+      <p class="disclaimer">All figures on this card: simulated benchmark result, results may vary (not customer results).</p>
+    </section>
+
+    <!-- PHYSICS -->
+    <section class="card span6 phys" aria-label="The physics">
+      <h2>The physics</h2>
+      <div class="ham">H = −J Σ<sub>i</sub> s<sub>i</sub> s<sub>i+1</sub> ,&nbsp; s<sub>i</sub> = ±1,&nbsp; J &gt; 0</div>
+      <p>Each spin wants to point the same way as its two neighbours — that is the <strong>ferromagnetic coupling J</strong>. A pair that agrees lowers the energy; a pair that disagrees raises it.</p>
+      <ul>
+        <li><strong>Sampler:</strong> Metropolis — propose a single spin flip, always accept it if it lowers the energy, accept it with probability e<sup>−ΔE/T</sup> if it raises it.</li>
+        <li><strong>A sweep</strong> is 16 flip attempts — one per spin, on average.</li>
+        <li><strong>Ground state:</strong> all 16 spins aligned, every bond satisfied. There are two of them: all up, or all down.</li>
+        <li><strong>Why 1D is special:</strong> a single domain wall costs the same energy anywhere on the chain, so at any nonzero temperature walls wander freely — which is why this chain orders only as T → 0, and why it makes such a clean first benchmark.</li>
+      </ul>
+    </section>
+
+    <!-- RUN IT -->
+    <section class="card span6" aria-label="Run this experiment">
+      <h2>Run it yourself</h2>
+      <div class="runbox">
+        <code id="runCmd">uv run thrml-bench run --exp 1</code>
+        <button class="btn primary" id="copyBtn">Copy command</button>
+      </div>
+      <p class="run-note">Runs Experiment 1 — the 1D ferromagnetic Ising chain, 16 spins, 1,000 sweeps — and reports ⟨E⟩ against the exact ground state of −2.0.</p>
+      <p class="disclaimer">Reported figures: simulated benchmark result, results may vary (not customer results).</p>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>Station 01 of 16 · Thermo Lab</span>
+    <span class="mono">H = −J Σ sᵢ sᵢ₊₁ · N = 16 · periodic boundaries</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var N = 16;
+  var spins = [];
+  var T = 1.2;
+  var playing = true;
+  var sweeps = 0, attempts = 0, accepted = 0;
+  var history = [];       // energy per sweep, capped
+  var windowE = [];       // last 200 energies for live average
+  var annealTimer = null;
+
+  var chainEl = document.getElementById('chain');
+  var tempEl = document.getElementById('temp');
+  var tvalEl = document.getElementById('tval');
+  var tBigEl = document.getElementById('tBig');
+  var regimeEl = document.getElementById('regime');
+
+  function randomise(){
+    spins = [];
+    for (var i=0;i<N;i++) spins.push(Math.random()<0.5?-1:1);
+  }
+  randomise();
+
+  // Build spin tiles + bonds
+  var spinEls = [], bondEls = [];
+  for (var i=0;i<N;i++){
+    (function(idx){
+      var wrap = document.createElement('div');
+      wrap.className = 'spin-wrap';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'spin up';
+      b.setAttribute('aria-label','Spin '+(idx+1)+'. Activate to flip.');
+      b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 L20 15 L14.5 15 L14.5 21 L9.5 21 L9.5 15 L4 15 Z" fill="currentColor"/></svg><span class="idx">'+(idx+1)+'</span>';
+      b.addEventListener('click', function(){
+        spins[idx] = -spins[idx];
+        accepted++; attempts++;
+        b.classList.remove('flip'); void b.offsetWidth; b.classList.add('flip');
+        render();
+      });
+      wrap.appendChild(b);
+      spinEls.push(b);
+      if (idx < N-1){
+        var bond = document.createElement('div');
+        bond.className = 'bond aligned';
+        wrap.appendChild(bond);
+        bondEls.push(bond);
+      }
+      chainEl.appendChild(wrap);
+    })(i);
+  }
+
+  function energy(){
+    var s = 0;
+    for (var i=0;i<N;i++) s += spins[i]*spins[(i+1)%N];
+    return -(2/N)*s;
+  }
+  function magnetisation(){
+    var s=0; for (var i=0;i<N;i++) s+=spins[i];
+    return s/N;
+  }
+  function walls(){
+    var w=0; for (var i=0;i<N;i++) if (spins[i]!==spins[(i+1)%N]) w++;
+    return w;
+  }
+  function regimeName(){
+    if (T<=0.3) return 'Frozen — ground state';
+    if (T<=0.9) return 'Cooling — domains merging';
+    if (T<=1.8) return 'Fluctuating';
+    return 'Hot — disordered';
+  }
+  function fmt(x,d){ return (x<0?'−':'+') + Math.abs(x).toFixed(d); }
+  function fmtPlain(x,d){ return (x<0?'−':'') + Math.abs(x).toFixed(d); }
+
+  function render(changed){
+    var E = energy(), M = magnetisation(), W = walls();
+    for (var i=0;i<N;i++){
+      var el = spinEls[i];
+      el.className = 'spin ' + (spins[i]>0?'up':'down') + (changed && changed.indexOf(i)>=0 ? ' flip':'');
+      el.setAttribute('aria-label','Spin '+(i+1)+', currently '+(spins[i]>0?'up':'down')+'. Activate to flip.');
+      if (i<N-1) bondEls[i].className = 'bond ' + (spins[i]===spins[i+1] ? 'aligned':'anti');
+    }
+    document.getElementById('eNow').textContent = fmtPlain(E,3);
+    var avg = windowE.length ? windowE.reduce(function(a,b){return a+b;},0)/windowE.length : null;
+    document.getElementById('eAvg').textContent = avg===null ? '—' : fmtPlain(avg,3);
+    document.getElementById('mNow').textContent = fmt(M,2);
+    document.getElementById('walls').textContent = W + ' / 16';
+    document.getElementById('sweeps').textContent = sweeps.toLocaleString('en-US');
+    document.getElementById('accRate').textContent = attempts ? Math.round(100*accepted/attempts)+'%' : '—';
+    var up = spins.filter(function(s){return s>0;}).length;
+    document.getElementById('upCount').textContent = up + ' / 16';
+    var fill = document.getElementById('mFill');
+    var pct = Math.abs(M)*50;
+    fill.style.width = pct + '%';
+    fill.style.left = M>=0 ? '50%' : (50-pct) + '%';
+    fill.style.background = M>=0 ? 'var(--up)' : 'var(--down)';
+    var pctE = (E + 2) / 4 * 100;
+    document.getElementById('eMarker').style.left = Math.max(0,Math.min(100,pctE)) + '%';
+    document.getElementById('traceCap').textContent = history.length.toLocaleString('en-US') + ' sweeps recorded';
+  }
+
+  function sweep(){
+    var changed = [];
+    for (var k=0;k<N;k++){
+      var i = Math.floor(Math.random()*N);
+      var neigh = spins[(i-1+N)%N] + spins[(i+1)%N];
+      var dE = 0.75 * spins[i] * neigh;
+      attempts++;
+      if (dE <= 0 || Math.random() < Math.exp(-dE/T)){
+        spins[i] = -spins[i];
+        accepted++;
+        if (changed.indexOf(i)<0) changed.push(i);
+      }
+    }
+    sweeps++;
+    var E = energy();
+    history.push(E); if (history.length>400) history.shift();
+    windowE.push(E); if (windowE.length>200) windowE.shift();
+    render(changed);
+    drawTrace();
+  }
+
+  // Chart
+  var canvas = document.getElementById('trace');
+  var ctx = canvas.getContext('2d');
+  function drawTrace(){
+    var dpr = window.devicePixelRatio || 1;
+    var w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w*dpr)){ canvas.width = Math.round(w*dpr); canvas.height = Math.round(h*dpr); }
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+    var cs = getComputedStyle(document.documentElement);
+    var line = cs.getPropertyValue('--line').trim() || '#ccc';
+    var accent = cs.getPropertyValue('--accent').trim() || '#0b6e99';
+    var gold = cs.getPropertyValue('--gold').trim() || '#b07d10';
+    var muted = cs.getPropertyValue('--muted').trim() || '#888';
+    function y(E){ return ( (2.4 - E) / 4.8 ) * (h-24) + 8; }
+    // gridlines at -2,-1,0,1,2
+    ctx.font = '10px "IBM Plex Mono", monospace';
+    [-2,-1,0,1,2].forEach(function(g){
+      ctx.strokeStyle = line; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(30,y(g)); ctx.lineTo(w-6,y(g)); ctx.stroke();
+      ctx.fillStyle = muted; ctx.fillText((g<0?'−':'')+Math.abs(g), 4, y(g)+3);
+    });
+    // ground state dashed
+    ctx.strokeStyle = gold; ctx.setLineDash([5,4]); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(30,y(-2)); ctx.lineTo(w-6,y(-2)); ctx.stroke();
+    ctx.setLineDash([]);
+    if (history.length > 1){
+      ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.beginPath();
+      var n = history.length;
+      for (var i=0;i<n;i++){
+        var x = 30 + (w-38) * i/399;
+        var yy = y(history[i]);
+        if (i===0) ctx.moveTo(x,yy); else ctx.lineTo(x,yy);
+      }
+      ctx.stroke();
+      // last point dot
+      var lx = 30 + (w-38) * (n-1)/399, ly = y(history[n-1]);
+      ctx.fillStyle = accent; ctx.beginPath(); ctx.arc(lx,ly,3.5,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  function setTemp(newT, fromSlider){
+    T = Math.max(0.1, Math.min(4, newT));
+    if (!fromSlider) tempEl.value = T;
+    tvalEl.textContent = 'T = ' + T.toFixed(2) + ' · β = ' + (1/T).toFixed(2);
+    tBigEl.textContent = T.toFixed(2);
+    regimeEl.textContent = regimeName();
+    document.querySelectorAll('.preset').forEach(function(p){
+      p.setAttribute('aria-pressed', Math.abs(parseFloat(p.getAttribute('data-t')) - T) < 0.02 ? 'true':'false');
+    });
+  }
+
+  tempEl.addEventListener('input', function(){ setTemp(parseFloat(tempEl.value), true); });
+  document.querySelectorAll('.preset').forEach(function(p){
+    p.addEventListener('click', function(){ stopAnneal(); setTemp(parseFloat(p.getAttribute('data-t')), false); });
+  });
+
+  var playBtn = document.getElementById('playBtn');
+  function setPlaying(on){
+    playing = on;
+    playBtn.textContent = playing ? 'Pause' : 'Play';
+  }
+  playBtn.addEventListener('click', function(){ setPlaying(!playing); });
+  document.getElementById('stepBtn').addEventListener('click', function(){ sweep(); });
+  document.getElementById('randBtn').addEventListener('click', function(){ randomise(); render(); });
+  document.getElementById('alignBtn').addEventListener('click', function(){
+    for (var i=0;i<N;i++) spins[i]=1; render();
+  });
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    sweeps=0; attempts=0; accepted=0; history=[]; windowE=[]; render(); drawTrace();
+  });
+
+  function stopAnneal(){ if (annealTimer){ clearInterval(annealTimer); annealTimer=null; } }
+  document.getElementById('annealBtn').addEventListener('click', function(){
+    stopAnneal();
+    var startT = T, target = 0.12, steps = 70, s = 0;
+    annealTimer = setInterval(function(){
+      s++;
+      var f = s/steps;
+      setTemp(startT * Math.pow(target/startT, f), false);
+      if (s>=steps) stopAnneal();
+    }, 55);
+  });
+
+  var copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', function(){
+    var txt = document.getElementById('runCmd').textContent.trim();
+    function done(){ copyBtn.textContent='Copied ✓'; setTimeout(function(){ copyBtn.textContent='Copy command'; }, 1800); }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done, done);
+    } else { done(); }
+  });
+
+  window.addEventListener('resize', drawTrace);
+  if (window.matchMedia){
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', drawTrace);
+  }
+
+  setTemp(1.2, true);
+  render();
+  drawTrace();
+  // seed a little history so the trace isn't empty on arrival
+  for (var s0=0;s0<24;s0++) sweep();
+  setInterval(function(){ if (playing) sweep(); }, 90);
+})();
+</script>
+</body>
+</html>

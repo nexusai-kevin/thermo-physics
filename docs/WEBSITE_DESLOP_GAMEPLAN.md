@@ -1,7 +1,7 @@
 # Website De-Slop & Vertical Silo Gameplan (Handoff Spec for Next Model)
 
 ## Context & Problem Statement
-When a biofoundry scientist (Dr. Felix Meier, Australian Genome Foundry) visited `https://getnexusaisolutions.com/codon` and `https://getnexusaisolutions.com/thermo-lab`, he immediately called the site "AI slop / vibe coded" because:
+When an academic biofoundry researcher evaluated `https://getnexusaisolutions.com/codon` and `https://getnexusaisolutions.com/thermo-lab`, feedback noted that:
 1. **Cross-Contamination of Buyer Personas**:
    - `src/app/(thermo)/layout.tsx` wraps `/codon`, `/dispatcher`, and `/microgrid` in the SMB agency `<SiteHeader />` and `<SiteFooter />` (which link to **Restaurants, Golf Courses, Medical Clinics, E-commerce, Missed-Call Text-Back, and "Own your Super Intelligence"**).
    - `src/components/thermo-pages/ThermoChrome.tsx` renders `<ThermoAlso />` at the bottom of each vertical page, cross-linking `/codon` <-> `/dispatcher` <-> `/microgrid` <-> `/thermo-lab`.

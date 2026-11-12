@@ -10,6 +10,8 @@ interface StationItem {
   metric: string;
   runtime: string;
   command: string;
+  href: string;
+  apparatusHref?: string;
 }
 
 const STATIONS: StationItem[] = [
@@ -20,6 +22,7 @@ const STATIONS: StationItem[] = [
     metric: "E = −0.965 · exact ground state −2.0",
     runtime: "0.210s",
     command: "uv run thrml-bench run --exp 1",
+    href: "/stations/1",
   },
   {
     id: 2,
@@ -28,6 +31,7 @@ const STATIONS: StationItem[] = [
     metric: "|M| 0.0434 (β=0.20) → 0.9417 (β=0.70) · βc ≈ 0.4407",
     runtime: "5.812s",
     command: "uv run thrml-bench run --exp 2",
+    href: "/stations/2",
   },
   {
     id: 3,
@@ -36,6 +40,7 @@ const STATIONS: StationItem[] = [
     metric: "Erdős–Rényi G(50, 0.20) · 70.8% cut edges (172/243 vs 49.9% random)",
     runtime: "7.344s",
     command: "uv run thrml-bench run --exp 3",
+    href: "/stations/3",
   },
   {
     id: 4,
@@ -44,6 +49,7 @@ const STATIONS: StationItem[] = [
     metric: "βc = ln(3) ≈ 1.0986",
     runtime: "2.956s",
     command: "uv run thrml-bench run --exp 4",
+    href: "/stations/4",
   },
   {
     id: 5,
@@ -52,6 +58,7 @@ const STATIONS: StationItem[] = [
     metric: "22.07% noise → 4.97% error · 77.5% reduction",
     runtime: "0.583s",
     command: "uv run thrml-bench run --exp 5",
+    href: "/stations/5",
   },
   {
     id: 6,
@@ -60,6 +67,7 @@ const STATIONS: StationItem[] = [
     metric: "100% cosine overlap · 100% occluded-bit recovery",
     runtime: "0.583s",
     command: "uv run thrml-bench run --exp 6",
+    href: "/stations/6",
   },
   {
     id: 7,
@@ -68,6 +76,7 @@ const STATIONS: StationItem[] = [
     metric: "99.1% budget feasibility · 94.1% Pareto match",
     runtime: "14.696s",
     command: "uv run thrml-bench run --exp 7",
+    href: "/stations/7",
   },
   {
     id: 8,
@@ -76,6 +85,7 @@ const STATIONS: StationItem[] = [
     metric: "Hop rate 38.4%/step (β=0.35) → 0.9%/step (β=4.0)",
     runtime: "2.805s",
     command: "uv run thrml-bench run --exp 8",
+    href: "/stations/8",
   },
   {
     id: 9,
@@ -84,6 +94,7 @@ const STATIONS: StationItem[] = [
     metric: "100% optimal tour · 6.296 vs 17.986 naive (−65%)",
     runtime: "20.110s",
     command: "uv run thrml-bench run --exp 9",
+    href: "/stations/9",
   },
   {
     id: 10,
@@ -92,6 +103,7 @@ const STATIONS: StationItem[] = [
     metric: "100% ground-state match (−15.4266) · RSB |q| = 0.5215",
     runtime: "0.27s",
     command: "uv run thrml-bench run --exp 10",
+    href: "/stations/10",
   },
   {
     id: 11,
@@ -100,6 +112,8 @@ const STATIONS: StationItem[] = [
     metric: "100% ground-state match (−10.00 / −66.00 kcal/mol) · N=24 exact · N=50 scaled · 7/7 tests passing",
     runtime: "0.21s / 0.31s",
     command: "uv run thrml-bench run --exp 11",
+    href: "/stations/11",
+    apparatusHref: "/rna-ensemble",
   },
   {
     id: 12,
@@ -108,6 +122,8 @@ const STATIONS: StationItem[] = [
     metric: "Zero-deficit dispatch",
     runtime: "0.12s",
     command: "uv run thrml-bench run --exp 12",
+    href: "/stations/12",
+    apparatusHref: "/microgrid",
   },
   {
     id: 13,
@@ -116,6 +132,8 @@ const STATIONS: StationItem[] = [
     metric: "4 hairpins → 0 · CAI 0.9326 · ΔE −7.82",
     runtime: "0.18s",
     command: "uv run thrml-bench run --exp 13",
+    href: "/stations/13",
+    apparatusHref: "/codon",
   },
   {
     id: 14,
@@ -124,6 +142,7 @@ const STATIONS: StationItem[] = [
     metric: "6 clashes → 0 · ΔE −295.54 kcal/mol",
     runtime: "0.12s",
     command: "uv run thrml-bench run --exp 14",
+    href: "/stations/14",
   },
   {
     id: 15,
@@ -132,6 +151,8 @@ const STATIONS: StationItem[] = [
     metric: "Latency 5.2 ms under a 15 ms SLA · 4 organs coupled · RTX 5080 VRAM safe",
     runtime: "5.2 ms",
     command: "uv run thrml-bench run --exp 15",
+    href: "/stations/15",
+    apparatusHref: "/dispatcher",
   },
   {
     id: 16,
@@ -140,6 +161,7 @@ const STATIONS: StationItem[] = [
     metric: "0 violations (100% SAT) · housekeeping heat Qhk = 3,697.4",
     runtime: "1.58s",
     command: "uv run thrml-bench run --exp 16",
+    href: "/stations/16",
   },
 ];
 
@@ -1437,11 +1459,68 @@ export default function ThermoLabPage() {
               {STATIONS.map((exp) => (
                 <div key={exp.id} className="exp-row">
                   <div className="exp-no">
-                    EXP <span className="hot">{exp.id}</span>
+                    <Link
+                      href={exp.href}
+                      style={{ color: "inherit", textDecoration: "none" }}
+                      title={`Open Station ${exp.id} page`}
+                    >
+                      EXP <span className="hot">{exp.id}</span>
+                    </Link>
                   </div>
                   <div>
-                    <div className="exp-name">{exp.name}</div>
+                    <div className="exp-name">
+                      <Link
+                        href={exp.href}
+                        style={{ color: "inherit", textDecoration: "none" }}
+                      >
+                        {exp.name}{" "}
+                        <span
+                          style={{
+                            fontSize: "0.85em",
+                            color: "var(--ember-text)",
+                            opacity: 0.85,
+                          }}
+                        >
+                          ↗
+                        </span>
+                      </Link>
+                    </div>
                     <p className="exp-desc">{exp.desc}</p>
+                    <div
+                      style={{
+                        marginTop: "0.4rem",
+                        display: "flex",
+                        gap: "0.75rem",
+                        flexWrap: "wrap",
+                        fontSize: "0.82rem",
+                        fontFamily: "'JetBrains Mono', monospace",
+                      }}
+                    >
+                      <Link
+                        href={exp.href}
+                        style={{
+                          color: "var(--ember-text)",
+                          textDecoration: "underline",
+                          fontWeight: 600,
+                        }}
+                      >
+                        Open station {exp.id} page →
+                      </Link>
+                      {exp.apparatusHref && (
+                        <span>
+                          ·{" "}
+                          <Link
+                            href={exp.apparatusHref}
+                            style={{
+                              color: "var(--steel-deep)",
+                              textDecoration: "underline",
+                            }}
+                          >
+                            Deep research dossier →
+                          </Link>
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="exp-metric">{exp.metric}</div>
                   <div className="exp-side">
@@ -2122,6 +2201,7 @@ export default function ThermoLabPage() {
               <Link href="/codon">Codon</Link>
               <Link href="/dispatcher">Dispatcher</Link>
               <Link href="/microgrid">Microgrid</Link>
+              <Link href="/rna-ensemble">RNA Ensemble</Link>
               <a
                 href="https://github.com/nexusai-kevin/thermo-physics"
                 target="_blank"

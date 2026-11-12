@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Station 4 — Multistate Potts Model, q = 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f2ec; --bg2:#ece9e0; --panel:#fffdf8; --panel2:#f8f5ee;
+    --ink:#1c1a15; --ink2:#5a554a; --ink3:#8a8478;
+    --line:#ddd6c6; --line2:#c9c1ad;
+    --s0:#e94f37; --s1:#0f8b8d; --s2:#e9a319; --s3:#5b8c3e;
+    --accent:#0f8b8d; --accent-ink:#0a5e60;
+    --hot:#e94f37; --cold:#0f8b8d;
+    --shadow:0 1px 2px rgba(28,26,21,.06), 0 8px 24px rgba(28,26,21,.06);
+    --radius:18px;
+    --mono:"IBM Plex Mono", ui-monospace, monospace;
+    --sans:"IBM Plex Sans", system-ui, sans-serif;
+    --serif:"Fraunces", Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#141311; --bg2:#1a1917; --panel:#1f1e1b; --panel2:#242320;
+      --ink:#f0ede4; --ink2:#b8b2a4; --ink3:#85806f;
+      --line:#33312c; --line2:#454239;
+      --accent:#3ec6c8; --accent-ink:#7fe0e2;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.5}
+  button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:2.5rem}
+  button{font-family:inherit;cursor:pointer}
+  a{color:var(--accent-ink)}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 18px 56px}
+
+  /* ---------- header ---------- */
+  .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .station-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 13px}
+  .station-tag .dot{width:8px;height:8px;border-radius:50%;background:var(--s2);box-shadow:0 0 0 3px color-mix(in srgb, var(--s2) 25%, transparent)}
+  .live-tag{font-family:var(--mono);font-size:12px;color:var(--ink2);display:inline-flex;gap:8px;align-items:center}
+  .live-tag .pulse{width:8px;height:8px;border-radius:50%;background:#3dbb5f;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media (prefers-reduced-motion: reduce){.live-tag .pulse{animation:none}}
+
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,5.2vw,52px);line-height:1.04;letter-spacing:-.01em;margin:6px 0 10px;max-width:16ch}
+  h1 em{font-style:italic;color:var(--accent-ink)}
+  .lede{font-size:clamp(16px,2vw,19px);color:var(--ink2);max-width:62ch;margin:0 0 6px}
+  .lede strong{color:var(--ink);font-weight:600}
+  .swatches{display:flex;gap:8px;margin:16px 0 4px;flex-wrap:wrap}
+  .swatch{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12.5px;border:1px solid var(--line);background:var(--panel);padding:6px 11px;border-radius:999px;color:var(--ink2)}
+  .swatch i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+  /* ---------- bento ---------- */
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:20px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;min-width:0}
+  .tile h2{font-size:13px;font-family:var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin:0 0 4px;font-weight:600}
+  .tile .sub{font-size:13.5px;color:var(--ink2);margin:0 0 12px}
+  .tile-lattice{grid-column:span 7}
+  .tile-controls{grid-column:span 5}
+  .tile-third{grid-column:span 4}
+  .tile-half{grid-column:span 6}
+  .tile-full{grid-column:span 12}
+  @media (max-width:900px){.tile-lattice,.tile-controls,.tile-third,.tile-half{grid-column:span 12}}
+
+  /* lattice */
+  .lattice-head{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between}
+  .phase-chip{font-family:var(--mono);font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;border:1.5px solid;white-space:nowrap;transition:all .3s}
+  .phase-chip.disordered{color:var(--hot);border-color:var(--hot);background:color-mix(in srgb, var(--s0) 9%, transparent)}
+  .phase-chip.ordered{color:var(--accent-ink);border-color:var(--accent);background:color-mix(in srgb, var(--s1) 10%, transparent)}
+  .phase-chip.critical{color:#9a6a00;border-color:var(--s2);background:color-mix(in srgb, var(--s2) 13%, transparent)}
+  @media (prefers-color-scheme: dark){.phase-chip.critical{color:#f2c14e}}
+  .canvas-shell{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--line2);background:#111;margin-top:12px}
+  canvas#lattice{display:block;width:100%;height:auto;aspect-ratio:1/1;touch-action:manipulation;cursor:crosshair}
+  .lattice-foot{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:12px;font-family:var(--mono);font-size:12.5px;color:var(--ink2)}
+  .lattice-foot b{color:var(--ink);font-weight:600}
+  .brush-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px}
+  .brush-row span{font-size:12.5px;font-family:var(--mono);color:var(--ink2);letter-spacing:.05em;text-transform:uppercase;margin-right:2px}
+  .brush{width:44px;height:44px;border-radius:12px;border:2px solid transparent;padding:0;display:grid;place-items:center;background:var(--panel2)}
+  .brush i{width:22px;height:22px;border-radius:6px;display:block}
+  .brush[aria-pressed="true"]{border-color:var(--ink)}
+  .brush:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* beta slider */
+  .beta-big{font-family:var(--mono);font-size:42px;font-weight:600;line-height:1;letter-spacing:-.02em}
+  .beta-big small{font-size:16px;color:var(--ink3);font-weight:400}
+  .beta-meta{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12.5px;color:var(--ink2);margin-top:4px;flex-wrap:wrap;gap:4px}
+  .slider-wrap{margin:18px 0 6px;position:relative;padding-top:22px}
+  .bc-marker{position:absolute;top:0;transform:translateX(-50%);font-family:var(--mono);font-size:11.5px;color:#9a6a00;font-weight:600;white-space:nowrap}
+  @media (prefers-color-scheme: dark){.bc-marker{color:#f2c14e}}
+  .bc-marker::after{content:"";display:block;width:2px;height:12px;background:var(--s2);margin:2px auto 0}
+  input[type="range"]{width:100%;accent-color:var(--accent);height:44px;cursor:pointer;padding:0;margin:0;background:transparent}
+  .slider-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--ink3);margin-top:-4px}
+  .regime-bar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin-top:14px;border:1px solid var(--line)}
+  .regime-bar .r-dis{flex:0 0 49.93%;background:color-mix(in srgb, var(--s0) 45%, transparent)}
+  .regime-bar .r-ord{flex:1;background:color-mix(in srgb, var(--s1) 45%, transparent)}
+  .regime-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-top:6px}
+  .preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .btn{border:1px solid var(--line2);background:var(--panel2);color:var(--ink);border-radius:11px;padding:9px 14px;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:7px;min-height:44px}
+  .btn:hover{border-color:var(--ink3)}
+  .btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .btn.primary:hover{opacity:.88}
+  .btn.small{font-size:13px;padding:7px 11px;min-height:40px}
+  .btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  @media (prefers-color-scheme: dark){.btn[aria-pressed="true"]{color:#0b2222}}
+  .control-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .speed-row{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--ink2)}
+  .speed-row input{flex:1}
+
+  /* readouts */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{border:1px solid var(--line);border-radius:13px;padding:13px 14px;background:var(--panel2)}
+  .stat .k{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+  .stat .v{font-family:var(--mono);font-size:27px;font-weight:600;line-height:1.15;margin-top:2px}
+  .stat .v small{font-size:14px;color:var(--ink3);font-weight:400}
+  .stat .d{font-size:12.5px;color:var(--ink2);margin-top:2px}
+  .frac-bars{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+  .frac-row{display:grid;grid-template-columns:86px 1fr 52px;gap:10px;align-items:center;font-size:13px}
+  .frac-row .nm{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:12.5px}
+  .frac-row .nm i{width:11px;height:11px;border-radius:3px;display:inline-block;flex:none}
+  .frac-track{height:12px;border-radius:99px;background:var(--bg2);overflow:hidden;border:1px solid var(--line)}
+  .frac-fill{height:100%;border-radius:99px;transition:width .35s ease}
+  .frac-row .pc{font-family:var(--mono);font-size:12.5px;text-align:right;color:var(--ink2)}
+  canvas#spark{display:block;width:100%;height:110px}
+  .spark-legend{display:flex;gap:16px;font-family:var(--mono);font-size:11.5px;color:var(--ink2);margin-top:6px;flex-wrap:wrap}
+  .spark-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+
+  /* ledger / published figures */
+  .figure{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1.1}
+  .figure small{font-size:15px;color:var(--ink3);font-weight:400}
+  .disclaimer{font-size:11.5px;color:var(--ink3);line-height:1.45;margin-top:8px;border-top:1px dashed var(--line2);padding-top:8px}
+  .disclaimer::before{content:"◈ ";color:var(--s2)}
+  .hamil{font-family:var(--mono);font-size:14.5px;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:13px 15px;line-height:1.6}
+  .hamil .dim{color:var(--ink3)}
+  .note-list{margin:0;padding-left:19px;font-size:14.5px;color:var(--ink2);display:flex;flex-direction:column;gap:7px}
+  .note-list strong{color:var(--ink)}
+  code,.mono{font-family:var(--mono)}
+  .runbox{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-top:4px}
+  .runbox code{flex:1 1 260px;display:flex;align-items:center;background:#171512;color:#f3eede;border-radius:12px;padding:13px 16px;font-size:15px;overflow-x:auto;white-space:nowrap}
+  @media (prefers-color-scheme: dark){.runbox code{background:#0c0b0a;border:1px solid var(--line)}}
+  .runbox code .prompt{color:#e9a319;margin-right:9px;user-select:none}
+  .copied{font-size:13px;color:var(--accent-ink);font-family:var(--mono);align-self:center;min-width:70px}
+  footer{margin-top:26px;font-size:12.5px;color:var(--ink3);display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,80px);background:var(--ink);color:var(--bg);font-family:var(--mono);font-size:13px;padding:11px 18px;border-radius:999px;transition:transform .35s ease;z-index:50;pointer-events:none;max-width:92vw;text-align:center}
+  .toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="station-tag"><a href="/thermo-lab" style="color:var(--muted);text-decoration:none;margin-right:10px;font-weight:600">← All 16 Stations</a> <span class="dot"></span> Station 4 · Thermo Lab · Exp 4</span>
+    <span class="live-tag"><span class="pulse"></span> Live sampler running in your browser</span>
+  </div>
+
+  <h1>Four states walk onto a lattice. <em>One takes over.</em></h1>
+  <p class="lede">A <strong>four-state categorical Potts model</strong> on a <strong>24 × 24 lattice</strong>. Every site holds one of four categories. Neighbours that match lower the energy — so as the inverse temperature β rises past the theoretical transition, <strong>matching categorical domains nucleate and lock</strong>. Drag β across β<sub>c</sub> below and watch it happen, live.</p>
+
+  <div class="swatches" aria-label="The four Potts states">
+    <span class="swatch"><i style="background:var(--s0)"></i> state 0</span>
+    <span class="swatch"><i style="background:var(--s1)"></i> state 1</span>
+    <span class="swatch"><i style="background:var(--s2)"></i> state 2</span>
+    <span class="swatch"><i style="background:var(--s3)"></i> state 3</span>
+    <span class="swatch">q = 4 · 576 sites · periodic boundaries</span>
+  </div>
+
+  <div class="bento">
+
+    <!-- LATTICE -->
+    <section class="tile tile-lattice" aria-label="Live Potts lattice">
+      <div class="lattice-head">
+        <div>
+          <h2>The lattice — 24 × 24, live</h2>
+          <p class="sub" style="margin-bottom:0">Metropolis updates, one sweep = 576 flip attempts. Tap any cell to paint it with the brush state.</p>
+        </div>
+        <span class="phase-chip disordered" id="phaseChip">DISORDERED · β &lt; β<sub>c</sub></span>
+      </div>
+      <div class="canvas-shell">
+        <canvas id="lattice" width="720" height="720" aria-label="24 by 24 Potts lattice simulation"></canvas>
+      </div>
+      <div class="lattice-foot">
+        <span>sweep <b id="sweepCount">0</b></span>
+        <span>acceptance <b id="acceptRate">—</b></span>
+        <span>energy / site <b id="energySite">—</b></span>
+        <span>⟨matches⟩ <b id="matchFrac">—</b></span>
+      </div>
+      <div class="brush-row" role="group" aria-label="Paint brush state">
+        <span>Brush</span>
+        <button class="brush" data-brush="0" aria-pressed="false" aria-label="Paint state 0"><i style="background:var(--s0)"></i></button>
+        <button class="brush" data-brush="1" aria-pressed="true" aria-label="Paint state 1"><i style="background:var(--s1)"></i></button>
+        <button class="brush" data-brush="2" aria-pressed="false" aria-label="Paint state 2"><i style="background:var(--s2)"></i></button>
+        <button class="brush" data-brush="3" aria-pressed="false" aria-label="Paint state 3"><i style="background:var(--s3)"></i></button>
+        <button class="btn small" id="seedBtn" type="button">↓ Seed a domain</button>
+      </div>
+    </section>
+
+    <!-- CONTROLS -->
+    <section class="tile tile-controls" aria-label="Beta control">
+      <h2>Inverse temperature β</h2>
+      <p class="sub">One knob drives the whole phase diagram. Cross the gold marker and the lattice changes its mind.</p>
+      <div class="beta-big"><span id="betaVal">0.70</span> <small>β · T = <span id="tempVal">1.43</span></small></div>
+      <div class="beta-meta"><span id="betaSide">below β<sub>c</sub> by 0.399</span><span>β<sub>c</sub> = ln(3) ≈ 1.0986</span></div>
+      <div class="slider-wrap">
+        <div class="bc-marker" id="bcMarker">β<sub>c</sub> = ln(3)</div>
+        <input type="range" id="betaSlider" min="0.20" max="1.80" step="0.005" value="0.70" aria-label="Inverse temperature beta" />
+        <div class="slider-scale"><span>0.20 · hot, noisy</span><span>1.80 · cold, locked</span></div>
+      </div>
+      <div class="regime-bar" aria-hidden="true"><div class="r-dis"></div><div class="r-ord"></div></div>
+      <div class="regime-labels"><span>Disordered — domains flicker &amp; dissolve</span><span>Ordered — domains lock</span></div>
+      <div class="preset-row">
+        <button class="btn small" type="button" data-beta="0.55">β 0.55 · melt it</button>
+        <button class="btn small" type="button" data-beta="1.0986">β = β<sub>c</sub> exactly</button>
+        <button class="btn small" type="button" data-beta="1.45">β 1.45 · freeze it</button>
+      </div>
+      <div class="control-row">
+        <button class="btn primary" id="playBtn" type="button" aria-pressed="true">❚❚ Pause</button>
+        <button class="btn" id="quenchBtn" type="button">↻ Quench (randomise)</button>
+        <button class="btn" id="annealBtn" type="button">Anneal β: 0.3 → 1.5</button>
+      </div>
+      <div class="speed-row">
+        <label for="speedSlider">Speed</label>
+        <input type="range" id="speedSlider" min="1" max="10" step="1" value="4" aria-label="Simulation speed, sweeps per frame" />
+        <span class="mono" id="speedVal">4 sweeps/frame</span>
+      </div>
+    </section>
+
+    <!-- DOMAIN READOUTS -->
+    <section class="tile tile-third" aria-label="Domain readouts">
+      <h2>Domains, measured live</h2>
+      <p class="sub">Connected clusters of equal state, counted by flood fill on the current frame.</p>
+      <div class="stat-grid">
+        <div class="stat"><div class="k">Largest domain</div><div class="v"><span id="largestDomain">—</span><small> sites</small></div><div class="d" id="largestDomainPct">— of 576</div></div>
+        <div class="stat"><div class="k">Domain count</div><div class="v" id="domainCount">—</div><div class="d">separate clusters on the lattice</div></div>
+        <div class="stat"><div class="k">Mean domain size</div><div class="v"><span id="meanDomain">—</span><small> sites</small></div><div class="d">576 ÷ domain count</div></div>
+        <div class="stat"><div class="k">Order parameter m</div><div class="v" id="orderParam">—</div><div class="d">0 = fully mixed · 1 = single state</div></div>
+      </div>
+    </section>
+
+    <!-- STATE FRACTIONS -->
+    <section class="tile tile-third" aria-label="State populations">
+      <h2>State populations</h2>
+      <p class="sub">Share of the 576 sites in each category, right now. In the disordered phase all four hover near 25%.</p>
+      <div class="frac-bars" id="fracBars"></div>
+      <p class="sub" style="margin:14px 0 0" id="leaderLine">No leader yet — the lattice is mixed.</p>
+    </section>
+
+    <!-- SPARKLINE -->
+    <section class="tile tile-third" aria-label="History chart">
+      <h2>Largest domain over time</h2>
+      <p class="sub">Watch the trace jump as β crosses β<sub>c</sub> — that step is the transition.</p>
+      <canvas id="spark" width="640" height="220" aria-label="Chart of largest domain size over recent sweeps"></canvas>
+      <div class="spark-legend">
+        <span><i style="background:var(--s0)"></i>largest domain (sites)</span>
+        <span><i style="background:var(--s2)"></i>β × 200 (scaled)</span>
+      </div>
+    </section>
+
+    <!-- PUBLISHED METRIC -->
+    <section class="tile tile-third" aria-label="Published transition point">
+      <h2>Published metric — the transition</h2>
+      <div class="figure">β<sub>c</sub> = ln(3) ≈ 1.0986</div>
+      <p class="sub" style="margin-top:8px">The exact theoretical critical point for the q = 4 Potts model. The benchmark reports the <strong>theoretical transition confirmed</strong> at this value — and the gold marker on the slider sits exactly here, so you can park the live lattice on it.</p>
+      <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+    </section>
+
+    <!-- PUBLISHED RUNTIME -->
+    <section class="tile tile-third" aria-label="Published runtime">
+      <h2>Published benchmark time</h2>
+      <div class="figure">2.956<small> s</small></div>
+      <p class="sub" style="margin-top:8px">Full Exp 4 benchmark run time for the 24 × 24, q = 4 lattice, as recorded in the thermo-lab ledger. The in-browser sampler above is a live illustration of the same model, not that benchmark.</p>
+      <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+    </section>
+
+    <!-- HAMILTONIAN -->
+    <section class="tile tile-third" aria-label="The model">
+      <h2>The model</h2>
+      <div class="hamil">H = − Σ<sub>⟨ij⟩</sub> δ(s<sub>i</sub>, s<sub>j</sub>) <span class="dim">· s ∈ {0,1,2,3}</span></div>
+      <ul class="note-list" style="margin-top:13px">
+        <li><strong>Matching pays.</strong> Each neighbouring pair in the same state contributes −1 to the energy; mismatches contribute 0.</li>
+        <li><strong>β weighs energy against entropy.</strong> A flip that raises energy by ΔE is accepted with probability e<sup>−βΔE</sup>.</li>
+        <li><strong>q = 4 is special.</strong> In 2D the transition sits exactly at β<sub>c</sub> = ln(1 + √q) = ln(3).</li>
+      </ul>
+    </section>
+
+    <!-- RUN IT -->
+    <section class="tile tile-full" aria-label="Run the benchmark">
+      <h2>Run the real benchmark</h2>
+      <p class="sub">The browser demo is the same physics at toy scale. The ledger entry — Exp 4, 24 × 24, q = 4, transition confirmed in 2.956 s — reproduces with one command:</p>
+      <div class="runbox">
+        <code><span class="prompt">$</span><span id="runCmd">uv run thrml-bench run --exp 4</span></code>
+        <button class="btn primary" id="copyBtn" type="button">Copy command</button>
+        <span class="copied" id="copyMsg" role="status" aria-live="polite"></span>
+      </div>
+      <p class="disclaimer" style="max-width:70ch">All published figures on this page (β<sub>c</sub> ≈ 1.0986, 2.956 s): simulated benchmark result, results may vary (not customer results). Live readouts are computed in your browser from the simulation above.</p>
+    </section>
+
+  </div>
+
+  <footer>
+    <span>Station 4 of 16 · Multistate Potts model, q = 4 · 24 × 24 lattice</span>
+    <span>Thermo Lab · Nexus AI Solutions</span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+  "use strict";
+  var N = 24, CELLS = N * N, Q = 4;
+  var BC = Math.log(3); // 1.0986...
+  var COLORS = ["#e94f37", "#0f8b8d", "#e9a319", "#5b8c3e"];
+  var COLORS_DARK = ["#f0654d", "#2fb3b5", "#f0b23e", "#79a95c"];
+  var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  var PAL = dark ? COLORS_DARK : COLORS;
+
+  // state
+  var grid = new Uint8Array(CELLS);
+  var beta = 0.70, running = true, sweepsPerFrame = 4;
+  var sweepCount = 0, attempts = 0, accepts = 0;
+  var brush = 1, annealing = false, annealT = 0;
+  var history = []; // {largest, beta}
+  var energy = 0;
+
+  function idx(x, y){ return ((y + N) % N) * N + ((x + N) % N); }
+  function neighbors(i){
+    var x = i % N, y = (i / N) | 0;
+    return [idx(x+1,y), idx(x-1,y), idx(x,y+1), idx(x,y-1)];
+  }
+  function computeEnergy(){
+    var e = 0;
+    for (var i = 0; i < CELLS; i++){
+      var x = i % N, y = (i / N) | 0;
+      if (grid[idx(x+1,y)] === grid[i]) e--;
+      if (grid[idx(x,y+1)] === grid[i]) e--;
+    }
+    return e;
+  }
+  function randomise(){
+    for (var i = 0; i < CELLS; i++) grid[i] = (Math.random() * Q) | 0;
+    energy = computeEnergy();
+  }
+  function sweep(){
+    for (var a = 0; a < CELLS; a++){
+      var i = (Math.random() * CELLS) | 0;
+      var cur = grid[i], nxt = (Math.random() * Q) | 0;
+      if (nxt === cur) continue;
+      var nb = neighbors(i), dE = 0;
+      for (var k = 0; k < 4; k++){
+        if (grid[nb[k]] === nxt) dE--;
+        if (grid[nb[k]] === cur) dE++;
+      }
+      attempts++;
+      if (dE <= 0 || Math.random() < Math.exp(-beta * dE)){
+        grid[i] = nxt; energy += dE; accepts++;
+      }
+    }
+    sweepCount++;
+  }
+
+  // domain analysis via flood fill
+  function analyse(){
+    var seen = new Uint8Array(CELLS);
+    var counts = [0,0,0,0];
+    var largest = 0, largestState = 0, domains = 0;
+    var stack = [];
+    for (var s = 0; s < CELLS; s++){
+      counts[grid[s]]++;
+      if (seen[s]) continue;
+      domains++;
+      var st = grid[s], size = 0;
+      stack.length = 0; stack.push(s); seen[s] = 1;
+      while (stack.length){
+        var c = stack.pop(); size++;
+        var nb = neighbors(c);
+        for (var k = 0; k < 4; k++){
+          var n2 = nb[k];
+          if (!seen[n2] && grid[n2] === st){ seen[n2] = 1; stack.push(n2); }
+        }
+      }
+      if (size > largest){ largest = size; largestState = st; }
+    }
+    var maxCount = Math.max(counts[0], counts[1], counts[2], counts[3]);
+    var m = (Q * (maxCount / CELLS) - 1) / (Q - 1);
+    return { counts: counts, largest: largest, largestState: largestState, domains: domains, m: m, maxCount: maxCount };
+  }
+
+  // ---- DOM ----
+  var cv = document.getElementById("lattice"), ctx = cv.getContext("2d");
+  var spark = document.getElementById("spark"), sctx = spark.getContext("2d");
+  var slider = document.getElementById("betaSlider");
+  var betaVal = document.getElementById("betaVal"), tempVal = document.getElementById("tempVal");
+  var betaSide = document.getElementById("betaSide"), chip = document.getElementById("phaseChip");
+  var marker = document.getElementById("bcMarker");
+  var el = function(id){ return document.getElementById(id); };
+
+  // fraction bars
+  var fracBars = el("fracBars"), fracFills = [], fracPcts = [];
+  for (var q = 0; q < Q; q++){
+    var row = document.createElement("div"); row.className = "frac-row";
+    row.innerHTML = '<span class="nm"><i style="background:' + PAL[q] + '"></i>state ' + q + '</span>' +
+      '<span class="frac-track"><span class="frac-fill" style="background:' + PAL[q] + ';width:25%;display:block"></span></span>' +
+      '<span class="pc">25.0%</span>';
+    fracBars.appendChild(row);
+    fracFills.push(row.querySelector(".frac-fill"));
+    fracPcts.push(row.querySelector(".pc"));
+  }
+
+  function positionMarker(){
+    var min = parseFloat(slider.min), max = parseFloat(slider.max);
+    var pct = (BC - min) / (max - min) * 100;
+    marker.style.left = pct + "%";
+  }
+
+  function setBeta(v, fromSlider){
+    beta = Math.min(1.8, Math.max(0.2, v));
+    if (!fromSlider) slider.value = beta.toFixed(3);
+    betaVal.textContent = beta.toFixed(2);
+    tempVal.textContent = (1 / beta).toFixed(2);
+    var diff = Math.abs(beta - BC);
+    if (diff < 0.015){
+      betaSide.innerHTML = "sitting on β<sub>c</sub> — the critical point";
+      chip.className = "phase-chip critical"; chip.innerHTML = "CRITICAL · β ≈ β<sub>c</sub>";
+    } else if (beta < BC){
+      betaSide.innerHTML = "below β<sub>c</sub> by " + diff.toFixed(3);
+      chip.className = "phase-chip disordered"; chip.innerHTML = "DISORDERED · β &lt; β<sub>c</sub>";
+    } else {
+      betaSide.innerHTML = "above β<sub>c</sub> by " + diff.toFixed(3);
+      chip.className = "phase-chip ordered"; chip.innerHTML = "ORDERED · β &gt; β<sub>c</sub>";
+    }
+  }
+
+  function drawLattice(){
+    var W = cv.width, cell = W / N, gap = Math.max(1, cell * 0.06);
+    ctx.fillStyle = dark ? "#101010" : "#191713";
+    ctx.fillRect(0, 0, W, W);
+    for (var y = 0; y < N; y++){
+      for (var x = 0; x < N; x++){
+        ctx.fillStyle = PAL[grid[y * N + x]];
+        var r = cell * 0.18;
+        var px = x * cell + gap / 2, py = y * cell + gap / 2, pw = cell - gap;
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(px, py, pw, pw, r); else ctx.rect(px, py, pw, pw);
+        ctx.fill();
+      }
+    }
+  }
+
+  function drawSpark(){
+    var W = spark.width, H = spark.height;
+    sctx.clearRect(0, 0, W, H);
+    var gridCol = dark ? "#33312c" : "#ddd6c6";
+    var ink3 = dark ? "#85806f" : "#8a8478";
+    sctx.strokeStyle = gridCol; sctx.lineWidth = 1;
+    sctx.font = "20px 'IBM Plex Mono', monospace"; sctx.fillStyle = ink3;
+    [0.25, 0.5, 0.75].forEach(function(f){
+      var y = H - f * (H - 28) - 8;
+      sctx.beginPath(); sctx.moveTo(34, y); sctx.lineTo(W - 6, y); sctx.stroke();
+      sctx.fillText(String(Math.round(f * CELLS)), 2, y + 6);
+    });
+    if (history.length < 2) return;
+    var maxPts = 160, data = history.slice(-maxPts);
+    function X(i){ return 34 + (W - 44) * (i / (maxPts - 1)); }
+    function Y(v){ return H - (v / CELLS) * (H - 28) - 8; }
+    // beta trace
+    sctx.strokeStyle = PAL[2]; sctx.lineWidth = 2; sctx.beginPath();
+    data.forEach(function(d, i){ var x = X(i), y = Y(d.beta * 200); i ? sctx.lineTo(x, y) : sctx.moveTo(x, y); });
+    sctx.stroke();
+    // largest domain trace
+    sctx.strokeStyle = PAL[0]; sctx.lineWidth = 2.6; sctx.beginPath();
+    data.forEach(function(d, i){ var x = X(i), y = Y(d.largest); i ? sctx.lineTo(x, y) : sctx.moveTo(x, y); });
+    sctx.stroke();
+    var last = data[data.length - 1];
+    sctx.fillStyle = PAL[0];
+    sctx.beginPath(); sctx.arc(X(data.length - 1), Y(last.largest), 4.5, 0, 7); sctx.fill();
+  }
+
+  var frame = 0;
+  function updateReadouts(){
+    var a = analyse();
+    el("largestDomain").textContent = a.largest;
+    el("largestDomainPct").textContent = (a.largest / CELLS * 100).toFixed(1) + "% of 576 · state " + a.largestState;
+    el("domainCount").textContent = a.domains;
+    el("meanDomain").textContent = (CELLS / a.domains).toFixed(1);
+    el("orderParam").textContent = a.m.toFixed(3);
+    el("sweepCount").textContent = sweepCount.toLocaleString();
+    el("acceptRate").textContent = attempts ? (accepts / attempts * 100).toFixed(1) + "%" : "—";
+    el("energySite").textContent = (energy / CELLS).toFixed(3);
+    var matches = -energy;
+    el("matchFrac").textContent = (matches / (2 * CELLS) * 100).toFixed(1) + "% of bonds";
+    for (var q = 0; q < Q; q++){
+      var pct = a.counts[q] / CELLS * 100;
+      fracFills[q].style.width = pct + "%";
+      fracPcts[q].textContent = pct.toFixed(1) + "%";
+    }
+    var leader = a.counts.indexOf(a.maxCount);
+    el("leaderLine").innerHTML = a.m < 0.08
+      ? "No leader yet — the lattice is mixed, all four states near parity."
+      : "State <strong>" + leader + "</strong> leads with " + a.maxCount + " sites (" + (a.maxCount / CELLS * 100).toFixed(1) + "%). " +
+        (beta > BC ? "Above β<sub>c</sub>, that lead tends to harden into a locked domain." : "Below β<sub>c</sub>, leads like this usually melt away.");
+    history.push({ largest: a.largest, beta: beta });
+    if (history.length > 400) history.splice(0, history.length - 400);
+    drawSpark();
+  }
+
+  function loop(){
+    if (running){
+      if (annealing){
+        annealT += 0.004;
+        if (annealT >= 1){ annealing = false; setBeta(1.5); toast("Anneal complete — settled at β 1.50, deep in the ordered phase"); }
+        else setBeta(0.3 + 1.2 * annealT);
+      }
+      for (var s = 0; s < sweepsPerFrame; s++) sweep();
+      drawLattice();
+      frame++;
+      if (frame % 6 === 0) updateReadouts();
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // ---- interactions ----
+  slider.addEventListener("input", function(){ annealing = false; setBeta(parseFloat(slider.value), true); });
+  document.querySelectorAll("[data-beta]").forEach(function(b){
+    b.addEventListener("click", function(){
+      annealing = false;
+      setBeta(parseFloat(b.getAttribute("data-beta")));
+      if (!running) togglePlay();
+    });
+  });
+  var playBtn = el("playBtn");
+  function togglePlay(){
+    running = !running;
+    playBtn.textContent = running ? "❚❚ Pause" : "▶ Run";
+    playBtn.setAttribute("aria-pressed", running ? "true" : "false");
+    if (running) updateReadouts();
+  }
+  playBtn.addEventListener("click", togglePlay);
+  el("quenchBtn").addEventListener("click", function(){
+    randomise(); attempts = 0; accepts = 0; drawLattice(); updateReadouts();
+    toast("Quenched — lattice randomised at β " + beta.toFixed(2) + (beta > BC ? ". Watch domains nucleate." : ". Staying disordered at this β."));
+  });
+  el("annealBtn").addEventListener("click", function(){
+    annealing = true; annealT = 0;
+    if (!running) togglePlay();
+    toast("Annealing — β sweeping 0.30 → 1.50 through βc = ln(3)");
+  });
+  var speedSlider = el("speedSlider");
+  speedSlider.addEventListener("input", function(){
+    sweepsPerFrame = parseInt(speedSlider.value, 10);
+    el("speedVal").textContent = sweepsPerFrame + (sweepsPerFrame === 1 ? " sweep/frame" : " sweeps/frame");
+  });
+  document.querySelectorAll(".brush").forEach(function(b){
+    b.addEventListener("click", function(){
+      brush = parseInt(b.getAttribute("data-brush"), 10);
+      document.querySelectorAll(".brush").forEach(function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    });
+  });
+  function paintAt(evt){
+    var rect = cv.getBoundingClientRect();
+    var cx = (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left;
+    var cy = (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top;
+    var x = Math.floor(cx / rect.width * N), y = Math.floor(cy / rect.height * N);
+    if (x < 0 || y < 0 || x >= N || y >= N) return;
+    // paint a 3x3 blob so taps register visibly
+    for (var dy = -1; dy <= 1; dy++) for (var dx = -1; dx <= 1; dx++) grid[idx(x + dx, y + dy)] = brush;
+    energy = computeEnergy();
+    drawLattice(); updateReadouts();
+  }
+  cv.addEventListener("pointerdown", paintAt);
+  el("seedBtn").addEventListener("click", function(){
+    var cx0 = 4 + ((Math.random() * 14) | 0), cy0 = 4 + ((Math.random() * 14) | 0), r = 3 + ((Math.random() * 3) | 0);
+    for (var y = 0; y < N; y++) for (var x = 0; x < N; x++){
+      var dx = Math.min(Math.abs(x - cx0), N - Math.abs(x - cx0));
+      var dy = Math.min(Math.abs(y - cy0), N - Math.abs(y - cy0));
+      if (dx * dx + dy * dy <= r * r) grid[y * N + x] = brush;
+    }
+    energy = computeEnergy(); drawLattice(); updateReadouts();
+    toast(beta > BC ? "Domain seeded — above βc it should grow and lock." : "Domain seeded — below βc, watch entropy eat it.");
+  });
+
+  var toastTimer = null;
+  function toast(msg){
+    var t = el("toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 3400);
+  }
+
+  el("copyBtn").addEventListener("click", function(){
+    var cmd = el("runCmd").textContent;
+    function done(){ el("copyMsg").textContent = "Copied ✓"; setTimeout(function(){ el("copyMsg").textContent = ""; }, 2200); }
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(cmd).then(done, function(){ fallback(); });
+    } else fallback();
+    function fallback(){
+      var ta = document.createElement("textarea"); ta.value = cmd; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand("copy"); done(); } catch(e){ el("copyMsg").textContent = cmd; }
+      document.body.removeChild(ta);
+    }
+  });
+
+  // init
+  randomise();
+  positionMarker();
+  setBeta(0.70);
+  drawLattice();
+  updateReadouts();
+  requestAnimationFrame(loop);
+  window.addEventListener("resize", positionMarker);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Station 9 — Travelling Salesperson, 10 Cities</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #edf0f3;
+        --panel: #ffffff;
+        --panel-2: #f4f7f9;
+        --ink: #17222d;
+        --ink-soft: #43566a;
+        --muted: #71808f;
+        --line: #d5dde4;
+        --route: #d64541;
+        --route-soft: rgba(214, 69, 65, 0.12);
+        --teal: #0e7c7b;
+        --grid-line: #dde4ea;
+        --map-bg: #f8fafb;
+        --dark-card: #14202c;
+        --dark-card-ink: #eef4f9;
+        --dark-card-muted: #9db2c4;
+        --b1: #d64541;
+        --b2: #0e7c7b;
+        --b3: #2f6fde;
+        --b4: #c2188b;
+        --b5: #5b8c2a;
+        --shadow: 0 1px 2px rgba(23, 34, 45, 0.05), 0 8px 24px rgba(23, 34, 45, 0.06);
+        --radius: 14px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b1117;
+          --panel: #131d27;
+          --panel-2: #0f1720;
+          --ink: #e8eef4;
+          --ink-soft: #b3c2d1;
+          --muted: #8496a7;
+          --line: #263646;
+          --route: #ff6f61;
+          --route-soft: rgba(255, 111, 97, 0.14);
+          --teal: #2dd4bf;
+          --grid-line: #1d2c3a;
+          --map-bg: #0e1620;
+          --dark-card: #1a2836;
+          --dark-card-ink: #f2f7fb;
+          --dark-card-muted: #a7bccf;
+          --b1: #ff6f61;
+          --b2: #2dd4bf;
+          --b3: #6ea8ff;
+          --b4: #f06ec2;
+          --b5: #9ccc4f;
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+      .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 20px 56px; }
+
+      /* ---------- header ---------- */
+      header { margin-bottom: 22px; }
+      .chip-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+      .chip {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+        padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px;
+        color: var(--ink-soft); background: var(--panel);
+      }
+      .chip.route { color: var(--route); border-color: var(--route); background: var(--route-soft); }
+      h1 {
+        font-size: clamp(30px, 5vw, 46px); line-height: 1.05; font-weight: 700;
+        letter-spacing: -0.02em; margin: 0 0 10px;
+      }
+      h1 .thin { color: var(--muted); font-weight: 500; }
+      .lede { max-width: 68ch; color: var(--ink-soft); font-size: 16px; margin: 0; }
+      .lede strong { color: var(--ink); }
+
+      /* ---------- bento grid ---------- */
+      .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
+      .card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+        box-shadow: var(--shadow); padding: 18px; min-width: 0;
+      }
+      .card h2 {
+        font-size: 12px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase;
+        color: var(--muted); margin: 0 0 12px; display: flex; align-items: center; gap: 8px;
+      }
+      .card h2 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--route); flex: none; }
+      .card-map { grid-column: span 8; grid-row: span 2; display: flex; flex-direction: column; }
+      .card-published { grid-column: span 4; }
+      .card-controls { grid-column: span 4; }
+      .card-matrix { grid-column: span 5; }
+      .card-readouts { grid-column: span 3; }
+      .card-trace { grid-column: span 4; }
+      .card-explain { grid-column: span 7; }
+      .card-run { grid-column: span 5; }
+
+      /* ---------- map ---------- */
+      .map-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: baseline; justify-content: space-between; }
+      .map-len { font-family: "IBM Plex Mono", monospace; text-align: right; }
+      .map-len .big { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+      .map-len .lbl { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+      .map-frame {
+        margin-top: 12px; border: 1px solid var(--line); border-radius: 10px;
+        background: var(--map-bg); overflow: hidden; flex: 1;
+      }
+      svg#map { display: block; width: 100%; height: auto; }
+      .city-dot { cursor: grab; touch-action: none; }
+      .city-dot:active { cursor: grabbing; }
+      .map-foot { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; }
+      .status { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: var(--ink-soft); min-height: 1.4em; }
+      .status b { color: var(--ink); }
+      .legend { display: flex; flex-wrap: wrap; gap: 6px; }
+      .legend span {
+        font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+        padding: 4px 8px; border-radius: 999px; color: #fff;
+      }
+
+      /* ---------- published card ---------- */
+      .card-published { background: var(--dark-card); color: var(--dark-card-ink); border-color: transparent; }
+      .card-published h2 { color: var(--dark-card-muted); }
+      .metric-big { font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; font-family: "IBM Plex Mono", monospace; }
+      .metric-sub { color: var(--dark-card-muted); font-size: 13.5px; margin: 4px 0 18px; }
+      .fig-row { margin-bottom: 14px; }
+      .fig-row .fig-top { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; }
+      .fig-row .fig-name { color: var(--dark-card-muted); }
+      .fig-row .fig-val { font-family: "IBM Plex Mono", monospace; font-size: 20px; font-weight: 600; }
+      .fig-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.14); margin-top: 6px; overflow: hidden; }
+      .fig-bar i { display: block; height: 100%; border-radius: 4px; background: var(--b2); }
+      .fig-bar.naive i { background: var(--b1); }
+      .fig-bar.time i { background: var(--b3); }
+      .fig-note { font-size: 12.5px; color: var(--dark-card-muted); margin-top: 2px; }
+      .disclaimer {
+        margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.16);
+        font-size: 11.5px; line-height: 1.5; color: var(--dark-card-muted);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      /* ---------- controls ---------- */
+      .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+      button {
+        font-family: "IBM Plex Sans", sans-serif; font-size: 14px; font-weight: 600;
+        min-height: 44px; padding: 10px 16px; border-radius: 10px; cursor: pointer;
+        border: 1px solid var(--line); background: var(--panel-2); color: var(--ink);
+      }
+      button:hover { border-color: var(--muted); }
+      button.primary { background: var(--route); border-color: var(--route); color: #fff; }
+      button.primary:hover { filter: brightness(1.07); }
+      button:focus-visible, input:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+      .slider-block { margin-bottom: 14px; }
+      .slider-block label {
+        display: flex; justify-content: space-between; align-items: baseline;
+        font-size: 13px; font-weight: 500; color: var(--ink-soft); margin-bottom: 4px;
+      }
+      .slider-block label output { font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 600; color: var(--ink); }
+      input[type="range"] { width: 100%; min-height: 36px; accent-color: var(--route); cursor: pointer; }
+      .hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+      /* ---------- readouts ---------- */
+      .readout-list { display: grid; grid-template-columns: 1fr; gap: 0; }
+      .readout {
+        display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+        padding: 9px 0; border-bottom: 1px dashed var(--line);
+      }
+      .readout:last-child { border-bottom: none; }
+      .readout .k { font-size: 12.5px; color: var(--muted); }
+      .readout .v { font-family: "IBM Plex Mono", monospace; font-size: 15px; font-weight: 600; white-space: nowrap; }
+      .readout .v.good { color: var(--teal); }
+      .block-chip {
+        display: inline-block; min-width: 30px; text-align: center; color: #fff;
+        border-radius: 6px; padding: 1px 7px; font-size: 13px;
+      }
+
+      /* ---------- matrix ---------- */
+      .matrix-wrap { overflow: hidden; }
+      table.matrix { border-collapse: separate; border-spacing: 3px; width: 100%; }
+      table.matrix th {
+        font-family: "IBM Plex Mono", monospace; font-size: 10.5px; font-weight: 600;
+        color: var(--muted); padding: 2px 0; text-align: center;
+      }
+      table.matrix th.rowhead { text-align: right; padding-right: 6px; white-space: nowrap; }
+      table.matrix td {
+        aspect-ratio: 1; border-radius: 5px; background: var(--panel-2);
+        border: 1px solid var(--line); padding: 0; transition: background 120ms ease, border-color 120ms ease;
+      }
+      table.matrix td.on { border-color: transparent; }
+      table.matrix tr.active-row td { border-color: var(--muted); }
+      table.matrix tr.active-row td.on { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px currentColor; }
+      .matrix-note { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+
+      /* ---------- trace ---------- */
+      svg#trace { display: block; width: 100%; height: auto; }
+      .trace-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 8px; font-family: "IBM Plex Mono", monospace; }
+      .trace-legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--route); vertical-align: middle; margin-right: 5px; }
+      .trace-legend i.opt { border-top: 2px dashed var(--teal); }
+      .trace-legend i.nv { border-top: 2px dotted var(--muted); }
+
+      /* ---------- explain / run ---------- */
+      .card-explain p { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 10px; }
+      .card-explain p:last-child { margin-bottom: 0; }
+      .card-explain strong { color: var(--ink); }
+      .run-box {
+        display: flex; align-items: stretch; gap: 8px; background: var(--dark-card);
+        border-radius: 10px; padding: 6px 6px 6px 16px;
+      }
+      .run-box code {
+        font-family: "IBM Plex Mono", monospace; font-size: 15px; color: var(--dark-card-ink);
+        display: flex; align-items: center; flex: 1; overflow-x: auto; white-space: nowrap; padding: 8px 0;
+      }
+      .run-box code .prompt { color: var(--b5); margin-right: 10px; user-select: none; }
+      #copyBtn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff; flex: none; }
+      #copyBtn:hover { background: rgba(255,255,255,0.2); }
+      .run-note { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+
+      footer { margin-top: 22px; font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between; }
+
+      /* ---------- responsive ---------- */
+      @media (max-width: 1079px) {
+        .card-map { grid-column: span 12; grid-row: auto; }
+        .card-published { grid-column: span 6; }
+        .card-controls { grid-column: span 6; }
+        .card-matrix { grid-column: span 7; }
+        .card-readouts { grid-column: span 5; }
+        .card-trace { grid-column: span 12; }
+        .card-explain { grid-column: span 7; }
+        .card-run { grid-column: span 5; }
+      }
+      @media (max-width: 699px) {
+        .wrap { padding: 20px 14px 44px; }
+        .card { grid-column: span 12 !important; padding: 15px; }
+        .map-len .big { font-size: 27px; }
+        .metric-big { font-size: 44px; }
+        table.matrix { border-spacing: 2px; }
+        table.matrix th { font-size: 9px; }
+        .run-box { flex-direction: column; padding: 12px 14px; }
+        .run-box code { white-space: normal; overflow-x: visible; overflow-wrap: anywhere; line-height: 1.6; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        table.matrix td { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="chip-row">
+          <span class="chip">THERMO LAB</span>
+          <span class="chip route">STATION 09 / 16</span>
+          <span class="chip">EXP 9 · QUBO</span>
+        </div>
+        <h1>The Travelling Salesperson <span class="thin">— ten cities, one loop</span></h1>
+        <p class="lede">
+          <strong>The TSP encoded as an N×N permutation-matrix QUBO.</strong>
+          Chromatic block Gibbs updates resolve row and column constraints while shrinking the tour.
+          Below, that sampler runs live in your browser: watch the loop over ten cities anneal
+          from the naive ordering down toward the proven optimum.
+        </p>
+      </header>
+
+      <div class="grid">
+        <!-- MAP -->
+        <section class="card card-map" aria-label="Live tour map">
+          <div class="map-head">
+            <h2 style="margin:0"><span class="dot"></span>Live anneal — the tour</h2>
+            <div class="map-len">
+              <div class="big" id="lenNow">—</div>
+              <div class="lbl">current tour length</div>
+            </div>
+          </div>
+          <div class="map-frame">
+            <svg id="map" viewBox="0 0 640 440" role="img" aria-label="Map of ten cities joined by the current tour"></svg>
+          </div>
+          <div class="map-foot">
+            <div class="status" id="status">Loading the field…</div>
+            <div class="legend" id="blockLegend" aria-label="Chromatic block colors"></div>
+          </div>
+        </section>
+
+        <!-- PUBLISHED RESULT -->
+        <section class="card card-published" aria-label="Published benchmark result">
+          <h2>Published result · Exp 9</h2>
+          <div class="metric-big">100%</div>
+          <p class="metric-sub">optimal tour — the sampler found the provably shortest loop</p>
+          <div class="fig-row">
+            <div class="fig-top"><span class="fig-name">Annealed tour length</span><span class="fig-val">6.296</span></div>
+            <div class="fig-bar"><i style="width:35%"></i></div>
+          </div>
+          <div class="fig-row">
+            <div class="fig-top"><span class="fig-name">Naive tour length</span><span class="fig-val">17.986</span></div>
+            <div class="fig-bar naive"><i style="width:100%"></i></div>
+          </div>
+          <div class="fig-row">
+            <div class="fig-top"><span class="fig-name">Runtime</span><span class="fig-val">20.110 s</span></div>
+            <div class="fig-bar time"><i style="width:56%"></i></div>
+          </div>
+          <p class="disclaimer">simulated benchmark result, results may vary (not customer results)</p>
+        </section>
+
+        <!-- CONTROLS -->
+        <section class="card card-controls" aria-label="Sampler controls">
+          <h2><span class="dot"></span>Sampler controls</h2>
+          <div class="btn-row">
+            <button class="primary" id="annealBtn" type="button">Anneal</button>
+            <button id="naiveBtn" type="button">Naive tour</button>
+            <button id="shuffleBtn" type="button">Reshuffle cities</button>
+          </div>
+          <div class="slider-block">
+            <label for="tempSlider">Temperature <output id="tempOut">—</output></label>
+            <input type="range" id="tempSlider" min="0" max="1000" value="500" aria-label="Sampler temperature" />
+          </div>
+          <div class="slider-block">
+            <label for="speedSlider">Anneal speed <output id="speedOut">3 sweeps / frame</output></label>
+            <input type="range" id="speedSlider" min="1" max="12" value="3" aria-label="Sweeps per frame" />
+          </div>
+          <p class="hint">Drag the temperature slider to hold the sampler at that heat and keep sampling — hot tours thrash, cold tours freeze. You can also drag any city on the map; the optimum is recomputed as you let go.</p>
+        </section>
+
+        <!-- MATRIX -->
+        <section class="card card-matrix" aria-label="Permutation matrix">
+          <h2><span class="dot"></span>Permutation matrix — the QUBO state</h2>
+          <div class="matrix-wrap">
+            <table class="matrix" id="matrix" aria-label="Ten by ten permutation matrix of the current tour"></table>
+          </div>
+          <p class="matrix-note">Rows are stops in the tour, columns are cities. Exactly one cell is lit per row and per column — that is the permutation constraint the QUBO enforces. Rows are tinted by chromatic block; the outlined pair is the block updating this sweep.</p>
+        </section>
+
+        <!-- READOUTS -->
+        <section class="card card-readouts" aria-label="Live readouts">
+          <h2><span class="dot"></span>Live readouts</h2>
+          <div class="readout-list">
+            <div class="readout"><span class="k">Best tour found</span><span class="v" id="rBest">—</span></div>
+            <div class="readout"><span class="k">Proven optimum (Held–Karp)</span><span class="v" id="rOpt">—</span></div>
+            <div class="readout"><span class="k">Current tour gap to optimum</span><span class="v" id="rGap">—</span></div>
+            <div class="readout"><span class="k">Naive tour (id order)</span><span class="v" id="rNaive">—</span></div>
+            <div class="readout"><span class="k">Temperature</span><span class="v" id="rTemp">—</span></div>
+            <div class="readout"><span class="k">Sweep</span><span class="v" id="rSweep">0</span></div>
+            <div class="readout"><span class="k">Block updating</span><span class="v"><span class="block-chip" id="rBlock">B1</span></span></div>
+            <div class="readout"><span class="k">Move acceptance</span><span class="v" id="rAcc">—</span></div>
+          </div>
+        </section>
+
+        <!-- TRACE -->
+        <section class="card card-trace" aria-label="Tour length trace">
+          <h2><span class="dot"></span>Tour length over sweeps</h2>
+          <svg id="trace" viewBox="0 0 340 120" role="img" aria-label="Chart of tour length falling over the anneal"></svg>
+          <div class="trace-legend">
+            <span><i></i>current length</span>
+            <span><i class="opt"></i>proven optimum</span>
+            <span><i class="nv"></i>naive start</span>
+          </div>
+        </section>
+
+        <!-- EXPLAIN -->
+        <section class="card card-explain" aria-label="How it works">
+          <h2><span class="dot"></span>How the QUBO holds a tour together</h2>
+          <p>The tour is written as a <strong>10×10 binary matrix</strong>: cell (stop, city) is 1 when that city is visited at that stop. A valid tour needs exactly one 1 in every row and every column, so the QUBO adds a heavy penalty for any row or column that breaks the rule, and a cost term that sums the distance of each leg the matrix selects.</p>
+          <p><strong>Chromatic block Gibbs updates</strong> split the ten stop-positions into five colored blocks. A sweep freezes four blocks and resamples the fifth, so row and column constraints are repaired block by block instead of being fought all at once — and because every proposed move is a swap inside the permutation, the matrix never stops being a legal tour while the distance term pulls it shorter.</p>
+          <p>The demo above runs that process on the cities in front of you. Its optimum is not assumed — it is <strong>proven by exhaustive Held–Karp dynamic programming</strong> over all orderings of these ten cities, so the gap readout is exact.</p>
+        </section>
+
+        <!-- RUN -->
+        <section class="card card-run" aria-label="Run it yourself">
+          <h2><span class="dot"></span>Run the benchmark</h2>
+          <div class="run-box">
+            <code><span class="prompt">$</span><span id="runCmd">uv run thrml-bench run --exp 9</span></code>
+            <button id="copyBtn" type="button">Copy</button>
+          </div>
+          <p class="run-note">Experiment 9 of the thermo benchmark suite — the travelling salesperson, encoded as a permutation-matrix QUBO and solved with chromatic block Gibbs sampling.</p>
+        </section>
+      </div>
+
+      <footer>
+        <span>Thermo Lab · Station 9 — Travelling Salesperson, 10 Cities</span>
+        <span class="mono">In-browser demo: lengths are computed live from the cities on this page.</span>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var N = 10, W = 640, H = 440, LEN_SCALE = 0.0042;
+        var BLOCK_COLORS = ["#d64541", "#0e7c7b", "#2f6fde", "#c2188b", "#5b8c2a"];
+        var BLOCKS = 5;
+        var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* ---------- seeded rng ---------- */
+        function mulberry32(a) {
+          return function () {
+            a |= 0; a = (a + 0x6D2B79F5) | 0;
+            var t = Math.imul(a ^ (a >>> 15), 1 | a);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+          };
+        }
+        var seed = 20261109;
+
+        /* ---------- state ---------- */
+        var cities = [];        // {x,y} in svg coords
+        var dist = [];          // N x N, in tour-length units
+        var tour = [], curLen = 0;
+        var bestTour = [], bestLen = Infinity;
+        var naiveLen = 0, optLen = 0;
+        var mode = "idle";      // idle | anneal | hold
+        var T = 0.3, sweep = 0, speed = 3;
+        var TOTAL_SWEEPS = 1100, T0 = 0.5, TEND = 0.004;
+        var attempts = 0, accepts = 0, accRate = null;
+        var history = [];
+        var dragging = -1;
+
+        var $ = function (id) { return document.getElementById(id); };
+        var fmt = function (x) { return x.toFixed(3); };
+
+        /* ---------- geometry / distances ---------- */
+        function buildDist() {
+          dist = [];
+          for (var i = 0; i < N; i++) {
+            dist.push([]);
+            for (var j = 0; j < N; j++) {
+              var dx = cities[i].x - cities[j].x, dy = cities[i].y - cities[j].y;
+              dist[i].push(Math.sqrt(dx * dx + dy * dy) * LEN_SCALE);
+            }
+          }
+        }
+        function tourLength(t) {
+          var s = 0;
+          for (var i = 0; i < N; i++) s += dist[t[i]][t[(i + 1) % N]];
+          return s;
+        }
+        function naiveTour() {
+          var t = [];
+          for (var i = 0; i < N; i++) t.push(i);
+          return t;
+        }
+
+        /* ---------- Held–Karp exact optimum ---------- */
+        function heldKarp() {
+          var M = 1 << N, INF = Infinity;
+          var dp = new Float64Array(M * N).fill(INF);
+          var par = new Int16Array(M * N).fill(-1);
+          dp[(1 << 0) * N + 0] = 0;
+          for (var mask = 1; mask < M; mask++) {
+            if (!(mask & 1)) continue;
+            for (var j = 1; j < N; j++) {
+              if (!(mask & (1 << j))) continue;
+              var prev = mask ^ (1 << j);
+              var best = INF, arg = -1;
+              for (var k = 0; k < N; k++) {
+                if (!(prev & (1 << k))) continue;
+                var v = dp[prev * N + k];
+                if (v === INF) continue;
+                v += dist[k][j];
+                if (v < best) { best = v; arg = k; }
+              }
+              dp[mask * N + j] = best; par[mask * N + j] = arg;
+            }
+          }
+          var full = M - 1, bestEnd = -1, bestVal = INF;
+          for (var e = 1; e < N; e++) {
+            var val = dp[full * N + e] + dist[e][0];
+            if (val < bestVal) { bestVal = val; bestEnd = e; }
+          }
+          var order = [], m = full, cur = bestEnd;
+          while (cur > 0) { order.push(cur); var p = par[m * N + cur]; m ^= (1 << cur); cur = p; }
+          order.reverse();
+          return { len: bestVal, tour: [0].concat(order) };
+        }
+
+        /* ---------- 2-opt polish ---------- */
+        function twoOpt(t) {
+          t = t.slice();
+          var improved = true;
+          while (improved) {
+            improved = false;
+            for (var i = 0; i < N - 1 && !improved; i++) {
+              for (var j = i + 2; j < N; j++) {
+                if (i === 0 && j === N - 1) continue;
+                var a = t[(i + N - 1) % N], b = t[i], c = t[j], d = t[(j + 1) % N];
+                if (dist[a][c] + dist[b][d] < dist[a][b] + dist[c][d] - 1e-12) {
+                  var seg = t.slice(i, j + 1).reverse();
+                  for (var s = 0; s < seg.length; s++) t[i + s] = seg[s];
+                  improved = true; break;
+                }
+              }
+            }
+          }
+          return t;
+        }
+
+        /* ---------- sampler: one chromatic block sweep ---------- */
+        var rng = mulberry32(987654321);
+        function doSweep() {
+          var block = sweep % BLOCKS;
+          var positions = [block * 2, block * 2 + 1];
+          for (var a = 0; a < 6; a++) {
+            var p = positions[Math.floor(rng() * 2)];
+            var q = Math.floor(rng() * N);
+            if (q === p) continue;
+            var oldA = tour[p], oldB = tour[q];
+            tour[p] = oldB; tour[q] = oldA;
+            var nl = tourLength(tour);
+            var dE = nl - curLen;
+            attempts++;
+            if (dE <= 0 || rng() < Math.exp(-dE / Math.max(T, 1e-6))) {
+              curLen = nl; accepts++;
+              if (nl < bestLen) { bestLen = nl; bestTour = tour.slice(); }
+            } else {
+              tour[p] = oldA; tour[q] = oldB;
+            }
+          }
+          sweep++;
+          if (attempts >= 60) { accRate = accepts / attempts; attempts = 0; accepts = 0; }
+        }
+
+        /* ---------- build the map svg ---------- */
+        var svgNS = "http://www.w3.org/2000/svg";
+        var mapSvg = $("map");
+        var legEls = [], cityEls = [], posEls = [];
+        (function buildMap() {
+          var g = document.createElementNS(svgNS, "g");
+          for (var gx = 0; gx <= W; gx += 64) {
+            var v = document.createElementNS(svgNS, "line");
+            v.setAttribute("x1", gx); v.setAttribute("x2", gx);
+            v.setAttribute("y1", 0); v.setAttribute("y2", H);
+            v.setAttribute("stroke", "var(--grid-line)"); v.setAttribute("stroke-width", "1");
+            g.appendChild(v);
+          }
+          for (var gy = 0; gy <= H; gy += 55) {
+            var hz = document.createElementNS(svgNS, "line");
+            hz.setAttribute("x1", 0); hz.setAttribute("x2", W);
+            hz.setAttribute("y1", gy); hz.setAttribute("y2", gy);
+            hz.setAttribute("stroke", "var(--grid-line)"); hz.setAttribute("stroke-width", "1");
+            g.appendChild(hz);
+          }
+          mapSvg.appendChild(g);
+          for (var i = 0; i < N; i++) {
+            var leg = document.createElementNS(svgNS, "line");
+            leg.setAttribute("stroke-width", "5");
+            leg.setAttribute("stroke-linecap", "round");
+            leg.setAttribute("opacity", "0.88");
+            mapSvg.appendChild(leg); legEls.push(leg);
+          }
+          for (var c = 0; c < N; c++) {
+            var grp = document.createElementNS(svgNS, "g");
+            grp.setAttribute("class", "city-dot");
+            grp.setAttribute("data-city", c);
+            var halo = document.createElementNS(svgNS, "circle");
+            halo.setAttribute("r", "21"); halo.setAttribute("fill", "transparent");
+            var dot = document.createElementNS(svgNS, "circle");
+            dot.setAttribute("r", "14");
+            dot.setAttribute("fill", "var(--panel)");
+            dot.setAttribute("stroke-width", "4");
+            var num = document.createElementNS(svgNS, "text");
+            num.setAttribute("text-anchor", "middle");
+            num.setAttribute("dy", "4.5");
+            num.setAttribute("font-family", "IBM Plex Mono, monospace");
+            num.setAttribute("font-size", "12"); num.setAttribute("font-weight", "700");
+            num.setAttribute("fill", "var(--ink)");
+            num.textContent = c;
+            var pos = document.createElementNS(svgNS, "text");
+            pos.setAttribute("text-anchor", "middle");
+            pos.setAttribute("dy", "34");
+            pos.setAttribute("font-family", "IBM Plex Mono, monospace");
+            pos.setAttribute("font-size", "9.5");
+            pos.setAttribute("fill", "var(--muted)");
+            grp.appendChild(halo); grp.appendChild(dot); grp.appendChild(num); grp.appendChild(pos);
+            mapSvg.appendChild(grp);
+            cityEls.push({ grp: grp, dot: dot });
+            posEls.push(pos);
+          }
+        })();
+
+        /* ---------- build the matrix ---------- */
+        var cellEls = [], rowEls = [];
+        (function buildMatrix() {
+          var table = $("matrix");
+          var thead = document.createElement("tr");
+          var corner = document.createElement("th");
+          corner.textContent = "stop \\ city";
+          thead.appendChild(corner);
+          for (var c = 0; c < N; c++) {
+            var th = document.createElement("th"); th.textContent = c; thead.appendChild(th);
+          }
+          table.appendChild(thead);
+          for (var p = 0; p < N; p++) {
+            var tr = document.createElement("tr");
+            var rh = document.createElement("th");
+            rh.className = "rowhead";
+            rh.innerHTML = "";
+            var chip = document.createElement("span");
+            chip.className = "block-chip";
+            chip.style.background = BLOCK_COLORS[Math.floor(p / 2)];
+            chip.style.fontSize = "9.5px"; chip.style.minWidth = "22px"; chip.style.padding = "0 4px";
+            chip.textContent = "B" + (Math.floor(p / 2) + 1);
+            rh.appendChild(chip);
+            var lbl = document.createElement("span");
+            lbl.textContent = " " + p;
+            rh.appendChild(lbl);
+            tr.appendChild(rh);
+            var rowCells = [];
+            for (var cc = 0; cc < N; cc++) {
+              var td = document.createElement("td");
+              tr.appendChild(td); rowCells.push(td);
+            }
+            table.appendChild(tr);
+            cellEls.push(rowCells); rowEls.push(tr);
+          }
+          var leg = $("blockLegend");
+          for (var b = 0; b < BLOCKS; b++) {
+            var s = document.createElement("span");
+            s.style.background = BLOCK_COLORS[b];
+            s.textContent = "B" + (b + 1) + " · stops " + (b * 2) + "–" + (b * 2 + 1);
+            leg.appendChild(s);
+          }
+        })();
+
+        /* ---------- render ---------- */
+        function blockOfPos(p) { return Math.floor(p / 2); }
+        function render() {
+          var posOfCity = [];
+          for (var p = 0; p < N; p++) posOfCity[tour[p]] = p;
+          for (var i = 0; i < N; i++) {
+            var a = cities[tour[i]], bpt = cities[tour[(i + 1) % N]];
+            var leg = legEls[i];
+            leg.setAttribute("x1", a.x); leg.setAttribute("y1", a.y);
+            leg.setAttribute("x2", bpt.x); leg.setAttribute("y2", bpt.y);
+            leg.setAttribute("stroke", BLOCK_COLORS[blockOfPos(i)]);
+          }
+          for (var c = 0; c < N; c++) {
+            var ce = cityEls[c];
+            ce.grp.setAttribute("transform", "translate(" + cities[c].x + "," + cities[c].y + ")");
+            ce.dot.setAttribute("stroke", BLOCK_COLORS[blockOfPos(posOfCity[c])]);
+            posEls[c].textContent = "stop " + posOfCity[c];
+          }
+          var activeBlock = sweep % BLOCKS;
+          for (var r = 0; r < N; r++) {
+            rowEls[r].classList.toggle("active-row", blockOfPos(r) === activeBlock && (mode === "anneal" || mode === "hold"));
+            for (var cc2 = 0; cc2 < N; cc2++) {
+              var on = tour[r] === cc2;
+              var td = cellEls[r][cc2];
+              if (on) {
+                td.classList.add("on");
+                td.style.background = BLOCK_COLORS[blockOfPos(r)];
+                td.style.color = BLOCK_COLORS[blockOfPos(r)];
+              } else {
+                td.classList.remove("on");
+                td.style.background = "";
+                td.style.color = "";
+              }
+            }
+          }
+          /* readouts */
+          $("lenNow").textContent = fmt(curLen);
+          $("rBest").textContent = fmt(bestLen);
+          $("rOpt").textContent = fmt(optLen);
+          var gap = ((curLen - optLen) / optLen) * 100;
+          var gapEl = $("rGap");
+          gapEl.textContent = gap.toFixed(2) + "%";
+          gapEl.className = "v" + (gap < 0.005 ? " good" : "");
+          $("rNaive").textContent = fmt(naiveLen);
+          $("rTemp").textContent = T.toFixed(3);
+          $("rSweep").textContent = sweep;
+          var bc = $("rBlock");
+          bc.textContent = "B" + (activeBlock + 1);
+          bc.style.background = BLOCK_COLORS[activeBlock];
+          $("rAcc").textContent = accRate === null ? "—" : Math.round(accRate * 100) + "%";
+          $("tempOut").textContent = T.toFixed(3);
+          if (mode !== "hold") syncTempSlider();
+          renderTrace();
+        }
+
+        /* ---------- trace ---------- */
+        function renderTrace() {
+          var svg = $("trace");
+          var TW = 340, TH = 120, PAD = 8;
+          var top = naiveLen * 1.03, bot = Math.min(optLen * 0.94, bestLen * 0.99);
+          if (top - bot < 0.5) top = bot + 0.5;
+          function Y(v) { return PAD + (top - v) / (top - bot) * (TH - 2 * PAD); }
+          var out = "";
+          out += '<line x1="0" y1="' + Y(optLen) + '" x2="' + TW + '" y2="' + Y(optLen) + '" stroke="var(--teal)" stroke-width="1.5" stroke-dasharray="5 4"/>';
+          out += '<line x1="0" y1="' + Y(naiveLen) + '" x2="' + TW + '" y2="' + Y(naiveLen) + '" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 4"/>';
+          if (history.length > 1) {
+            var pts = "";
+            var maxPts = 220;
+            var step = Math.max(1, Math.floor(history.length / maxPts));
+            for (var i = 0; i < history.length; i += step) {
+              var x = (i / Math.max(TOTAL_SWEEPS, history.length - 1)) * (TW - 2 * PAD) + PAD;
+              if (x > TW - PAD) x = TW - PAD;
+              pts += x.toFixed(1) + "," + Y(Math.min(history[i], top)).toFixed(1) + " ";
+            }
+            out += '<polyline points="' + pts + '" fill="none" stroke="var(--route)" stroke-width="2" stroke-linejoin="round"/>';
+          }
+          svg.innerHTML = out;
+        }
+
+        /* ---------- status ---------- */
+        function setStatus(html) { $("status").innerHTML = html; }
+
+        /* ---------- field setup ---------- */
+        function newField(newSeed) {
+          seed = newSeed;
+          var r = mulberry32(seed);
+          cities = [];
+          for (var i = 0; i < N; i++) {
+            cities.push({ x: 52 + r() * (W - 104), y: 48 + r() * (H - 96) });
+          }
+          buildDist();
+          resetToNaive();
+          var hk = heldKarp();
+          optLen = hk.len;
+          render();
+        }
+        function resetToNaive() {
+          tour = naiveTour();
+          curLen = tourLength(tour);
+          naiveLen = curLen;
+          bestTour = tour.slice(); bestLen = curLen;
+          sweep = 0; attempts = 0; accepts = 0; accRate = null;
+          history = [curLen];
+          mode = "idle";
+        }
+
+        /* ---------- anneal control ---------- */
+        var annealBtn = $("annealBtn");
+        function startAnneal() {
+          resetToNaive();
+          var hk = heldKarp(); optLen = hk.len;
+          mode = "anneal";
+          annealBtn.textContent = "Annealing…";
+          setStatus("Annealing — <b>block Gibbs sweeps</b> shrinking the tour from the naive ordering.");
+        }
+        function finishAnneal() {
+          var polished = twoOpt(bestTour);
+          var pl = tourLength(polished);
+          if (pl < bestLen) { bestLen = pl; bestTour = polished; }
+          tour = bestTour.slice(); curLen = bestLen;
+          mode = "idle";
+          annealBtn.textContent = "Anneal";
+          var gap = ((curLen - optLen) / optLen) * 100;
+          if (gap < 0.005) {
+            setStatus("Settled — <b>optimal tour reached</b>, matching the Held–Karp proof at " + fmt(optLen) + ".");
+          } else {
+            setStatus("Settled at <b>" + fmt(curLen) + "</b> — " + gap.toFixed(2) + "% above the proven optimum. Anneal again or hold a low temperature to keep hunting.");
+          }
+          render();
+        }
+
+        /* ---------- main loop ---------- */
+        function frame() {
+          if (dragging < 0) {
+            if (mode === "anneal") {
+              for (var s = 0; s < speed; s++) {
+                var frac = sweep / TOTAL_SWEEPS;
+                T = T0 * Math.pow(TEND / T0, frac);
+                doSweep();
+                if (sweep >= TOTAL_SWEEPS) break;
+              }
+              history.push(curLen);
+              if (history.length > 4000) history.splice(0, 1000);
+              render();
+              if (sweep >= TOTAL_SWEEPS) finishAnneal();
+            } else if (mode === "hold") {
+              for (var s2 = 0; s2 < speed; s2++) doSweep();
+              history.push(curLen);
+              if (history.length > 4000) history.splice(0, 1000);
+              render();
+            }
+          }
+          requestAnimationFrame(frame);
+        }
+
+        /* ---------- temperature slider ---------- */
+        var tempSlider = $("tempSlider");
+        function sliderToT(v) { return 0.002 * Math.pow(400, v / 1000); } // 0.002 .. 0.8
+        function tToSlider(t) { return Math.round(1000 * Math.log(t / 0.002) / Math.log(400)); }
+        function syncTempSlider() { tempSlider.value = tToSlider(Math.min(Math.max(T, 0.002), 0.8)); }
+        tempSlider.addEventListener("input", function () {
+          T = sliderToT(+tempSlider.value);
+          if (mode !== "hold") {
+            mode = "hold";
+            annealBtn.textContent = "Anneal";
+          }
+          setStatus("Holding at <b>T = " + T.toFixed(3) + "</b> — block Gibbs sampling continues at this temperature.");
+          render();
+        });
+
+        /* ---------- speed slider ---------- */
+        var speedSlider = $("speedSlider");
+        speedSlider.addEventListener("input", function () {
+          speed = +speedSlider.value;
+          $("speedOut").textContent = speed + (speed === 1 ? " sweep / frame" : " sweeps / frame");
+        });
+
+        /* ---------- buttons ---------- */
+        annealBtn.addEventListener("click", function () {
+          if (mode === "anneal") return;
+          startAnneal();
+        });
+        $("naiveBtn").addEventListener("click", function () {
+          mode = "idle";
+          annealBtn.textContent = "Anneal";
+          resetToNaive();
+          setStatus("Naive tour — cities visited in <b>id order 0 → 9</b>, length " + fmt(naiveLen) + ". Press Anneal to shrink it.");
+          render();
+        });
+        $("shuffleBtn").addEventListener("click", function () {
+          mode = "idle";
+          annealBtn.textContent = "Anneal";
+          newField((Math.random() * 1e9) | 0);
+          setStatus("New field of ten cities. Naive length <b>" + fmt(naiveLen) + "</b> · proven optimum <b>" + fmt(optLen) + "</b>. Annealing…");
+          if (!REDUCED) startAnneal(); else render();
+        });
+
+        /* ---------- copy ---------- */
+        $("copyBtn").addEventListener("click", function () {
+          var btn = this;
+          var text = $("runCmd").textContent;
+          function done() {
+            btn.textContent = "Copied";
+            setTimeout(function () { btn.textContent = "Copy"; }, 1600);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, done);
+          } else {
+            var ta = document.createElement("textarea");
+            ta.value = text; document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand("copy"); } catch (e) {}
+            document.body.removeChild(ta);
+            done();
+          }
+        });
+
+        /* ---------- drag cities ---------- */
+        function svgPoint(evt) {
+          var pt = mapSvg.createSVGPoint();
+          pt.x = evt.clientX; pt.y = evt.clientY;
+          var m = mapSvg.getScreenCTM();
+          if (!m) return null;
+          return pt.matrixTransform(m.inverse());
+        }
+        mapSvg.addEventListener("pointerdown", function (evt) {
+          var g = evt.target.closest ? evt.target.closest(".city-dot") : null;
+          if (!g) return;
+          dragging = +g.getAttribute("data-city");
+          mapSvg.setPointerCapture(evt.pointerId);
+          evt.preventDefault();
+        });
+        mapSvg.addEventListener("pointermove", function (evt) {
+          if (dragging < 0) return;
+          var p = svgPoint(evt);
+          if (!p) return;
+          cities[dragging].x = Math.min(W - 26, Math.max(26, p.x));
+          cities[dragging].y = Math.min(H - 26, Math.max(26, p.y));
+          buildDist();
+          curLen = tourLength(tour);
+          bestLen = tourLength(bestTour);
+          naiveLen = tourLength(naiveTour());
+          render();
+        });
+        function endDrag() {
+          if (dragging < 0) return;
+          dragging = -1;
+          var hk = heldKarp();
+          optLen = hk.len;
+          if (tourLength(bestTour) > tourLength(tour)) { bestTour = tour.slice(); bestLen = curLen; }
+          history = [curLen];
+          setStatus("City moved — proven optimum for the new field is <b>" + fmt(optLen) + "</b>. Anneal to chase it.");
+          render();
+        }
+        mapSvg.addEventListener("pointerup", endDrag);
+        mapSvg.addEventListener("pointercancel", endDrag);
+
+        /* ---------- init ---------- */
+        newField(seed);
+        setStatus("Naive tour loaded — length <b>" + fmt(naiveLen) + "</b> against a proven optimum of <b>" + fmt(optLen) + "</b>.");
+        render();
+        requestAnimationFrame(frame);
+        if (!REDUCED) {
+          setTimeout(function () { if (mode === "idle") startAnneal(); }, 900);
+        }
+      })();
+    </script>
+  </body>
+</html>

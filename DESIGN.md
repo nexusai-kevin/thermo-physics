@@ -6,7 +6,7 @@ This document encodes the visual identity, typography hierarchy, surface tokens,
 
 ## 1. Aesthetic Direction: Editorial Scientific Research
 
-Inspired by Dr. Felix Meier ([`drfelixmeier.com/research`](https://www.drfelixmeier.com/research/)), *Nature Methods*, and *Quanta Magazine*. The site reads as an authoritative, high-craft scientific instrument and academic publication—never as a generic template or promotional AI-SaaS landing page.
+Inspired by leading scientific instruments, *Nature Methods*, and *Quanta Magazine*. The site reads as an authoritative, high-craft scientific instrument and academic publication—never as a generic template or promotional AI-SaaS landing page.
 
 ### Core Principles
 - **Restraint Over Noise**: Spend boldness in one place (e.g. the live interactive ribbon or network graph). Keep everything around it quiet, disciplined, and razor-sharp.

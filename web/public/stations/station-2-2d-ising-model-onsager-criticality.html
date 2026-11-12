@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Station 2 — 2D Ising Model, Onsager Criticality</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Archivo:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1f3; --panel:#ffffff; --panel2:#f7f9fa; --ink:#101418; --muted:#5b6770; --line:#dde3e6;
+    --up:#e85a24; --up-dim:#fde8df; --down:#0e7c8c; --down-dim:#dff3f5;
+    --accent:#0e7c8c; --accent2:#e85a24; --good:#0f7a4d;
+    --chip:#101418; --chip-ink:#fff;
+    --shadow:0 1px 2px rgba(16,20,24,.06),0 8px 28px rgba(16,20,24,.06);
+    --radius:18px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0a0e11; --panel:#12181d; --panel2:#171f26; --ink:#eef3f5; --muted:#9aabb3; --line:#232e36;
+      --up:#ff6a2b; --up-dim:#2a1a12; --down:#22b8cf; --down-dim:#0d262b;
+      --accent:#22b8cf; --accent2:#ff6a2b;
+      --chip:#eef3f5; --chip-ink:#0a0e11;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:2.25rem}
+  button{font-family:inherit;cursor:pointer}
+  .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 40px}
+  /* header */
+  .topbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .crumb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pill{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);background:var(--panel);padding:6px 10px;border-radius:999px;color:var(--muted)}
+  .pill strong{color:var(--ink)}
+  .pill.hot{border-color:transparent;background:var(--ink);color:var(--bg)}
+  .pill.hot strong{color:var(--bg)}
+  h1{font-family:"Archivo",sans-serif;font-weight:900;letter-spacing:-.02em;line-height:.95;font-size:clamp(34px,6vw,62px);margin:6px 0 10px}
+  h1 .thin{font-weight:700;color:var(--muted)}
+  h1 em{font-style:normal;color:var(--up)}
+  .lede{font-size:17px;line-height:1.55;color:var(--muted);max-width:62ch;margin:0}
+  .lede strong{color:var(--ink)}
+  .hero{display:grid;grid-template-columns:1.55fr .9fr;gap:14px;margin-bottom:14px}
+  @media(max-width:820px){.hero{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+  .card h2{font-size:13px;letter-spacing:.09em;text-transform:uppercase;font-family:"IBM Plex Mono",monospace;color:var(--muted);margin:0 0 12px;font-weight:600}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .runbox{background:var(--chip);color:var(--chip-ink);border-radius:12px;padding:14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .runbox code{font-family:"IBM Plex Mono",monospace;font-size:13.5px;word-break:break-all;line-height:1.4}
+  .copybtn{flex:none;border:0;border-radius:8px;padding:8px 12px;font-weight:600;font-size:13px;background:var(--up);color:#fff;min-height:36px}
+  .fine{font-size:11.5px;line-height:1.5;color:var(--muted)}
+  .fine em{font-style:normal;text-decoration:underline;text-underline-offset:2px}
+  /* phase strip */
+  .phasestrip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+  @media(max-width:560px){.phasestrip{grid-template-columns:1fr}}
+  .phase{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2)}
+  .phase b{display:block;font-size:13px;margin-bottom:2px}
+  .phase span{font-size:12.5px;color:var(--muted);line-height:1.45;display:block}
+  .phase.on{outline:2px solid var(--accent);outline-offset:-2px}
+  /* bento */
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+  .span7{grid-column:span 7}.span5{grid-column:span 5}.span4{grid-column:span 4}.span8{grid-column:span 8}.span6{grid-column:span 6}.span12{grid-column:span 12}
+  @media(max-width:900px){.span7,.span5,.span4,.span8,.span6{grid-column:span 12}}
+  /* lattice */
+  .latwrap{position:relative}
+  canvas#lattice{width:100%;aspect-ratio:1/1;display:block;border-radius:12px;background:#0a0e11;cursor:crosshair;touch-action:manipulation}
+  .latmeta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .tag{font-family:"IBM Plex Mono",monospace;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:var(--panel2)}
+  .tag i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .overlay{position:absolute;top:10px;left:10px;background:rgba(10,14,17,.82);color:#fff;border-radius:10px;padding:8px 10px;font-family:"IBM Plex Mono",monospace;font-size:12px;line-height:1.5;pointer-events:none;backdrop-filter:blur(4px)}
+  .overlay b{color:#ffb38a}
+  /* controls */
+  .sliderrow{margin:14px 0 6px}
+  input[type=range]{width:100%;accent-color:var(--up);height:36px;cursor:pointer}
+  .ticks{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);margin-top:-4px}
+  .ticks .crit{color:var(--up);font-weight:600}
+  .btnrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btn{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;padding:9px 13px;font-weight:600;font-size:13.5px;min-height:40px}
+  .btn.primary{background:var(--ink);color:var(--bg);border-color:transparent}
+  .btn.warn{background:var(--up);color:#fff;border-color:transparent}
+  .btn:active{transform:translateY(1px)}
+  .presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .preset{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px;text-align:left;min-height:52px}
+  .preset b{display:block;font-size:13px}
+  .preset span{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted)}
+  .preset.active{outline:2px solid var(--up);outline-offset:-2px}
+  /* readouts */
+  .readouts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ro{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2)}
+  .ro label{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:block}
+  .ro .val{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:600;letter-spacing:-.02em;margin-top:2px}
+  .ro .sub{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}
+  .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--down),var(--up));width:0%;transition:width .25s}
+  .bigM{font-family:"IBM Plex Mono",monospace;font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1}
+  /* chart */
+  canvas#chart{width:100%;height:220px;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:8px;font-family:"IBM Plex Mono",monospace}
+  .legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+  /* bench table */
+  .bench{display:grid;gap:0}
+  .brow{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line);align-items:baseline}
+  .brow:last-child{border-bottom:0}
+  .brow .k{font-size:13.5px;color:var(--muted)}
+  .brow .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;text-align:right;white-space:nowrap}
+  .brow .v small{display:block;font-size:11px;font-weight:400;color:var(--muted);white-space:normal}
+  .arrow{color:var(--up);font-weight:700}
+  .disc{margin-top:12px;background:var(--up-dim);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;line-height:1.5}
+  .disc2{background:var(--down-dim)}
+  /* onsager math */
+  .formula{font-family:"IBM Plex Mono",monospace;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.9;overflow-wrap:anywhere}
+  .steps{margin:12px 0 0;padding:0;list-style:none;counter-reset:s}
+  .steps li{display:flex;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:14px;line-height:1.55;color:var(--muted)}
+  .steps li:last-child{border-bottom:0}
+  .steps li b{color:var(--ink)}
+  .steps .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;margin-top:1px}
+  footer{margin-top:16px}
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:20}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="crumb">
+      <span class="pill hot">Station <strong>02</strong> · Thermo Lab</span>
+      <span class="pill">Experiment <strong>2</strong> · 16 stations</span>
+      <span class="pill">Lattice <strong>32 × 32</strong> · periodic</span>
+    </div>
+    <span class="pill" id="clockPill">Metropolis · live in your browser</span>
+  </div>
+
+  <div class="hero">
+    <div class="card">
+      <h1>2D Ising model.<br><span class="thin">Order out of noise, at</span> <em>Onsager's point.</em></h1>
+      <p class="lede">A <strong>32×32 lattice</strong> with a <strong>second-order phase transition</strong> at Onsager's exact critical point. Above it: flickering disorder. Below it, cooling triggers <strong>spontaneous symmetry breaking</strong> — the lattice picks a side and <strong>domains form</strong>. Drag β across the line and watch it happen, live.</p>
+      <div class="phasestrip">
+        <div class="phase" id="phHot"><b>🔥 Disordered — β &lt; β<sub>c</sub></b><span>Thermal noise wins. Spins flip freely, |M| hovers near zero.</span></div>
+        <div class="phase" id="phCrit"><b>◐ Critical — β ≈ β<sub>c</sub></b><span>Fractal clusters at every scale. Fluctuations never settle.</span></div>
+        <div class="phase" id="phCold"><b>❄ Ordered — β &gt; β<sub>c</sub></b><span>Symmetry breaks. One spin direction takes the whole lattice.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Run it yourself</h2>
+      <div class="runbox"><code id="runCmd">uv run thrml-bench run --exp 2</code><button class="copybtn" id="copyBtn" type="button">Copy</button></div>
+      <p class="fine" style="margin:12px 0 0">Runs the published sweep for Experiment 2. The lattice on this page is a separate, live Metropolis simulation in your browser — same model, same critical point, so you can feel the transition before you run the benchmark.</p>
+      <div style="margin-top:14px">
+        <h2 style="margin-bottom:8px">How to play</h2>
+        <p class="fine" style="margin:0">Drag the <em>β slider</em> through 0.4407 · tap <em>Run the sweep</em> to replay the published cooling run · <em>click or drag on the lattice</em> to paint a domain and watch its neighbours respond · hit <em>Quench</em> to drop straight into the ordered phase.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bento">
+
+    <!-- LATTICE -->
+    <section class="card span7" aria-label="Live Ising lattice">
+      <h2>Live lattice — 32 × 32 spins · tap to paint a domain</h2>
+      <div class="latwrap">
+        <canvas id="lattice" width="640" height="640"></canvas>
+        <div class="overlay" id="overlay">β 0.30 · T 3.33<br><b>DISORDERED</b></div>
+      </div>
+      <div class="latmeta">
+        <span class="tag"><i style="background:var(--up)"></i>spin up ↑ &nbsp;<span id="upPct">50%</span></span>
+        <span class="tag"><i style="background:var(--down)"></i>spin down ↓ &nbsp;<span id="downPct">50%</span></span>
+        <span class="tag">Sweeps: <b id="sweepCount">0</b></span>
+        <span class="tag">Largest domain: <b id="domPct">—</b></span>
+      </div>
+    </section>
+
+    <!-- CONTROLS + READOUTS -->
+    <section class="card span5" aria-label="Controls and live readouts">
+      <h2>Control deck — inverse temperature β</h2>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+        <div><span style="font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600" id="betaVal">0.300</span> <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:13px">β = 1 / T</span></div>
+        <div style="text-align:right"><div style="font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600" id="tempVal">T = 3.333</div><div class="fine">T<sub>c</sub> = 2.269 · β<sub>c</sub> = 0.4407</div></div>
+      </div>
+      <div class="sliderrow">
+        <input type="range" id="betaSlider" min="0.05" max="0.80" step="0.005" value="0.30" aria-label="Inverse temperature beta">
+        <div class="ticks"><span>0.05 · hot</span><span class="crit">▲ βc 0.4407</span><span>0.80 · cold</span></div>
+      </div>
+      <div class="presets">
+        <button class="preset" type="button" data-beta="0.20"><b>Hot</b><span>β 0.20 · T 5.00</span></button>
+        <button class="preset" type="button" data-beta="0.4407"><b>At Onsager</b><span>β 0.4407 · T 2.269</span></button>
+        <button class="preset" type="button" data-beta="0.65"><b>Cold</b><span>β 0.65 · T 1.54</span></button>
+      </div>
+      <div class="btnrow">
+        <button class="btn primary" id="playBtn" type="button">⏸ Pause</button>
+        <button class="btn warn" id="sweepBtn" type="button">▶ Run the sweep</button>
+        <button class="btn" id="quenchBtn" type="button">❄ Quench</button>
+        <button class="btn" id="heatBtn" type="button">Randomise</button>
+        <button class="btn" id="stepBtn" type="button">Step ×10</button>
+      </div>
+      <div style="margin-top:16px">
+        <h2>Live readouts — from the lattice above</h2>
+        <div style="display:flex;gap:14px;align-items:flex-end;margin-bottom:10px">
+          <div><label style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)">Order parameter |M|</label><div class="bigM" id="absM">0.00</div></div>
+          <div class="fine" style="padding-bottom:6px">0 = perfect disorder<br>1 = fully magnetised</div>
+        </div>
+        <div class="bar"><i id="mBar"></i></div>
+        <div class="readouts" style="margin-top:12px">
+          <div class="ro"><label>Signed M</label><div class="val" id="signedM">+0.00</div><div class="sub">Which side the lattice picked</div></div>
+          <div class="ro"><label>Energy / spin</label><div class="val" id="energyVal">0.00</div><div class="sub">−2.00 is the perfect crystal</div></div>
+          <div class="ro"><label>Flip acceptance</label><div class="val" id="accVal">—</div><div class="sub">Share of proposed flips accepted</div></div>
+          <div class="ro"><label>Phase</label><div class="val" id="phaseVal" style="font-size:19px;padding-top:5px">Disordered</div><div class="sub" id="phaseSub">Above Tc — entropy wins</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHART -->
+    <section class="card span8" aria-label="Magnetisation chart">
+      <h2>Magnetisation trace — |M| as you cross the critical point</h2>
+      <canvas id="chart" width="900" height="220"></canvas>
+      <div class="legend">
+        <span><i style="background:var(--up)"></i>live |M| (rolling)</span>
+        <span><i style="background:var(--down)"></i>sweep average |M| at each β</span>
+        <span>┆ dashed line = β<sub>c</sub> 0.4407</span>
+      </div>
+      <p class="fine" style="margin:10px 0 0">Press <b>Run the sweep</b> and the teal curve fills in left to right — flat near zero while hot, then climbing steeply once β passes Onsager's point. That steep climb <em>is</em> the second-order transition: no jump, no latent heat, just order condensing out of critical fluctuations.</p>
+    </section>
+
+    <!-- PUBLISHED BENCHMARK -->
+    <section class="card span4" aria-label="Published benchmark">
+      <h2>Published benchmark — Exp 2</h2>
+      <div class="bench">
+        <div class="brow"><span class="k">Critical point β<sub>c</sub></span><span class="v">≈ 0.4407</span></div>
+        <div class="brow"><span class="k">|⟨M⟩| across the sweep</span><span class="v">0.0434 <span class="arrow">→</span> 0.9417<small>disordered → ordered</small></span></div>
+        <div class="brow"><span class="k">Sweep runtime</span><span class="v">5.812 s</span></div>
+        <div class="brow"><span class="k">Lattice</span><span class="v">32 × 32</span></div>
+      </div>
+      <div class="disc"><b>Label:</b> simulated benchmark result, results may vary (not customer results). Every figure in this panel is the published Exp 2 ledger result — your live lattice above will land near these numbers, not exactly on them.</div>
+      <div class="disc disc2" style="margin-top:8px">Live-sim note: at β<sub>c</sub> the trace jitters hardest — on a finite 32×32 lattice the transition is rounded, which is exactly the finite-size behaviour Onsager's infinite-lattice solution predicts you should see.</div>
+    </section>
+
+    <!-- ONSAGER -->
+    <section class="card span6" aria-label="Onsager solution">
+      <h2>Why 0.4407 is exact — Onsager, 1944</h2>
+      <div class="formula">sinh(2β<sub>c</sub>) = 1 &nbsp;⇒&nbsp; β<sub>c</sub> = ½ · ln(1 + √2) ≈ 0.4407<br>T<sub>c</sub> = 2 / ln(1 + √2) ≈ 2.269 &nbsp;·&nbsp; H = −J Σ⟨i,j⟩ s<sub>i</sub>s<sub>j</sub>, &nbsp;s = ±1</div>
+      <ol class="steps">
+        <li><span class="n">1</span><span><b>Neighbours want to agree.</b> Each aligned pair lowers the energy by J. Left alone, the whole lattice would freeze into one domain.</span></li>
+        <li><span class="n">2</span><span><b>Heat wants chaos.</b> At high T, entropy overwhelms that preference and spins flip almost freely — |M| ≈ 0.</span></li>
+        <li><span class="n">3</span><span><b>At β<sub>c</sub> they balance exactly.</b> Lars Onsager solved this balance in closed form in 1944 — the first exact solution of an interacting many-body system, and still the reference every sampler is checked against.</span></li>
+        <li><span class="n">4</span><span><b>Cool past it and symmetry breaks.</b> Nothing tells the lattice to choose up or down — it picks one anyway. That spontaneous choice, and the domains that grow from it, is what the benchmark measures.</span></li>
+      </ol>
+    </section>
+
+    <!-- TRY THIS -->
+    <section class="card span6" aria-label="Things to try">
+      <h2>Three things to try in 60 seconds</h2>
+      <ol class="steps">
+        <li><span class="n">A</span><span><b>Sit exactly on β<sub>c</sub>.</b> Tap <b>At Onsager</b> and watch for a full minute: clusters of every size appear and dissolve, and |M| refuses to settle. That restlessness is criticality.</span></li>
+        <li><span class="n">B</span><span><b>Paint against the majority.</b> Quench to the cold phase, then drag a stripe of the opposite spin across the lattice. Surface tension shrinks it — small painted domains evaporate, big ones fight back.</span></li>
+        <li><span class="n">C</span><span><b>Race the sweep.</b> Run the sweep, then compare the teal curve's endpoints with the published panel: <b>0.0434 → 0.9417</b> <span style="display:block;margin-top:2px">(simulated benchmark result, results may vary (not customer results)).</span></span></li>
+      </ol>
+      <div class="runbox" style="margin-top:14px"><code>uv run thrml-bench run --exp 2</code><button class="copybtn" type="button" onclick="copyRun(this)">Copy</button></div>
+      <p class="fine" style="margin:10px 0 0">Station 2 of 16 · 2D Ising model, Onsager criticality · β<sub>c</sub> ≈ 0.4407, |⟨M⟩| 0.0434 → 0.9417, 5.812 s — simulated benchmark result, results may vary (not customer results).</p>
+    </section>
+
+  </div>
+
+  <footer class="card">
+    <p class="fine" style="margin:0">About this page: the lattice, trace and readouts are a real Metropolis simulation running locally in your browser (J = 1, zero field, periodic boundaries) — they are illustrative, not the benchmark itself. All published Exp 2 figures on this page — β<sub>c</sub> ≈ 0.4407, |⟨M⟩| 0.0434 → 0.9417, 5.812 s — are labelled: simulated benchmark result, results may vary (not customer results).</p>
+  </footer>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+
+<script>
+(function(){
+  var N=32, NN=N*N, BC=0.4406867935;
+  var spins=new Int8Array(NN);
+  var beta=0.30, playing=true, sweeps=0;
+  var proposed=0, accepted=0;
+  var trace=[], sweepAvg={}; // beta bucket -> {sum,n}
+  var sweeping=false, sweepT=0;
+  var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var UP = dark ? '#ff6a2b' : '#e85a24';
+  var DOWN = dark ? '#22b8cf' : '#0e7c8c';
+
+  var lat=document.getElementById('lattice'), lctx=lat.getContext('2d');
+  var chart=document.getElementById('chart'), cctx=chart.getContext('2d');
+  var slider=document.getElementById('betaSlider');
+
+  function idx(x,y){return ((y+N)%N)*N+((x+N)%N);}
+  function randomise(){for(var i=0;i<NN;i++)spins[i]=Math.random()<0.5?1:-1;}
+  function ordered(v){for(var i=0;i<NN;i++)spins[i]=v;}
+  randomise();
+
+  function step(n){
+    for(var k=0;k<n;k++){
+      var i=(Math.random()*NN)|0, x=i%N, y=(i/N)|0, s=spins[i];
+      var nb=spins[idx(x+1,y)]+spins[idx(x-1,y)]+spins[idx(x,y+1)]+spins[idx(x,y-1)];
+      var dE=2*s*nb;
+      proposed++;
+      if(dE<=0||Math.random()<Math.exp(-beta*dE)){spins[i]=-s;accepted++;}
+    }
+  }
+  function magnetisation(){var s=0;for(var i=0;i<NN;i++)s+=spins[i];return s/NN;}
+  function energyPerSpin(){
+    var e=0;
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){var s=spins[y*N+x];e-=s*(spins[y*N+((x+1)%N)]+spins[((y+1)%N)*N+x]);}
+    return e/NN;
+  }
+  function largestDomain(){
+    var seen=new Uint8Array(NN), best=0, stack=[];
+    for(var s0=0;s0<NN;s0++){
+      if(seen[s0])continue;
+      var val=spins[s0], size=0; stack.length=0; stack.push(s0); seen[s0]=1;
+      while(stack.length){var c=stack.pop();size++;var cx=c%N, cy=(c/N)|0;
+        var nbs=[idx(cx+1,cy),idx(cx-1,cy),idx(cx,cy+1),idx(cx,cy-1)];
+        for(var j=0;j<4;j++){var nb=nbs[j];if(!seen[nb]&&spins[nb]===val){seen[nb]=1;stack.push(nb);}}}
+      if(size>best)best=size;
+    }
+    return best/NN;
+  }
+
+  function drawLattice(){
+    var W=lat.width, cell=W/N;
+    lctx.clearRect(0,0,W,W);
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+      lctx.fillStyle=spins[y*N+x]>0?UP:DOWN;
+      lctx.fillRect(x*cell+0.5,y*cell+0.5,cell-1,cell-1);
+    }
+  }
+
+  function drawChart(){
+    var W=chart.width,H=chart.height,padL=34,padR=10,padT=10,padB=22;
+    var plotW=W-padL-padR, plotH=H-padT-padB;
+    var cs=getComputedStyle(document.documentElement);
+    var line=cs.getPropertyValue('--line').trim()||'#ccc', mut=cs.getPropertyValue('--muted').trim()||'#888';
+    cctx.clearRect(0,0,W,H);
+    cctx.font='11px "IBM Plex Mono", monospace'; cctx.fillStyle=mut; cctx.strokeStyle=line; cctx.lineWidth=1;
+    for(var g=0;g<=4;g++){var yy=padT+plotH*g/4;cctx.beginPath();cctx.moveTo(padL,yy);cctx.lineTo(W-padR,yy);cctx.stroke();cctx.fillText((1-g/4).toFixed(2),4,yy+4);}
+    cctx.fillText('β →',W-34,H-6); cctx.fillText('0.05',padL,H-6);
+    // critical line
+    var bx=padL+plotW*((BC-0.05)/0.75);
+    cctx.save();cctx.setLineDash([4,4]);cctx.strokeStyle=UP;cctx.beginPath();cctx.moveTo(bx,padT);cctx.lineTo(bx,padT+plotH);cctx.stroke();cctx.restore();
+    cctx.fillStyle=UP;cctx.fillText('βc',bx-8,padT+10);
+    // sweep averages
+    var keys=Object.keys(sweepAvg).map(Number).sort(function(a,b){return a-b;});
+    if(keys.length>1){cctx.strokeStyle=DOWN;cctx.lineWidth=2.5;cctx.beginPath();
+      keys.forEach(function(k,i){var a=sweepAvg[k];var px=padL+plotW*((k-0.05)/0.75);var py=padT+plotH*(1-Math.min(1,a.sum/a.n));if(i===0)cctx.moveTo(px,py);else cctx.lineTo(px,py);});
+      cctx.stroke();}
+    // live trace (last 160 pts, x by beta at sample time)
+    if(trace.length>1){cctx.strokeStyle=UP;cctx.lineWidth=1.6;cctx.beginPath();
+      trace.forEach(function(p,i){var px=padL+plotW*((p.b-0.05)/0.75);var py=padT+plotH*(1-Math.min(1,p.m));if(i===0)cctx.moveTo(px,py);else cctx.lineTo(px,py);});
+      cctx.stroke();}
+    // current point
+    if(trace.length){var p=trace[trace.length-1];var cx=padL+plotW*((p.b-0.05)/0.75);var cy=padT+plotH*(1-Math.min(1,p.m));cctx.fillStyle=UP;cctx.beginPath();cctx.arc(cx,cy,4.5,0,7);cctx.fill();}
+  }
+
+  var els={beta:document.getElementById('betaVal'),temp:document.getElementById('tempVal'),absM:document.getElementById('absM'),signed:document.getElementById('signedM'),energy:document.getElementById('energyVal'),acc:document.getElementById('accVal'),phase:document.getElementById('phaseVal'),phaseSub:document.getElementById('phaseSub'),bar:document.getElementById('mBar'),overlay:document.getElementById('overlay'),sweeps:document.getElementById('sweepCount'),dom:document.getElementById('domPct'),up:document.getElementById('upPct'),down:document.getElementById('downPct')};
+  var frame=0, domCache='—';
+  function refresh(){
+    var M=magnetisation(), aM=Math.abs(M), T=beta>0?1/beta:Infinity;
+    els.beta.textContent=beta.toFixed(3);
+    els.temp.textContent='T = '+(isFinite(T)?T.toFixed(3):'∞');
+    els.absM.textContent=aM.toFixed(3);
+    els.signed.textContent=(M>=0?'+':'')+M.toFixed(3);
+    els.energy.textContent=energyPerSpin().toFixed(3);
+    els.acc.textContent=proposed?Math.round(100*accepted/Math.max(1,proposed))+'%':'—';
+    els.bar.style.width=(aM*100).toFixed(1)+'%';
+    els.sweeps.textContent=sweeps.toLocaleString();
+    var upCount=0;for(var i=0;i<NN;i++)if(spins[i]>0)upCount++;
+    els.up.textContent=Math.round(100*upCount/NN)+'%'; els.down.textContent=Math.round(100*(NN-upCount)/NN)+'%';
+    if(frame%30===0)domCache=Math.round(100*largestDomain())+'% of lattice';
+    els.dom.textContent=domCache;
+    var nearC=Math.abs(beta-BC)<0.03;
+    var name=nearC?'Critical':(beta<BC?'Disordered':'Ordered');
+    els.phase.textContent=name;
+    els.phaseSub.textContent=nearC?'At Tc — clusters at every scale':(beta<BC?'Above Tc — entropy wins':'Below Tc — symmetry broken');
+    els.overlay.innerHTML='β '+beta.toFixed(3)+' · T '+(isFinite(T)?T.toFixed(2):'∞')+'<br><b>'+name.toUpperCase()+'</b> · |M| '+aM.toFixed(2);
+    ['phHot','phCrit','phCold'].forEach(function(id){document.getElementById(id).classList.remove('on');});
+    document.getElementById(nearC?'phCrit':(beta<BC?'phHot':'phCold')).classList.add('on');
+    document.querySelectorAll('.preset').forEach(function(p){p.classList.toggle('active',Math.abs(parseFloat(p.getAttribute('data-beta'))-beta)<0.006);});
+  }
+
+  function loop(){
+    if(playing){
+      if(sweeping){
+        sweepT+=1/360; // ~6s full sweep at 60fps
+        if(sweepT>=1){sweeping=false;showToast('Sweep complete — compare with the published panel');}
+        else{beta=0.10+0.60*sweepT;slider.value=beta;}
+      }
+      step(NN*2); sweeps+=2;
+      trace.push({b:beta,m:Math.abs(magnetisation())});
+      if(trace.length>220)trace.shift();
+      var bucket=Math.round(beta*40)/40;
+      if(!sweepAvg[bucket])sweepAvg[bucket]={sum:0,n:0};
+      // only accumulate sweep averages while sweeping or after settling
+      if(sweeping){sweepAvg[bucket].sum+=Math.abs(magnetisation());sweepAvg[bucket].n++;}
+    }
+    drawLattice();
+    if(frame%4===0){refresh();drawChart();}
+    frame++;
+    requestAnimationFrame(loop);
+  }
+
+  // controls
+  slider.addEventListener('input',function(){beta=parseFloat(slider.value);sweeping=false;});
+  document.querySelectorAll('.preset').forEach(function(p){p.addEventListener('click',function(){beta=parseFloat(p.getAttribute('data-beta'));slider.value=beta;sweeping=false;playing=true;document.getElementById('playBtn').textContent='⏸ Pause';});});
+  document.getElementById('playBtn').addEventListener('click',function(){playing=!playing;this.textContent=playing?'⏸ Pause':'▶ Play';});
+  document.getElementById('sweepBtn').addEventListener('click',function(){sweepAvg={};trace=[];randomise();sweepT=0;sweeping=true;playing=true;document.getElementById('playBtn').textContent='⏸ Pause';showToast('Cooling sweep: β 0.10 → 0.70');});
+  document.getElementById('quenchBtn').addEventListener('click',function(){beta=0.65;slider.value=beta;sweeping=false;showToast('Quenched to β 0.65 — watch domains grow');});
+  document.getElementById('heatBtn').addEventListener('click',function(){randomise();proposed=0;accepted=0;showToast('Randomised — maximum disorder');});
+  document.getElementById('stepBtn').addEventListener('click',function(){for(var i=0;i<10;i++){step(NN);sweeps++;}refresh();drawLattice();drawChart();});
+
+  // paint on lattice
+  var painting=false, paintVal=1;
+  function paintAt(ev){
+    var r=lat.getBoundingClientRect();
+    var cx=(ev.touches?ev.touches[0].clientX:ev.clientX), cy=(ev.touches?ev.touches[0].clientY:ev.clientY);
+    var x=Math.floor((cx-r.left)/r.width*N), y=Math.floor((cy-r.top)/r.height*N);
+    for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){if(Math.random()<0.9)spins[idx(x+dx,y+dy)]=paintVal;}
+    drawLattice();
+  }
+  lat.addEventListener('pointerdown',function(ev){painting=true;var r=lat.getBoundingClientRect();var x=Math.floor((ev.clientX-r.left)/r.width*N),y=Math.floor((ev.clientY-r.top)/r.height*N);paintVal=-spins[idx(x,y)];paintAt(ev);});
+  lat.addEventListener('pointermove',function(ev){if(painting)paintAt(ev);});
+  window.addEventListener('pointerup',function(){painting=false;});
+
+  // copy
+  var toast=document.getElementById('toast'), toastTimer=null;
+  function showToast(msg){toast.textContent=msg;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){toast.classList.remove('show');},2200);}
+  window.copyRun=function(btn){var t='uv run thrml-bench run --exp 2';if(navigator.clipboard)navigator.clipboard.writeText(t);showToast('Run command copied');};
+  document.getElementById('copyBtn').addEventListener('click',function(){window.copyRun(this);});
+
+  // crisp chart on retina / resize
+  function fitChart(){var r=chart.getBoundingClientRect();var d=Math.min(2,window.devicePixelRatio||1);chart.width=Math.round(r.width*d);chart.height=Math.round(220*d);}
+  fitChart(); window.addEventListener('resize',function(){fitChart();drawChart();});
+
+  refresh(); drawLattice(); drawChart();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

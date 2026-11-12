@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Station 6 — RBM Associative Memory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2rem; }
+      * { box-sizing: border-box; }
+      :root{
+        --bg:#f2f5f1; --surface:#ffffff; --surface2:#e9efeb; --ink:#12211d; --muted:#54665f;
+        --line:#d5ded8; --teal:#0b8a76; --teal-deep:#066354; --teal-soft:#cdeae2;
+        --coral:#e05224; --amber:#dd9416; --cell-off:#eef2ef;
+        --shadow:0 1px 2px rgba(18,33,29,.05),0 10px 30px -18px rgba(18,33,29,.25);
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#0c1412; --surface:#14201d; --surface2:#0f1a17; --ink:#e9f2ee; --muted:#96aaa2;
+          --line:#263832; --teal:#2bbfa5; --teal-deep:#7fe3cf; --teal-soft:#173b33;
+          --coral:#ff7a52; --amber:#f0b04a; --cell-off:#1a2823;
+          --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -18px rgba(0,0,0,.7);
+        }
+      }
+      html{ scroll-behavior:smooth; }
+      body{
+        margin:0; background:var(--bg); color:var(--ink);
+        font-family:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        background-image:radial-gradient(var(--line) 1px, transparent 1px);
+        background-size:26px 26px; background-position:center top;
+      }
+      .wrap{ max-width:1180px; margin:0 auto; padding:28px 18px 56px; }
+      .mono{ font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+      /* ---------- header ---------- */
+      .station-chip{
+        display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border:1px solid var(--line);
+        border-radius:999px; background:var(--surface); font-size:12.5px; font-weight:600; letter-spacing:.04em;
+      }
+      .station-chip .dot{ width:8px; height:8px; border-radius:50%; background:var(--teal); box-shadow:0 0 0 4px var(--teal-soft); }
+      h1{ font-size:clamp(30px,5.4vw,52px); line-height:1.04; letter-spacing:-.02em; margin:16px 0 10px; font-weight:700; max-width:16ch; }
+      h1 em{ font-style:normal; color:var(--teal-deep); }
+      .lede{ font-size:clamp(15.5px,2vw,18px); line-height:1.55; color:var(--muted); max-width:62ch; margin:0; }
+      .lede strong{ color:var(--ink); font-weight:600; }
+
+      /* ---------- ledger metrics ---------- */
+      .ledger{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:26px 0 14px; }
+      .metric{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px 18px 13px; box-shadow:var(--shadow); }
+      .metric .big{ font-size:clamp(26px,3.6vw,36px); font-weight:700; letter-spacing:-.02em; line-height:1; }
+      .metric .big small{ font-size:.45em; font-weight:600; color:var(--muted); letter-spacing:0; }
+      .metric .what{ font-size:13.5px; font-weight:600; margin-top:7px; }
+      .fineprint{ font-size:11px; line-height:1.45; color:var(--muted); margin-top:8px; border-top:1px dashed var(--line); padding-top:8px; }
+      .runbar{
+        display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:var(--ink); color:var(--bg);
+        border-radius:12px; padding:10px 10px 10px 16px; margin-bottom:26px;
+      }
+      .runbar .prompt{ color:var(--teal); font-weight:600; }
+      .runbar code{ font-family:"IBM Plex Mono",monospace; font-size:14px; flex:1 1 240px; word-break:break-all; }
+      .runbar button{
+        border:1px solid rgba(255,255,255,.25); background:transparent; color:inherit; border-radius:8px;
+        padding:8px 14px; font:inherit; font-size:13px; font-weight:600; cursor:pointer; min-height:36px;
+      }
+      .runbar button:hover{ background:rgba(255,255,255,.12); }
+
+      /* ---------- bento ---------- */
+      .bento{ display:grid; grid-template-columns:repeat(12,1fr); gap:12px; }
+      .tile{ background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:var(--shadow); min-width:0; }
+      .tile h2{ font-size:15px; font-weight:700; letter-spacing:-.01em; margin:0; display:flex; align-items:center; gap:8px; }
+      .tile h2 .tag{ font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; color:var(--teal-deep); background:var(--teal-soft); border-radius:5px; padding:2px 6px; letter-spacing:.05em; }
+      .tile .sub{ font-size:12.5px; color:var(--muted); line-height:1.5; margin:6px 0 0; }
+      .t-visible{ grid-column:span 7; grid-row:span 2; }
+      .t-controls{ grid-column:span 5; }
+      .t-readouts{ grid-column:span 5; }
+      .t-hidden{ grid-column:span 7; }
+      .t-basins{ grid-column:span 5; }
+      .t-how{ grid-column:span 4; }
+      .t-arch{ grid-column:span 4; }
+      .t-run{ grid-column:span 4; }
+
+      /* ---------- visible grid ---------- */
+      .memgrid{ display:grid; grid-template-columns:repeat(8,1fr); gap:5px; margin-top:16px; }
+      .cell{
+        aspect-ratio:1; border-radius:7px; cursor:pointer; position:relative; padding:0;
+        background:color-mix(in srgb, var(--teal) calc(var(--p,0)*100%), var(--cell-off));
+        border:1.5px solid var(--line); transition:background .3s ease, border-color .2s ease, transform .15s ease;
+        -webkit-tap-highlight-color:transparent; touch-action:none;
+      }
+      .cell.clamped{ border-color:var(--ink); border-style:solid; }
+      .cell.clamped::after{
+        content:""; position:absolute; right:3px; top:3px; width:5px; height:5px; border-radius:50%;
+        background:var(--ink); opacity:.55;
+      }
+      .cell.free{ border-style:dashed; border-color:var(--muted); }
+      .cell.unknown{ background:var(--surface2); }
+      .cell.unknown::before{
+        content:"?"; position:absolute; inset:0; display:grid; place-items:center;
+        font-family:"IBM Plex Mono",monospace; font-size:clamp(11px,2vw,16px); color:var(--muted); font-weight:600;
+      }
+      .cell.noisy{ border-color:var(--coral); }
+      .cell.flash{ transform:scale(1.07); }
+      .cell:focus-visible{ outline:3px solid var(--amber); outline-offset:2px; }
+      .legend{ display:flex; flex-wrap:wrap; gap:8px 16px; margin-top:14px; font-size:12px; color:var(--muted); }
+      .legend span{ display:inline-flex; align-items:center; gap:6px; }
+      .swatch{ width:14px; height:14px; border-radius:4px; display:inline-block; flex:none; }
+      .sw-on{ background:var(--teal); border:1.5px solid var(--ink); }
+      .sw-off{ background:var(--cell-off); border:1.5px solid var(--ink); }
+      .sw-unk{ background:var(--surface2); border:1.5px dashed var(--muted); }
+      .sw-free{ background:color-mix(in srgb, var(--teal) 45%, var(--cell-off)); border:1.5px dashed var(--muted); }
+
+      /* ---------- controls ---------- */
+      .chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+      .chip{
+        border:1.5px solid var(--line); background:var(--surface2); color:var(--ink); border-radius:999px;
+        padding:8px 14px; font:inherit; font-size:13.5px; font-weight:600; cursor:pointer; min-height:38px;
+      }
+      .chip[aria-pressed="true"]{ background:var(--teal); border-color:var(--teal-deep); color:#fff; }
+      @media (prefers-color-scheme: dark){ .chip[aria-pressed="true"]{ color:#06231d; } }
+      .ctl{ margin-top:18px; }
+      .ctl label{ display:flex; justify-content:space-between; align-items:baseline; font-size:13px; font-weight:600; }
+      .ctl label output{ font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--teal-deep); font-weight:600; }
+      .ctl .hint{ font-size:12px; color:var(--muted); margin-top:3px; line-height:1.45; }
+      input[type="range"]{ width:100%; accent-color:var(--teal); height:36px; cursor:pointer; margin:2px 0 0; }
+      .btnrow{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+      .btn{
+        border-radius:10px; padding:10px 16px; font:inherit; font-size:14px; font-weight:600; cursor:pointer;
+        border:1.5px solid var(--line); background:var(--surface); color:var(--ink); min-height:44px;
+      }
+      .btn:hover{ border-color:var(--muted); }
+      .btn.primary{ background:var(--teal); border-color:var(--teal-deep); color:#fff; }
+      @media (prefers-color-scheme: dark){ .btn.primary{ color:#06231d; } }
+      .btn.primary:hover{ filter:brightness(1.07); }
+      .btn.warn:hover{ border-color:var(--coral); color:var(--coral); }
+      .btn[disabled]{ opacity:.45; cursor:default; }
+      .presetrow{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .preset{
+        font:inherit; font-size:12.5px; font-weight:600; padding:7px 12px; border-radius:8px; cursor:pointer;
+        border:1px dashed var(--muted); background:transparent; color:var(--muted); min-height:36px;
+      }
+      .preset:hover{ color:var(--ink); border-color:var(--ink); }
+
+      /* ---------- readouts ---------- */
+      .overlap-big{ display:flex; align-items:baseline; gap:10px; margin-top:12px; }
+      .overlap-big .num{ font-size:56px; font-weight:700; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+      .overlap-big .of{ color:var(--muted); font-size:13px; line-height:1.4; }
+      .statgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+      .stat{ background:var(--surface2); border-radius:10px; padding:10px 12px; }
+      .stat .v{ font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:600; font-variant-numeric:tabular-nums; }
+      .stat .k{ font-size:11.5px; color:var(--muted); margin-top:2px; line-height:1.35; }
+      .spark{ margin-top:16px; }
+      .spark svg{ width:100%; height:64px; display:block; }
+      .spark .cap{ display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-top:4px; font-family:"IBM Plex Mono",monospace; }
+      .statusline{
+        margin-top:14px; font-size:13px; line-height:1.5; background:var(--teal-soft); border-radius:10px; padding:10px 12px;
+      }
+      .statusline strong{ font-weight:700; }
+
+      /* ---------- hidden layer ---------- */
+      .hidden-wrap{ margin-top:16px; display:grid; gap:14px; }
+      .hgroup{ display:grid; grid-template-columns:86px 1fr; gap:10px; align-items:center; }
+      .hgroup .glabel{ font-size:12px; font-weight:600; line-height:1.35; }
+      .hgroup .glabel span{ display:block; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--muted); font-weight:500; }
+      .hunits{ display:grid; grid-template-columns:repeat(8,1fr); gap:5px; }
+      .hunit{
+        aspect-ratio:1.35; border-radius:6px; border:1px solid var(--line);
+        background:color-mix(in srgb, var(--amber) calc(var(--h,0)*88%), var(--cell-off));
+        transition:background .3s ease; position:relative;
+      }
+      .hunit.hot{ border-color:var(--amber); }
+      .phasebar{ display:flex; gap:6px; margin-top:16px; }
+      .phase{ flex:1; text-align:center; font-size:11.5px; font-weight:600; padding:8px 4px; border-radius:8px; background:var(--surface2); color:var(--muted); border:1px solid var(--line); transition:all .25s ease; }
+      .phase.on{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+
+      /* ---------- basins ---------- */
+      .basin{ display:grid; grid-template-columns:52px 1fr 52px; gap:12px; align-items:center; padding:10px 0; border-bottom:1px dashed var(--line); cursor:pointer; }
+      .basin:last-child{ border-bottom:none; }
+      .basin .mini{ display:grid; grid-template-columns:repeat(8,1fr); gap:1.5px; width:52px; }
+      .basin .mini i{ aspect-ratio:1; border-radius:1.5px; background:var(--cell-off); display:block; }
+      .basin .mini i.on{ background:var(--teal); }
+      .basin .bname{ font-size:13px; font-weight:600; }
+      .basin .bar{ height:7px; border-radius:99px; background:var(--surface2); margin-top:5px; overflow:hidden; }
+      .basin .bar b{ display:block; height:100%; background:var(--teal); border-radius:99px; transition:width .35s ease; }
+      .basin.winning .bname{ color:var(--teal-deep); }
+      .basin .corr{ font-family:"IBM Plex Mono",monospace; font-size:14px; text-align:right; font-variant-numeric:tabular-nums; }
+
+      /* ---------- text tiles ---------- */
+      .steps{ list-style:none; margin:14px 0 0; padding:0; display:grid; gap:12px; counter-reset:step; }
+      .steps li{ display:grid; grid-template-columns:30px 1fr; gap:10px; font-size:13.5px; line-height:1.5; color:var(--muted); }
+      .steps li b{ color:var(--ink); display:block; font-size:14px; }
+      .steps .n{
+        width:30px; height:30px; border-radius:50%; background:var(--teal-soft); color:var(--teal-deep);
+        display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-size:13px; font-weight:600;
+      }
+      .archrows{ margin-top:12px; display:grid; gap:0; }
+      .archrows div{ display:flex; justify-content:space-between; gap:12px; padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px; }
+      .archrows div:last-child{ border-bottom:none; }
+      .archrows dt{ color:var(--muted); } .archrows dd{ margin:0; font-weight:600; font-family:"IBM Plex Mono",monospace; font-size:13px; text-align:right; }
+      .term{
+        margin-top:14px; background:var(--ink); color:var(--bg); border-radius:10px; padding:14px; font-family:"IBM Plex Mono",monospace;
+        font-size:13px; line-height:1.7; overflow-wrap:anywhere;
+      }
+      .term .p{ color:var(--teal); } .term .c{ opacity:.55; }
+      .copybtn{ margin-top:12px; width:100%; }
+
+      footer{ margin-top:30px; border-top:1px solid var(--line); padding-top:18px; display:flex; flex-wrap:wrap; gap:8px 22px; justify-content:space-between; font-size:12.5px; color:var(--muted); line-height:1.6; }
+      footer .brand{ font-weight:600; color:var(--ink); }
+
+      @media (max-width:900px){
+        .t-visible,.t-controls,.t-readouts,.t-hidden,.t-basins,.t-how,.t-arch,.t-run{ grid-column:span 12; }
+        .ledger{ grid-template-columns:1fr; }
+        .hgroup{ grid-template-columns:70px 1fr; }
+      }
+      @media (prefers-reduced-motion: reduce){
+        *{ transition:none !important; } html{ scroll-behavior:auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <span class="station-chip"><span class="dot"></span>THERMALBITS · STATION 06 — RESTRICTED BOLTZMANN MACHINE</span>
+      <h1>A memory that <em>fills in its own blanks.</em></h1>
+      <p class="lede">
+        A <strong>restricted Boltzmann machine (64 visible, 32 hidden)</strong> trained on prototype patterns.
+        Clamp part of a pattern, and <strong>alternating Gibbs sweeps</strong> complete the rest — the visible layer
+        proposes, the hidden layer answers, and the pattern settles into the memory it most resembles.
+        Occlude the grid below and watch it happen.
+      </p>
+
+      <section class="ledger" aria-label="Published benchmark figures">
+        <div class="metric">
+          <div class="big">100<small>%</small></div>
+          <div class="what">Overlap with the stored prototype</div>
+          <p class="fineprint">simulated benchmark result, results may vary (not customer results)</p>
+        </div>
+        <div class="metric">
+          <div class="big">100<small>%</small></div>
+          <div class="what">Occluded-bit recovery</div>
+          <p class="fineprint">simulated benchmark result, results may vary (not customer results)</p>
+        </div>
+        <div class="metric">
+          <div class="big">0.583<small>s</small></div>
+          <div class="what">Runtime for the benchmark run</div>
+          <p class="fineprint">simulated benchmark result, results may vary (not customer results)</p>
+        </div>
+      </section>
+
+      <div class="runbar">
+        <span class="prompt mono">$</span>
+        <code id="runCmd">uv run thrml-bench run --exp 6</code>
+        <button type="button" id="copyTop">Copy command</button>
+      </div>
+
+      <main class="bento">
+
+        <!-- VISIBLE LAYER -->
+        <section class="tile t-visible" aria-labelledby="visTitle">
+          <h2 id="visTitle"><span class="tag">VISIBLE</span> The memory field — 8 × 8 visible units</h2>
+          <p class="sub">Tap or drag across cells to occlude them (they become free units the sampler must rebuild), or tap a free cell to clamp it back. Solid border = clamped and trusted. Dashed border = free, up for grabs.</p>
+          <div class="memgrid" id="memgrid" role="group" aria-label="Visible layer grid. Activate a cell to toggle it between clamped and occluded."></div>
+          <div class="legend">
+            <span><i class="swatch sw-on"></i>Clamped on</span>
+            <span><i class="swatch sw-off"></i>Clamped off</span>
+            <span><i class="swatch sw-unk"></i>Occluded — unknown</span>
+            <span><i class="swatch sw-free"></i>Free — being rebuilt</span>
+          </div>
+        </section>
+
+        <!-- CONTROLS -->
+        <section class="tile t-controls" aria-labelledby="ctlTitle">
+          <h2 id="ctlTitle"><span class="tag">CONTROL</span> Set up the recall</h2>
+          <p class="sub" style="margin-bottom:2px">Stored prototype</p>
+          <div class="chips" id="protoChips" role="group" aria-label="Choose a stored prototype pattern"></div>
+
+          <div class="ctl">
+            <label for="occRange">Occlusion <output id="occOut">40%</output></label>
+            <input type="range" id="occRange" min="0" max="80" step="5" value="40" />
+            <p class="hint">How much of the pattern is hidden before recall starts. More occlusion = a harder memory test.</p>
+            <div class="presetrow">
+              <button type="button" class="preset" id="presetBottom">▒ Bottom half</button>
+              <button type="button" class="preset" id="presetRight">▒ Right half</button>
+              <button type="button" class="preset" id="presetScatter">▒ Scatter (slider %)</button>
+              <button type="button" class="preset" id="presetNoise">Flip 6 bits as noise</button>
+            </div>
+          </div>
+
+          <div class="ctl">
+            <label for="tempRange">Sampler temperature <output id="tempOut">1.00</output></label>
+            <input type="range" id="tempRange" min="0.4" max="2" step="0.05" value="1" />
+            <p class="hint">Hotter sampling is softer and wanders longer before settling; colder snaps straight to the nearest memory.</p>
+          </div>
+
+          <div class="btnrow">
+            <button type="button" class="btn primary" id="btnAuto">▶ Run Gibbs sweeps</button>
+            <button type="button" class="btn" id="btnStep">Single sweep</button>
+            <button type="button" class="btn warn" id="btnReset">Reset recall</button>
+          </div>
+        </section>
+
+        <!-- READOUTS -->
+        <section class="tile t-readouts" aria-labelledby="readTitle">
+          <h2 id="readTitle"><span class="tag">LIVE</span> Recall readouts — your run, in this browser</h2>
+          <div class="overlap-big">
+            <div class="num" id="overlapNum">0%</div>
+            <div class="of">overlap between the<br />visible layer right now<br />and the stored prototype</div>
+          </div>
+          <div class="statgrid">
+            <div class="stat"><div class="v" id="statRecovery">—</div><div class="k">occluded-bit recovery so far</div></div>
+            <div class="stat"><div class="v" id="statSweeps">0</div><div class="k">Gibbs sweeps taken</div></div>
+            <div class="stat"><div class="v" id="statClamped">64 / 64</div><div class="k">units clamped / free</div></div>
+            <div class="stat"><div class="v" id="statEnergy">0.00</div><div class="k">demo energy — falls as the pattern settles</div></div>
+          </div>
+          <div class="spark">
+            <svg id="sparkSvg" viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">
+              <line x1="0" y1="4" x2="100" y2="4" stroke="var(--coral)" stroke-width="0.7" stroke-dasharray="2.5 2" />
+              <polyline id="sparkLine" fill="none" stroke="var(--teal)" stroke-width="1.8" stroke-linejoin="round" points="" />
+            </svg>
+            <div class="cap"><span>overlap per sweep</span><span>dashed = 100%</span></div>
+          </div>
+          <p class="statusline" id="statusLine" role="status">Ready.</p>
+        </section>
+
+        <!-- HIDDEN LAYER -->
+        <section class="tile t-hidden" aria-labelledby="hidTitle">
+          <h2 id="hidTitle"><span class="tag">HIDDEN</span> The hidden layer — 32 units, four memory groups</h2>
+          <p class="sub">Each group of eight hidden units is tuned to one stored prototype. Whichever group lights up is the memory the machine believes it is seeing — and that belief is what rebuilds the free visible units.</p>
+          <div class="hidden-wrap" id="hiddenWrap"></div>
+          <div class="phasebar" aria-hidden="true">
+            <div class="phase" id="phaseVH">1 · Visible → Hidden</div>
+            <div class="phase" id="phaseHV">2 · Hidden → Visible</div>
+            <div class="phase" id="phaseSettle">3 · Settle &amp; re-check</div>
+          </div>
+        </section>
+
+        <!-- BASINS -->
+        <section class="tile t-basins" aria-labelledby="basinTitle">
+          <h2 id="basinTitle"><span class="tag">BASINS</span> Attractor basins — which memory is pulling?</h2>
+          <p class="sub">Live correlation of the current visible state with each stored prototype. Associative memory works because the right basin pulls hardest. Tap a row to load that prototype.</p>
+          <div id="basinList"></div>
+        </section>
+
+        <!-- HOW -->
+        <section class="tile t-how" aria-labelledby="howTitle">
+          <h2 id="howTitle">How completion works</h2>
+          <ol class="steps">
+            <li><span class="n">1</span><span><b>Clamp what you know.</b> The visible units you can see are locked to the partial pattern. The rest start unknown.</span></li>
+            <li><span class="n">2</span><span><b>Alternate.</b> A Gibbs sweep passes the visible state up to the 32 hidden units, then passes their answer back down to rebuild only the free units.</span></li>
+            <li><span class="n">3</span><span><b>Settle into a memory.</b> Each sweep sharpens the reconstruction until it locks onto a stored prototype — the blanks are filled by the memory itself.</span></li>
+          </ol>
+        </section>
+
+        <!-- ARCH -->
+        <section class="tile t-arch" aria-labelledby="archTitle">
+          <h2 id="archTitle">The machine</h2>
+          <dl class="archrows">
+            <div><dt>Visible units</dt><dd>64 (8 × 8)</dd></div>
+            <div><dt>Hidden units</dt><dd>32 (4 × 8)</dd></div>
+            <div><dt>Connections</dt><dd>visible ↔ hidden only</dd></div>
+            <div><dt>Trained on</dt><dd>prototype patterns</dd></div>
+            <div><dt>Recall method</dt><dd>clamp + Gibbs sweeps</dd></div>
+            <div><dt>Experiment</dt><dd>thrml-bench · exp 6</dd></div>
+          </dl>
+          <p class="sub" style="margin-top:12px">No connections within a layer — that restriction is what forces the hidden layer to learn the patterns' structure instead of copying neighbours.</p>
+        </section>
+
+        <!-- RUN -->
+        <section class="tile t-run" aria-labelledby="runTitle">
+          <h2 id="runTitle">Run the benchmark</h2>
+          <div class="term"><span class="c"># the published Station 6 run</span><br /><span class="p">$</span> uv run thrml-bench run --exp 6</div>
+          <button type="button" class="btn copybtn" id="copyBottom">Copy command</button>
+          <p class="sub" style="margin-top:12px">Published result of that run: 100% overlap, 100% occluded-bit recovery, 0.583s.</p>
+          <p class="fineprint">simulated benchmark result, results may vary (not customer results)</p>
+        </section>
+
+      </main>
+
+      <footer>
+        <span><span class="brand">ThermalBits</span> — the thermo-computing stations, by Nexus AI Solutions. Station 6 of 16.</span>
+        <span>Live demo above runs a small illustrative sampler in your browser; the benchmark figures are the labelled published run.</span>
+      </footer>
+    </div>
+
+    <script>
+      (function(){
+        "use strict";
+        var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* ---------------- prototypes (8x8) ---------------- */
+        var PROTOS = [
+          { id:"A", name:"Letter A", rows:[
+            "00111100","01100110","11000011","11000011",
+            "11111111","11000011","11000011","11000011"] },
+          { id:"PLUS", name:"Plus", rows:[
+            "00011000","00011000","00011000","11111111",
+            "11111111","00011000","00011000","00011000"] },
+          { id:"RING", name:"Ring", rows:[
+            "11111111","10000001","10000001","10000001",
+            "10000001","10000001","10000001","11111111"] },
+          { id:"X", name:"Cross X", rows:[
+            "10000001","01000010","00100100","00011000",
+            "00011000","00100100","01000010","10000001"] }
+        ];
+        PROTOS.forEach(function(p){ p.bits = p.rows.join("").split("").map(function(c){ return c === "1" ? 1 : 0; }); });
+        function tval(p, i){ return PROTOS[p].bits[i] * 2 - 1; }
+        function groupOf(k){ return Math.floor(k / 8); } /* 4 groups x 8 hidden */
+        function sigmoid(x){ if (x > 30) return 1; if (x < -30) return 0; return 1 / (1 + Math.exp(-x)); }
+
+        /* ---------------- state ---------------- */
+        var protoIdx = 0;
+        var V = new Float64Array(64);          /* visible probabilities 0..1 */
+        var clamped = [];                       /* trusted units */
+        var noisy = [];                         /* free units seeded with a flipped value */
+        var episode = [];                       /* units the current recall must rebuild */
+        var H = new Float64Array(32);
+        var corrs = [0,0,0,0];
+        var sweeps = 0, history = [], running = false, runTimer = null;
+        for (var i = 0; i < 64; i++){ clamped.push(true); noisy.push(false); episode.push(false); }
+
+        /* ---------------- dom ---------------- */
+        function $(id){ return document.getElementById(id); }
+        var grid = $("memgrid"), cells = [];
+        for (var c = 0; c < 64; c++){
+          var d = document.createElement("div");
+          d.className = "cell"; d.setAttribute("role","button"); d.tabIndex = 0;
+          d.dataset.i = c;
+          grid.appendChild(d); cells.push(d);
+        }
+        var hiddenWrap = $("hiddenWrap"), hunits = [];
+        PROTOS.forEach(function(p, gi){
+          var row = document.createElement("div"); row.className = "hgroup";
+          var lab = document.createElement("div"); lab.className = "glabel";
+          lab.innerHTML = p.name + "<span>H" + (gi*8+1) + "–H" + (gi*8+8) + "</span>";
+          var ug = document.createElement("div"); ug.className = "hunits";
+          for (var u = 0; u < 8; u++){
+            var hu = document.createElement("div"); hu.className = "hunit";
+            ug.appendChild(hu); hunits.push(hu);
+          }
+          row.appendChild(lab); row.appendChild(ug); hiddenWrap.appendChild(row);
+        });
+        var chipsWrap = $("protoChips"), chipEls = [];
+        PROTOS.forEach(function(p, idx){
+          var b = document.createElement("button"); b.type = "button"; b.className = "chip";
+          b.textContent = p.name; b.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
+          b.addEventListener("click", function(){ loadPrototype(idx, true); });
+          chipsWrap.appendChild(b); chipEls.push(b);
+        });
+        var basinList = $("basinList"), basinEls = [];
+        PROTOS.forEach(function(p, idx){
+          var row = document.createElement("div"); row.className = "basin"; row.setAttribute("role","button"); row.tabIndex = 0;
+          var mini = document.createElement("div"); mini.className = "mini";
+          p.bits.forEach(function(bit){ var m = document.createElement("i"); if (bit) m.className = "on"; mini.appendChild(m); });
+          var mid = document.createElement("div");
+          var nm = document.createElement("div"); nm.className = "bname"; nm.textContent = p.name;
+          var bar = document.createElement("div"); bar.className = "bar"; var fill = document.createElement("b"); bar.appendChild(fill);
+          mid.appendChild(nm); mid.appendChild(bar);
+          var cv = document.createElement("div"); cv.className = "corr"; cv.textContent = "0.00";
+          row.appendChild(mini); row.appendChild(mid); row.appendChild(cv);
+          row.addEventListener("click", function(){ loadPrototype(idx, true); });
+          row.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " "){ e.preventDefault(); loadPrototype(idx, true); } });
+          basinList.appendChild(row);
+          basinEls.push({ row: row, fill: fill, cv: cv });
+        });
+
+        /* ---------------- model ---------------- */
+        function target(){ return PROTOS[protoIdx].bits; }
+        function computeCorrs(){
+          for (var p = 0; p < 4; p++){
+            var s = 0;
+            for (var j = 0; j < 64; j++) s += (2 * V[j] - 1) * tval(p, j);
+            corrs[p] = s / 64;
+          }
+        }
+        function computeHidden(temp){
+          computeCorrs();
+          for (var k = 0; k < 32; k++) H[k] = sigmoid((corrs[groupOf(k)] - 0.26) * 16 / temp);
+        }
+        function computeVisible(temp){
+          var denom = 0, k, j;
+          for (k = 0; k < 32; k++) denom += H[k];
+          denom += 1e-6;
+          for (j = 0; j < 64; j++){
+            if (clamped[j]) continue;
+            var logit = 0;
+            for (k = 0; k < 32; k++) logit += H[k] * tval(groupOf(k), j);
+            V[j] = sigmoid((logit / denom) * 3.4 / temp);
+          }
+        }
+        function overlapNow(){
+          var T = target(), ok = 0;
+          for (var j = 0; j < 64; j++) if ((V[j] >= 0.5 ? 1 : 0) === T[j]) ok++;
+          return ok / 64;
+        }
+        function recoveryNow(){
+          var T = target(), tot = 0, ok = 0;
+          for (var j = 0; j < 64; j++) if (episode[j]){ tot++; if ((V[j] >= 0.5 ? 1 : 0) === T[j]) ok++; }
+          return tot === 0 ? null : ok / tot;
+        }
+        function energyNow(){
+          var e = 0;
+          for (var k = 0; k < 32; k++) e += H[k] * corrs[groupOf(k)];
+          return -(e / 32) * 10;
+        }
+
+        /* ---------------- rendering ---------------- */
+        var statusEl = $("statusLine");
+        function setStatus(html){ statusEl.innerHTML = html; }
+        function render(){
+          var j;
+          for (j = 0; j < 64; j++){
+            var el = cells[j];
+            el.style.setProperty("--p", V[j].toFixed(3));
+            el.className = "cell" + (clamped[j] ? " clamped" : " free") +
+              (!clamped[j] && Math.abs(V[j] - 0.5) < 0.02 ? " unknown" : "") +
+              (noisy[j] && !clamped[j] ? " noisy" : "");
+            el.setAttribute("aria-label", "Unit " + (j+1) + ": " +
+              (clamped[j] ? ("clamped " + (target()[j] ? "on" : "off")) :
+                (Math.abs(V[j]-0.5) < 0.02 ? "occluded, unknown" : ("free, reading " + Math.round(V[j]*100) + "% on"))));
+          }
+          for (var k = 0; k < 32; k++){
+            hunits[k].style.setProperty("--h", H[k].toFixed(3));
+            hunits[k].className = "hunit" + (H[k] > 0.6 ? " hot" : "");
+          }
+          var best = 0;
+          for (var p = 0; p < 4; p++){
+            basinEls[p].fill.style.width = Math.max(0, Math.min(100, corrs[p] * 100)).toFixed(1) + "%";
+            basinEls[p].cv.textContent = (corrs[p] >= 0 ? "+" : "") + corrs[p].toFixed(2);
+            basinEls[p].row.classList.toggle("winning", p === bestIdx());
+            if (corrs[p] > corrs[best]) best = p;
+          }
+          var ov = overlapNow(), rec = recoveryNow(), nClamp = 0;
+          for (j = 0; j < 64; j++) if (clamped[j]) nClamp++;
+          $("overlapNum").textContent = Math.round(ov * 100) + "%";
+          $("statRecovery").textContent = rec === null ? "—" : Math.round(rec * 100) + "%";
+          $("statSweeps").textContent = sweeps;
+          $("statClamped").textContent = nClamp + " / " + (64 - nClamp);
+          $("statEnergy").textContent = energyNow().toFixed(2);
+          var pts = history.map(function(v, idx){
+            var x = history.length <= 1 ? 0 : (idx / Math.max(11, history.length - 1)) * 100;
+            var y = 38 - v * 34;
+            return x.toFixed(1) + "," + y.toFixed(1);
+          }).join(" ");
+          $("sparkLine").setAttribute("points", pts);
+        }
+        function bestIdx(){ var b = 0; for (var p = 1; p < 4; p++) if (corrs[p] > corrs[b]) b = p; return b; }
+        function setPhase(which){
+          $("phaseVH").classList.toggle("on", which === 1);
+          $("phaseHV").classList.toggle("on", which === 2);
+          $("phaseSettle").classList.toggle("on", which === 3);
+        }
+
+        /* ---------------- episodes ---------------- */
+        function resetRecall(keepStatus){
+          var T = target();
+          for (var j = 0; j < 64; j++){
+            if (clamped[j]) V[j] = T[j];
+            else if (noisy[j]) V[j] = 1 - T[j];
+            else V[j] = 0.5;
+          }
+          sweeps = 0; history = [overlapNow()];
+          computeHidden(temp());
+          render();
+          if (!keepStatus) setStatus("<strong>Recall reset.</strong> " + countFree() + " units are free. Run the sweeps and the hidden layer will rebuild them.");
+        }
+        function countFree(){ var n = 0; for (var j = 0; j < 64; j++) if (!clamped[j]) n++; return n; }
+        function temp(){ return parseFloat($("tempRange").value); }
+
+        function applyOcclusion(maskFn){
+          stopRun();
+          for (var j = 0; j < 64; j++){
+            var hide = maskFn(j);
+            clamped[j] = !hide; noisy[j] = false; episode[j] = hide;
+          }
+          resetRecall(true);
+          setStatus("<strong>Pattern clamped.</strong> " + countFree() + " of 64 units occluded. Press <strong>Run Gibbs sweeps</strong> — or step one sweep at a time — and watch the free units rebuild.");
+        }
+        function scatterOcclusion(){
+          var pct = parseFloat($("occRange").value) / 100;
+          var idxs = [];
+          for (var j = 0; j < 64; j++) idxs.push(j);
+          for (var s = idxs.length - 1; s > 0; s--){ var r = Math.floor(Math.random() * (s + 1)); var t = idxs[s]; idxs[s] = idxs[r]; idxs[r] = t; }
+          var n = Math.round(pct * 64), set = {};
+          for (var q = 0; q < n; q++) set[idxs[q]] = true;
+          applyOcclusion(function(j){ return !!set[j]; });
+        }
+        function loadPrototype(idx, reshuffle){
+          protoIdx = idx;
+          chipEls.forEach(function(ch, ci){ ch.setAttribute("aria-pressed", ci === idx ? "true" : "false"); });
+          if (reshuffle) scatterOcclusion();
+          else { stopRun(); resetRecall(true); }
+          setStatus("<strong>" + PROTOS[idx].name + " loaded</strong> as the stored prototype. Occlude part of it, then run the sweeps.");
+          if (reshuffle) scatterOcclusionStatus();
+        }
+        function scatterOcclusionStatus(){
+          setStatus("<strong>" + PROTOS[protoIdx].name + " clamped with " + countFree() + " units occluded.</strong> Run the Gibbs sweeps to complete it.");
+        }
+
+        /* ---------------- painting on the grid ---------------- */
+        var paintAction = null, suppressClick = false;
+        function applyCell(j, action){
+          var T = target();
+          if (action === "occlude" && clamped[j]){
+            clamped[j] = false; noisy[j] = false; episode[j] = true; V[j] = 0.5;
+          } else if (action === "clamp" && !clamped[j]){
+            clamped[j] = true; noisy[j] = false; episode[j] = false; V[j] = T[j];
+          } else { return; }
+          stopRun(); sweeps = 0; history = [overlapNow()];
+          computeHidden(temp()); render();
+          setStatus("<strong>Clamp changed.</strong> " + countFree() + " units free. Run the sweeps to recall.");
+        }
+        grid.addEventListener("pointerdown", function(e){
+          var el = e.target.closest(".cell"); if (!el) return;
+          e.preventDefault(); suppressClick = true;
+          var j = +el.dataset.i;
+          paintAction = clamped[j] ? "occlude" : "clamp";
+          applyCell(j, paintAction);
+        });
+        grid.addEventListener("pointerover", function(e){
+          if (!paintAction || !e.buttons) return;
+          var el = e.target.closest(".cell"); if (!el) return;
+          applyCell(+el.dataset.i, paintAction);
+        });
+        window.addEventListener("pointerup", function(){ paintAction = null; });
+        grid.addEventListener("click", function(e){
+          if (suppressClick){ suppressClick = false; return; }
+          var el = e.target.closest(".cell"); if (!el) return;
+          var j = +el.dataset.i;
+          applyCell(j, clamped[j] ? "occlude" : "clamp");
+        });
+        grid.addEventListener("keydown", function(e){
+          if (e.key !== "Enter" && e.key !== " ") return;
+          var el = e.target.closest(".cell"); if (!el) return;
+          e.preventDefault();
+          var j = +el.dataset.i;
+          applyCell(j, clamped[j] ? "occlude" : "clamp");
+        });
+
+        /* ---------------- gibbs sweeps ---------------- */
+        var phaseDelay = REDUCED ? 0 : 260;
+        function doSweep(done){
+          setPhase(1);
+          computeHidden(temp()); render();
+          setTimeout(function(){
+            setPhase(2);
+            computeVisible(temp());
+            computeCorrs();
+            sweeps++;
+            history.push(overlapNow());
+            if (history.length > 120) history.shift();
+            render();
+            setTimeout(function(){
+              setPhase(3);
+              var ov = overlapNow(), rec = recoveryNow();
+              if (ov >= 1 && (rec === null || rec >= 1)){
+                setStatus("<strong>Settled — attractor reached in " + sweeps + " sweep" + (sweeps === 1 ? "" : "s") + ".</strong> The visible layer now matches " + PROTOS[protoIdx].name + " exactly: 100% overlap, every occluded bit recovered by the memory, not by peeking.");
+              } else {
+                setStatus("<strong>Sweep " + sweeps + " complete.</strong> Overlap " + Math.round(ov * 100) + "% — the " + PROTOS[bestIdx()].name + " basin is pulling hardest. " + (running ? "Continuing…" : "Step again or run to settle."));
+              }
+              setTimeout(function(){ setPhase(0); if (done) done(); }, REDUCED ? 0 : 140);
+            }, phaseDelay);
+          }, phaseDelay);
+        }
+        function settled(){ var rec = recoveryNow(); return overlapNow() >= 1 && (rec === null || rec >= 1); }
+        function stopRun(){
+          running = false;
+          if (runTimer){ clearTimeout(runTimer); runTimer = null; }
+          $("btnAuto").textContent = "▶ Run Gibbs sweeps";
+        }
+        function autoStep(){
+          if (!running) return;
+          if (settled() || sweeps >= 80){
+            stopRun();
+            if (!settled()) setStatus("<strong>Stopped after " + sweeps + " sweeps</strong> at " + Math.round(overlapNow() * 100) + "% overlap. Try a colder temperature, or clamp a few more units to tip it into the right basin.");
+            return;
+          }
+          doSweep(function(){ if (running) runTimer = setTimeout(autoStep, REDUCED ? 30 : 90); });
+        }
+        $("btnAuto").addEventListener("click", function(){
+          if (running){ stopRun(); setStatus("<strong>Paused</strong> at sweep " + sweeps + ". Press run to continue the alternation."); return; }
+          if (countFree() === 0){ setStatus("<strong>Nothing to recall.</strong> Every unit is clamped — occlude some cells first (tap the grid, or use the occlusion slider)."); return; }
+          running = true; this.textContent = "❚❚ Pause sweeps";
+          setStatus("<strong>Gibbs sampling running.</strong> Visible → hidden → visible, alternating until the pattern settles…");
+          autoStep();
+        });
+        $("btnStep").addEventListener("click", function(){
+          stopRun();
+          if (countFree() === 0){ setStatus("<strong>Nothing to recall.</strong> Every unit is clamped — occlude some cells first."); return; }
+          doSweep(null);
+        });
+        $("btnReset").addEventListener("click", function(){ stopRun(); resetRecall(false); });
+
+        /* ---------------- controls ---------------- */
+        $("occRange").addEventListener("input", function(){ $("occOut").textContent = this.value + "%"; });
+        $("occRange").addEventListener("change", function(){ scatterOcclusion(); });
+        $("tempRange").addEventListener("input", function(){ $("tempOut").textContent = parseFloat(this.value).toFixed(2); });
+        $("presetBottom").addEventListener("click", function(){ applyOcclusion(function(j){ return Math.floor(j / 8) >= 4; }); });
+        $("presetRight").addEventListener("click", function(){ applyOcclusion(function(j){ return (j % 8) >= 4; }); });
+        $("presetScatter").addEventListener("click", scatterOcclusion);
+        $("presetNoise").addEventListener("click", function(){
+          stopRun();
+          var T = target(), cand = [];
+          for (var j = 0; j < 64; j++) cand.push(j);
+          for (var s = cand.length - 1; s > 0; s--){ var r = Math.floor(Math.random() * (s + 1)); var t = cand[s]; cand[s] = cand[r]; cand[r] = t; }
+          var flipped = 0;
+          for (var q = 0; q < cand.length && flipped < 6; q++){
+            var jj = cand[q];
+            clamped[jj] = false; noisy[jj] = true; episode[jj] = true; V[jj] = 1 - T[jj]; flipped++;
+          }
+          sweeps = 0; history = [overlapNow()]; computeHidden(temp()); render();
+          setStatus("<strong>Noise injected.</strong> 6 units now show the <em>wrong</em> value, but they are unclamped (coral, dashed) — the sampler is free to overrule them. Run the sweeps.");
+        });
+
+        /* ---------------- copy ---------------- */
+        function copyCmd(btn){
+          var text = "uv run thrml-bench run --exp 6";
+          function done(){ var old = btn.textContent; btn.textContent = "Copied ✓"; setTimeout(function(){ btn.textContent = old; }, 1600); }
+          if (navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(text).then(done, function(){ fallback(); });
+          } else fallback();
+          function fallback(){
+            var ta = document.createElement("textarea");
+            ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand("copy"); } catch (e) {}
+            document.body.removeChild(ta); done();
+          }
+        }
+        $("copyTop").addEventListener("click", function(){ copyCmd(this); });
+        $("copyBottom").addEventListener("click", function(){ copyCmd(this); });
+
+        /* ---------------- init ---------------- */
+        scatterOcclusion();
+        setStatus("<strong>" + PROTOS[0].name + " clamped, " + countFree() + " units occluded.</strong> Running the first recall — watch the hidden groups light up, then the free units rebuild sweep by sweep.");
+        setTimeout(function(){
+          if (!running && !settled()){
+            running = true; $("btnAuto").textContent = "❚❚ Pause sweeps";
+            autoStep();
+          }
+        }, REDUCED ? 60 : 750);
+      })();
+    </script>
+  </body>
+</html>

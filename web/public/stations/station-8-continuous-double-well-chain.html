@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Station 8 — Continuous Double-Well Chain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#eef4f4;
+        --bg2:#e3eded;
+        --tile:#ffffff;
+        --tile2:#f6fafa;
+        --ink:#12211f;
+        --ink2:#43584f;
+        --ink3:#6d8478;
+        --line:#cfded9;
+        --line2:#b9cec7;
+        --teal:#0b8a96;
+        --teal-soft:#d7f0f1;
+        --coral:#d94f1e;
+        --coral-soft:#fde7dd;
+        --amber:#c07f13;
+        --good:#177a4c;
+        --shadow:0 1px 2px rgba(18,33,31,.05),0 10px 28px -18px rgba(18,33,31,.28);
+        --canvas-bg:#fbfdfe;
+        --grid-line:rgba(18,33,31,.07);
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#0a1114;
+          --bg2:#0d1518;
+          --tile:#121d20;
+          --tile2:#162326;
+          --ink:#e8f2ef;
+          --ink2:#a9bfb8;
+          --ink3:#74897f;
+          --line:#24383a;
+          --line2:#2f4a4c;
+          --teal:#2fc3cf;
+          --teal-soft:#10333a;
+          --coral:#ff7a45;
+          --coral-soft:#3d2015;
+          --amber:#e0a83e;
+          --good:#4cc38a;
+          --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px -18px rgba(0,0,0,.7);
+          --canvas-bg:#0d171a;
+          --grid-line:rgba(232,242,239,.07);
+        }
+      }
+      *{box-sizing:border-box}
+      html{-webkit-text-size-adjust:100%}
+      body{
+        margin:0;
+        font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+        background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+        color:var(--ink);
+        line-height:1.5;
+      }
+      button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:2.25rem}
+      .wrap{max-width:1180px;margin:0 auto;padding:28px 18px 56px}
+      .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+      /* ---------- Header ---------- */
+      .station-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+      .chip{
+        font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+        border:1px solid var(--line2);border-radius:999px;padding:5px 12px;color:var(--ink2);background:var(--tile);
+      }
+      .chip.hot{border-color:var(--coral);color:var(--coral)}
+      .chip.cold{border-color:var(--teal);color:var(--teal)}
+      h1{font-size:clamp(30px,5.2vw,46px);line-height:1.06;margin:0 0 12px;font-weight:700;letter-spacing:-.015em}
+      h1 .thin{color:var(--teal)}
+      .lede{font-size:clamp(16px,2.2vw,19px);color:var(--ink2);max-width:68ch;margin:0}
+      .lede strong{color:var(--ink);font-weight:600}
+
+      /* ---------- Bento grid ---------- */
+      .bento{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:26px}
+      .tile{
+        background:var(--tile);border:1px solid var(--line);border-radius:14px;
+        box-shadow:var(--shadow);padding:18px;min-width:0;
+      }
+      .tile-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+      .tile-title{font-size:13px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin:0}
+      .tile-note{font-size:12px;color:var(--ink3)}
+      .span3{grid-column:span 3}
+      .span2{grid-column:span 2}
+      .span1{grid-column:span 1}
+      .rowspan2{grid-row:span 2}
+
+      canvas{display:block;width:100%;border-radius:8px;background:var(--canvas-bg)}
+      #wellCanvas{height:320px}
+      #chainCanvas{height:118px}
+      #traceCanvas{height:170px}
+      #sparkCanvas{height:64px;background:transparent}
+
+      .state-pill{
+        font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.05em;
+        padding:5px 11px;border-radius:999px;white-space:nowrap;
+      }
+      .state-pill.hot{background:var(--coral-soft);color:var(--coral)}
+      .state-pill.warm{background:#f7ecd4;color:var(--amber)}
+      @media (prefers-color-scheme: dark){.state-pill.warm{background:#38300f}}
+      .state-pill.cold{background:var(--teal-soft);color:var(--teal)}
+
+      .sim-foot{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;font-size:13px;color:var(--ink2)}
+      .sim-foot b{color:var(--ink);font-family:"IBM Plex Mono",monospace;font-weight:600}
+
+      /* ---------- Big live numbers ---------- */
+      .big-num{font-family:"IBM Plex Mono",monospace;font-size:clamp(38px,4.6vw,52px);font-weight:600;line-height:1;letter-spacing:-.02em}
+      .big-num small{font-size:20px;color:var(--ink3)}
+      .big-sub{font-size:13px;color:var(--ink2);margin-top:6px}
+      .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:14px}
+      .stat{border-top:1px solid var(--line);padding-top:9px}
+      .stat .k{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+      .stat .v{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;margin-top:2px}
+      .stat .v small{font-size:12px;color:var(--ink3);font-weight:400}
+
+      /* ---------- Controls ---------- */
+      .beta-readout{display:flex;align-items:baseline;gap:10px;margin:2px 0 4px}
+      .beta-readout .beta{font-family:"IBM Plex Mono",monospace;font-size:40px;font-weight:600;line-height:1}
+      .beta-readout .temp{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink2)}
+      .slider-wrap{padding:10px 2px 2px}
+      input[type="range"]{width:100%;accent-color:var(--teal);height:36px;cursor:pointer}
+      .scale{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink3);font-family:"IBM Plex Mono",monospace;margin-top:-2px}
+      .scale .h{color:var(--coral)} .scale .c{color:var(--teal)}
+      .thermo-track{height:8px;border-radius:99px;margin-top:10px;background:linear-gradient(90deg,var(--coral),var(--amber),var(--teal));position:relative}
+      .thermo-dot{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--tile);border:3px solid var(--ink);transform:translate(-50%,-50%);transition:left .12s linear}
+      .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+      .btn{
+        font-family:inherit;font-size:14px;font-weight:600;border-radius:9px;border:1px solid var(--line2);
+        background:var(--tile2);color:var(--ink);padding:9px 15px;cursor:pointer;min-height:40px;
+      }
+      .btn:hover{border-color:var(--ink3)}
+      .btn:active{transform:translateY(1px)}
+      .btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+      @media (prefers-color-scheme: dark){.btn.primary{color:#062a2e}}
+      .btn.hot-btn{background:var(--coral);border-color:var(--coral);color:#fff}
+      .btn.small{font-size:13px;padding:7px 12px;min-height:36px}
+      .ctl-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:20px 0 2px}
+      .ctl-label:first-of-type{margin-top:14px}
+
+      /* ---------- Benchmark ---------- */
+      .bench-rows{display:flex;flex-direction:column}
+      .bench-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px dashed var(--line)}
+      .bench-row:last-child{border-bottom:none}
+      .bench-k{font-size:14px;color:var(--ink2)}
+      .bench-v{font-family:"IBM Plex Mono",monospace;font-size:clamp(19px,2.6vw,25px);font-weight:600;text-align:right;white-space:nowrap}
+      .bench-v .arrow{color:var(--ink3);font-weight:400;padding:0 2px}
+      .bench-v .to{color:var(--teal)}
+      .sim-label{font-size:11.5px;color:var(--ink3);margin-top:10px;line-height:1.45}
+      .bench-row-wrap{border-bottom:1px dashed var(--line);padding-bottom:10px}
+      .bench-row-wrap .bench-row{border-bottom:none;padding-bottom:2px}
+      .bench-row-wrap .sim-label{margin:0 0 4px}
+
+      /* ---------- Physics / run ---------- */
+      .eq{font-family:"IBM Plex Mono",monospace;font-size:13.5px;background:var(--tile2);border:1px solid var(--line);border-radius:8px;padding:11px 13px;margin:0 0 10px;line-height:1.6;overflow-wrap:break-word}
+      .phys p{font-size:14px;color:var(--ink2);margin:0 0 10px}
+      .phys p:last-child{margin-bottom:0}
+      .phys b{color:var(--ink)}
+      .run-box{display:flex;flex-direction:column;gap:12px}
+      .run-cmd{
+        font-family:"IBM Plex Mono",monospace;font-size:13.5px;background:#0d171a;color:#b8f0e4;
+        border-radius:8px;padding:14px 15px;line-height:1.55;
+      }
+      @media (prefers-color-scheme: dark){.run-cmd{background:#060d0f;border:1px solid var(--line)}}
+      .run-cmd .prompt{color:#5f7d76;user-select:none}
+      .copy-feedback{font-size:13px;color:var(--good);font-weight:600;min-height:20px}
+
+      footer{margin-top:30px;font-size:13px;color:var(--ink3);display:flex;flex-wrap:wrap;gap:6px 18px;justify-content:space-between}
+
+      @media (max-width:900px){
+        .span3,.span2{grid-column:span 4}
+        .span1{grid-column:span 2}
+        .rowspan2{grid-row:auto}
+      }
+      @media (max-width:560px){
+        .bento{grid-template-columns:1fr 1fr;gap:10px}
+        .span3,.span2,.span1{grid-column:span 2}
+        .tile{padding:14px}
+        #wellCanvas{height:270px}
+        .wrap{padding:20px 12px 44px}
+      }
+      @media (prefers-reduced-motion: reduce){
+        .thermo-dot{transition:none}
+        .btn:active{transform:none}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <!-- ================= Header ================= -->
+      <div class="station-row">
+        <span class="chip">Station 08 · Exp 8</span>
+        <span class="chip hot">Hot · β = 0.35</span>
+        <span class="chip cold">Cold · β = 4.0</span>
+        <span class="chip">Langevin dynamics</span>
+      </div>
+      <h1>Continuous Double-Well <span class="thin">Chain</span></h1>
+      <p class="lede">
+        Coupled quartic double-well Langevin oscillators. <strong>Hot</strong>, particles hop the central
+        barrier freely; <strong>cold</strong>, each localises in one metastable minimum. Drag the temperature
+        below and watch the chain freeze — well by well — in the live simulation.
+      </p>
+
+      <div class="bento">
+
+        <!-- ================= Live potential + particles ================= -->
+        <section class="tile span3 rowspan2" aria-label="Live double-well simulation">
+          <div class="tile-head">
+            <h2 class="tile-title">The double well — live</h2>
+            <span class="state-pill hot" id="statePill">HOT — FREE HOPPING</span>
+          </div>
+          <canvas id="wellCanvas" aria-label="Quartic double-well potential with sixteen particles moving under Langevin dynamics"></canvas>
+          <div class="sim-foot">
+            <span>particles <b>16</b></span>
+            <span>barrier crossings <b id="statCrossings">0</b></span>
+            <span>sim time <b id="statTime">0.0</b> units</span>
+            <span>mean energy / particle <b id="statEnergy">—</b></span>
+            <span>right-well population <b id="statRight">—</b></span>
+          </div>
+          <p class="tile-note" style="margin:12px 0 0">
+            Each dot is one oscillator riding V(x) = (x² − 1)². Teal sits in the left minimum, amber in the
+            right; a ring pulses from a dot at the instant it crosses the barrier at x = 0. Neighbours are
+            spring-coupled, so cold runs settle into same-well domains.
+          </p>
+        </section>
+
+        <!-- ================= Live hop rate ================= -->
+        <section class="tile span1" aria-label="Live hop rate">
+          <div class="tile-head">
+            <h2 class="tile-title">Hop rate · live</h2>
+          </div>
+          <div class="big-num"><span id="liveHop">—</span><small>%</small></div>
+          <p class="big-sub">of particles change well per sweep, measured from this simulation</p>
+          <canvas id="sparkCanvas" aria-label="Hop rate history sparkline"></canvas>
+          <div class="stat-grid">
+            <div class="stat"><div class="k">Mean dwell</div><div class="v" id="statDwell">—</div></div>
+            <div class="stat"><div class="k">Mean |x|</div><div class="v" id="statAbsX">—</div></div>
+          </div>
+        </section>
+
+        <!-- ================= Controls ================= -->
+        <section class="tile span1" aria-label="Temperature controls">
+          <div class="tile-head">
+            <h2 class="tile-title">Temperature</h2>
+            <span class="tile-note">β = 1 / T</span>
+          </div>
+          <div class="beta-readout">
+            <span class="beta">β <span id="betaVal">0.35</span></span>
+            <span class="temp">T = <span id="tempVal">2.86</span></span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="betaSlider" min="0.35" max="4" step="0.01" value="0.35"
+                   aria-label="Inverse temperature beta, from 0.35 hot to 4.0 cold" />
+            <div class="scale"><span class="h">0.35 · HOT</span><span class="c">COLD · 4.0</span></div>
+            <div class="thermo-track" aria-hidden="true"><div class="thermo-dot" id="thermoDot" style="left:0%"></div></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn hot-btn small" id="btnHeat" type="button">Heat · β 0.35</button>
+            <button class="btn small" id="btnQuench" type="button">Quench · β 4.0</button>
+            <button class="btn primary small" id="btnAnneal" type="button">Anneal →</button>
+          </div>
+          <p class="ctl-label">Neighbour coupling J</p>
+          <div class="slider-wrap">
+            <input type="range" id="coupSlider" min="0" max="2" step="0.05" value="0.8"
+                   aria-label="Neighbour coupling strength J, from 0 to 2" />
+            <div class="scale"><span>0 · independent</span><span>J = <span id="coupVal">0.80</span></span><span>2 · stiff chain</span></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn small" id="btnPause" type="button">Pause</button>
+            <button class="btn small" id="btnReset" type="button">Scatter particles</button>
+          </div>
+        </section>
+
+        <!-- ================= Chain configuration ================= -->
+        <section class="tile span2" aria-label="Chain configuration">
+          <div class="tile-head">
+            <h2 class="tile-title">Chain configuration — 16 coupled wells</h2>
+            <span class="tile-note" id="domainNote">no domains yet</span>
+          </div>
+          <canvas id="chainCanvas" aria-label="Sixteen wells in a row showing each particle localised left or right"></canvas>
+          <p class="tile-note" style="margin:10px 0 0">
+            One cell per oscillator, dot position = its x. Hot, the row churns. Cold, with coupling on,
+            neighbours agree and the row locks into blocks of left and right.
+          </p>
+        </section>
+
+        <!-- ================= Traces ================= -->
+        <section class="tile span2" aria-label="Position traces">
+          <div class="tile-head">
+            <h2 class="tile-title">Position traces x(t) — particles 1–4</h2>
+            <span class="tile-note">telegraph switching, live</span>
+          </div>
+          <canvas id="traceCanvas" aria-label="Time traces of four particles switching between the two wells"></canvas>
+          <p class="tile-note" style="margin:10px 0 0">
+            Hot traces jump between +1 and −1 like a telegraph signal. Cool the chain and each trace
+            flattens onto whichever minimum it fell into.
+          </p>
+        </section>
+
+        <!-- ================= Published benchmark ================= -->
+        <section class="tile span2" aria-label="Published benchmark">
+          <div class="tile-head">
+            <h2 class="tile-title">Published benchmark — Exp 8</h2>
+          </div>
+          <div class="bench-rows">
+            <div class="bench-row-wrap">
+              <div class="bench-row">
+                <span class="bench-k">Hop rate, per step</span>
+                <span class="bench-v">38.4% <span class="arrow">→</span> <span class="to">0.9%</span></span>
+              </div>
+              <p class="sim-label">simulated benchmark result, results may vary (not customer results)</p>
+            </div>
+            <div class="bench-row-wrap">
+              <div class="bench-row">
+                <span class="bench-k">Inverse temperature sweep, β</span>
+                <span class="bench-v">0.35 <span class="arrow">→</span> <span class="to">4.0</span></span>
+              </div>
+              <p class="sim-label">simulated benchmark result, results may vary (not customer results)</p>
+            </div>
+            <div class="bench-row-wrap" style="border-bottom:none">
+              <div class="bench-row">
+                <span class="bench-k">Runtime</span>
+                <span class="bench-v">2.805<span style="color:var(--ink3);font-weight:400"> s</span></span>
+              </div>
+              <p class="sim-label">simulated benchmark result, results may vary (not customer results)</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= Physics ================= -->
+        <section class="tile span1 phys" aria-label="The physics">
+          <div class="tile-head"><h2 class="tile-title">The physics</h2></div>
+          <p class="eq">V(x) = (x² − 1)²</p>
+          <p>Minima at <b>x = ±1</b>, barrier of height <b>ΔV = 1</b> at x = 0. A particle needs a thermal kick of order ΔV to change wells.</p>
+          <p class="eq">dx = −V′(x) dt − J·coupling + √(2/β) dW</p>
+          <p>Overdamped Langevin dynamics: the noise term shrinks as <b>β</b> grows, so hops freeze out roughly as <b>exp(−βΔV)</b> — the Kramers picture behind the falling hop rate.</p>
+        </section>
+
+        <!-- ================= Run it ================= -->
+        <section class="tile span1" aria-label="Run this experiment">
+          <div class="tile-head"><h2 class="tile-title">Run it</h2></div>
+          <div class="run-box">
+            <div class="run-cmd"><span class="prompt">$ </span>uv run thrml-bench run --exp 8</div>
+            <div>
+              <button class="btn small" id="btnCopy" type="button">Copy command</button>
+              <div class="copy-feedback" id="copyFeedback" aria-live="polite"></div>
+            </div>
+            <p class="tile-note" style="margin:0">
+              Reproduces the β = 0.35 → 4.0 sweep on the full chain and reports the per-step hop rate at each end.
+            </p>
+          </div>
+        </section>
+
+      </div>
+
+      <footer>
+        <span>Station 8 of 16 · Thermo computing bench</span>
+        <span>Live figures are measured from the simulation running on this page.</span>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /* ---------------- Setup ---------------- */
+        var N = 16;
+        var DT = 0.02;
+        var SUBSTEPS = 30;           // one "sweep" per animation frame
+        var XMIN = -2, XMAX = 2, VMAX = 8;
+
+        var beta = 0.35;
+        var coupling = 0.8;
+        var running = true;
+        var annealing = false;
+        var annealFrom = 0.35, annealStart = 0;
+
+        var particles = [];
+        var crossings = 0;
+        var simTime = 0;
+        var hopEMA = null;
+        var hopHistory = [];
+        var dwellTotal = 0, dwellCount = 0, lastHopSimTime = [];
+        var traces = [[], [], [], []];
+        var TRACE_LEN = 260;
+
+        var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reducedMotion) running = false;
+
+        function randn() {
+          var u = 0, v = 0;
+          while (u === 0) u = Math.random();
+          while (v === 0) v = Math.random();
+          return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+        function potential(x) { var t = x * x - 1; return t * t; }
+
+        function scatter() {
+          particles = [];
+          for (var i = 0; i < N; i++) {
+            var side = Math.random() < 0.5 ? -1 : 1;
+            var x = side * (0.85 + Math.random() * 0.4) + randn() * 0.15;
+            particles.push({ x: x, well: x >= 0 ? 1 : -1, flash: 0 });
+            lastHopSimTime[i] = 0;
+          }
+          crossings = 0; simTime = 0; hopEMA = null; hopHistory = [];
+          dwellTotal = 0; dwellCount = 0;
+          traces = [[], [], [], []];
+        }
+        scatter();
+
+        /* ---------------- DOM ---------------- */
+        function el(id) { return document.getElementById(id); }
+        var betaSlider = el("betaSlider"), coupSlider = el("coupSlider");
+        var betaVal = el("betaVal"), tempVal = el("tempVal"), coupVal = el("coupVal");
+        var thermoDot = el("thermoDot"), statePill = el("statePill");
+        var btnPause = el("btnPause");
+        if (!running) btnPause.textContent = "Resume";
+
+        function isDark() { return window.matchMedia("(prefers-color-scheme: dark)").matches; }
+
+        function syncBetaUI() {
+          betaVal.textContent = beta.toFixed(2);
+          tempVal.textContent = (1 / beta).toFixed(2);
+          betaSlider.value = beta;
+          var frac = (beta - 0.35) / (4 - 0.35);
+          thermoDot.style.left = (frac * 100).toFixed(1) + "%";
+          var label, cls;
+          if (beta < 1.0) { label = "HOT — FREE HOPPING"; cls = "hot"; }
+          else if (beta < 2.5) { label = "COOLING — HOPS RAREFY"; cls = "warm"; }
+          else { label = "COLD — LOCALISED"; cls = "cold"; }
+          statePill.textContent = label;
+          statePill.className = "state-pill " + cls;
+        }
+        syncBetaUI();
+
+        betaSlider.addEventListener("input", function () {
+          annealing = false;
+          beta = parseFloat(betaSlider.value);
+          syncBetaUI();
+        });
+        coupSlider.addEventListener("input", function () {
+          coupling = parseFloat(coupSlider.value);
+          coupVal.textContent = coupling.toFixed(2);
+        });
+        el("btnHeat").addEventListener("click", function () {
+          annealing = false; beta = 0.35; syncBetaUI();
+        });
+        el("btnQuench").addEventListener("click", function () {
+          annealing = false; beta = 4.0; syncBetaUI();
+        });
+        el("btnAnneal").addEventListener("click", function () {
+          annealFrom = beta; annealStart = performance.now(); annealing = true;
+          if (!running) { running = true; btnPause.textContent = "Pause"; }
+        });
+        btnPause.addEventListener("click", function () {
+          running = !running;
+          btnPause.textContent = running ? "Pause" : "Resume";
+        });
+        el("btnReset").addEventListener("click", function () { scatter(); });
+
+        el("btnCopy").addEventListener("click", function () {
+          var cmd = "uv run thrml-bench run --exp 8";
+          var fb = el("copyFeedback");
+          function done() { fb.textContent = "Copied to clipboard."; }
+          function fallback() {
+            var ta = document.createElement("textarea");
+            ta.value = cmd; ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand("copy"); done(); }
+            catch (e) { fb.textContent = cmd; }
+            document.body.removeChild(ta);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(cmd).then(done, fallback);
+          } else { fallback(); }
+        });
+
+        /* ---------------- Simulation ---------------- */
+        function sweep() {
+          var T = 1 / beta;
+          var noiseAmp = Math.sqrt(2 * T * DT);
+          var hoppedThisSweep = [];
+          for (var h = 0; h < N; h++) hoppedThisSweep.push(false);
+          for (var s = 0; s < SUBSTEPS; s++) {
+            var xs = particles.map(function (p) { return p.x; });
+            for (var i = 0; i < N; i++) {
+              var x = xs[i];
+              var force = -4 * x * (x * x - 1);
+              var left = i > 0 ? xs[i - 1] : xs[i];
+              var right = i < N - 1 ? xs[i + 1] : xs[i];
+              force += coupling * (left + right - 2 * x);
+              var nx = x + force * DT + noiseAmp * randn();
+              if (nx > 2.05) nx = 2.05; if (nx < -2.05) nx = -2.05;
+              particles[i].x = nx;
+              // Hysteresis hop detection: must commit past ±0.25
+              var p = particles[i];
+              if (p.well < 0 && nx > 0.25) {
+                p.well = 1; p.flash = 1; crossings++; hoppedThisSweep[i] = true;
+                dwellTotal += simTime - lastHopSimTime[i]; dwellCount++;
+                lastHopSimTime[i] = simTime;
+              } else if (p.well > 0 && nx < -0.25) {
+                p.well = -1; p.flash = 1; crossings++; hoppedThisSweep[i] = true;
+                dwellTotal += simTime - lastHopSimTime[i]; dwellCount++;
+                lastHopSimTime[i] = simTime;
+              }
+            }
+            simTime += DT;
+          }
+          var hopCount = 0;
+          for (var hc = 0; hc < N; hc++) if (hoppedThisSweep[hc]) hopCount++;
+          var frac = hopCount / N * 100;
+          hopEMA = hopEMA === null ? frac : hopEMA * 0.94 + frac * 0.06;
+          hopHistory.push(hopEMA);
+          if (hopHistory.length > 140) hopHistory.shift();
+          for (var k = 0; k < 4; k++) {
+            traces[k].push(particles[k].x);
+            if (traces[k].length > TRACE_LEN) traces[k].shift();
+          }
+          for (var j = 0; j < N; j++) {
+            if (particles[j].flash > 0) particles[j].flash = Math.max(0, particles[j].flash - 0.15);
+          }
+        }
+
+        /* ---------------- Canvas helpers ---------------- */
+        function fitCanvas(cv) {
+          var dpr = window.devicePixelRatio || 1;
+          var w = cv.clientWidth, h = cv.clientHeight;
+          if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) {
+            cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+          }
+          var ctx = cv.getContext("2d");
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          return { ctx: ctx, w: w, h: h };
+        }
+        function cssVar(name) {
+          return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        var wellCv = el("wellCanvas"), chainCv = el("chainCanvas"),
+            traceCv = el("traceCanvas"), sparkCv = el("sparkCanvas");
+        var traceColors = ["#0b8a96", "#d94f1e", "#c07f13", "#177a4c"];
+
+        function drawWell() {
+          var f = fitCanvas(wellCv), ctx = f.ctx, W = f.w, H = f.h;
+          ctx.clearRect(0, 0, W, H);
+          var dark = isDark();
+          var padL = 34, padR = 14, padT = 16, padB = 26;
+          var iw = W - padL - padR, ih = H - padT - padB;
+          function X(x) { return padL + (x - XMIN) / (XMAX - XMIN) * iw; }
+          function Y(v) { return padT + ih - Math.min(v, VMAX) / VMAX * ih; }
+
+          // gridlines
+          ctx.strokeStyle = cssVar("--grid-line"); ctx.lineWidth = 1;
+          ctx.fillStyle = cssVar("--ink3"); ctx.font = "10.5px 'IBM Plex Mono', monospace";
+          for (var gv = 0; gv <= 8; gv += 2) {
+            ctx.beginPath(); ctx.moveTo(padL, Y(gv)); ctx.lineTo(W - padR, Y(gv)); ctx.stroke();
+            ctx.fillText(gv.toFixed(0), 8, Y(gv) + 3);
+          }
+          // barrier dashed line
+          ctx.strokeStyle = dark ? "rgba(232,242,239,.35)" : "rgba(18,33,31,.35)";
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath(); ctx.moveTo(X(0), padT); ctx.lineTo(X(0), padT + ih); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = cssVar("--ink3");
+          ctx.fillText("barrier ΔV = 1", X(0) + 6, padT + 12);
+
+          // potential fill + curve
+          var grad = ctx.createLinearGradient(padL, 0, W - padR, 0);
+          var teal = dark ? "#2fc3cf" : "#0b8a96", coral = dark ? "#ff7a45" : "#d94f1e";
+          grad.addColorStop(0, teal); grad.addColorStop(0.5, dark ? "#8a97a3" : "#7d948c"); grad.addColorStop(1, coral);
+          ctx.beginPath();
+          var steps = 120;
+          for (var s = 0; s <= steps; s++) {
+            var x = XMIN + (XMAX - XMIN) * s / steps;
+            var px = X(x), py = Y(potential(x));
+            if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          }
+          ctx.strokeStyle = grad; ctx.lineWidth = 2.5; ctx.stroke();
+          ctx.lineTo(X(XMAX), padT + ih); ctx.lineTo(X(XMIN), padT + ih); ctx.closePath();
+          ctx.fillStyle = dark ? "rgba(47,195,207,.08)" : "rgba(11,138,150,.07)";
+          ctx.fill();
+
+          // minima labels
+          ctx.fillStyle = cssVar("--ink2"); ctx.font = "11px 'IBM Plex Mono', monospace";
+          ctx.fillText("x = −1", X(-1) - 16, padT + ih + 18);
+          ctx.fillText("x = +1", X(1) - 14, padT + ih + 18);
+
+          // particles
+          for (var i = 0; i < N; i++) {
+            var p = particles[i];
+            var dxp = Math.max(XMIN, Math.min(XMAX, p.x));
+            var px2 = X(dxp), py2 = Y(potential(dxp));
+            var col = p.well < 0 ? teal : coral;
+            if (p.flash > 0) {
+              ctx.beginPath();
+              ctx.arc(px2, py2, 8 + (1 - p.flash) * 9, 0, Math.PI * 2);
+              ctx.globalAlpha = p.flash * 0.8;
+              ctx.lineWidth = 2; ctx.strokeStyle = col; ctx.stroke();
+              ctx.globalAlpha = 1;
+            }
+            ctx.beginPath();
+            ctx.arc(px2, py2, 6, 0, Math.PI * 2);
+            ctx.fillStyle = col;
+            ctx.fill();
+            ctx.lineWidth = 2; ctx.strokeStyle = cssVar("--tile"); ctx.stroke();
+          }
+        }
+
+        function drawChain() {
+          var f = fitCanvas(chainCv), ctx = f.ctx, W = f.w, H = f.h;
+          ctx.clearRect(0, 0, W, H);
+          var dark = isDark();
+          var teal = dark ? "#2fc3cf" : "#0b8a96", coral = dark ? "#ff7a45" : "#d94f1e";
+          var cell = W / N, midY = H / 2, amp = Math.min(cell * 0.36, 26);
+          ctx.strokeStyle = cssVar("--line"); ctx.lineWidth = 1;
+          // connecting line
+          ctx.beginPath();
+          for (var i = 0; i < N; i++) {
+            var cx = cell * i + cell / 2;
+            var dx = Math.max(-1.6, Math.min(1.6, particles[i].x)) / 1.6 * amp;
+            if (i === 0) ctx.moveTo(cx + dx, midY); else ctx.lineTo(cx + dx, midY);
+          }
+          ctx.strokeStyle = cssVar("--line2"); ctx.lineWidth = 1.5; ctx.stroke();
+          for (var j = 0; j < N; j++) {
+            var cx2 = cell * j + cell / 2;
+            // mini well ticks
+            ctx.strokeStyle = cssVar("--line"); ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(cx2 - amp - 3, midY + 22); ctx.lineTo(cx2 - amp - 3, midY + 28);
+            ctx.moveTo(cx2 + amp + 3, midY + 22); ctx.lineTo(cx2 + amp + 3, midY + 28);
+            ctx.moveTo(cx2, midY + 24); ctx.lineTo(cx2, midY + 28);
+            ctx.stroke();
+            var dx2 = Math.max(-1.6, Math.min(1.6, particles[j].x)) / 1.6 * amp;
+            ctx.beginPath();
+            ctx.arc(cx2 + dx2, midY, 7, 0, Math.PI * 2);
+            ctx.fillStyle = particles[j].well < 0 ? teal : coral;
+            ctx.fill();
+            ctx.lineWidth = 2; ctx.strokeStyle = cssVar("--tile"); ctx.stroke();
+            ctx.fillStyle = cssVar("--ink3"); ctx.font = "9.5px 'IBM Plex Mono', monospace";
+            ctx.fillText(String(j + 1), cx2 - 3, 14);
+          }
+        }
+
+        function drawTraces() {
+          var f = fitCanvas(traceCv), ctx = f.ctx, W = f.w, H = f.h;
+          ctx.clearRect(0, 0, W, H);
+          var padL = 30, padR = 10, padT = 10, padB = 8;
+          var iw = W - padL - padR, ih = H - padT - padB;
+          function Y(x) { return padT + ih / 2 - Math.max(-2, Math.min(2, x)) / 2 * (ih / 2 - 4); }
+          ctx.strokeStyle = cssVar("--grid-line"); ctx.lineWidth = 1;
+          ctx.fillStyle = cssVar("--ink3"); ctx.font = "10.5px 'IBM Plex Mono', monospace";
+          [1, 0, -1].forEach(function (v) {
+            ctx.beginPath(); ctx.moveTo(padL, Y(v)); ctx.lineTo(W - padR, Y(v)); ctx.stroke();
+            ctx.fillText((v > 0 ? "+" : "") + v, 6, Y(v) + 3);
+          });
+          for (var k = 0; k < 4; k++) {
+            var tr = traces[k];
+            if (tr.length < 2) continue;
+            ctx.beginPath();
+            for (var i = 0; i < tr.length; i++) {
+              var px = padL + i / (TRACE_LEN - 1) * iw;
+              if (i === 0) ctx.moveTo(px, Y(tr[i])); else ctx.lineTo(px, Y(tr[i]));
+            }
+            ctx.strokeStyle = traceColors[k]; ctx.lineWidth = 1.6; ctx.stroke();
+          }
+        }
+
+        function drawSpark() {
+          var f = fitCanvas(sparkCv), ctx = f.ctx, W = f.w, H = f.h;
+          ctx.clearRect(0, 0, W, H);
+          if (hopHistory.length < 2) return;
+          var maxV = Math.max(45, Math.max.apply(null, hopHistory) * 1.15);
+          var last = hopHistory.length - 1;
+          ctx.beginPath();
+          for (var i = 0; i < hopHistory.length; i++) {
+            var px = i / last * W;
+            var py = H - 4 - hopHistory[i] / maxV * (H - 10);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          }
+          ctx.strokeStyle = cssVar("--teal"); ctx.lineWidth = 2; ctx.stroke();
+          ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+          ctx.fillStyle = isDark() ? "rgba(47,195,207,.12)" : "rgba(11,138,150,.10)";
+          ctx.fill();
+        }
+
+        /* ---------------- Readouts ---------------- */
+        var frame = 0;
+        function updateReadouts() {
+          el("liveHop").textContent = hopEMA === null ? "—" : hopEMA.toFixed(1);
+          el("statCrossings").textContent = crossings.toLocaleString("en-US");
+          el("statTime").textContent = simTime.toFixed(1);
+          var eSum = 0, absSum = 0, right = 0;
+          for (var i = 0; i < N; i++) {
+            eSum += potential(particles[i].x);
+            absSum += Math.abs(particles[i].x);
+            if (particles[i].well > 0) right++;
+          }
+          el("statEnergy").textContent = (eSum / N).toFixed(2);
+          el("statAbsX").textContent = (absSum / N).toFixed(2);
+          el("statRight").textContent = Math.round(right / N * 100) + "%";
+          el("statDwell").innerHTML = dwellCount > 0
+            ? (dwellTotal / dwellCount).toFixed(1) + " <small>units</small>" : "—";
+          // domains: runs of same well >= 3
+          var runs = 0, runLen = 1;
+          for (var j = 1; j <= N; j++) {
+            if (j < N && particles[j].well === particles[j - 1].well) { runLen++; }
+            else { if (runLen >= 3) runs++; runLen = 1; }
+          }
+          el("domainNote").textContent = runs === 0 ? "no domains yet"
+            : runs + (runs === 1 ? " domain" : " domains") + " of 3+ wells";
+        }
+
+        /* ---------------- Main loop ---------------- */
+        function loop(now) {
+          if (annealing) {
+            var t = Math.min(1, (now - annealStart) / 6000);
+            var ease = t * t * (3 - 2 * t);
+            beta = annealFrom + (4.0 - annealFrom) * ease;
+            if (t >= 1) annealing = false;
+            syncBetaUI();
+          }
+          if (running) sweep();
+          drawWell(); drawChain(); drawTraces();
+          frame++;
+          if (frame % 6 === 0) { updateReadouts(); drawSpark(); }
+          requestAnimationFrame(loop);
+        }
+        updateReadouts();
+        requestAnimationFrame(loop);
+      })();
+    </script>
+  </body>
+</html>

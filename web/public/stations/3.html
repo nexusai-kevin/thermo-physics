@@ -1,0 +1,750 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Station 3 — Max-Cut on Erdos-Renyi Graphs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.25rem; }
+      * { box-sizing: border-box; }
+      :root {
+        --bg: #edf1ee;
+        --panel: #ffffff;
+        --panel-2: #f4f7f4;
+        --ink: #13211b;
+        --ink-2: #43554c;
+        --line: #d3ddd6;
+        --teal: #0b7a68;
+        --teal-bright: #12a58a;
+        --teal-soft: #d9f0ea;
+        --coral: #d9481f;
+        --coral-bright: #f0643a;
+        --coral-soft: #fbe3da;
+        --cut-line: #13211b;
+        --uncut-line: #d9481f;
+        --amber: #b97d10;
+        --shadow: 0 1px 2px rgba(19,33,27,.06), 0 8px 24px rgba(19,33,27,.05);
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 9px;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0c130f;
+          --panel: #141d17;
+          --panel-2: #18231b;
+          --ink: #e8f0ea;
+          --ink-2: #9db3a5;
+          --line: #2a3a2f;
+          --teal: #2cc4a6;
+          --teal-bright: #3edbbd;
+          --teal-soft: #173a32;
+          --coral: #ff7a52;
+          --coral-bright: #ff8f6b;
+          --coral-soft: #40231a;
+          --cut-line: #cfe3d6;
+          --uncut-line: #ff7a52;
+          --amber: #e0aa3e;
+          --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.25);
+        }
+      }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+      .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 18px 56px; }
+
+      .station-line {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+        font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .78rem; letter-spacing: .08em;
+        color: var(--ink-2); text-transform: uppercase;
+      }
+      .station-line .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--teal-bright); box-shadow: 0 0 0 4px var(--teal-soft); }
+      .station-line .sep { opacity: .5; }
+      h1 {
+        margin: 12px 0 0; font-size: clamp(1.9rem, 4.6vw, 3.1rem); line-height: 1.04;
+        font-weight: 800; letter-spacing: -0.02em; max-width: 16ch;
+      }
+      h1 .cut-word { color: var(--teal); }
+      .lede { margin: 14px 0 0; max-width: 68ch; font-size: 1.05rem; color: var(--ink-2); }
+      .lede strong { color: var(--ink); font-weight: 600; }
+
+      .grid { display: grid; gap: 14px; margin-top: 26px; grid-template-columns: repeat(12, 1fr); }
+      .card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg);
+        box-shadow: var(--shadow); padding: 20px; min-width: 0;
+      }
+      .card h2 { margin: 0; font-size: 1.02rem; font-weight: 700; letter-spacing: -0.01em; }
+      .card .sub { margin: 4px 0 0; font-size: .88rem; color: var(--ink-2); }
+      .span-graph { grid-column: span 8; }
+      .span-side  { grid-column: span 4; }
+      .span-4 { grid-column: span 4; }
+      .span-12 { grid-column: span 12; }
+      @media (max-width: 900px) {
+        .span-graph, .span-side, .span-4 { grid-column: span 12; }
+      }
+
+      /* ---------- graph ---------- */
+      .graph-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; }
+      .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .8rem; color: var(--ink-2); align-items: center; margin-top: 12px; }
+      .legend .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 5px; }
+      .legend .linekey { display: inline-block; width: 22px; border-top: 3px solid var(--cut-line); vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+      .legend .linekey.uncut { border-top: 2px dashed var(--uncut-line); }
+      .graph-frame {
+        margin-top: 14px; border: 1px solid var(--line); border-radius: var(--radius-md);
+        background: var(--panel-2); overflow: hidden;
+      }
+      svg#graph { display: block; width: 100%; height: auto; }
+      svg#graph .zone-a { fill: var(--teal-soft); opacity: .55; }
+      svg#graph .zone-b { fill: var(--coral-soft); opacity: .55; }
+      svg#graph .zone-label { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600; letter-spacing: .12em; }
+      svg#graph .zone-label.a { fill: var(--teal); }
+      svg#graph .zone-label.b { fill: var(--coral); }
+      svg#graph .edge { stroke: var(--cut-line); stroke-width: 1.4; opacity: .38; }
+      svg#graph .edge.uncut { stroke: var(--uncut-line); stroke-width: 1.1; stroke-dasharray: 4 3; opacity: .34; }
+      svg#graph[data-edgemode="cut"] .edge.uncut { opacity: 0; }
+      svg#graph[data-edgemode="uncut"] .edge:not(.uncut) { opacity: 0; }
+      svg#graph .edge.hl { opacity: .95; stroke-width: 2.6; }
+      svg#graph .node circle.body { stroke: var(--panel); stroke-width: 2.5; cursor: pointer; }
+      svg#graph .node circle.body:focus { outline: none; stroke: var(--amber); stroke-width: 4; }
+      svg#graph .node text { font-family: "IBM Plex Mono", monospace; font-size: 11px; font-weight: 600; fill: #fff; pointer-events: none; }
+      @media (prefers-color-scheme: dark) { svg#graph .node text { fill: #0c130f; } }
+      .graph-foot { margin-top: 14px; }
+      .balance .bar { display: flex; height: 12px; border-radius: 99px; overflow: hidden; border: 1px solid var(--line); }
+      .balance .bar .a { background: var(--teal-bright); transition: width .3s; }
+      .balance .bar .b { background: var(--coral-bright); transition: width .3s; }
+      .balance .labels { display: flex; justify-content: space-between; font-size: .78rem; color: var(--ink-2); margin-top: 5px; }
+      .balance .labels b { color: var(--ink); font-weight: 600; }
+      .segmented { display: inline-flex; border: 1px solid var(--line); border-radius: 99px; padding: 3px; background: var(--panel-2); }
+      .segmented button {
+        border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: .82rem; font-weight: 600;
+        padding: 6px 13px; border-radius: 99px; cursor: pointer; min-height: 2.25rem;
+      }
+      .segmented button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+
+      /* ---------- readouts ---------- */
+      .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+      .tile { background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px; }
+      .tile .k { font-size: .74rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-2); }
+      .tile .v { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 1.55rem; font-weight: 600; margin-top: 2px; letter-spacing: -0.02em; }
+      .tile .v small { font-size: .85rem; color: var(--ink-2); font-weight: 400; }
+      .tile.hero { grid-column: span 2; background: var(--ink); color: var(--panel); border-color: var(--ink); }
+      .tile.hero .k { color: inherit; opacity: .65; }
+      .tile.hero .v { font-size: 2.6rem; }
+      .tile.hero .v small { color: inherit; opacity: .65; }
+      .tile .note { font-size: .78rem; color: var(--ink-2); margin-top: 2px; }
+      .tile.hero .note { color: inherit; opacity: .7; }
+
+      /* ---------- controls ---------- */
+      .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+      button.btn {
+        font: inherit; font-weight: 600; font-size: .92rem; cursor: pointer;
+        border-radius: var(--radius-sm); padding: 9px 16px; min-height: 2.75rem;
+        border: 1px solid var(--line); background: var(--panel-2); color: var(--ink);
+      }
+      button.btn:hover { border-color: var(--ink-2); }
+      button.btn.primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+      @media (prefers-color-scheme: dark) { button.btn.primary { color: #06231c; } }
+      button.btn.primary:hover { background: var(--teal-bright); }
+      button.btn.warn { background: var(--coral); border-color: var(--coral); color: #fff; }
+      button.btn:disabled { opacity: .45; cursor: not-allowed; }
+      .slider-row { margin-top: 16px; }
+      .slider-row label { display: flex; justify-content: space-between; font-size: .86rem; font-weight: 600; }
+      .slider-row label output { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 500; color: var(--ink-2); }
+      .slider-row input[type="range"] { width: 100%; accent-color: var(--teal); min-height: 2.25rem; }
+      .status-line { margin-top: 12px; font-size: .88rem; color: var(--ink-2); min-height: 1.4em; }
+      .status-line b { color: var(--ink); }
+      canvas#spark { width: 100%; height: 92px; display: block; margin-top: 12px; }
+
+      /* ---------- benchmark ---------- */
+      .bench-big { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 3rem; font-weight: 600; letter-spacing: -0.03em; line-height: 1; margin-top: 10px; }
+      .bench-big small { font-size: 1.1rem; color: var(--ink-2); font-weight: 400; }
+      .bench-rows { margin-top: 14px; display: grid; gap: 8px; font-size: .92rem; }
+      .bench-rows .row { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+      .bench-rows .row span:first-child { color: var(--ink-2); }
+      .bench-rows .row span:last-child { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 600; }
+      .vsbar { margin-top: 16px; display: grid; gap: 8px; font-size: .8rem; color: var(--ink-2); }
+      .vsbar .track { height: 14px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+      .vsbar .fill { height: 100%; border-radius: 99px; }
+      .vsbar .fill.rand { background: var(--ink-2); width: 49.9%; }
+      .vsbar .fill.ann { background: var(--teal-bright); width: 70.8%; }
+      .vsbar .lab { display: flex; justify-content: space-between; }
+      .vsbar .lab b { color: var(--ink); font-family: "IBM Plex Mono", ui-monospace, monospace; }
+      .sim-label {
+        margin-top: 16px; font-size: .76rem; line-height: 1.45; color: var(--ink-2);
+        border: 1px dashed var(--line); border-radius: var(--radius-sm); padding: 9px 11px; background: var(--panel-2);
+      }
+
+      /* ---------- hamiltonian ---------- */
+      .formula {
+        margin-top: 12px; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius-md);
+        padding: 16px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 1.02rem; text-align: center;
+      }
+      .formula .ham { font-size: 1.3rem; font-weight: 600; }
+      .term-list { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; font-size: .9rem; color: var(--ink-2); }
+      .term-list b { color: var(--ink); }
+      .term-list .tag { display: inline-block; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .74rem; padding: 2px 8px; border-radius: 99px; margin-right: 7px; vertical-align: 1px; }
+      .tag.cut { background: var(--teal-soft); color: var(--teal); }
+      .tag.uncut { background: var(--coral-soft); color: var(--coral); }
+      @media (prefers-color-scheme: dark) { .tag.cut { color: var(--teal-bright); } .tag.uncut { color: var(--coral-bright); } }
+      .live-h {
+        margin-top: 14px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .92rem;
+        background: var(--ink); color: var(--panel); border-radius: var(--radius-sm); padding: 11px 13px;
+        white-space: normal; overflow-wrap: anywhere; line-height: 1.6;
+      }
+      .howto { margin: 12px 0 0; padding-left: 1.15em; display: grid; gap: 7px; font-size: .92rem; color: var(--ink-2); }
+      .howto b { color: var(--ink); }
+
+      /* ---------- run ---------- */
+      .run-card { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+      .run-card h2, .run-card .sub { color: var(--panel); }
+      .run-card .sub { opacity: .7; }
+      .cmd { margin-top: 14px; display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+      .cmd code {
+        flex: 1 1 240px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .95rem;
+        background: rgba(127,160,140,.16); border: 1px solid rgba(160,190,170,.3); border-radius: var(--radius-sm);
+        padding: 13px 15px; display: flex; align-items: center; white-space: normal; overflow-wrap: anywhere;
+      }
+      .cmd code .prompt { opacity: .5; margin-right: 9px; user-select: none; }
+      .cmd button { background: var(--teal-bright); border-color: var(--teal-bright); color: #06231c; }
+      .run-meta { margin-top: 12px; font-size: .84rem; opacity: .75; }
+
+      footer { margin-top: 26px; font-size: .8rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between; }
+      @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="station-line">
+          <span class="dot" aria-hidden="true"></span>
+          <span>Thermalbits</span><span class="sep">/</span>
+          <span>Station 03</span><span class="sep">/</span>
+          <span>Experiment 3</span>
+        </div>
+        <h1>Max-<span class="cut-word">Cut</span> on Erdős–Rényi graphs</h1>
+        <p class="lede">
+          The NP-hard <strong>Max-Cut</strong> problem on a <strong>G(50, 0.20)</strong> random graph,
+          mapped to an <strong>antiferromagnetic Ising Hamiltonian</strong> and annealed to a bipartition.
+          Every edge wants its two endpoints on opposite sides — the annealer&rsquo;s job is to satisfy as
+          many edges as possible at once. Below, a smaller live graph runs the same physics in your browser:
+          flip spins yourself, or let the annealer hunt.
+        </p>
+      </header>
+
+      <main class="grid">
+        <!-- ======== GRAPH ======== -->
+        <section class="card span-graph" aria-labelledby="graph-h">
+          <div class="graph-head">
+            <div>
+              <h2 id="graph-h">The live bipartition</h2>
+              <p class="sub">Nodes live on their side of the cut. Click one and it crosses over — solid edges are cut, dashed edges are still uncut.</p>
+            </div>
+            <div class="segmented" role="group" aria-label="Edge display">
+              <button type="button" data-edgemode="all" aria-pressed="true">All edges</button>
+              <button type="button" data-edgemode="cut" aria-pressed="false">Cut only</button>
+              <button type="button" data-edgemode="uncut" aria-pressed="false">Uncut only</button>
+            </div>
+          </div>
+
+          <div class="graph-frame">
+            <svg id="graph" viewBox="0 0 640 460" data-edgemode="all" role="group" aria-label="Interactive Erdos-Renyi graph split into two sides. Activate a node to flip its partition."></svg>
+          </div>
+
+          <div class="legend" aria-hidden="true">
+            <span><span class="swatch" style="background:var(--teal-bright)"></span>Side A · spin +1</span>
+            <span><span class="swatch" style="background:var(--coral-bright)"></span>Side B · spin &minus;1</span>
+            <span><span class="linekey"></span>cut edge</span>
+            <span><span class="linekey uncut"></span>uncut edge</span>
+          </div>
+
+          <div class="graph-foot">
+            <div class="balance">
+              <div class="bar"><div class="a" id="bal-a" style="width:50%"></div><div class="b" id="bal-b" style="width:50%"></div></div>
+              <div class="labels"><span>Side A · <b id="count-a">0</b> nodes</span><span>Side B · <b id="count-b">0</b> nodes</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======== LIVE READOUTS ======== -->
+        <section class="card span-side" aria-labelledby="readout-h">
+          <h2 id="readout-h">Live readouts</h2>
+          <p class="sub">Recomputed on every flip, from the graph above.</p>
+          <div class="tiles">
+            <div class="tile hero">
+              <div class="k">Cut fraction</div>
+              <div class="v"><span id="ro-pct">–</span><small>%</small></div>
+              <div class="note" id="ro-pct-note">of edges cross the partition</div>
+            </div>
+            <div class="tile">
+              <div class="k">Cut edges</div>
+              <div class="v"><span id="ro-cut">–</span><small> / <span id="ro-total">–</span></small></div>
+            </div>
+            <div class="tile">
+              <div class="k">Ising energy H</div>
+              <div class="v" id="ro-energy">–</div>
+              <div class="note">lower is better</div>
+            </div>
+            <div class="tile">
+              <div class="k">Best seen</div>
+              <div class="v"><span id="ro-best">–</span><small>%</small></div>
+              <div class="note">this graph, this session</div>
+            </div>
+            <div class="tile">
+              <div class="k">Temperature</div>
+              <div class="v" id="ro-temp">—</div>
+              <div class="note" id="ro-temp-note">annealer idle</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ======== ANNEALER CONTROLS ======== -->
+        <section class="card span-4" aria-labelledby="anneal-h">
+          <h2 id="anneal-h">Annealer controls</h2>
+          <p class="sub">Simulated annealing with Metropolis single-spin flips — the same recipe as the benchmark, on a demo-size graph.</p>
+
+          <div class="slider-row">
+            <label for="t0">Start temperature <output id="t0-out">2.40</output></label>
+            <input type="range" id="t0" min="0.4" max="4" step="0.1" value="2.4" />
+          </div>
+          <div class="slider-row">
+            <label for="sweeps">Sweeps <output id="sweeps-out">140</output></label>
+            <input type="range" id="sweeps" min="30" max="400" step="10" value="140" />
+          </div>
+
+          <div class="controls">
+            <button type="button" class="btn primary" id="btn-anneal">Anneal</button>
+            <button type="button" class="btn" id="btn-greedy">Greedy sweep</button>
+            <button type="button" class="btn" id="btn-random">Random bipartition</button>
+            <button type="button" class="btn warn" id="btn-newgraph">New graph</button>
+          </div>
+          <p class="status-line" id="status" role="status">Ready. The graph starts from a random bipartition — expect a cut near 50%.</p>
+
+          <canvas id="spark" width="640" height="184" aria-label="History of cut fraction during annealing"></canvas>
+          <p class="sub" style="margin-top:6px">Cut fraction over the current anneal. The dashed line marks the published 70.8% — simulated benchmark result, results may vary (not customer results).</p>
+        </section>
+
+        <!-- ======== HAMILTONIAN ======== -->
+        <section class="card span-4" aria-labelledby="ham-h">
+          <h2 id="ham-h">Why flipping works</h2>
+          <p class="sub">Max-Cut, rewritten as physics. Each node carries a spin s<sub>i</sub> = &plusmn;1 — its side of the partition.</p>
+          <div class="formula">
+            <div class="ham">H = &Sigma;<sub>(i,j) &isin; E</sub> s<sub>i</sub> s<sub>j</sub></div>
+            <div style="margin-top:6px; font-size:.82rem; opacity:.75">antiferromagnetic Ising Hamiltonian</div>
+          </div>
+          <ul class="term-list">
+            <li><span class="tag cut">cut</span><b>Opposite spins</b> — the edge contributes &minus;1. The antiferromagnetic coupling is satisfied.</li>
+            <li><span class="tag uncut">uncut</span><b>Same spin</b> — the edge contributes +1. Energy goes up, so the annealer tries to flip it away.</li>
+            <li>Minimising H is exactly maximising the cut: <b>H = |E| &minus; 2 &times; cut</b>. One number, both views.</li>
+          </ul>
+          <div class="live-h" id="live-h">H = — · cut = — · |E| = —</div>
+          <ol class="howto">
+            <li><b>Flip by hand:</b> click a node with many dashed edges — every same-side neighbour it leaves behind adds a cut.</li>
+            <li><b>Beat the machine:</b> get the live cut as high as you can, then press Anneal and see if it beats your best.</li>
+            <li><b>Heat it up:</b> raise the start temperature and the annealer wanders longer before it settles.</li>
+          </ol>
+        </section>
+
+        <!-- ======== PUBLISHED BENCHMARK ======== -->
+        <section class="card span-4" aria-labelledby="bench-h">
+          <h2 id="bench-h">Published benchmark · Exp 3</h2>
+          <p class="sub">Full-size run: G(50, 0.20) — 50 nodes, edges drawn with probability 0.20.</p>
+          <div class="bench-big">70.8<small>% cut edges</small></div>
+          <div class="bench-rows">
+            <div class="row"><span>Edges cut</span><span>172 of 243</span></div>
+            <div class="row"><span>Random bipartition</span><span>49.9%</span></div>
+            <div class="row"><span>Lift over random</span><span>+20.9 pts</span></div>
+            <div class="row"><span>Run time</span><span>7.344 s</span></div>
+          </div>
+          <div class="vsbar" aria-hidden="true">
+            <div>
+              <div class="lab"><span>Annealed</span><b>70.8%</b></div>
+              <div class="track"><div class="fill ann"></div></div>
+            </div>
+            <div>
+              <div class="lab"><span>Random</span><b>49.9%</b></div>
+              <div class="track"><div class="fill rand"></div></div>
+            </div>
+          </div>
+          <p class="sim-label">All figures on this card: <b>simulated benchmark result, results may vary (not customer results)</b>. The live demo above runs a smaller graph in your browser, so its numbers will differ.</p>
+        </section>
+
+        <!-- ======== RUN COMMAND ======== -->
+        <section class="card span-12 run-card" aria-labelledby="run-h">
+          <h2 id="run-h">Run it yourself</h2>
+          <p class="sub">The full G(50, 0.20) benchmark, exactly as it appears in the thermo-lab ledger.</p>
+          <div class="cmd">
+            <code><span class="prompt">$</span><span id="cmd-text">uv run thrml-bench run --exp 3</span></code>
+            <button type="button" class="btn" id="btn-copy">Copy command</button>
+          </div>
+          <p class="run-meta">Experiment 3 · Max-Cut on Erdős–Rényi graphs · published result 70.8% cut edges (172 of 243) in 7.344 s — simulated benchmark result, results may vary (not customer results).</p>
+        </section>
+      </main>
+
+      <footer>
+        <span>Thermalbits · Station 03 — one of sixteen thermo-computing stations.</span>
+        <span>Demo graph: G(30, 0.24), generated fresh in your browser.</span>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var SVGNS = "http://www.w3.org/2000/svg";
+        var N = 30, P = 0.24, W = 640, Hh = 460;
+        var ROWS = 8;                 // slots per column inside a side zone
+        var ZONE = { a: { x: 18, cx: 160 }, b: { x: 338, cx: 480 } };
+        var ZONE_W = 284;
+
+        var svg = document.getElementById("graph");
+        var edges = [], adj = [], spins = [], pos = [], targets = [], jitter = [];
+        var nodeEls = [];
+        var bestPct = 0, history = [];
+        var animating = false, rafId = null, tweenId = null;
+
+        function mulberry32(seed) {
+          return function () {
+            seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+            var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+          };
+        }
+
+        // Position of each node: a slot inside its side's zone.
+        function computeTargets() {
+          var rank = { "-1": 0, "1": 0 };
+          var counts = { "-1": 0, "1": 0 };
+          spins.forEach(function (s) { counts[s]++; });
+          for (var i = 0; i < N; i++) {
+            var s = spins[i], r = rank[s]++;
+            var cols = Math.max(1, Math.ceil(counts[s] / ROWS));
+            var col = Math.floor(r / ROWS), row = r % ROWS;
+            var rowsHere = Math.min(ROWS, counts[s] - col * ROWS);
+            var cx = (s === 1 ? ZONE.a.cx : ZONE.b.cx) + (col - (cols - 1) / 2) * 74;
+            var cy = Hh / 2 + (row - (rowsHere - 1) / 2) * 47;
+            targets[i] = { x: cx + jitter[i].x, y: cy + jitter[i].y };
+          }
+        }
+
+        function drawPositions() {
+          for (var i = 0; i < N; i++) {
+            nodeEls[i].g.setAttribute("transform", "translate(" + pos[i].x + "," + pos[i].y + ")");
+          }
+          edges.forEach(function (e) {
+            e.el.setAttribute("x1", pos[e.a].x); e.el.setAttribute("y1", pos[e.a].y);
+            e.el.setAttribute("x2", pos[e.b].x); e.el.setAttribute("y2", pos[e.b].y);
+          });
+        }
+
+        function tweenPositions() {
+          if (tweenId) cancelAnimationFrame(tweenId);
+          var from = pos.map(function (p) { return { x: p.x, y: p.y }; });
+          var start = null, dur = 380;
+          function step(ts) {
+            if (!start) start = ts;
+            var t = Math.min((ts - start) / dur, 1);
+            var e = 1 - Math.pow(1 - t, 3);
+            for (var i = 0; i < N; i++) {
+              pos[i].x = from[i].x + (targets[i].x - from[i].x) * e;
+              pos[i].y = from[i].y + (targets[i].y - from[i].y) * e;
+            }
+            drawPositions();
+            if (t < 1) tweenId = requestAnimationFrame(step); else tweenId = null;
+          }
+          tweenId = requestAnimationFrame(step);
+        }
+
+        function buildGraph(useRandom) {
+          var rng = useRandom ? Math.random : mulberry32(20261111);
+          edges = []; adj = []; spins = []; pos = []; targets = []; jitter = [];
+          for (var i = 0; i < N; i++) {
+            adj.push([]);
+            spins.push(rng() < 0.5 ? 1 : -1);
+            jitter.push({ x: (rng() - 0.5) * 14, y: (rng() - 0.5) * 12 });
+          }
+          for (var a = 0; a < N; a++) {
+            for (var b = a + 1; b < N; b++) {
+              if (rng() < P) { edges.push({ a: a, b: b }); adj[a].push(b); adj[b].push(a); }
+            }
+          }
+          renderGraph();
+          computeTargets();
+          pos = targets.map(function (p) { return { x: p.x, y: p.y }; });
+          drawPositions();
+          bestPct = 0; history = [];
+          update();
+          drawSpark();
+        }
+
+        function renderGraph() {
+          while (svg.firstChild) svg.removeChild(svg.firstChild);
+          nodeEls = [];
+          // side zones
+          [["zone-a", ZONE.a.x, "SIDE A · +1", "zone-label a", ZONE.a.cx],
+           ["zone-b", ZONE.b.x, "SIDE B · −1", "zone-label b", ZONE.b.cx]].forEach(function (z) {
+            var r = document.createElementNS(SVGNS, "rect");
+            r.setAttribute("x", z[1]); r.setAttribute("y", 14);
+            r.setAttribute("width", ZONE_W); r.setAttribute("height", Hh - 28);
+            r.setAttribute("rx", 14); r.setAttribute("class", z[0]);
+            svg.appendChild(r);
+            var t = document.createElementNS(SVGNS, "text");
+            t.setAttribute("x", z[4]); t.setAttribute("y", 42);
+            t.setAttribute("text-anchor", "middle"); t.setAttribute("class", z[3]);
+            t.textContent = z[2];
+            svg.appendChild(t);
+          });
+          edges.forEach(function (e) {
+            var line = document.createElementNS(SVGNS, "line");
+            line.setAttribute("class", "edge");
+            e.el = line;
+            svg.appendChild(line);
+          });
+          for (var i = 0; i < N; i++) {
+            var g = document.createElementNS(SVGNS, "g");
+            g.setAttribute("class", "node");
+            var c = document.createElementNS(SVGNS, "circle");
+            c.setAttribute("r", "15"); c.setAttribute("class", "body");
+            c.setAttribute("tabindex", "0");
+            c.setAttribute("role", "button");
+            c.setAttribute("aria-label", "Node " + (i + 1) + " — flip partition");
+            var t2 = document.createElementNS(SVGNS, "text");
+            t2.setAttribute("text-anchor", "middle"); t2.setAttribute("dy", "4");
+            t2.textContent = i + 1;
+            g.appendChild(c); g.appendChild(t2);
+            (function (idx, cel) {
+              cel.addEventListener("click", function () { stopAnneal(); flipSpin(idx); setStatus("Flipped node <b>" + (idx + 1) + "</b> by hand — it crossed the cut."); });
+              cel.addEventListener("keydown", function (ev) {
+                if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); stopAnneal(); flipSpin(idx); }
+              });
+              cel.addEventListener("mouseenter", function () { highlight(idx, true); });
+              cel.addEventListener("mouseleave", function () { highlight(idx, false); });
+              cel.addEventListener("focus", function () { highlight(idx, true); });
+              cel.addEventListener("blur", function () { highlight(idx, false); });
+            })(i, c);
+            svg.appendChild(g);
+            nodeEls.push({ g: g, c: c });
+          }
+        }
+
+        function highlight(idx, on) {
+          edges.forEach(function (e) {
+            if (e.a === idx || e.b === idx) e.el.classList.toggle("hl", on);
+          });
+        }
+
+        // ---------- physics ----------
+        function cutCount() {
+          var c = 0;
+          for (var i = 0; i < edges.length; i++) if (spins[edges[i].a] !== spins[edges[i].b]) c++;
+          return c;
+        }
+        function deltaCut(i) {
+          var same = 0, diff = 0;
+          adj[i].forEach(function (j) { if (spins[j] === spins[i]) same++; else diff++; });
+          return same - diff;
+        }
+        function flipSpin(i) {
+          spins[i] = -spins[i];
+          computeTargets();
+          update();
+          tweenPositions();
+        }
+
+        function update() {
+          var cut = cutCount(), total = edges.length;
+          var pct = total ? (cut / total) * 100 : 0;
+          var energy = total - 2 * cut;
+          if (pct > bestPct) bestPct = pct;
+          var na = spins.filter(function (s) { return s === 1; }).length;
+
+          edges.forEach(function (e) { e.el.classList.toggle("uncut", spins[e.a] === spins[e.b]); });
+          nodeEls.forEach(function (ne, i) {
+            ne.c.setAttribute("fill", spins[i] === 1 ? "var(--teal-bright)" : "var(--coral-bright)");
+          });
+
+          document.getElementById("ro-pct").textContent = pct.toFixed(1);
+          document.getElementById("ro-pct-note").textContent =
+            pct >= 65 ? "strong cut — annealer territory" :
+            pct >= 55 ? "well above the ~50% random level" : "near the ~50% random level";
+          document.getElementById("ro-cut").textContent = cut;
+          document.getElementById("ro-total").textContent = total;
+          document.getElementById("ro-energy").textContent = energy;
+          document.getElementById("ro-best").textContent = bestPct.toFixed(1);
+          document.getElementById("live-h").textContent =
+            "H = |E| − 2 × cut = " + total + " − 2 × " + cut + " = " + energy;
+          document.getElementById("count-a").textContent = na;
+          document.getElementById("count-b").textContent = N - na;
+          document.getElementById("bal-a").style.width = (na / N) * 100 + "%";
+          document.getElementById("bal-b").style.width = ((N - na) / N) * 100 + "%";
+          return pct;
+        }
+
+        // ---------- sparkline ----------
+        var spark = document.getElementById("spark");
+        function drawSpark() {
+          var ctx = spark.getContext("2d");
+          var w = spark.width, h = spark.height;
+          var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          ctx.clearRect(0, 0, w, h);
+          ctx.strokeStyle = dark ? "#2a3a2f" : "#d3ddd6";
+          ctx.lineWidth = 1;
+          [0.25, 0.5, 0.75].forEach(function (f) {
+            ctx.beginPath(); ctx.moveTo(0, h * f); ctx.lineTo(w, h * f); ctx.stroke();
+          });
+          var y708 = h - 0.708 * h;
+          ctx.strokeStyle = dark ? "#e0aa3e" : "#b97d10";
+          ctx.setLineDash([7, 6]); ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(0, y708); ctx.lineTo(w, y708); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = dark ? "#e0aa3e" : "#b97d10";
+          ctx.font = "600 21px 'IBM Plex Mono', monospace";
+          ctx.fillText("70.8%", 10, y708 - 9);
+          if (history.length < 2) {
+            ctx.fillStyle = dark ? "#9db3a5" : "#43554c";
+            ctx.font = "22px 'Archivo', sans-serif";
+            ctx.fillText("Press Anneal to trace a run…", 10, h - 16);
+            return;
+          }
+          ctx.strokeStyle = dark ? "#3edbbd" : "#0b7a68";
+          ctx.lineWidth = 3; ctx.lineJoin = "round";
+          ctx.beginPath();
+          history.forEach(function (p, i) {
+            var x = (i / (history.length - 1)) * (w - 8) + 4;
+            var y = h - (p / 100) * h;
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        }
+
+        // ---------- annealer ----------
+        var statusEl = document.getElementById("status");
+        function setStatus(html) { statusEl.innerHTML = html; }
+        var tempEl = document.getElementById("ro-temp");
+        var tempNote = document.getElementById("ro-temp-note");
+
+        function stopAnneal() {
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = null; animating = false;
+          document.getElementById("btn-anneal").disabled = false;
+          if (tempEl.textContent !== "—") tempNote.textContent = "annealer idle";
+        }
+
+        function anneal() {
+          stopAnneal();
+          if (tweenId) { cancelAnimationFrame(tweenId); tweenId = null; }
+          var T0 = parseFloat(document.getElementById("t0").value);
+          var sweeps = parseInt(document.getElementById("sweeps").value, 10);
+          var totalSteps = sweeps * N, step = 0;
+          history = [cutCount() / edges.length * 100];
+          animating = true;
+          document.getElementById("btn-anneal").disabled = true;
+          setStatus("Annealing — cooling from T = " + T0.toFixed(1) + " over " + sweeps + " sweeps. Watch nodes migrate across the cut.");
+          var startPct = history[0];
+
+          function frame() {
+            var batch = N * 2;
+            for (var s = 0; s < batch && step < totalSteps; s++, step++) {
+              var frac = step / totalSteps;
+              var T = T0 * Math.pow(0.02 / T0, frac);
+              var i = Math.floor(Math.random() * N);
+              var d = deltaCut(i);
+              if (d >= 0 || Math.random() < Math.exp(d / Math.max(T, 0.02))) spins[i] = -spins[i];
+              if (step % N === 0) history.push(cutCount() / edges.length * 100);
+            }
+            var fracNow = Math.min(step / totalSteps, 1);
+            var Tnow = T0 * Math.pow(0.02 / T0, fracNow);
+            tempEl.textContent = Tnow.toFixed(2);
+            tempNote.textContent = "cooling · sweep " + Math.round(fracNow * sweeps) + " of " + sweeps;
+            computeTargets();
+            pos = targets.map(function (p) { return { x: p.x, y: p.y }; });
+            drawPositions();
+            var pct = update();
+            drawSpark();
+            if (step < totalSteps) {
+              rafId = requestAnimationFrame(frame);
+            } else {
+              animating = false; rafId = null;
+              document.getElementById("btn-anneal").disabled = false;
+              tempEl.textContent = "0.02"; tempNote.textContent = "annealer idle · settled";
+              setStatus("Anneal settled at <b>" + pct.toFixed(1) + "%</b> cut (started " + startPct.toFixed(1) + "%). " +
+                "The published full-size run reached 70.8% — simulated benchmark result, results may vary (not customer results).");
+            }
+          }
+          rafId = requestAnimationFrame(frame);
+        }
+
+        function greedy() {
+          stopAnneal();
+          var improved = true, rounds = 0;
+          while (improved && rounds < 60) {
+            improved = false; rounds++;
+            for (var i = 0; i < N; i++) {
+              if (deltaCut(i) > 0) { spins[i] = -spins[i]; improved = true; }
+            }
+          }
+          computeTargets();
+          var pct = update();
+          tweenPositions();
+          history.push(pct); drawSpark();
+          setStatus("Greedy sweep settled at a local optimum — <b>" + pct.toFixed(1) + "%</b> cut after " + rounds + " passes. Annealing usually escapes further: it accepts bad flips while hot.");
+        }
+
+        // ---------- wiring ----------
+        document.getElementById("btn-anneal").addEventListener("click", anneal);
+        document.getElementById("btn-greedy").addEventListener("click", greedy);
+        document.getElementById("btn-random").addEventListener("click", function () {
+          stopAnneal();
+          for (var i = 0; i < N; i++) spins[i] = Math.random() < 0.5 ? 1 : -1;
+          computeTargets();
+          var pct = update();
+          tweenPositions();
+          setStatus("Fresh random bipartition: <b>" + pct.toFixed(1) + "%</b> — coin flips land near 50%, like the published random baseline of 49.9% (simulated benchmark result, results may vary — not customer results).");
+        });
+        document.getElementById("btn-newgraph").addEventListener("click", function () {
+          stopAnneal();
+          buildGraph(true);
+          tempEl.textContent = "—"; tempNote.textContent = "annealer idle";
+          setStatus("New G(30, 0.24) graph drawn — <b>" + edges.length + " edges</b>, random bipartition. Anneal it.");
+        });
+        document.getElementById("t0").addEventListener("input", function (e) {
+          document.getElementById("t0-out").textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        document.getElementById("sweeps").addEventListener("input", function (e) {
+          document.getElementById("sweeps-out").textContent = e.target.value;
+        });
+        document.querySelectorAll("[data-edgemode]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document.querySelectorAll("[data-edgemode]").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
+            btn.setAttribute("aria-pressed", "true");
+            svg.setAttribute("data-edgemode", btn.getAttribute("data-edgemode"));
+          });
+        });
+        document.getElementById("btn-copy").addEventListener("click", function () {
+          var btn = this, text = document.getElementById("cmd-text").textContent;
+          function done(ok) {
+            btn.textContent = ok ? "Copied ✓" : "Select the command to copy";
+            setTimeout(function () { btn.textContent = "Copy command"; }, 2200);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+          } else { done(false); }
+        });
+        if (window.matchMedia("(prefers-color-scheme: dark)").addEventListener) {
+          window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawSpark);
+        }
+
+        buildGraph(false);
+      })();
+    </script>
+  </body>
+</html>

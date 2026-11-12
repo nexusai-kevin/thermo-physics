@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Station 7 — Markowitz Portfolio QUBO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f3; --panel:#ffffff; --panel2:#eef2ee; --ink:#14201a; --muted:#5c6b62;
+  --line:#d9e2da; --accent:#0e7a5f; --accent-ink:#ffffff; --amber:#b7791f; --red:#c0392b;
+  --chip:#e8efe9; --dot:#0e7a5f; --grid:#dde6de;
+  --shadow:0 1px 2px rgba(20,32,26,.06),0 8px 24px rgba(20,32,26,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0d1310; --panel:#151d18; --panel2:#1a241e; --ink:#e8f0ea; --muted:#9db0a4;
+    --line:#2a3830; --accent:#2fbf9a; --accent-ink:#06231a; --amber:#e0a83e; --red:#ff7a6b;
+    --chip:#1e2a22; --dot:#2fbf9a; --grid:#223028;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,[role="button"],select,summary,input:not([type="checkbox"],[type="radio"]){min-height:2.25rem}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 56px}
+header.top{padding:18px 0 8px}
+.station{display:inline-flex;align-items:center;gap:8px;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);font-weight:600;letter-spacing:.04em}
+.station::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 18%,transparent)}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.08;margin:10px 0 10px;font-weight:700;letter-spacing:-.02em}
+.lede{font-size:clamp(16px,2.4vw,19px);color:var(--muted);max-width:46em;margin:0}
+.runbar{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 14px}
+.runbar .lbl{font-size:13px;font-weight:600;color:var(--muted)}
+.runbar code{font-family:"IBM Plex Mono",monospace;font-size:15px;background:var(--panel2);border:1px solid var(--line);padding:8px 12px;border-radius:9px;flex:1 1 260px;overflow-x:auto;white-space:nowrap}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:9px 14px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;min-height:40px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible, input:focus-visible, .asset:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* benchmark strip */
+.bench{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+@media(max-width:760px){.bench{grid-template-columns:1fr}}
+.bcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.bcard .v{font-family:"IBM Plex Mono",monospace;font-size:32px;font-weight:600;line-height:1}
+.bcard .k{font-weight:600;margin-top:6px}
+.fine{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.45}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);min-width:0}
+.card h2{font-size:15px;margin:0 0 4px;font-weight:700}
+.card .sub{font-size:13px;color:var(--muted);margin:0 0 12px}
+.c-frontier{grid-column:span 8}
+.c-gauge{grid-column:span 4}
+.c-controls{grid-column:span 4}
+.c-ham{grid-column:span 4}
+.c-stats{grid-column:span 4}
+.c-assets{grid-column:span 12}
+@media(max-width:900px){.c-frontier,.c-gauge,.c-controls,.c-ham,.c-stats{grid-column:span 12}}
+
+svg.chart{width:100%;height:auto;display:block}
+.axis{stroke:var(--line)} .gridl{stroke:var(--grid);stroke-width:1}
+.axlab{fill:var(--muted);font-size:11px;font-family:"IBM Plex Mono",monospace}
+.pt{fill:var(--muted);opacity:.45}
+.ptfront{fill:none;stroke:var(--amber);stroke-width:2.5}
+.userpt{fill:var(--accent);stroke:var(--panel);stroke-width:2.5}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+/* gauge */
+.gauge-num{font-family:"IBM Plex Mono",monospace;font-size:40px;font-weight:600;line-height:1}
+.gauge-track{height:16px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);overflow:hidden;margin:14px 0 8px;position:relative}
+.gauge-fill{height:100%;background:var(--accent);transition:width .35s ease}
+.gauge-fill.over{background:var(--red)}
+.gauge-fill.under{background:var(--amber)}
+.targetmark{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);opacity:.55}
+.pill{display:inline-block;padding:4px 10px;border-radius:99px;font-size:12.5px;font-weight:600;background:var(--chip)}
+.pill.ok{color:var(--accent)} .pill.bad{color:var(--red)} .pill.warn{color:var(--amber)}
+
+/* sliders */
+.ctl{margin:0 0 16px}
+.ctl label{display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:6px}
+.ctl label output{font-family:"IBM Plex Mono",monospace;color:var(--accent)}
+input[type=range]{width:100%;accent-color:var(--accent);min-height:36px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+
+/* hamiltonian bars */
+.hrow{margin-bottom:12px}
+.hrow .t{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.hrow .t b{font-family:"IBM Plex Mono",monospace;font-weight:600}
+.bar{height:10px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;transition:width .3s ease}
+.h-total{font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:600;margin-top:4px}
+.formula{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;white-space:normal;overflow-wrap:anywhere;margin-top:10px}
+
+/* stats */
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat .v{font-family:"IBM Plex Mono",monospace;font-size:24px;font-weight:600}
+.stat .k{font-size:12.5px;color:var(--muted)}
+
+/* assets */
+.assets{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.asset{appearance:none;text-align:left;background:var(--chip);border:1.5px solid transparent;border-radius:12px;padding:10px 12px;cursor:pointer;color:var(--ink);font:inherit;min-height:64px}
+.asset .tk{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px;display:flex;justify-content:space-between;align-items:center}
+.asset .tk .sw{width:10px;height:10px;border-radius:3px;background:var(--muted);opacity:.4}
+.asset.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.asset.on .tk .sw{background:var(--accent);opacity:1}
+.asset .meta{font-size:12px;color:var(--muted);font-family:"IBM Plex Mono",monospace;margin-top:2px}
+.statusline{font-size:13.5px;color:var(--muted);margin-top:12px;min-height:1.5em}
+.statusline b{color:var(--ink)}
+footer{margin-top:22px;font-size:12.5px;color:var(--muted);max-width:60em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <span class="station">STATION 7 · THERMO LAB · EXP 7</span>
+  <h1>Markowitz Portfolio QUBO</h1>
+  <p class="lede">Cardinality-constrained portfolio selection as a QUBO mapped to an Ising Hamiltonian, with quadratic penalties enforcing the exact budget. Pick assets below and watch the sampler&rsquo;s trade-off — return, risk, and budget feasibility — move in real time.</p>
+  <div class="runbar">
+    <span class="lbl">Run this benchmark</span>
+    <code id="runcmd">uv run thrml-bench run --exp 7</code>
+    <button class="btn" id="copyBtn" type="button">Copy command</button>
+  </div>
+</header>
+
+<section class="bench" aria-label="Published benchmark results">
+  <div class="bcard">
+    <div class="v">99.1%</div>
+    <div class="k">Budget feasibility</div>
+    <p class="fine">simulated benchmark result, results may vary (not customer results)</p>
+  </div>
+  <div class="bcard">
+    <div class="v">94.1%</div>
+    <div class="k">Pareto match</div>
+    <p class="fine">simulated benchmark result, results may vary (not customer results)</p>
+  </div>
+  <div class="bcard">
+    <div class="v">14.696s</div>
+    <div class="k">Runtime · N = 20 assets</div>
+    <p class="fine">simulated benchmark result, results may vary (not customer results)</p>
+  </div>
+</section>
+
+<div class="bento">
+
+  <section class="card c-frontier" aria-label="Efficient frontier">
+    <h2>The frontier, live</h2>
+    <p class="sub">Each faint dot is a randomly drawn feasible portfolio holding exactly K assets. The amber curve is their Pareto frontier — best return at each risk level. Your selection is the green dot.</p>
+    <svg class="chart" id="chart" viewBox="0 0 640 360" role="img" aria-label="Scatter chart of portfolio risk versus return with Pareto frontier"></svg>
+    <div class="legend">
+      <span><i style="background:var(--muted)"></i>Feasible portfolios (demo universe)</span>
+      <span><i style="background:var(--amber);border-radius:2px"></i>Pareto frontier</span>
+      <span><i style="background:var(--accent)"></i>Your selection</span>
+    </div>
+  </section>
+
+  <section class="card c-gauge" aria-label="Budget gauge">
+    <h2>Budget gauge</h2>
+    <p class="sub">The QUBO only counts a portfolio when it holds exactly K assets. The penalty term grows quadratically with every asset over or under.</p>
+    <div class="gauge-num"><span id="gCount">0</span><span style="color:var(--muted);font-size:22px"> / <span id="gTarget">8</span> assets</span></div>
+    <div class="gauge-track"><div class="gauge-fill under" id="gFill" style="width:0%"></div><div class="targetmark" id="gMark" style="left:40%"></div></div>
+    <span class="pill warn" id="gPill">Under budget</span>
+    <p class="sub" style="margin-top:12px">Penalty term: <span class="mono" id="gPenalty" style="color:var(--ink)">0.000</span></p>
+  </section>
+
+  <section class="card c-controls" aria-label="Sampler controls">
+    <h2>Sampler controls</h2>
+    <p class="sub">Shape the Hamiltonian, then let the annealer search it.</p>
+    <div class="ctl">
+      <label>Target holdings K <output id="oK">8</output></label>
+      <input type="range" id="inK" min="2" max="16" step="1" value="8" aria-label="Target number of holdings">
+    </div>
+    <div class="ctl">
+      <label>Risk aversion λ <output id="oLam">1.0</output></label>
+      <input type="range" id="inLam" min="0" max="3" step="0.1" value="1" aria-label="Risk aversion">
+    </div>
+    <div class="ctl">
+      <label>Budget penalty P <output id="oPen">2.0</output></label>
+      <input type="range" id="inPen" min="0" max="5" step="0.1" value="2" aria-label="Budget penalty strength">
+    </div>
+    <div class="btnrow">
+      <button class="btn primary" id="annealBtn" type="button">▶ Anneal</button>
+      <button class="btn" id="randomBtn" type="button">Random K</button>
+      <button class="btn" id="clearBtn" type="button">Clear</button>
+    </div>
+    <p class="statusline" id="status">Annealer idle. Toggle assets by hand, or anneal to search for a low-energy feasible portfolio.</p>
+  </section>
+
+  <section class="card c-ham" aria-label="Hamiltonian breakdown">
+    <h2>Ising Hamiltonian</h2>
+    <p class="sub">Energy of your current selection, term by term. Lower is better.</p>
+    <div class="hrow"><div class="t"><span>Return reward (−μ)</span><b id="hRet">0.000</b></div><div class="bar"><i id="bRet" style="background:var(--accent);width:0%"></i></div></div>
+    <div class="hrow"><div class="t"><span>Risk cost (λ·σ²)</span><b id="hRisk">0.000</b></div><div class="bar"><i id="bRisk" style="background:var(--amber);width:0%"></i></div></div>
+    <div class="hrow"><div class="t"><span>Budget penalty (P·(n−K)²)</span><b id="hPen">0.000</b></div><div class="bar"><i id="bPen" style="background:var(--red);width:0%"></i></div></div>
+    <div class="h-total">H = <span id="hTotal">0.000</span></div>
+    <div class="formula">H(x) = −Σ μᵢxᵢ + λ Σᵢⱼ Σᵢⱼxᵢxⱼ + P(Σxᵢ − K)², &nbsp;xᵢ ∈ {0,1}</div>
+  </section>
+
+  <section class="card c-stats" aria-label="Live portfolio readouts">
+    <h2>Your portfolio — live</h2>
+    <p class="sub">Computed in your browser from the demo universe below. Demo figures, not the benchmark above.</p>
+    <div class="statgrid">
+      <div class="stat"><div class="v" id="sRet">—</div><div class="k">Expected return / yr</div></div>
+      <div class="stat"><div class="v" id="sVol">—</div><div class="k">Volatility (risk)</div></div>
+      <div class="stat"><div class="v" id="sSharpe">—</div><div class="k">Return / risk</div></div>
+      <div class="stat"><div class="v" id="sPareto">—</div><div class="k">Distance to frontier</div></div>
+    </div>
+  </section>
+
+  <section class="card c-assets" aria-label="Asset universe">
+    <h2>The universe — N = 20 assets</h2>
+    <p class="sub">Tap an asset to include it (xᵢ = 1) or drop it (xᵢ = 0). μ is expected annual return, σ is annual volatility. This demo universe is illustrative; the published benchmark figures are in the cards at the top.</p>
+    <div class="assets" id="assets"></div>
+  </section>
+
+</div>
+
+<footer>
+  <p><strong>How to read this page:</strong> the three figures at the top — 99.1% budget feasibility, 94.1% Pareto match, 14.696s at N = 20 assets — are the station&rsquo;s published benchmark: simulated benchmark result, results may vary (not customer results). Everything in the dashboard below is an interactive demonstration running locally in your browser, so you can feel how the quadratic budget penalty shapes which portfolios the sampler accepts. Reproduce the benchmark with <span class="mono">uv run thrml-bench run --exp 7</span>.</p>
+</footer>
+
+</div>
+<script>
+(function(){
+"use strict";
+// Demo universe: 20 illustrative assets [ticker, mu %/yr, sigma %/yr, group]
+var A=[
+["NVLT",14.2,28,0],["HLIX",11.8,24,1],["ORB T".replace(" ",""),13.5,31,0],["FERN",7.4,15,2],
+["KITE",12.6,27,0],["MOSS",6.8,13,2],["PULSE",10.9,22,1],["QUAR",8.9,18,3],
+["RIDGE",9.7,19,3],["SOLM",15.1,33,0],["TUND",5.9,11,2],["UMBR",11.2,25,1],
+["VELA",13.9,29,0],["WREN",7.9,16,2],["XENL",12.1,26,1],["YARROW".slice(0,4),8.3,17,3],
+["ZEPH",14.7,30,0],["ALTO",9.2,20,3],["BRIO",10.4,21,1],["CELO",6.4,12,2]
+];
+var N=A.length;
+var sel=new Array(N).fill(false);
+var K=8, lam=1.0, pen=2.0;
+var seed=1234567;
+function rnd(){ seed=(seed*1103515245+12345)%2147483648; return seed/2147483648; }
+function corr(i,j){ if(i===j) return 1; return A[i][3]===A[j][3]?0.45:0.18; }
+function stats(idx){
+  var n=idx.length; if(!n) return null;
+  var mu=0; for(var a=0;a<n;a++) mu+=A[idx[a]][1]; mu/=n;
+  var v=0;
+  for(var a2=0;a2<n;a2++) for(var b=0;b<n;b++){
+    v+= (A[idx[a2]][2]*A[idx[b]][2]*corr(idx[a2],idx[b]))/(n*n);
+  }
+  return {mu:mu, vol:Math.sqrt(v), n:n};
+}
+function energy(idx){
+  var s=stats(idx);
+  var ret = s? -s.mu/10 : 0;
+  var risk = s? lam*(s.vol*s.vol)/100 : 0;
+  var p = pen*Math.pow(idx.length-K,2)/4;
+  return {ret:ret, risk:risk, pen:p, total:ret+risk+p, s:s};
+}
+function selectedIdx(){ var r=[]; for(var i=0;i<N;i++) if(sel[i]) r.push(i); return r; }
+
+// Build asset buttons
+var assetsEl=document.getElementById('assets');
+A.forEach(function(a,i){
+  var b=document.createElement('button');
+  b.type='button'; b.className='asset'; b.setAttribute('aria-pressed','false');
+  b.innerHTML='<span class="tk">'+a[0]+'<span class="sw"></span></span><span class="meta">μ '+a[1].toFixed(1)+'% · σ '+a[2].toFixed(0)+'%</span>';
+  b.addEventListener('click',function(){ sel[i]=!sel[i]; render(); });
+  assetsEl.appendChild(b);
+});
+var btns=assetsEl.children;
+
+// Frontier samples
+var samples=[], frontier=[];
+function buildFrontier(){
+  samples=[]; seed=987654;
+  for(var t=0;t<260;t++){
+    var pool=[]; for(var i=0;i<N;i++) pool.push(i);
+    var pick=[];
+    for(var c=0;c<K;c++){ var j=Math.floor(rnd()*pool.length); pick.push(pool.splice(j,1)[0]); }
+    var s=stats(pick); samples.push({vol:s.vol, mu:s.mu, idx:pick});
+  }
+  // Pareto: sort by vol, keep max mu so far from low-risk side -> frontier = points not dominated
+  var sorted=samples.slice().sort(function(x,y){return x.vol-y.vol;});
+  frontier=[]; var best=-1;
+  // frontier as upper envelope: scan risk bins
+  var bins={};
+  sorted.forEach(function(p){ var key=Math.round(p.vol*2)/2; if(!bins[key]||p.mu>bins[key].mu) bins[key]=p; });
+  var pts=Object.keys(bins).map(function(k){return bins[k];}).sort(function(x,y){return x.vol-y.vol;});
+  var run=-1;
+  pts.forEach(function(p){ if(p.mu>run){ run=p.mu; frontier.push(p); } });
+}
+var X0=4,X1=24,Y0=4,Y1=17;
+function X(v){ return 56+(v-X0)/(X1-X0)*560; }
+function Y(v){ return 316-(v-Y0)/(Y1-Y0)*272; }
+function draw(){
+  var svg=document.getElementById('chart');
+  var h='';
+  for(var gx=6;gx<=24;gx+=3){ h+='<line class="gridl" x1="'+X(gx)+'" y1="44" x2="'+X(gx)+'" y2="316"/><text class="axlab" x="'+(X(gx)-8)+'" y="334">'+gx+'%</text>'; }
+  for(var gy=6;gy<=16;gy+=2){ h+='<line class="gridl" x1="56" y1="'+Y(gy)+'" x2="616" y2="'+Y(gy)+'"/><text class="axlab" x="18" y="'+(Y(gy)+4)+'">'+gy+'%</text>'; }
+  h+='<line class="axis" x1="56" y1="316" x2="616" y2="316"/><line class="axis" x1="56" y1="44" x2="56" y2="316"/>';
+  h+='<text class="axlab" x="540" y="352">risk σ →</text><text class="axlab" x="4" y="30">return μ</text>';
+  samples.forEach(function(p){ h+='<circle class="pt" cx="'+X(p.vol)+'" cy="'+Y(p.mu)+'" r="3.2"/>'; });
+  if(frontier.length>1){ h+='<path class="ptfront" d="M'+frontier.map(function(p){return X(p.vol)+' '+Y(p.mu);}).join(' L')+'"/>'; }
+  var idx=selectedIdx(), s=stats(idx);
+  if(s){ h+='<circle class="userpt" cx="'+X(Math.min(X1,Math.max(X0,s.vol)))+'" cy="'+Y(Math.min(Y1,Math.max(Y0,s.mu)))+'" r="8"/>'; }
+  svg.innerHTML=h;
+}
+function frontierGap(s){
+  if(!s||!frontier.length) return null;
+  var best=null;
+  frontier.forEach(function(p){ if(best===null||Math.abs(p.vol-s.vol)<Math.abs(best.vol-s.vol)) best=p; });
+  return s.mu-best.mu; // negative = below frontier
+}
+function fmt(x,d){ return (x>=0?'+':'')+x.toFixed(d===undefined?3:d); }
+function render(){
+  var idx=selectedIdx(), e=energy(idx), s=e.s;
+  for(var i=0;i<N;i++){ btns[i].classList.toggle('on',sel[i]); btns[i].setAttribute('aria-pressed',sel[i]?'true':'false'); }
+  // gauge
+  document.getElementById('gCount').textContent=idx.length;
+  document.getElementById('gTarget').textContent=K;
+  var fill=document.getElementById('gFill');
+  fill.style.width=Math.min(100,idx.length/20*100)+'%';
+  fill.className='gauge-fill '+(idx.length===K?'':(idx.length>K?'over':'under'));
+  document.getElementById('gMark').style.left=(K/20*100)+'%';
+  var pill=document.getElementById('gPill');
+  if(idx.length===K){ pill.textContent='✓ Feasible — exactly on budget'; pill.className='pill ok'; }
+  else if(idx.length>K){ pill.textContent='Over budget by '+(idx.length-K); pill.className='pill bad'; }
+  else { pill.textContent='Under budget by '+(K-idx.length); pill.className='pill warn'; }
+  document.getElementById('gPenalty').textContent=e.pen.toFixed(3);
+  // hamiltonian
+  document.getElementById('hRet').textContent=fmt(e.ret);
+  document.getElementById('hRisk').textContent=fmt(e.risk);
+  document.getElementById('hPen').textContent=fmt(e.pen);
+  document.getElementById('hTotal').textContent=fmt(e.total);
+  var mx=Math.max(1.2,Math.abs(e.ret),e.risk,e.pen);
+  document.getElementById('bRet').style.width=Math.min(100,Math.abs(e.ret)/mx*100)+'%';
+  document.getElementById('bRisk').style.width=Math.min(100,e.risk/mx*100)+'%';
+  document.getElementById('bPen').style.width=Math.min(100,e.pen/mx*100)+'%';
+  // stats
+  document.getElementById('sRet').textContent=s?s.mu.toFixed(1)+'%':'—';
+  document.getElementById('sVol').textContent=s?s.vol.toFixed(1)+'%':'—';
+  document.getElementById('sSharpe').textContent=s?(s.mu/s.vol).toFixed(2):'—';
+  var gap=s?frontierGap(s):null;
+  document.getElementById('sPareto').textContent=(gap===null)?'—':(Math.abs(gap)<0.15?'On frontier':fmt(gap,1)+'% μ');
+  draw();
+}
+// controls
+var inK=document.getElementById('inK'), inLam=document.getElementById('inLam'), inPen=document.getElementById('inPen');
+inK.addEventListener('input',function(){ K=+inK.value; document.getElementById('oK').textContent=K; buildFrontier(); render(); });
+inLam.addEventListener('input',function(){ lam=+inLam.value; document.getElementById('oLam').textContent=lam.toFixed(1); render(); });
+inPen.addEventListener('input',function(){ pen=+inPen.value; document.getElementById('oPen').textContent=pen.toFixed(1); render(); });
+document.getElementById('clearBtn').addEventListener('click',function(){ sel.fill(false); setStatus('Cleared. Energy is now driven only by the budget penalty.'); render(); });
+document.getElementById('randomBtn').addEventListener('click',function(){
+  sel.fill(false); var pool=[]; for(var i=0;i<N;i++) pool.push(i);
+  for(var c=0;c<K;c++){ var j=Math.floor(Math.random()*pool.length); sel[pool.splice(j,1)[0]]=true; }
+  setStatus('Drew a random feasible portfolio: exactly <b>'+K+' assets</b>, so the budget penalty is zero. Try annealing to improve it.'); render();
+});
+function setStatus(html){ document.getElementById('status').innerHTML=html; }
+// annealer
+var timer=null;
+document.getElementById('annealBtn').addEventListener('click',function(){
+  if(timer){ clearInterval(timer); timer=null; this.textContent='▶ Anneal'; return; }
+  var btn=this; btn.textContent='■ Stop';
+  var T=1.6, step=0;
+  if(selectedIdx().length===0){ sel.fill(false); for(var c=0;c<K;c++) sel[c]=true; }
+  var cur=energy(selectedIdx()).total;
+  timer=setInterval(function(){
+    step++; T*=0.94;
+    var i=Math.floor(Math.random()*N);
+    sel[i]=!sel[i];
+    var e2=energy(selectedIdx()).total;
+    if(e2<=cur || Math.random()<Math.exp((cur-e2)/Math.max(T,0.02))){ cur=e2; } else { sel[i]=!sel[i]; }
+    render();
+    var idx=selectedIdx();
+    setStatus('Annealing… step <b>'+step+'</b>, temperature <b>'+T.toFixed(2)+'</b>, H = <b>'+cur.toFixed(3)+'</b>, holding <b>'+idx.length+' / '+K+'</b> assets.');
+    if(T<0.03||step>220){
+      clearInterval(timer); timer=null; btn.textContent='▶ Anneal';
+      var fin=energy(idx);
+      setStatus(idx.length===K
+        ? 'Settled after <b>'+step+'</b> steps: a <b>feasible</b> portfolio at H = <b>'+fin.total.toFixed(3)+'</b> — return '+fin.s.mu.toFixed(1)+'%, risk '+fin.s.vol.toFixed(1)+'%. Compare it with the published 99.1% budget feasibility (simulated benchmark result, results may vary — not customer results).'
+        : 'Settled after <b>'+step+'</b> steps holding <b>'+idx.length+'</b> assets — off budget. Raise the penalty P and anneal again to force feasibility.');
+      render();
+    }
+  },60);
+});
+// copy
+document.getElementById('copyBtn').addEventListener('click',function(){
+  var btn=this, txt=document.getElementById('runcmd').textContent;
+  function done(){ btn.textContent='Copied ✓'; setTimeout(function(){btn.textContent='Copy command';},1600); }
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,function(){done();}); } else { done(); }
+});
+// init: start from a feasible hand-picked portfolio
+[0,3,5,9,12,14,17,19].forEach(function(i){ sel[i]=true; });
+buildFrontier(); render();
+setStatus('Starting portfolio: <b>8 hand-picked assets</b>, exactly on budget. Drag λ up to favour safety, or hit <b>Anneal</b> and watch the sampler trade return against risk.');
+})();
+</script>
+</body>
+</html>
