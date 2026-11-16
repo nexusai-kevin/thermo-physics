@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { EnergyBasinDescent } from "./EnergyBasinDescent";
 
 interface StationItem {
   id: number;
@@ -2015,6 +2016,25 @@ export default function ThermoLabPage() {
               <a className="thermo-btn thermo-btn-ghost" href="/microgrid">
                 Read the full microgrid page
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Energy Basin Descent (Experiment 12) */}
+        <section className="thermo-blk" id="energy-basin">
+          <div className="wrap">
+            <h2>Associative recall as energy basin descent.</h2>
+            <p className="intro measure">
+              <span className="mono" style={{ fontSize: ".95em" }}>
+                experiments/exp12_associative_recall.py
+              </span>{" "}
+              benchmarks thrml 0.1.4 Ising and K=4 Potts samplers against classical
+              Hebbian Hopfield and continuous exponential Hopfield networks across 20%,
+              35%, and 50% cue noise. Select an attractor, noise level, and dynamics
+              below to watch corrupted 64-bit cues relax into stored memories.
+            </p>
+            <div style={{ marginTop: "2rem" }}>
+              <EnergyBasinDescent />
             </div>
           </div>
         </section>

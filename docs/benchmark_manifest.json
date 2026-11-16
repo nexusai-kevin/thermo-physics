@@ -2,7 +2,7 @@
   "metadata": {
     "title": "Extropic THRML Reference Benchmark Suite Manifest",
     "version": "1.0.0",
-    "generated_at_utc": "2026-11-02T14:42:23.201638+00:00",
+    "generated_at_utc": "2026-11-16T20:25:00.556248+00:00",
     "total_stations": 16,
     "total_wall_time_seconds": 9.147,
     "hardware_baseline": {
@@ -691,5 +691,176 @@
       },
       "suite_exec_time_s": 0.0
     }
-  ]
+  ],
+  "experiments": {
+    "exp12_associative_recall": {
+      "experiment_id": 12,
+      "name": "Associative Memory Recall (thrml 0.1.4 Ising & Potts vs. Hopfield)",
+      "thrml_version": "0.1.4",
+      "patterns": 10,
+      "bits_per_pattern": 64,
+      "storage_load_alpha": 0.15625,
+      "noise_model": "random_replacement",
+      "noise_levels": [
+        "20%",
+        "35%",
+        "50%"
+      ],
+      "trials_per_noise": 100,
+      "calibration_file": "configs/exp12_annealing_calibration.json",
+      "optimal_annealing_schedule": {
+        "name": "constant_cold",
+        "betas": [
+          4.5,
+          4.5,
+          4.5,
+          4.5,
+          4.5,
+          4.5
+        ],
+        "sweeps_per_stage": 2,
+        "total_sweeps": 12
+      },
+      "hardware": {
+        "host_gpu": "NVIDIA GeForce RTX 5080, 616.92",
+        "jax_backend": "cpu",
+        "jax_devices": "cpu:0",
+        "rtx_5080_host_execution_time_s": {
+          "classical_hopfield": 0.05254,
+          "exponential_hopfield": 0.01318,
+          "thrml_ising": 0.01049,
+          "thrml_potts": 0.03254
+        },
+        "jit_warmup_s": {
+          "thrml_ising": 0.3949,
+          "thrml_potts": 0.5547
+        }
+      },
+      "results_by_noise": {
+        "20%": {
+          "cue_noise_rate": 0.2,
+          "effective_bit_flip_rate": 0.1,
+          "n_trials": 100,
+          "classical_hopfield": {
+            "bit_error_recovery": 0.9291,
+            "bit_error_rate": 0.0709,
+            "exact_pattern_recall": 0.53,
+            "spurious_attractor_rate": 0.47,
+            "mean_convergence_steps": 2.88,
+            "execution_time_s": 0.01413,
+            "ms_per_trial": 0.1413
+          },
+          "exponential_hopfield": {
+            "bit_error_recovery": 1.0,
+            "bit_error_rate": 0.0,
+            "exact_pattern_recall": 1.0,
+            "spurious_attractor_rate": 0.0,
+            "mean_convergence_steps": 3.85,
+            "execution_time_s": 0.00407,
+            "ms_per_trial": 0.0407
+          },
+          "thrml_ising": {
+            "bit_error_recovery": 0.9916,
+            "bit_error_rate": 0.0084,
+            "exact_pattern_recall": 0.62,
+            "spurious_attractor_rate": 0.38,
+            "mean_convergence_steps": 3.86,
+            "execution_time_s": 0.00339,
+            "ms_per_trial": 0.0339
+          },
+          "thrml_potts": {
+            "bit_error_recovery": 1.0,
+            "bit_error_rate": 0.0,
+            "exact_pattern_recall": 1.0,
+            "spurious_attractor_rate": 0.0,
+            "mean_convergence_steps": 2.0,
+            "execution_time_s": 0.01174,
+            "ms_per_trial": 0.1174
+          }
+        },
+        "35%": {
+          "cue_noise_rate": 0.35,
+          "effective_bit_flip_rate": 0.175,
+          "n_trials": 100,
+          "classical_hopfield": {
+            "bit_error_recovery": 0.8878,
+            "bit_error_rate": 0.1122,
+            "exact_pattern_recall": 0.4,
+            "spurious_attractor_rate": 0.6,
+            "mean_convergence_steps": 3.42,
+            "execution_time_s": 0.01689,
+            "ms_per_trial": 0.1689
+          },
+          "exponential_hopfield": {
+            "bit_error_recovery": 1.0,
+            "bit_error_rate": 0.0,
+            "exact_pattern_recall": 1.0,
+            "spurious_attractor_rate": 0.0,
+            "mean_convergence_steps": 4.14,
+            "execution_time_s": 0.00415,
+            "ms_per_trial": 0.0415
+          },
+          "thrml_ising": {
+            "bit_error_recovery": 0.9641,
+            "bit_error_rate": 0.0359,
+            "exact_pattern_recall": 0.56,
+            "spurious_attractor_rate": 0.44,
+            "mean_convergence_steps": 4.7,
+            "execution_time_s": 0.00362,
+            "ms_per_trial": 0.0362
+          },
+          "thrml_potts": {
+            "bit_error_recovery": 1.0,
+            "bit_error_rate": 0.0,
+            "exact_pattern_recall": 1.0,
+            "spurious_attractor_rate": 0.0,
+            "mean_convergence_steps": 2.0,
+            "execution_time_s": 0.01056,
+            "ms_per_trial": 0.1056
+          }
+        },
+        "50%": {
+          "cue_noise_rate": 0.5,
+          "effective_bit_flip_rate": 0.25,
+          "n_trials": 100,
+          "classical_hopfield": {
+            "bit_error_recovery": 0.8061,
+            "bit_error_rate": 0.1939,
+            "exact_pattern_recall": 0.26,
+            "spurious_attractor_rate": 0.74,
+            "mean_convergence_steps": 4.03,
+            "execution_time_s": 0.02151,
+            "ms_per_trial": 0.2151
+          },
+          "exponential_hopfield": {
+            "bit_error_recovery": 0.9953,
+            "bit_error_rate": 0.0047,
+            "exact_pattern_recall": 0.99,
+            "spurious_attractor_rate": 0.0,
+            "mean_convergence_steps": 4.73,
+            "execution_time_s": 0.00496,
+            "ms_per_trial": 0.0496
+          },
+          "thrml_ising": {
+            "bit_error_recovery": 0.8889,
+            "bit_error_rate": 0.1111,
+            "exact_pattern_recall": 0.42,
+            "spurious_attractor_rate": 0.58,
+            "mean_convergence_steps": 6.04,
+            "execution_time_s": 0.00348,
+            "ms_per_trial": 0.0348
+          },
+          "thrml_potts": {
+            "bit_error_recovery": 0.9692,
+            "bit_error_rate": 0.0308,
+            "exact_pattern_recall": 0.93,
+            "spurious_attractor_rate": 0.0,
+            "mean_convergence_steps": 2.08,
+            "execution_time_s": 0.01023,
+            "ms_per_trial": 0.1023
+          }
+        }
+      }
+    }
+  }
 }

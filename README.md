@@ -46,6 +46,7 @@ pytest upstream_patches/pr80/ -v -W error
 | **Energy Error** | **`|ΔE| = 0.0014`** | Exact $E_0 = -1.7699$ | Unbiased thermodynamic expectation values on $2 \times 4$ spin system ($2^8 = 256$ states) |
 | **Dense Spin Glass Ground State** | **`E = -15.4266`** | Exact $2^{24}$ enumeration | **100% exact match** on Sherrington-Kirkpatrick model ($N=24$, 276 couplings) |
 | **Station 13 Codon EBM** | **`-7.82 units vs Greedy`** | Greedy CAI baseline (9.11) | Eliminates 4 severe stem-loop hairpins and balances GC to 57.8% |
+| **Exp 12 Associative Recall** | **`96.92% @ 50% noise`** | Classical Hopfield (80.61%) | `thrml 0.1.4` $K=4$ Potts achieves **0.0% spurious attractors** across 20%-50% cue noise |
 | **Projected Energy Efficiency** | **`16,000x - 910,000x`** | NVIDIA GPU @ 350W | Extropic TSU (< 1W) [Audited Assumptions](docs/METHODOLOGY.md#6-hardware-projections-assumptions--limitations) |
 
 ---
@@ -527,7 +528,33 @@ python experiments/exp11_rna_folding.py
 
 ---
 
-## Experiment 12: Microgrid Security-Constrained Unit Commitment (SCUC) QUBO
+## Experiment 12: Associative Memory Recall (`thrml 0.1.4` Ising & Potts vs. Hopfield)
+
+Benchmarks `thrml 0.1.4` bipartite Ising (`SpinNode`) and $K=4$ Potts (`CategoricalNode`) block-Gibbs samplers against Classical Hebbian Hopfield and Continuous Exponential Hopfield networks on 64-bit ($8 \times 8$) corrupted-pattern associative recall ($P=10$ stored patterns, $\alpha = 0.15625$) across 20%, 35%, and 50% cue noise. Exports the calibrated inverse-temperature annealing schedule to `configs/exp12_annealing_calibration.json` and logs all metrics into `data/benchmark_manifest.json`.
+
+| Cue Noise | Model | Bit-Error Recovery | Spurious Attractor Rate | Conv. Steps | Batch Time (100 trials) |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **20%** | Classical Hopfield | 92.91% | 47.0% | 2.88 | 14.13 ms |
+| **20%** | Exp Hopfield | 100.00% | 0.0% | 3.85 | 4.07 ms |
+| **20%** | `thrml` Ising | 99.16% | 38.0% | 3.86 | 3.39 ms |
+| **20%** | `thrml` Potts ($K=4$) | **100.00%** | **0.0%** | **2.00** | 11.74 ms |
+| **35%** | Classical Hopfield | 88.78% | 60.0% | 3.42 | 16.89 ms |
+| **35%** | Exp Hopfield | 100.00% | 0.0% | 4.14 | 4.15 ms |
+| **35%** | `thrml` Ising | 96.41% | 44.0% | 4.70 | 3.62 ms |
+| **35%** | `thrml` Potts ($K=4$) | **100.00%** | **0.0%** | **2.00** | 10.56 ms |
+| **50%** | Classical Hopfield | 80.61% | 74.0% | 4.03 | 21.51 ms |
+| **50%** | Exp Hopfield | 99.53% | 0.0% | 4.73 | 4.96 ms |
+| **50%** | `thrml` Ising | 88.89% | 58.0% | 6.04 | 3.48 ms |
+| **50%** | `thrml` Potts ($K=4$) | **96.92%** | **0.0%** | **2.08** | 10.23 ms |
+
+### Reproduction
+```bash
+python experiments/exp12_associative_recall.py
+```
+
+---
+
+## Station 12: Microgrid Security-Constrained Unit Commitment (SCUC) QUBO
 
 Schedules 4 heterogeneous thermal generation units across 6 operational time intervals ($N=24$ spins) subject to continuous linear heat-rate costs, operational capacity limits, and quadratic generation-load equilibrium constraints. Resolves grid deficits with zero unmet demand while beating naive heuristic dispatch.
 

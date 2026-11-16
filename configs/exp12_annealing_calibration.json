@@ -1,0 +1,86 @@
+{
+  "experiment": "exp12_associative_recall",
+  "thrml_version": "0.1.4",
+  "generated_at_utc": "2026-11-16T20:24:59.380834+00:00",
+  "optimal_schedule_name": "constant_cold",
+  "sweeps_per_stage": 2,
+  "total_sweeps": 12,
+  "inverse_temperatures_beta": [
+    4.5,
+    4.5,
+    4.5,
+    4.5,
+    4.5,
+    4.5
+  ],
+  "temperatures_T": [
+    0.2222,
+    0.2222,
+    0.2222,
+    0.2222,
+    0.2222,
+    0.2222
+  ],
+  "candidate_sweep": {
+    "constant_cold": {
+      "betas": [
+        4.5,
+        4.5,
+        4.5,
+        4.5,
+        4.5,
+        4.5
+      ],
+      "ising_bit_recovery": 0.9484,
+      "potts_bit_recovery": 0.9934,
+      "ising_spurious_rate": 0.5,
+      "potts_spurious_rate": 0.0,
+      "composite_score": 0.9084
+    },
+    "linear_warm_to_cold": {
+      "betas": [
+        2.0,
+        3.1,
+        4.2,
+        5.3,
+        6.4,
+        7.5
+      ],
+      "ising_bit_recovery": 0.9279,
+      "potts_bit_recovery": 0.9887,
+      "ising_spurious_rate": 0.5125,
+      "potts_spurious_rate": 0.0,
+      "composite_score": 0.8942
+    },
+    "geometric_anneal": {
+      "betas": [
+        2.0,
+        2.639,
+        3.4822,
+        4.5948,
+        6.0629,
+        8.0
+      ],
+      "ising_bit_recovery": 0.9303,
+      "potts_bit_recovery": 0.9887,
+      "ising_spurious_rate": 0.5125,
+      "potts_spurious_rate": 0.0,
+      "composite_score": 0.8954
+    },
+    "sigmoid_quench": {
+      "betas": [
+        2.5527,
+        3.2216,
+        4.5831,
+        6.1813,
+        7.1891,
+        7.6008
+      ],
+      "ising_bit_recovery": 0.9275,
+      "potts_bit_recovery": 0.9887,
+      "ising_spurious_rate": 0.4875,
+      "potts_spurious_rate": 0.0,
+      "composite_score": 0.8972
+    }
+  }
+}
