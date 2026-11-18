@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Play, Pause, RotateCcw, StepForward, Shuffle, Activity } from "lucide-react";
+import { computeSokalTauInt, type LiveEmpiricalStreamsPayload } from "./LiveEmpiricalRefineryDeck";
 
 type SamplerId = "thrml_potts" | "thrml_ising" | "exp_hopfield" | "classical_hopfield";
 type NoiseLevel = 0.2 | 0.35 | 0.5;
+type BasinDataSource = "synthetic" | "live";
 
 interface TrajectoryPoint {
   step: number;
@@ -16,6 +18,46 @@ interface TrajectoryPoint {
 
 const N_BITS = 64;
 const P_PATTERNS = 10;
+
+function tile16To64(vec16: number[]): number[] {
+  const out: number[] = [];
+  for (let r = 0; r < 4; r++) {
+    for (let i = 0; i < 16; i++) {
+      const sign = (vec16[i] ?? 0) >= 0 ? 1 : -1;
+      out.push(r % 2 === 0 ? sign : -sign);
+    }
+  }
+  return out;
+}
+
+function buildLivePatterns(payload: LiveEmpiricalStreamsPayload): { names: string[]; matrix: number[][] } {
+  const base = buildPatterns();
+  const ecoSign = (payload.ecological_ising?.h ?? []).map((v) => (v >= 0 ? 1 : -1));
+  const ecoRow = ecoSign.length === 16 ? tile16To64(ecoSign) : base.matrix[0];
+
+  const mktOpt = new Set(payload.market_qubo?.exact_optimum?.selected_indices ?? []);
+  const mktVec = Array.from({ length: 16 }, (_, i) => (mktOpt.has(i) ? 1 : -1));
+  const mktRow = tile16To64(mktVec);
+
+  const rnaFi = payload.rna_potts?.f_i ?? [];
+  const rnaVec = Array.from({ length: 16 }, (_, i) => {
+    const f = rnaFi[i];
+    if (!f) return i % 2 === 0 ? 1 : -1;
+    return (f[2] ?? 0) + (f[1] ?? 0) >= (f[0] ?? 0) + (f[3] ?? 0) ? 1 : -1;
+  });
+  const rnaRow = tile16To64(rnaVec);
+
+  const affilBrands = payload.affilai_product_graph?.brands ?? [];
+  const affilVec = Array.from({ length: 16 }, (_, i) =>
+    (affilBrands[i % Math.max(1, affilBrands.length)]?.composite_deal_score ?? 50) >= 65 ? 1 : -1
+  );
+  const affilRow = tile16To64(affilVec);
+
+  return {
+    names: ["USGS Estuary", "Market Opt", "Rfam Consensus", "AffilAI Tier"],
+    matrix: [ecoRow, mktRow, rnaRow, affilRow, ...base.matrix.slice(4)],
+  };
+}
 
 // 4 geometric 8x8 attractors + 6 deterministic low-overlap background patterns (alpha = 10/64)
 function buildPatterns(): { names: string[]; matrix: number[][] } {
@@ -181,8 +223,41 @@ const SAMPLER_META: Record<SamplerId, { name: string; tag: string; allowInv: boo
   classical_hopfield: { name: "Classical Hopfield", tag: "Async Hebbian Zero-T", allowInv: true },
 };
 
-export function EnergyBasinDescent() {
-  const { names, matrix: patterns } = useMemo(() => buildPatterns(), []);
+export interface EnergyBasinDescentProps {
+  externalData?: LiveEmpiricalStreamsPayload | null;
+}
+
+export function EnergyBasinDescent({ externalData }: EnergyBasinDescentProps = {}) {
+  const [dataSource, setDataSource] = useState<BasinDataSource>("synthetic");
+  const [livePayload, setLivePayload] = useState<LiveEmpiricalStreamsPayload | null>(null);
+  const [liveStatus, setLiveStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
+
+  const resolvedLive = externalData ?? livePayload;
+  const usingLive = dataSource === "live" && resolvedLive !== null;
+
+  const toggleSource = useCallback(
+    async (next: BasinDataSource) => {
+      setDataSource(next);
+      if (next === "live" && !resolvedLive && liveStatus !== "loading") {
+        setLiveStatus("loading");
+        try {
+          const res = await fetch("/data/live_empirical_streams.json", { cache: "no-store" });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json = (await res.json()) as LiveEmpiricalStreamsPayload;
+          setLivePayload(json);
+          setLiveStatus("ready");
+        } catch {
+          setLiveStatus("error");
+        }
+      }
+    },
+    [resolvedLive, liveStatus]
+  );
+
+  const { names, matrix: patterns } = useMemo(
+    () => (usingLive && resolvedLive ? buildLivePatterns(resolvedLive) : buildPatterns()),
+    [usingLive, resolvedLive]
+  );
   const W = useMemo(() => computeHebbianWeights(patterns), [patterns]);
 
   const [patternIdx, setPatternIdx] = useState<number>(0);
@@ -364,6 +439,10 @@ export function EnergyBasinDescent() {
   }, [isRunning, converged, stepOnce]);
 
   const latest = trajectory[trajectory.length - 1];
+  const sokalStats = useMemo(
+    () => computeSokalTauInt(trajectory.map((pt) => pt.energy)),
+    [trajectory]
+  );
   const spuriousTrap = converged && isSpurious(spins, patterns, SAMPLER_META[sampler].allowInv);
   const lockedTarget = converged && latest.recovery === 1;
 
@@ -414,7 +493,46 @@ export function EnergyBasinDescent() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            className="inline-flex items-center rounded-full border border-[rgba(250,249,245,0.16)] bg-[#020308] p-0.5 text-[11px] font-mono"
+            role="switch"
+            aria-checked={dataSource === "live"}
+            aria-label="Data Source: Synthetic Baseline or Live Public Telemetry"
+          >
+            <button
+              type="button"
+              onClick={() => void toggleSource("synthetic")}
+              className={`px-2.5 py-1 rounded-full transition-colors ${
+                dataSource === "synthetic"
+                  ? "bg-[#faf9f5] text-[#020308] font-medium"
+                  : "text-[rgba(250,249,245,0.65)] hover:text-[#faf9f5]"
+              }`}
+            >
+              Synthetic Baseline
+            </button>
+            <button
+              type="button"
+              onClick={() => void toggleSource("live")}
+              className={`px-2.5 py-1 rounded-full transition-colors ${
+                dataSource === "live"
+                  ? "bg-[#5eead4] text-[#020308] font-medium"
+                  : "text-[rgba(250,249,245,0.65)] hover:text-[#faf9f5]"
+              }`}
+            >
+              Live Public Telemetry
+            </button>
+          </div>
+          {usingLive && resolvedLive ? (
+            <span className="px-2.5 py-1 text-[10px] font-mono rounded-full border border-[#5eead4]/35 bg-[rgba(94,234,212,0.08)] text-[#5eead4]">
+              {resolvedLive.ecological_ising?.provenance?.source_mode ?? "live"} ·{" "}
+              {resolvedLive.generated_at_utc}
+            </span>
+          ) : dataSource === "live" ? (
+            <span className="px-2.5 py-1 text-[10px] font-mono rounded-full border border-amber-400/35 bg-[rgba(245,158,11,0.08)] text-amber-300">
+              {liveStatus === "loading" ? "Loading live stream..." : "Live stream offline · Synthetic fallback"}
+            </span>
+          ) : null}
           <span
             className={`px-3 py-1 text-[11px] font-mono rounded-full border ${
               lockedTarget
@@ -667,7 +785,7 @@ export function EnergyBasinDescent() {
           </svg>
 
           {/* Telemetry Cards */}
-          <div className="grid grid-cols-4 gap-2.5 mt-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-3">
             <div className="bg-[#05070f] border border-[rgba(250,249,245,0.08)] rounded-lg p-2.5">
               <div className="text-[10px] font-mono text-[rgba(250,249,245,0.45)] uppercase">Bit Recovery</div>
               <div className="text-base font-mono text-[#34d399] mt-0.5">
@@ -683,8 +801,10 @@ export function EnergyBasinDescent() {
               <div className="text-base font-mono text-[#5eead4] mt-0.5">{latest.energy.toFixed(3)}</div>
             </div>
             <div className="bg-[#05070f] border border-[rgba(250,249,245,0.08)] rounded-lg p-2.5">
-              <div className="text-[10px] font-mono text-[rgba(250,249,245,0.45)] uppercase">Beta Schedule</div>
-              <div className="text-base font-mono text-[#faf9f5] mt-0.5">{latest.beta.toFixed(1)}</div>
+              <div className="text-[10px] font-mono text-[rgba(250,249,245,0.45)] uppercase">Beta · Sokal τ_int</div>
+              <div className="text-base font-mono text-[#faf9f5] mt-0.5">
+                {latest.beta.toFixed(1)} · {sokalStats.tauInt.toFixed(2)}
+              </div>
             </div>
           </div>
         </div>

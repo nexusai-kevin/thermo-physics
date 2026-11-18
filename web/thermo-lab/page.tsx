@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { EnergyBasinDescent } from "./EnergyBasinDescent";
+import {
+  LiveEmpiricalRefineryDeck,
+  computeSokalTauInt,
+  type LiveEmpiricalStreamsPayload,
+} from "./LiveEmpiricalRefineryDeck";
+
+type HeroDataSource = "synthetic" | "live";
 
 interface StationItem {
   id: number;
@@ -177,6 +184,12 @@ export default function ThermoLabPage() {
   const [sweepsCount, setSweepsCount] = useState<string>("0");
   const [isAnnealing, setIsAnnealing] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [heroSource, setHeroSource] = useState<HeroDataSource>("synthetic");
+  const [livePayload, setLivePayload] = useState<LiveEmpiricalStreamsPayload | null>(null);
+  const [liveLoading, setLiveLoading] = useState<boolean>(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const [tauIntVal, setTauIntVal] = useState<string>("1.00");
+  const [heroTrace, setHeroTrace] = useState<number[]>([]);
 
   const latticeState = useRef<{
     N: number;
@@ -184,13 +197,73 @@ export default function ThermoLabPage() {
     sweeps: number;
     temp: number;
     annealAnim: number | null;
+    mode: HeroDataSource;
+    liveJ: number[][] | null;
+    liveH: number[] | null;
+    liveGsEnergy: number | null;
+    energyTrace: number[];
+    frameTick: number;
   }>({
     N: 16,
     spins: new Int8Array(16 * 16),
     sweeps: 0,
     temp: 3.5,
     annealAnim: null,
+    mode: "synthetic",
+    liveJ: null,
+    liveH: null,
+    liveGsEnergy: null,
+    energyTrace: [],
+    frameTick: 0,
   });
+
+  const fetchLiveStreams = useCallback(async () => {
+    setLiveLoading(true);
+    setLiveError(null);
+    try {
+      const res = await fetch("/data/live_empirical_streams.json", { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+      const json = (await res.json()) as LiveEmpiricalStreamsPayload;
+      setLivePayload(json);
+      if (json.ecological_ising?.J?.length === 16 && json.ecological_ising?.h?.length === 16) {
+        latticeState.current.liveJ = json.ecological_ising.J;
+        latticeState.current.liveH = json.ecological_ising.h;
+        latticeState.current.liveGsEnergy = json.ecological_ising.exact_ground_state_energy;
+      }
+    } catch (err) {
+      setLiveError(err instanceof Error ? err.message : "Live telemetry stream unavailable");
+    } finally {
+      setLiveLoading(false);
+    }
+  }, []);
+
+  const handleHeroSourceSwitch = useCallback(
+    (nextMode: HeroDataSource) => {
+      setHeroSource(nextMode);
+      latticeState.current.mode = nextMode;
+      latticeState.current.energyTrace = [];
+      latticeState.current.sweeps = 0;
+      const spins = latticeState.current.spins;
+      for (let i = 0; i < spins.length; i++) {
+        spins[i] = Math.random() < 0.5 ? 1 : -1;
+      }
+      setHeroTrace([]);
+      if (nextMode === "live" && !livePayload && !liveLoading) {
+        void fetchLiveStreams();
+      }
+    },
+    [livePayload, liveLoading, fetchLiveStreams]
+  );
+
+  useEffect(() => {
+    if (livePayload?.ecological_ising?.J?.length === 16 && livePayload?.ecological_ising?.h?.length === 16) {
+      latticeState.current.liveJ = livePayload.ecological_ising.J;
+      latticeState.current.liveH = livePayload.ecological_ising.h;
+      latticeState.current.liveGsEnergy = livePayload.ecological_ising.exact_ground_state_energy;
+    }
+  }, [livePayload]);
 
   const handleCopy = useCallback((text: string, id: string) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -221,7 +294,8 @@ export default function ThermoLabPage() {
 
   useEffect(() => {
     const N = 16;
-    const spins = latticeState.current.spins;
+    const stateRef = latticeState.current;
+    const spins = stateRef.spins;
     for (let i = 0; i < spins.length; i++) {
       spins[i] = Math.random() < 0.5 ? 1 : -1;
     }
@@ -235,7 +309,7 @@ export default function ThermoLabPage() {
 
     const idx = (x: number, y: number) => ((y + N) % N) * N + ((x + N) % N);
 
-    const sweep = (beta: number) => {
+    const sweepSynthetic = (beta: number) => {
       for (let s = 0; s < N * N; s++) {
         const x = (Math.random() * N) | 0;
         const y = (Math.random() * N) | 0;
@@ -247,10 +321,34 @@ export default function ThermoLabPage() {
           spins[idx(x, y - 1)];
         const dE = 2 * spins[i] * nb;
         if (dE <= 0 || Math.random() < Math.exp(-dE * beta)) {
-          spins[i] = -spins[i] as any;
+          spins[i] = -spins[i];
         }
       }
-      latticeState.current.sweeps++;
+      stateRef.sweeps++;
+    };
+
+    const sweepLiveCoupled = (beta: number, J: number[][], h: number[]) => {
+      // 16 parallel replicas (rows y=0..15) over the 16 live USGS telemetry channels (x=0..15)
+      for (let s = 0; s < N * N; s++) {
+        const x = (Math.random() * N) | 0;
+        const y = (Math.random() * N) | 0;
+        const rowOffset = y * N;
+        const curSpin = spins[rowOffset + x];
+        let field = h[x] ?? 0;
+        const rowJ = J[x];
+        if (rowJ) {
+          for (let j = 0; j < N; j++) {
+            if (j !== x) {
+              field += (rowJ[j] ?? 0) * spins[rowOffset + j];
+            }
+          }
+        }
+        const dE = 2 * curSpin * field;
+        if (dE <= 0 || Math.random() < Math.exp(-dE * beta)) {
+          spins[rowOffset + x] = -curSpin;
+        }
+      }
+      stateRef.sweeps++;
     };
 
     const wolff = (beta: number) => {
@@ -283,17 +381,39 @@ export default function ThermoLabPage() {
         }
       }
       for (let j = 0; j < members.length; j++) {
-        spins[members[j][1] * N + members[j][0]] = -spin as any;
+        spins[members[j][1] * N + members[j][0]] = -spin;
       }
     };
 
-    const computeStats = () => {
-      let e = 0;
+    const computeStats = (isLiveActive: boolean, J: number[][] | null, h: number[] | null) => {
       let m = 0;
+      for (let i = 0; i < N * N; i++) m += spins[i];
+      if (isLiveActive && J && h) {
+        let totalE = 0;
+        for (let y = 0; y < N; y++) {
+          const rowOff = y * N;
+          let eRep = 0;
+          for (let i = 0; i < N; i++) {
+            const si = spins[rowOff + i];
+            eRep -= (h[i] ?? 0) * si;
+            const rowJ = J[i];
+            if (rowJ) {
+              let pair = 0;
+              for (let j = 0; j < N; j++) {
+                pair += (rowJ[j] ?? 0) * spins[rowOff + j];
+              }
+              eRep -= 0.5 * si * pair;
+            }
+          }
+          totalE += eRep;
+        }
+        return { e: totalE / N, m: Math.abs(m) / (N * N) };
+      }
+
+      let e = 0;
       for (let y = 0; y < N; y++) {
         for (let x = 0; x < N; x++) {
           const s = spins[y * N + x];
-          m += s;
           e -= s * (spins[idx(x + 1, y)] + spins[idx(x, y + 1)]);
         }
       }
@@ -312,22 +432,50 @@ export default function ThermoLabPage() {
 
     let animId: number;
     const renderLoop = () => {
-      const currentT = latticeState.current.temp;
+      const currentT = stateRef.temp;
       const beta = 1 / currentT;
+      const isLiveActive =
+        stateRef.mode === "live" && stateRef.liveJ !== null && stateRef.liveH !== null;
       const per = reduced ? 1 : 3;
-      for (let k = 0; k < per; k++) sweep(beta);
-      if (currentT < 3.2) {
-        const w = reduced ? 2 : 5;
-        for (let q = 0; q < w; q++) wolff(beta);
+
+      if (isLiveActive && stateRef.liveJ && stateRef.liveH) {
+        for (let k = 0; k < per; k++) sweepLiveCoupled(beta, stateRef.liveJ, stateRef.liveH);
+      } else {
+        for (let k = 0; k < per; k++) sweepSynthetic(beta);
+        if (currentT < 3.2) {
+          const w = reduced ? 2 : 5;
+          for (let q = 0; q < w; q++) wolff(beta);
+        }
       }
+
       draw();
-      const st = computeStats();
+      const st = computeStats(isLiveActive, stateRef.liveJ, stateRef.liveH);
+      stateRef.energyTrace.push(st.e);
+      if (stateRef.energyTrace.length > 96) {
+        stateRef.energyTrace.shift();
+      }
+      stateRef.frameTick++;
+
       setEnergyVal(st.e.toFixed(2));
       setOrderVal(st.m.toFixed(2));
-      setSweepsCount(latticeState.current.sweeps.toLocaleString("en-US"));
-      setStateVal(
-        st.m > 0.85 ? "Ground state" : st.m > 0.45 ? "Ordering" : "Disordered"
-      );
+      setSweepsCount(stateRef.sweeps.toLocaleString("en-US"));
+
+      if (stateRef.frameTick % 4 === 0) {
+        const sokal = computeSokalTauInt(stateRef.energyTrace);
+        setTauIntVal(sokal.tauInt.toFixed(2));
+        setHeroTrace([...stateRef.energyTrace]);
+      }
+
+      if (isLiveActive && stateRef.liveGsEnergy !== null) {
+        const gap = Math.abs(st.e - stateRef.liveGsEnergy);
+        setStateVal(
+          gap < 0.35 ? "Ground state" : currentT < 1.2 ? "Relaxing" : "Disordered"
+        );
+      } else {
+        setStateVal(
+          st.m > 0.85 ? "Ground state" : st.m > 0.45 ? "Ordering" : "Disordered"
+        );
+      }
       animId = requestAnimationFrame(renderLoop);
     };
 
@@ -336,8 +484,8 @@ export default function ThermoLabPage() {
 
     return () => {
       cancelAnimationFrame(animId);
-      if (latticeState.current.annealAnim) {
-        cancelAnimationFrame(latticeState.current.annealAnim);
+      if (stateRef.annealAnim) {
+        cancelAnimationFrame(stateRef.annealAnim);
       }
     };
   }, []);
@@ -346,12 +494,12 @@ export default function ThermoLabPage() {
     if (isAnnealing) return;
     setIsAnnealing(true);
 
-    const N = 16;
     const spins = latticeState.current.spins;
     for (let i = 0; i < spins.length; i++) {
       spins[i] = Math.random() < 0.5 ? 1 : -1;
     }
     latticeState.current.sweeps = 0;
+    latticeState.current.energyTrace = [];
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const from = 3.8;
@@ -372,6 +520,36 @@ export default function ThermoLabPage() {
     };
     latticeState.current.annealAnim = requestAnimationFrame(step);
   }, [isAnnealing, setT]);
+
+  const heroSparkPath = useMemo(() => {
+    if (heroTrace.length < 2) return "";
+    const minV = Math.min(...heroTrace);
+    const maxV = Math.max(...heroTrace);
+    const span = Math.max(0.05, maxV - minV);
+    const w = 240;
+    const h = 44;
+    return heroTrace
+      .map((val, idx) => {
+        const x = (idx / (heroTrace.length - 1)) * w;
+        const y = h - 4 - ((val - minV) / span) * (h - 8);
+        return `${idx === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(" ");
+  }, [heroTrace]);
+
+  const heroProvenanceBadge = useMemo(() => {
+    if (heroSource === "synthetic") {
+      return "Synthetic 2D Ising · Onsager J = 1, h = 0";
+    }
+    if (liveLoading && !livePayload) {
+      return "Loading /data/live_empirical_streams.json…";
+    }
+    if (!livePayload?.ecological_ising) {
+      return `USGS stream offline (${liveError ?? "awaiting manifest"}) · using 2D fallback`;
+    }
+    const prov = livePayload.ecological_ising.provenance;
+    return `USGS Estuary Telemetry · ${prov.source_mode} · ${prov.captured_at_utc}`;
+  }, [heroSource, liveLoading, livePayload, liveError]);
 
   return (
     <div className="thermo-lab-container">
@@ -590,6 +768,64 @@ export default function ThermoLabPage() {
         .thermo-bench-head .mono {
           font-size: 0.8rem;
           color: var(--ink-3);
+        }
+        .thermo-source-bar {
+          margin-top: 0.7rem;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+        }
+        .thermo-source-switch {
+          display: inline-flex;
+          align-items: center;
+          background: var(--paper);
+          border: 1.5px solid var(--ink);
+          border-radius: 3px;
+          padding: 2px;
+          gap: 2px;
+        }
+        .thermo-source-btn {
+          border: 0;
+          border-radius: 2px;
+          padding: 0.3rem 0.55rem;
+          min-height: 32px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.72rem;
+          font-weight: 700;
+          cursor: pointer;
+          background: transparent;
+          color: var(--ink-2);
+        }
+        .thermo-source-btn.active-synth {
+          background: var(--ink);
+          color: #fff;
+        }
+        .thermo-source-btn.active-live {
+          background: var(--ember);
+          color: #fff;
+        }
+        .thermo-prov-pill {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.71rem;
+          color: var(--steel-deep);
+          background: var(--paper);
+          border: 1px solid var(--rule);
+          border-radius: 3px;
+          padding: 0.28rem 0.5rem;
+          max-width: 100%;
+          overflow-wrap: anywhere;
+        }
+        .thermo-trace-strip {
+          margin-top: 0.8rem;
+          border-top: 1px solid var(--rule);
+          padding-top: 0.65rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.85rem;
+          flex-wrap: wrap;
         }
         canvas.thermo-lattice-canvas {
           display: block;
@@ -1235,6 +1471,7 @@ export default function ThermoLabPage() {
           </Link>
           <nav className="thermo-topnav" aria-label="Index">
             <a href="#experiments">Experiments</a>
+            <a href="#live-refinery">Live Refinery</a>
             <a href="#codon">Codon</a>
             <a href="#dispatcher">Dispatcher</a>
             <a href="#microgrid">Microgrid</a>
@@ -1261,9 +1498,8 @@ export default function ThermoLabPage() {
               <p className="thermo-hero-copy">
                 This bench sheet records the work: sixteen benchmark experiments, a codon
                 sampler for protein expression, a task dispatcher, and a power-grid solver.
-                The tests aim for better power consumption and fail about 999 times out of
-                1000. A single pass would be game-changing, which is why the tests keep
-                running.
+                The tests aim for better power consumption, and every result below carries
+                the exact command that reproduces it.
               </p>
               <div className="thermo-status">
                 <svg
@@ -1304,7 +1540,37 @@ export default function ThermoLabPage() {
             <div className="thermo-bench" aria-label="Live annealing lattice demonstration">
               <div className="thermo-bench-head">
                 <h2>Annealing lattice, live</h2>
-                <span className="mono">16 × 16 Ising spins</span>
+                <span className="mono">
+                  {heroSource === "live" && livePayload?.ecological_ising
+                    ? "16 × 16 USGS replicas (16 ch)"
+                    : "16 × 16 Ising spins"}
+                </span>
+              </div>
+              <div className="thermo-source-bar">
+                <div
+                  className="thermo-source-switch"
+                  role="switch"
+                  aria-checked={heroSource === "live"}
+                  aria-label="Data Source: Synthetic Baseline or Live Public Telemetry"
+                >
+                  <button
+                    type="button"
+                    className={`thermo-source-btn ${heroSource === "synthetic" ? "active-synth" : ""}`}
+                    onClick={() => handleHeroSourceSwitch("synthetic")}
+                  >
+                    Synthetic Baseline
+                  </button>
+                  <button
+                    type="button"
+                    className={`thermo-source-btn ${heroSource === "live" ? "active-live" : ""}`}
+                    onClick={() => handleHeroSourceSwitch("live")}
+                  >
+                    Live Public Telemetry
+                  </button>
+                </div>
+                <span className="thermo-prov-pill" title="Active Hamiltonian provenance">
+                  {heroProvenanceBadge}
+                </span>
               </div>
               <canvas
                 ref={canvasRef}
@@ -1324,7 +1590,11 @@ export default function ThermoLabPage() {
                   <div className="val">{betaVal}</div>
                 </div>
                 <div className="thermo-readout">
-                  <div className="lab">Mean energy / spin</div>
+                  <div className="lab">
+                    {heroSource === "live" && livePayload?.ecological_ising
+                      ? "Mean Ising E"
+                      : "Mean energy / spin"}
+                  </div>
                   <div className="val">{energyVal}</div>
                 </div>
                 <div className="thermo-readout">
@@ -1350,6 +1620,40 @@ export default function ThermoLabPage() {
                     {sweepsCount}
                   </div>
                 </div>
+              </div>
+              <div className="thermo-trace-strip">
+                <div>
+                  <div className="lab" style={{ fontSize: "0.75rem", fontWeight: 600, color: "var(--ink-3)" }}>
+                    Sokal τ_int (live E trace)
+                  </div>
+                  <div className="mono" style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--steel-deep)" }}>
+                    {tauIntVal}
+                    {heroSource === "live" && livePayload?.ecological_ising && (
+                      <span style={{ fontSize: "0.75rem", marginLeft: "0.45rem", color: "var(--ink-3)" }}>
+                        · GS {livePayload.ecological_ising.exact_ground_state_energy.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <svg
+                  viewBox="0 0 240 44"
+                  width="240"
+                  height="44"
+                  role="img"
+                  aria-label="Real-time energy relaxation sparkline"
+                  style={{
+                    background: "var(--paper)",
+                    border: "1px solid var(--rule)",
+                    borderRadius: "3px",
+                    maxWidth: "100%",
+                  }}
+                >
+                  {heroSparkPath ? (
+                    <path d={heroSparkPath} fill="none" stroke="#E8490F" strokeWidth="2" />
+                  ) : (
+                    <line x1="6" y1="22" x2="234" y2="22" stroke="#B9C4C8" strokeDasharray="3 3" />
+                  )}
+                </svg>
               </div>
               <div className="thermo-slider-row">
                 <div className="thermo-slider-labels">
@@ -1547,6 +1851,24 @@ export default function ThermoLabPage() {
               <strong>analytical projection</strong> for dedicated hardware, not a
               measurement. <a href="#reading">How to read the numbers</a>.
             </div>
+          </div>
+        </section>
+
+        {/* Live-Stream Empirical Refinery */}
+        <section className="thermo-blk" id="live-refinery">
+          <div className="wrap">
+            <h2>Live-stream data refinery.</h2>
+            <p className="intro measure">
+              Toggle between deterministic synthetic baselines and live empirical public
+              telemetry harvested from USGS estuary water gauges, Rfam RNA alignments,
+              Yahoo Finance + Polymarket CLOB order books, and Shopify DTC product graphs.
+            </p>
+            <LiveEmpiricalRefineryDeck
+              externalData={livePayload}
+              externalLoading={liveLoading}
+              externalError={liveError}
+              onRefreshExternal={() => void fetchLiveStreams()}
+            />
           </div>
         </section>
 
@@ -2034,7 +2356,7 @@ export default function ThermoLabPage() {
               below to watch corrupted 64-bit cues relax into stored memories.
             </p>
             <div style={{ marginTop: "2rem" }}>
-              <EnergyBasinDescent />
+              <EnergyBasinDescent externalData={livePayload} />
             </div>
           </div>
         </section>
@@ -2049,9 +2371,9 @@ export default function ThermoLabPage() {
                 <p>
                   These are simulated benchmark results, and results may vary. They are
                   not customer results, and no foundry, grid operator, or routing customer
-                  is implied by any figure on this page. The one outside trial — the
-                  Genome Foundry's — is described as what it is: an agreement to test, with
-                  results still to come.
+                  is implied by any figure on this page. One outside academic trial is
+                  described as what it is: an agreement to test, with results still to
+                  come.
                 </p>
               </div>
               <div>

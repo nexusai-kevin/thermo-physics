@@ -115,6 +115,12 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:36px}
 .asset .meta{font-size:12px;color:var(--muted);font-family:"IBM Plex Mono",monospace;margin-top:2px}
 .statusline{font-size:13.5px;color:var(--muted);margin-top:12px;min-height:1.5em}
 .statusline b{color:var(--ink)}
+.dsbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+.dsswitch{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px;gap:2px}
+.dsbtn{border:0;background:transparent;color:var(--muted);border-radius:999px;padding:5px 10px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;font-weight:600;min-height:28px;cursor:pointer}
+.dsbtn.on{background:var(--ink);color:var(--bg)}
+.dsbtn.on.live{background:var(--accent);color:var(--accent-ink)}
+.dsprov{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;color:var(--muted)}
 footer{margin-top:22px;font-size:12.5px;color:var(--muted);max-width:60em}
 </style>
 </head>
@@ -175,6 +181,13 @@ footer{margin-top:22px;font-size:12.5px;color:var(--muted);max-width:60em}
   <section class="card c-controls" aria-label="Sampler controls">
     <h2>Sampler controls</h2>
     <p class="sub">Shape the Hamiltonian, then let the annealer search it.</p>
+    <div class="dsbar">
+      <div class="dsswitch" role="switch" id="dsSwitch" aria-checked="false" aria-label="Data Source: Synthetic Baseline or Live Public Telemetry">
+        <button type="button" class="dsbtn on" id="dsSynthBtn">Synthetic Baseline</button>
+        <button type="button" class="dsbtn" id="dsLiveBtn">Live Public Telemetry</button>
+      </div>
+      <span class="dsprov" id="dsBadge">Synthetic N=20 Universe</span>
+    </div>
     <div class="ctl">
       <label>Target holdings K <output id="oK">8</output></label>
       <input type="range" id="inK" min="2" max="16" step="1" value="8" aria-label="Target number of holdings">
@@ -213,12 +226,14 @@ footer{margin-top:22px;font-size:12.5px;color:var(--muted);max-width:60em}
       <div class="stat"><div class="v" id="sVol">—</div><div class="k">Volatility (risk)</div></div>
       <div class="stat"><div class="v" id="sSharpe">—</div><div class="k">Return / risk</div></div>
       <div class="stat"><div class="v" id="sPareto">—</div><div class="k">Distance to frontier</div></div>
+      <div class="stat"><div class="v" id="sTau">1.00</div><div class="k">Sokal τ<sub>int</sub></div></div>
+      <div class="stat"><div class="v" id="sEss">—</div><div class="k">Live ESS</div></div>
     </div>
   </section>
 
   <section class="card c-assets" aria-label="Asset universe">
-    <h2>The universe — N = 20 assets</h2>
-    <p class="sub">Tap an asset to include it (xᵢ = 1) or drop it (xᵢ = 0). μ is expected annual return, σ is annual volatility. This demo universe is illustrative; the published benchmark figures are in the cards at the top.</p>
+    <h2 id="assetsHeading">The universe — N = 20 assets</h2>
+    <p class="sub" id="assetsSub">Tap an asset to include it (xᵢ = 1) or drop it (xᵢ = 0). μ is expected annual return, σ is annual volatility. This demo universe is illustrative; the published benchmark figures are in the cards at the top.</p>
     <div class="assets" id="assets"></div>
   </section>
 
@@ -233,16 +248,37 @@ footer{margin-top:22px;font-size:12.5px;color:var(--muted);max-width:60em}
 (function(){
 "use strict";
 // Demo universe: 20 illustrative assets [ticker, mu %/yr, sigma %/yr, group]
-var A=[
+var SYNTH_A=[
 ["NVLT",14.2,28,0],["HLIX",11.8,24,1],["ORB T".replace(" ",""),13.5,31,0],["FERN",7.4,15,2],
 ["KITE",12.6,27,0],["MOSS",6.8,13,2],["PULSE",10.9,22,1],["QUAR",8.9,18,3],
 ["RIDGE",9.7,19,3],["SOLM",15.1,33,0],["TUND",5.9,11,2],["UMBR",11.2,25,1],
 ["VELA",13.9,29,0],["WREN",7.9,16,2],["XENL",12.1,26,1],["YARROW".slice(0,4),8.3,17,3],
 ["ZEPH",14.7,30,0],["ALTO",9.2,20,3],["BRIO",10.4,21,1],["CELO",6.4,12,2]
 ];
+var A=SYNTH_A.slice();
 var N=A.length;
 var sel=new Array(N).fill(false);
 var K=8, lam=1.0, pen=2.0;
+var dataSource='synthetic', liveMarket=null, eTrace=[];
+function computeSokalTauInt(series){
+  var n=series.length;
+  if(n<20) return {tau:1.0,ess:n};
+  var mean=0,i;
+  for(i=0;i<n;i++) mean+=series[i];
+  mean/=n;
+  var cen=new Float64Array(n), sumSq=0;
+  for(i=0;i<n;i++){ var d=series[i]-mean; cen[i]=d; sumSq+=d*d; }
+  if(sumSq/n<=1e-12) return {tau:1.0,ess:n};
+  var tau=0.5;
+  for(var lag=1;lag<n;lag++){
+    var cross=0, lim=n-lag;
+    for(var t=0;t<lim;t++) cross+=cen[t]*cen[t+lag];
+    tau+=cross/(sumSq+1e-12);
+    if(lag>=5.0*tau) break;
+  }
+  tau=Math.max(0.5,tau);
+  return {tau:tau,ess:Math.max(1.0,n/(2.0*tau))};
+}
 var seed=1234567;
 function rnd(){ seed=(seed*1103515245+12345)%2147483648; return seed/2147483648; }
 function corr(i,j){ if(i===j) return 1; return A[i][3]===A[j][3]?0.45:0.18; }
@@ -260,20 +296,36 @@ function energy(idx){
   var ret = s? -s.mu/10 : 0;
   var risk = s? lam*(s.vol*s.vol)/100 : 0;
   var p = pen*Math.pow(idx.length-K,2)/4;
+  if(dataSource==='live'&&liveMarket&&liveMarket.Q){
+    var Q=liveMarket.Q, qTotal=0;
+    for(var a=0;a<idx.length;a++) for(var b=0;b<idx.length;b++){
+      qTotal += (Q[idx[a]]&&Q[idx[a]][idx[b]])||0;
+    }
+    var kT=(liveMarket.provenance&&liveMarket.provenance.k_target)||K;
+    qTotal += (liveMarket.penalty_lambda||0)*kT*kT;
+    return {ret:ret, risk:risk, pen:p, total:qTotal, s:s};
+  }
   return {ret:ret, risk:risk, pen:p, total:ret+risk+p, s:s};
 }
 function selectedIdx(){ var r=[]; for(var i=0;i<N;i++) if(sel[i]) r.push(i); return r; }
 
 // Build asset buttons
 var assetsEl=document.getElementById('assets');
-A.forEach(function(a,i){
-  var b=document.createElement('button');
-  b.type='button'; b.className='asset'; b.setAttribute('aria-pressed','false');
-  b.innerHTML='<span class="tk">'+a[0]+'<span class="sw"></span></span><span class="meta">μ '+a[1].toFixed(1)+'% · σ '+a[2].toFixed(0)+'%</span>';
-  b.addEventListener('click',function(){ sel[i]=!sel[i]; render(); });
-  assetsEl.appendChild(b);
-});
-var btns=assetsEl.children;
+var btns=[];
+function buildAssetButtons(){
+  assetsEl.innerHTML='';
+  btns=[];
+  A.forEach(function(a,i){
+    var b=document.createElement('button');
+    b.type='button'; b.className='asset'; b.setAttribute('aria-pressed','false');
+    var extra = (a.length>4) ? ' · OBI '+(a[4]>=0?'+':'')+a[4].toFixed(2) : '';
+    b.innerHTML='<span class="tk">'+a[0]+'<span class="sw"></span></span><span class="meta">μ '+a[1].toFixed(1)+'% · σ '+a[2].toFixed(0)+'%'+extra+'</span>';
+    b.addEventListener('click',function(){ sel[i]=!sel[i]; render(); });
+    assetsEl.appendChild(b);
+    btns.push(b);
+  });
+}
+buildAssetButtons();
 
 // Frontier samples
 var samples=[], frontier=[];
@@ -292,22 +344,31 @@ function buildFrontier(){
   var bins={};
   sorted.forEach(function(p){ var key=Math.round(p.vol*2)/2; if(!bins[key]||p.mu>bins[key].mu) bins[key]=p; });
   var pts=Object.keys(bins).map(function(k){return bins[k];}).sort(function(x,y){return x.vol-y.vol;});
-  var run=-1;
+  var run=-Infinity;
   pts.forEach(function(p){ if(p.mu>run){ run=p.mu; frontier.push(p); } });
 }
 var X0=4,X1=24,Y0=4,Y1=17;
-function X(v){ return 56+(v-X0)/(X1-X0)*560; }
-function Y(v){ return 316-(v-Y0)/(Y1-Y0)*272; }
+function X(v){ return 56+(v-X0)/Math.max(1,X1-X0)*560; }
+function Y(v){ return 316-(v-Y0)/Math.max(1,Y1-Y0)*272; }
 function draw(){
   var svg=document.getElementById('chart');
+  var idx=selectedIdx(), s=stats(idx);
+  if(dataSource==='live'&&samples.length){
+    var minV=Infinity,maxV=-Infinity,minM=Infinity,maxM=-Infinity;
+    samples.forEach(function(p){
+      if(p.vol<minV)minV=p.vol; if(p.vol>maxV)maxV=p.vol;
+      if(p.mu<minM)minM=p.mu; if(p.mu>maxM)maxM=p.mu;
+    });
+    if(s){ minV=Math.min(minV,s.vol); maxV=Math.max(maxV,s.vol); minM=Math.min(minM,s.mu); maxM=Math.max(maxM,s.mu); }
+    X0=Math.floor(minV-2); X1=Math.ceil(maxV+2); Y0=Math.floor(minM-2); Y1=Math.ceil(maxM+2);
+  } else { X0=4; X1=24; Y0=4; Y1=17; }
   var h='';
-  for(var gx=6;gx<=24;gx+=3){ h+='<line class="gridl" x1="'+X(gx)+'" y1="44" x2="'+X(gx)+'" y2="316"/><text class="axlab" x="'+(X(gx)-8)+'" y="334">'+gx+'%</text>'; }
-  for(var gy=6;gy<=16;gy+=2){ h+='<line class="gridl" x1="56" y1="'+Y(gy)+'" x2="616" y2="'+Y(gy)+'"/><text class="axlab" x="18" y="'+(Y(gy)+4)+'">'+gy+'%</text>'; }
+  for(var t=0;t<=5;t++){ var gx=X0+(X1-X0)*t/5; h+='<line class="gridl" x1="'+X(gx)+'" y1="44" x2="'+X(gx)+'" y2="316"/><text class="axlab" x="'+(X(gx)-10)+'" y="334">'+gx.toFixed(0)+'%</text>'; }
+  for(var ty=0;ty<=5;ty++){ var gy=Y0+(Y1-Y0)*ty/5; h+='<line class="gridl" x1="56" y1="'+Y(gy)+'" x2="616" y2="'+Y(gy)+'"/><text class="axlab" x="14" y="'+(Y(gy)+4)+'">'+gy.toFixed(0)+'%</text>'; }
   h+='<line class="axis" x1="56" y1="316" x2="616" y2="316"/><line class="axis" x1="56" y1="44" x2="56" y2="316"/>';
   h+='<text class="axlab" x="540" y="352">risk σ →</text><text class="axlab" x="4" y="30">return μ</text>';
   samples.forEach(function(p){ h+='<circle class="pt" cx="'+X(p.vol)+'" cy="'+Y(p.mu)+'" r="3.2"/>'; });
   if(frontier.length>1){ h+='<path class="ptfront" d="M'+frontier.map(function(p){return X(p.vol)+' '+Y(p.mu);}).join(' L')+'"/>'; }
-  var idx=selectedIdx(), s=stats(idx);
   if(s){ h+='<circle class="userpt" cx="'+X(Math.min(X1,Math.max(X0,s.vol)))+'" cy="'+Y(Math.min(Y1,Math.max(Y0,s.mu)))+'" r="8"/>'; }
   svg.innerHTML=h;
 }
@@ -325,9 +386,9 @@ function render(){
   document.getElementById('gCount').textContent=idx.length;
   document.getElementById('gTarget').textContent=K;
   var fill=document.getElementById('gFill');
-  fill.style.width=Math.min(100,idx.length/20*100)+'%';
+  fill.style.width=Math.min(100,idx.length/N*100)+'%';
   fill.className='gauge-fill '+(idx.length===K?'':(idx.length>K?'over':'under'));
-  document.getElementById('gMark').style.left=(K/20*100)+'%';
+  document.getElementById('gMark').style.left=(K/N*100)+'%';
   var pill=document.getElementById('gPill');
   if(idx.length===K){ pill.textContent='✓ Feasible — exactly on budget'; pill.className='pill ok'; }
   else if(idx.length>K){ pill.textContent='Over budget by '+(idx.length-K); pill.className='pill bad'; }
@@ -348,6 +409,9 @@ function render(){
   document.getElementById('sSharpe').textContent=s?(s.mu/s.vol).toFixed(2):'—';
   var gap=s?frontierGap(s):null;
   document.getElementById('sPareto').textContent=(gap===null)?'—':(Math.abs(gap)<0.15?'On frontier':fmt(gap,1)+'% μ');
+  var sokal=computeSokalTauInt(eTrace);
+  document.getElementById('sTau').textContent=sokal.tau.toFixed(2);
+  document.getElementById('sEss').textContent=sokal.ess.toFixed(1);
   draw();
 }
 // controls
@@ -376,6 +440,7 @@ document.getElementById('annealBtn').addEventListener('click',function(){
     sel[i]=!sel[i];
     var e2=energy(selectedIdx()).total;
     if(e2<=cur || Math.random()<Math.exp((cur-e2)/Math.max(T,0.02))){ cur=e2; } else { sel[i]=!sel[i]; }
+    eTrace.push(cur); if(eTrace.length>140) eTrace.shift();
     render();
     var idx=selectedIdx();
     setStatus('Annealing… step <b>'+step+'</b>, temperature <b>'+T.toFixed(2)+'</b>, H = <b>'+cur.toFixed(3)+'</b>, holding <b>'+idx.length+' / '+K+'</b> assets.');
@@ -395,6 +460,58 @@ document.getElementById('copyBtn').addEventListener('click',function(){
   function done(){ btn.textContent='Copied ✓'; setTimeout(function(){btn.textContent='Copy command';},1600); }
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,function(){done();}); } else { done(); }
 });
+// data source toggle
+var dsSynthBtn=document.getElementById('dsSynthBtn'), dsLiveBtn=document.getElementById('dsLiveBtn'), dsBadge=document.getElementById('dsBadge'), dsSwitch=document.getElementById('dsSwitch');
+function applyMarketDataset(mode){
+  dataSource=mode;
+  dsSwitch.setAttribute('aria-checked', mode==='live'?'true':'false');
+  dsSynthBtn.classList.toggle('on', mode==='synthetic');
+  dsLiveBtn.classList.toggle('on', mode==='live');
+  dsLiveBtn.classList.toggle('live', mode==='live');
+  if(timer){ clearInterval(timer); timer=null; document.getElementById('annealBtn').textContent='▶ Anneal'; }
+  if(mode==='synthetic'){
+    A=SYNTH_A.slice(); N=A.length; K=8; inK.max=16; inK.value=8; document.getElementById('oK').textContent='8';
+    sel=new Array(N).fill(false); [0,3,5,9,12,14,17,19].forEach(function(i){ sel[i]=true; });
+    eTrace=[];
+    dsBadge.textContent='Synthetic N=20 Universe';
+    document.getElementById('assetsHeading').textContent='The universe — N = 20 assets';
+    buildAssetButtons(); buildFrontier(); render();
+    setStatus('Synthetic N=20 baseline active.');
+    return;
+  }
+  if(liveMarket&&liveMarket.assets){
+    A=liveMarket.assets.map(function(a,i){
+      return [a.ticker, a.annualized_return*100, Math.max(5,a.annualized_vol*100), i%4, a.obi||0, a.obi_penalty||0, a.polymarket_market||''];
+    });
+    N=A.length; K=(liveMarket.provenance&&liveMarket.provenance.k_target)||5;
+    inK.max=N; inK.value=K; document.getElementById('oK').textContent=String(K);
+    sel=new Array(N).fill(false);
+    var seedIdx=(liveMarket.exact_optimum&&liveMarket.exact_optimum.selected_indices)||[0,1,2,3,4];
+    seedIdx.forEach(function(i){ if(i<N) sel[i]=true; });
+    eTrace=(liveMarket.sampler_benchmark&&liveMarket.sampler_benchmark.energy_trace)?liveMarket.sampler_benchmark.energy_trace.slice():[];
+    var p=liveMarket.provenance||{};
+    dsBadge.textContent='Yahoo 16 + Polymarket · '+(p.source_mode||'live')+' · '+(p.captured_at_utc||'');
+    document.getElementById('assetsHeading').textContent='Live empirical universe — N = '+N+' assets + Polymarket CLOB OBI';
+    buildAssetButtons(); buildFrontier(); render();
+    setStatus('Loaded live '+N+'-asset QUBO (exact optimum: <b>'+((liveMarket.exact_optimum&&liveMarket.exact_optimum.selected_tickers)||[]).join(', ')+'</b>).');
+    return;
+  }
+  dsBadge.textContent='Fetching /data/live_empirical_streams.json…';
+  fetch('/data/live_empirical_streams.json',{cache:'no-store'}).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(d){
+    if(d&&d.market_qubo&&d.market_qubo.assets){
+      liveMarket=d.market_qubo;
+      if(dataSource==='live') applyMarketDataset('live');
+    } else { throw new Error('Missing market_qubo'); }
+  }).catch(function(err){
+    if(dataSource==='live') dsBadge.textContent='Live stream offline ('+err.message+') · synthetic fallback';
+  });
+}
+dsSynthBtn.addEventListener('click',function(){ applyMarketDataset('synthetic'); });
+dsLiveBtn.addEventListener('click',function(){ applyMarketDataset('live'); });
+
 // init: start from a feasible hand-picked portfolio
 [0,3,5,9,12,14,17,19].forEach(function(i){ sel[i]=true; });
 buildFrontier(); render();

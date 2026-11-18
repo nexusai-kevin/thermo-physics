@@ -112,6 +112,12 @@
   .control-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .speed-row{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13px;color:var(--ink2)}
   .speed-row input{flex:1}
+  .dsbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:8px 10px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+  .dsswitch{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px;gap:2px}
+  .dsbtn{border:0;background:transparent;color:var(--ink2);border-radius:999px;padding:5px 10px;font-family:var(--mono);font-size:11px;font-weight:600;min-height:28px}
+  .dsbtn.on{background:var(--ink);color:var(--bg)}
+  .dsbtn.on.live{background:var(--s0);color:#fff}
+  .dsprov{font-family:var(--mono);font-size:11px;color:var(--ink2)}
 
   /* readouts */
   .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -203,6 +209,13 @@
     <!-- CONTROLS -->
     <section class="tile tile-controls" aria-label="Beta control">
       <h2>Inverse temperature β</h2>
+      <div class="dsbar">
+        <div class="dsswitch" role="switch" id="dsSwitch" aria-checked="false" aria-label="Data Source: Synthetic Baseline or Live Public Telemetry">
+          <button type="button" class="dsbtn on" id="dsSynthBtn">Synthetic Baseline</button>
+          <button type="button" class="dsbtn" id="dsLiveBtn">Live Public Telemetry</button>
+        </div>
+        <span class="dsprov" id="dsBadge">Synthetic 24×24 Potts · q=4</span>
+      </div>
       <p class="sub">One knob drives the whole phase diagram. Cross the gold marker and the lattice changes its mind.</p>
       <div class="beta-big"><span id="betaVal">0.70</span> <small>β · T = <span id="tempVal">1.43</span></small></div>
       <div class="beta-meta"><span id="betaSide">below β<sub>c</sub> by 0.399</span><span>β<sub>c</sub> = ln(3) ≈ 1.0986</span></div>
@@ -239,6 +252,8 @@
         <div class="stat"><div class="k">Domain count</div><div class="v" id="domainCount">—</div><div class="d">separate clusters on the lattice</div></div>
         <div class="stat"><div class="k">Mean domain size</div><div class="v"><span id="meanDomain">—</span><small> sites</small></div><div class="d">576 ÷ domain count</div></div>
         <div class="stat"><div class="k">Order parameter m</div><div class="v" id="orderParam">—</div><div class="d">0 = fully mixed · 1 = single state</div></div>
+        <div class="stat"><div class="k">Sokal τ<sub>int</sub></div><div class="v" id="tauIntVal">1.00</div><div class="d">Window cutoff W ≥ 5·τ<sub>int</sub></div></div>
+        <div class="stat"><div class="k">Live ESS</div><div class="v" id="essVal">—</div><div class="d">Effective trace samples</div></div>
       </div>
     </section>
 
@@ -315,8 +330,8 @@
   "use strict";
   var N = 24, CELLS = N * N, Q = 4;
   var BC = Math.log(3); // 1.0986...
-  var COLORS = ["#e94f37", "#0f8b8d", "#e9a319", "#5b8c3e"];
-  var COLORS_DARK = ["#f0654d", "#2fb3b5", "#f0b23e", "#79a95c"];
+  var COLORS = ["#e94f37", "#0f8b8d", "#e9a319", "#5b8c3e", "#8a8478"];
+  var COLORS_DARK = ["#f0654d", "#2fb3b5", "#f0b23e", "#79a95c", "#9c9689"];
   var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   var PAL = dark ? COLORS_DARK : COLORS;
 
@@ -326,39 +341,110 @@
   var sweepCount = 0, attempts = 0, accepts = 0;
   var brush = 1, annealing = false, annealT = 0;
   var history = []; // {largest, beta}
+  var eTrace = [];
+  var dataSource = "synthetic", liveRna = null;
   var energy = 0;
+
+  function computeSokalTauInt(series){
+    var n = series.length;
+    if (n < 20) return { tau: 1.0, ess: n };
+    var mean = 0, i;
+    for (i = 0; i < n; i++) mean += series[i];
+    mean /= n;
+    var cen = new Float64Array(n), sumSq = 0;
+    for (i = 0; i < n; i++){ var d = series[i] - mean; cen[i] = d; sumSq += d * d; }
+    if (sumSq / n <= 1e-12) return { tau: 1.0, ess: n };
+    var tau = 0.5;
+    for (var lag = 1; lag < n; lag++){
+      var cross = 0, lim = n - lag;
+      for (var t = 0; t < lim; t++) cross += cen[t] * cen[t + lag];
+      tau += cross / (sumSq + 1e-12);
+      if (lag >= 5.0 * tau) break;
+    }
+    tau = Math.max(0.5, tau);
+    return { tau: tau, ess: Math.max(1.0, n / (2.0 * tau)) };
+  }
 
   function idx(x, y){ return ((y + N) % N) * N + ((x + N) % N); }
   function neighbors(i){
     var x = i % N, y = (i / N) | 0;
     return [idx(x+1,y), idx(x-1,y), idx(x,y+1), idx(x,y-1)];
   }
+  function activeQ(){ return (dataSource === "live" && liveRna && liveRna.alphabet) ? liveRna.alphabet.length : Q; }
   function computeEnergy(){
+    if (dataSource === "live" && liveRna && liveRna.h_i && liveRna.C_ij){
+      var total = 0, hi = liveRna.h_i, C = liveRna.C_ij;
+      for (var y = 0; y < N; y++){
+        var rowOff = y * N;
+        for (var x = 0; x < N; x++){
+          var sx = grid[rowOff + x];
+          total -= 0.5 * ((hi[x] && hi[x][sx]) || 0);
+          var Cx = C[x];
+          if (Cx){
+            for (var x2 = x + 1; x2 < N; x2++){
+              var Cx2 = Cx[x2];
+              if (Cx2 && Cx2[sx]) total -= 4.0 * (Cx2[sx][grid[rowOff + x2]] || 0);
+            }
+          }
+        }
+      }
+      return total;
+    }
     var e = 0;
     for (var i = 0; i < CELLS; i++){
-      var x = i % N, y = (i / N) | 0;
-      if (grid[idx(x+1,y)] === grid[i]) e--;
-      if (grid[idx(x,y+1)] === grid[i]) e--;
+      var x0 = i % N, y0 = (i / N) | 0;
+      if (grid[idx(x0+1,y0)] === grid[i]) e--;
+      if (grid[idx(x0,y0+1)] === grid[i]) e--;
     }
     return e;
   }
   function randomise(){
-    for (var i = 0; i < CELLS; i++) grid[i] = (Math.random() * Q) | 0;
+    var qn = activeQ();
+    for (var i = 0; i < CELLS; i++) grid[i] = (Math.random() * qn) | 0;
     energy = computeEnergy();
   }
   function sweep(){
-    for (var a = 0; a < CELLS; a++){
-      var i = (Math.random() * CELLS) | 0;
-      var cur = grid[i], nxt = (Math.random() * Q) | 0;
-      if (nxt === cur) continue;
-      var nb = neighbors(i), dE = 0;
+    if (dataSource === "live" && liveRna && liveRna.h_i && liveRna.C_ij){
+      var hi = liveRna.h_i, C = liveRna.C_ij, qn = activeQ();
+      for (var a = 0; a < CELLS; a++){
+        var i = (Math.random() * CELLS) | 0;
+        var x = i % N, rowOff = ((i / N) | 0) * N;
+        var cur = grid[i], nxt = (Math.random() * qn) | 0;
+        if (nxt === cur) continue;
+        var eCur = 0.5 * ((hi[x] && hi[x][cur]) || 0);
+        var eNxt = 0.5 * ((hi[x] && hi[x][nxt]) || 0);
+        var Cx = C[x];
+        if (Cx){
+          for (var j = 0; j < N; j++){
+            if (j === x) continue;
+            var Cxj = Cx[j], sj = grid[rowOff + j];
+            if (Cxj){
+              eCur += 4.0 * ((Cxj[cur] && Cxj[cur][sj]) || 0);
+              eNxt += 4.0 * ((Cxj[nxt] && Cxj[nxt][sj]) || 0);
+            }
+          }
+        }
+        var dE = -(eNxt - eCur);
+        attempts++;
+        if (dE <= 0 || Math.random() < Math.exp(-beta * dE)){
+          grid[i] = nxt; energy += dE; accepts++;
+        }
+      }
+      sweepCount++;
+      return;
+    }
+    for (var a2 = 0; a2 < CELLS; a2++){
+      var i2 = (Math.random() * CELLS) | 0;
+      var cur2 = grid[i2], nxt2 = (Math.random() * Q) | 0;
+      if (nxt2 === cur2) continue;
+      var nb = neighbors(i2), dE2 = 0;
       for (var k = 0; k < 4; k++){
-        if (grid[nb[k]] === nxt) dE--;
-        if (grid[nb[k]] === cur) dE++;
+        if (grid[nb[k]] === nxt2) dE2--;
+        if (grid[nb[k]] === cur2) dE2++;
       }
       attempts++;
-      if (dE <= 0 || Math.random() < Math.exp(-beta * dE)){
-        grid[i] = nxt; energy += dE; accepts++;
+      if (dE2 <= 0 || Math.random() < Math.exp(-beta * dE2)){
+        grid[i2] = nxt2; energy += dE2; accepts++;
       }
     }
     sweepCount++;
@@ -367,7 +453,7 @@
   // domain analysis via flood fill
   function analyse(){
     var seen = new Uint8Array(CELLS);
-    var counts = [0,0,0,0];
+    var counts = [0,0,0,0,0];
     var largest = 0, largestState = 0, domains = 0;
     var stack = [];
     for (var s = 0; s < CELLS; s++){
@@ -492,8 +578,13 @@
     el("sweepCount").textContent = sweepCount.toLocaleString();
     el("acceptRate").textContent = attempts ? (accepts / attempts * 100).toFixed(1) + "%" : "—";
     el("energySite").textContent = (energy / CELLS).toFixed(3);
+    eTrace.push(energy);
+    if (eTrace.length > 120) eTrace.shift();
+    var sokal = computeSokalTauInt(eTrace);
+    el("tauIntVal").textContent = sokal.tau.toFixed(2);
+    el("essVal").textContent = sokal.ess.toFixed(1);
     var matches = -energy;
-    el("matchFrac").textContent = (matches / (2 * CELLS) * 100).toFixed(1) + "% of bonds";
+    el("matchFrac").textContent = dataSource === "live" ? "Rfam C_ij(a,b)" : ((matches / (2 * CELLS) * 100).toFixed(1) + "% of bonds");
     for (var q = 0; q < Q; q++){
       var pct = a.counts[q] / CELLS * 100;
       fracFills[q].style.width = pct + "%";
@@ -516,13 +607,54 @@
         if (annealT >= 1){ annealing = false; setBeta(1.5); toast("Anneal complete — settled at β 1.50, deep in the ordered phase"); }
         else setBeta(0.3 + 1.2 * annealT);
       }
-      for (var s = 0; s < sweepsPerFrame; s++) sweep();
+      var runCount = (dataSource === "live" && liveRna) ? Math.min(2, sweepsPerFrame) : sweepsPerFrame;
+      for (var s = 0; s < runCount; s++) sweep();
       drawLattice();
       frame++;
       if (frame % 6 === 0) updateReadouts();
     }
     requestAnimationFrame(loop);
   }
+
+  // ---- data source toggle ----
+  var dsSynthBtn = el("dsSynthBtn"), dsLiveBtn = el("dsLiveBtn"), dsBadge = el("dsBadge"), dsSwitch = el("dsSwitch");
+  function setDataSourceUI(mode){
+    dataSource = mode;
+    dsSwitch.setAttribute("aria-checked", mode === "live" ? "true" : "false");
+    dsSynthBtn.classList.toggle("on", mode === "synthetic");
+    dsLiveBtn.classList.toggle("on", mode === "live");
+    dsLiveBtn.classList.toggle("live", mode === "live");
+    eTrace = []; attempts = 0; accepts = 0;
+    if (mode === "synthetic"){
+      dsBadge.textContent = "Synthetic 24×24 Potts · q=4";
+      randomise(); drawLattice(); updateReadouts();
+      return;
+    }
+    if (liveRna){
+      var p = liveRna.provenance || {};
+      dsBadge.textContent = "Rfam " + (p.family_id || "RF00005") + " · " + (p.source_mode || "live") + " · " + (p.captured_at_utc || "");
+      randomise(); drawLattice(); updateReadouts();
+      return;
+    }
+    dsBadge.textContent = "Fetching /data/live_empirical_streams.json…";
+    fetch("/data/live_empirical_streams.json", { cache: "no-store" }).then(function(r){
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(d){
+      if (d && d.rna_potts && d.rna_potts.h_i && d.rna_potts.C_ij){
+        liveRna = d.rna_potts;
+        if (dataSource === "live"){
+          var p2 = liveRna.provenance || {};
+          dsBadge.textContent = "Rfam " + (p2.family_id || "RF00005") + " · " + (p2.source_mode || "live") + " · " + (p2.captured_at_utc || "");
+          eTrace = []; randomise(); drawLattice(); updateReadouts();
+        }
+      } else { throw new Error("Missing rna_potts"); }
+    }).catch(function(err){
+      if (dataSource === "live") dsBadge.textContent = "Live stream offline (" + err.message + ") · synthetic fallback";
+    });
+  }
+  dsSynthBtn.addEventListener("click", function(){ setDataSourceUI("synthetic"); });
+  dsLiveBtn.addEventListener("click", function(){ setDataSourceUI("live"); });
 
   // ---- interactions ----
   slider.addEventListener("input", function(){ annealing = false; setBeta(parseFloat(slider.value), true); });

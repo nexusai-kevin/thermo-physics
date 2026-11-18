@@ -84,6 +84,12 @@
   .btn.primary{background:var(--ink);color:var(--bg);border-color:transparent}
   .btn.warn{background:var(--up);color:#fff;border-color:transparent}
   .btn:active{transform:translateY(1px)}
+  .dsbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+  .dsswitch{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px;gap:2px}
+  .dsbtn{border:0;background:transparent;color:var(--muted);border-radius:999px;padding:5px 10px;font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;min-height:28px}
+  .dsbtn.on{background:var(--ink);color:var(--bg)}
+  .dsbtn.on.live{background:var(--up);color:#fff}
+  .dsprov{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
   .presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
   .preset{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px;text-align:left;min-height:52px}
   .preset b{display:block;font-size:13px}
@@ -178,6 +184,13 @@
     <!-- CONTROLS + READOUTS -->
     <section class="card span5" aria-label="Controls and live readouts">
       <h2>Control deck — inverse temperature β</h2>
+      <div class="dsbar">
+        <div class="dsswitch" role="switch" id="dsSwitch" aria-checked="false" aria-label="Data Source: Synthetic Baseline or Live Public Telemetry">
+          <button type="button" class="dsbtn on" id="dsSynthBtn">Synthetic Baseline</button>
+          <button type="button" class="dsbtn" id="dsLiveBtn">Live Public Telemetry</button>
+        </div>
+        <span class="dsprov" id="dsBadge">Synthetic 2D Onsager · J=1, h=0</span>
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
         <div><span style="font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600" id="betaVal">0.300</span> <span style="color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:13px">β = 1 / T</span></div>
         <div style="text-align:right"><div style="font-family:'IBM Plex Mono',monospace;font-size:19px;font-weight:600" id="tempVal">T = 3.333</div><div class="fine">T<sub>c</sub> = 2.269 · β<sub>c</sub> = 0.4407</div></div>
@@ -207,9 +220,11 @@
         <div class="bar"><i id="mBar"></i></div>
         <div class="readouts" style="margin-top:12px">
           <div class="ro"><label>Signed M</label><div class="val" id="signedM">+0.00</div><div class="sub">Which side the lattice picked</div></div>
-          <div class="ro"><label>Energy / spin</label><div class="val" id="energyVal">0.00</div><div class="sub">−2.00 is the perfect crystal</div></div>
+          <div class="ro"><label>Energy / spin</label><div class="val" id="energyVal">0.00</div><div class="sub" id="energySub">−2.00 is the perfect crystal</div></div>
           <div class="ro"><label>Flip acceptance</label><div class="val" id="accVal">—</div><div class="sub">Share of proposed flips accepted</div></div>
           <div class="ro"><label>Phase</label><div class="val" id="phaseVal" style="font-size:19px;padding-top:5px">Disordered</div><div class="sub" id="phaseSub">Above Tc — entropy wins</div></div>
+          <div class="ro"><label>Sokal τ<sub>int</sub></label><div class="val" id="tauIntVal">1.00</div><div class="sub">Autocorrelation window (W ≥ 5τ)</div></div>
+          <div class="ro"><label>Live ESS</label><div class="val" id="essVal">—</div><div class="sub">Effective samples in trace</div></div>
         </div>
       </div>
     </section>
@@ -280,6 +295,7 @@
   var proposed=0, accepted=0;
   var trace=[], sweepAvg={}; // beta bucket -> {sum,n}
   var sweeping=false, sweepT=0;
+  var dataSource='synthetic', liveEco=null, eTrace=[];
   var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   var UP = dark ? '#ff6a2b' : '#e85a24';
   var DOWN = dark ? '#22b8cf' : '#0e7c8c';
@@ -288,22 +304,69 @@
   var chart=document.getElementById('chart'), cctx=chart.getContext('2d');
   var slider=document.getElementById('betaSlider');
 
+  function computeSokalTauInt(series){
+    var n=series.length;
+    if(n<20)return {tau:1.0,ess:n};
+    var mean=0,i;
+    for(i=0;i<n;i++)mean+=series[i];
+    mean/=n;
+    var cen=new Float64Array(n), sumSq=0;
+    for(i=0;i<n;i++){var d=series[i]-mean;cen[i]=d;sumSq+=d*d;}
+    if(sumSq/n<=1e-12)return {tau:1.0,ess:n};
+    var tau=0.5;
+    for(var lag=1;lag<n;lag++){
+      var cross=0, lim=n-lag;
+      for(var t=0;t<lim;t++)cross+=cen[t]*cen[t+lag];
+      tau+=cross/(sumSq+1e-12);
+      if(lag>=5.0*tau)break;
+    }
+    tau=Math.max(0.5,tau);
+    return {tau:tau,ess:Math.max(1.0,n/(2.0*tau))};
+  }
+
   function idx(x,y){return ((y+N)%N)*N+((x+N)%N);}
   function randomise(){for(var i=0;i<NN;i++)spins[i]=Math.random()<0.5?1:-1;}
   function ordered(v){for(var i=0;i<NN;i++)spins[i]=v;}
   randomise();
 
   function step(n){
-    for(var k=0;k<n;k++){
-      var i=(Math.random()*NN)|0, x=i%N, y=(i/N)|0, s=spins[i];
+    if(dataSource==='live'&&liveEco&&liveEco.J&&liveEco.h){
+      var J=liveEco.J, h=liveEco.h;
+      for(var k=0;k<n;k++){
+        var i=(Math.random()*NN)|0, rep=i>>4, ch=i&15, base=rep<<4, s=spins[i];
+        var field=h[ch]||0, row=J[ch];
+        if(row){for(var j=0;j<16;j++)if(j!==ch)field+=(row[j]||0)*spins[base+j];}
+        var dE=2*s*field;
+        proposed++;
+        if(dE<=0||Math.random()<Math.exp(-beta*dE)){spins[i]=-s;accepted++;}
+      }
+      return;
+    }
+    for(var k2=0;k2<n;k2++){
+      var i2=(Math.random()*NN)|0, x=i2%N, y=(i2/N)|0, s2=spins[i2];
       var nb=spins[idx(x+1,y)]+spins[idx(x-1,y)]+spins[idx(x,y+1)]+spins[idx(x,y-1)];
-      var dE=2*s*nb;
+      var dE2=2*s2*nb;
       proposed++;
-      if(dE<=0||Math.random()<Math.exp(-beta*dE)){spins[i]=-s;accepted++;}
+      if(dE2<=0||Math.random()<Math.exp(-beta*dE2)){spins[i2]=-s2;accepted++;}
     }
   }
   function magnetisation(){var s=0;for(var i=0;i<NN;i++)s+=spins[i];return s/NN;}
   function energyPerSpin(){
+    if(dataSource==='live'&&liveEco&&liveEco.J&&liveEco.h){
+      var J=liveEco.J, h=liveEco.h, totalE=0;
+      for(var rep=0;rep<64;rep++){
+        var base=rep<<4, er=0;
+        for(var i=0;i<16;i++){
+          var si=spins[base+i];
+          er-=(h[i]||0)*si;
+          var pair=0, row=J[i];
+          if(row)for(var j=0;j<16;j++)pair+=(row[j]||0)*spins[base+j];
+          er-=0.5*si*pair;
+        }
+        totalE+=er;
+      }
+      return totalE/NN;
+    }
     var e=0;
     for(var y=0;y<N;y++)for(var x=0;x<N;x++){var s=spins[y*N+x];e-=s*(spins[y*N+((x+1)%N)]+spins[((y+1)%N)*N+x]);}
     return e/NN;
@@ -356,15 +419,20 @@
     if(trace.length){var p=trace[trace.length-1];var cx=padL+plotW*((p.b-0.05)/0.75);var cy=padT+plotH*(1-Math.min(1,p.m));cctx.fillStyle=UP;cctx.beginPath();cctx.arc(cx,cy,4.5,0,7);cctx.fill();}
   }
 
-  var els={beta:document.getElementById('betaVal'),temp:document.getElementById('tempVal'),absM:document.getElementById('absM'),signed:document.getElementById('signedM'),energy:document.getElementById('energyVal'),acc:document.getElementById('accVal'),phase:document.getElementById('phaseVal'),phaseSub:document.getElementById('phaseSub'),bar:document.getElementById('mBar'),overlay:document.getElementById('overlay'),sweeps:document.getElementById('sweepCount'),dom:document.getElementById('domPct'),up:document.getElementById('upPct'),down:document.getElementById('downPct')};
+  var els={beta:document.getElementById('betaVal'),temp:document.getElementById('tempVal'),absM:document.getElementById('absM'),signed:document.getElementById('signedM'),energy:document.getElementById('energyVal'),energySub:document.getElementById('energySub'),acc:document.getElementById('accVal'),phase:document.getElementById('phaseVal'),phaseSub:document.getElementById('phaseSub'),tauInt:document.getElementById('tauIntVal'),ess:document.getElementById('essVal'),bar:document.getElementById('mBar'),overlay:document.getElementById('overlay'),sweeps:document.getElementById('sweepCount'),dom:document.getElementById('domPct'),up:document.getElementById('upPct'),down:document.getElementById('downPct')};
   var frame=0, domCache='—';
   function refresh(){
     var M=magnetisation(), aM=Math.abs(M), T=beta>0?1/beta:Infinity;
+    var curE=energyPerSpin();
+    eTrace.push(curE); if(eTrace.length>120)eTrace.shift();
+    var sokal=computeSokalTauInt(eTrace);
     els.beta.textContent=beta.toFixed(3);
     els.temp.textContent='T = '+(isFinite(T)?T.toFixed(3):'∞');
     els.absM.textContent=aM.toFixed(3);
     els.signed.textContent=(M>=0?'+':'')+M.toFixed(3);
-    els.energy.textContent=energyPerSpin().toFixed(3);
+    els.energy.textContent=curE.toFixed(3);
+    els.tauInt.textContent=sokal.tau.toFixed(2);
+    els.ess.textContent=sokal.ess.toFixed(1);
     els.acc.textContent=proposed?Math.round(100*accepted/Math.max(1,proposed))+'%':'—';
     els.bar.style.width=(aM*100).toFixed(1)+'%';
     els.sweeps.textContent=sweeps.toLocaleString();
@@ -402,6 +470,49 @@
     frame++;
     requestAnimationFrame(loop);
   }
+
+  // data source toggle
+  var dsSynthBtn=document.getElementById('dsSynthBtn'), dsLiveBtn=document.getElementById('dsLiveBtn'), dsBadge=document.getElementById('dsBadge'), dsSwitch=document.getElementById('dsSwitch');
+  function setDataSourceUI(mode){
+    dataSource=mode;
+    dsSwitch.setAttribute('aria-checked', mode==='live'?'true':'false');
+    dsSynthBtn.classList.toggle('on', mode==='synthetic');
+    dsLiveBtn.classList.toggle('on', mode==='live');
+    dsLiveBtn.classList.toggle('live', mode==='live');
+    eTrace=[]; proposed=0; accepted=0; randomise();
+    if(mode==='synthetic'){
+      dsBadge.textContent='Synthetic 2D Onsager · J=1, h=0';
+      els.energySub.textContent='−2.00 is the perfect crystal';
+      return;
+    }
+    if(liveEco){
+      var p=liveEco.provenance||{};
+      dsBadge.textContent='USGS Estuary Telemetry · '+(p.source_mode||'live')+' · '+(p.captured_at_utc||'');
+      els.energySub.textContent='USGS 16-ch E/spin (GS '+(liveEco.exact_ground_state_energy/16).toFixed(2)+')';
+      return;
+    }
+    dsBadge.textContent='Fetching /data/live_empirical_streams.json…';
+    fetch('/data/live_empirical_streams.json',{cache:'no-store'}).then(function(r){
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.json();
+    }).then(function(d){
+      if(d&&d.ecological_ising&&d.ecological_ising.J&&d.ecological_ising.h){
+        liveEco=d.ecological_ising;
+        var p=liveEco.provenance||{};
+        if(dataSource==='live'){
+          dsBadge.textContent='USGS Estuary Telemetry · '+(p.source_mode||'live')+' · '+(p.captured_at_utc||'');
+          els.energySub.textContent='USGS 16-ch E/spin (GS '+(liveEco.exact_ground_state_energy/16).toFixed(2)+')';
+          eTrace=[]; randomise();
+        }
+      } else { throw new Error('Missing ecological_ising'); }
+    }).catch(function(err){
+      if(dataSource==='live'){
+        dsBadge.textContent='Live stream offline ('+err.message+') · synthetic fallback';
+      }
+    });
+  }
+  dsSynthBtn.addEventListener('click',function(){setDataSourceUI('synthetic');});
+  dsLiveBtn.addEventListener('click',function(){setDataSourceUI('live');});
 
   // controls
   slider.addEventListener('input',function(){beta=parseFloat(slider.value);sweeping=false;});

@@ -637,5 +637,26 @@ def tpu_silicon_command() -> None:
     run_phase_4_silicon_realism()
 
 
+@app.command("refinery")
+def refinery_command(
+    offline_only: bool = typer.Option(False, "--offline-only", help="Skip live HTTP polling; use refinery_cache or seeded fallback."),
+    verify: bool = typer.Option(False, "--verify", help="Verify exported streams, historical vault, and benchmark manifests."),
+    seed: int = typer.Option(42, "--seed", help="Deterministic thermodynamic sampler seed."),
+) -> None:
+    """Run the 5-Phase Live-Stream Data Refinery and productize live_empirical_streams.json."""
+    from scripts.run_live_refinery import render_summary, verify_refinery_artifacts
+    from thermo_physics.refinery import run_live_refinery_pipeline
+
+    result = run_live_refinery_pipeline(offline_only=offline_only, seed=seed)
+    render_summary(result)
+    if verify:
+        errors = verify_refinery_artifacts(result)
+        if errors:
+            for err in errors:
+                console.print(f"[bold red]VERIFY FAIL:[/bold red] {err}")
+            raise typer.Exit(code=1)
+        console.print("[bold green]✓ Refinery verification passed across all targets.[/bold green]")
+
+
 if __name__ == "__main__":
     app()

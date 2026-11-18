@@ -177,10 +177,16 @@
       .btn[aria-pressed="true"]{background:var(--ink); color:var(--bg); border-color:var(--ink)}
       .status{margin-top:12px; font-size:.88rem; color:var(--ink-soft); min-height:1.35em}
       .status .mono{color:var(--ink)}
-      .live-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px}
+      .live-stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px}
       .live-stats .ls{border-top:2px solid var(--line); padding-top:6px}
       .live-stats .ls .v{font-family:"IBM Plex Mono",monospace; font-size:1.05rem; font-weight:600}
       .live-stats .ls .k{font-size:.75rem; color:var(--ink-faint)}
+      .dsbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2)}
+      .dsswitch{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:2px;gap:2px}
+      .dsbtn{border:0;background:transparent;color:var(--ink-soft);border-radius:999px;padding:4px 10px;font-family:"IBM Plex Mono",monospace;font-size:.72rem;font-weight:600;min-height:26px}
+      .dsbtn.on{background:var(--ink);color:var(--bg)}
+      .dsbtn.on.live{background:var(--down);color:#fff}
+      .dsprov{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--ink-soft)}
 
       /* P(q) tile */
       .pq{grid-column:span 7}
@@ -228,7 +234,7 @@
         .tile{padding:16px}
         .hero{padding:20px}
         .bench-grid{grid-template-columns:1fr 1fr}
-        .live-stats{grid-template-columns:repeat(3,1fr)}
+        .live-stats{grid-template-columns:repeat(2,1fr)}
       }
       @media (prefers-reduced-motion: reduce){
         .spin{transition:none}
@@ -264,7 +270,7 @@
         <section class="tile replicas" aria-label="Twin replicas, live">
           <div class="rep-head">
             <h2 style="margin:0">Twin replicas · live sampling</h2>
-            <span class="mono" style="font-size:.8rem;color:var(--ink-faint)">N = 24 spins each · tap a spin to flip it</span>
+            <span class="mono" id="repSub" style="font-size:.8rem;color:var(--ink-faint)">N = 24 spins each · tap a spin to flip it</span>
           </div>
           <div class="rep-wrap">
             <div>
@@ -283,7 +289,7 @@
           </div>
           <div class="rep-foot">
             <span>Best energy found this session · <b class="mono" id="bestE">—</b></span>
-            <span>Exact ground state of this instance · <b class="mono">−16.9836</b></span>
+            <span>Exact ground state of this instance · <b class="mono" id="gsFoot">−16.9836</b></span>
             <span id="matchNote">The annealer below hunts for it.</span>
           </div>
         </section>
@@ -315,6 +321,13 @@
         <!-- ===== Controls ===== -->
         <section class="tile controls" aria-label="Sampler controls">
           <h2>Temperature &amp; sampler</h2>
+          <div class="dsbar">
+            <div class="dsswitch" role="switch" id="dsSwitch" aria-checked="false" aria-label="Data Source: Synthetic Baseline or Live Public Telemetry">
+              <button type="button" class="dsbtn on" id="dsSynthBtn">Synthetic Baseline</button>
+              <button type="button" class="dsbtn" id="dsLiveBtn">Live Public Telemetry</button>
+            </div>
+            <span class="dsprov" id="dsBadge">Synthetic SK (N=24)</span>
+          </div>
           <div class="t-row">
             <label for="temp" style="font-weight:600">Temperature</label>
             <span class="t-val"><span id="tVal">0.80</span> <small>T</small></span>
@@ -333,6 +346,7 @@
             <div class="ls"><div class="v" id="sweeps">0</div><div class="k">sweeps run</div></div>
             <div class="ls"><div class="v" id="accept">—</div><div class="k">flip acceptance</div></div>
             <div class="ls"><div class="v" id="magnet">—</div><div class="k">|m| replica A</div></div>
+            <div class="ls"><div class="v" id="tauIntVal">1.00</div><div class="k">Sokal τ<sub>int</sub></div></div>
           </div>
         </section>
 
@@ -357,7 +371,7 @@
           <h2>Frustration · one triangle, live</h2>
           <svg id="triSvg" viewBox="0 0 300 235" role="img" aria-label="A triangle of three coupled spins from replica A, showing which bonds are satisfied"></svg>
           <p id="triText">—</p>
-          <p><span class="big-frac">1,014 of 2,024</span><br />triangles in this coupling instance are frustrated — the product of their three bonds is negative, so no spin assignment can satisfy all three at once. That impossibility, repeated across every triangle, is what makes the landscape rugged.</p>
+          <p id="frustSummary"><span class="big-frac">1,014 of 2,024</span><br />triangles in this coupling instance are frustrated — the product of their three bonds is negative, so no spin assignment can satisfy all three at once. That impossibility, repeated across every triangle, is what makes the landscape rugged.</p>
         </section>
 
         <!-- ===== Energy trace ===== -->
@@ -367,7 +381,7 @@
           <div class="legend">
             <span><span class="sw" style="background:var(--up)"></span>Replica A</span>
             <span><span class="sw" style="background:var(--down)"></span>Replica B</span>
-            <span class="gs-line">- - exact ground state of this instance, −16.9836</span>
+            <span class="gs-line" id="gsLegend">- - exact ground state of this instance, −16.9836</span>
           </div>
         </section>
 
@@ -397,14 +411,47 @@
       /* ============ Instance: one fixed draw of SK couplings, N = 24 ============
          J_ij ~ N(0, 1/N), upper triangle in row-major order, values rounded to 6dp.
          Exact ground state of THIS instance (full 2^24 enumeration): -16.983616. */
-      var N = 24;
+      var SYNTH_N = 24;
       var JFLAT = [-0.229671,-0.039683,0.255182,0.374226,-0.07503,-0.344453,-0.126036,-0.133974,0.118195,-0.220071,0.148117,0.136463,0.449273,-0.026755,-0.078527,0.173711,-0.016809,-0.076597,0.046539,-0.30617,0.325278,0.18161,-0.06184,0.036289,-0.022876,-0.069542,-0.332498,-0.045734,-0.132144,-0.157677,0.359402,0.008314,0.183993,-0.039059,-0.16144,-0.159181,-0.243878,-0.077032,0.463418,0.001299,-0.090292,-0.011016,-0.263153,0.235345,0.235636,0.281292,-0.316173,0.040392,-0.121047,0.393639,-0.159867,-0.346751,0.140952,0.225702,0.191092,0.0802,-0.468705,-0.126207,0.018803,0.379681,-0.3842,-0.12648,0.206309,-0.195438,-0.440751,0.154821,-0.150735,0.184448,-0.04106,-0.212983,-0.377355,-0.236186,-0.093834,-0.243305,-0.319626,-0.441163,0.175118,-0.099967,-0.041335,0.292999,-0.054034,0.454864,0.142998,-0.283318,0.277457,-0.119851,0.46062,-0.189947,0.286594,-0.172991,0.317779,0.17995,0.171748,0.105684,-0.135213,0.196239,0.162133,0.06457,-0.153339,0.377547,0.110546,-0.545043,-0.473963,-0.293597,-0.01995,-0.45793,0.135446,0.309788,-0.195612,-0.236039,0.217942,0.207457,0.064018,0.294333,0.196629,0.074258,-0.036231,-0.308654,0.226,-0.198388,-0.39078,-0.167571,0.146935,-0.032335,0.287316,-0.019456,0.269454,-0.031052,0.216451,0.115094,0.221226,0.019843,0.046327,0.162204,-0.071089,-0.191029,0.235192,-0.026494,0.049596,-0.339771,-0.027893,0.116733,-0.285144,0.388194,-0.188443,0.054918,0.361321,-0.167767,0.005614,-0.111064,-0.31278,0.151512,0.208877,-0.122513,-0.276992,0.02114,0.492797,-0.077665,-0.154357,0.031958,-0.137627,0.066481,0.078022,-0.040995,-0.397467,0.120419,0.239224,-0.262889,0.271683,-0.002667,-0.340924,-0.187591,-0.050972,0.017561,0.05305,-0.291561,0.093993,0.102585,-0.106046,-0.13325,-0.331695,-0.029672,-0.254737,-0.447826,0.280242,-0.010753,-0.158732,0.123384,0.428753,-0.073424,-0.102857,0.102333,-0.009327,0.17113,0.053298,0.072733,-0.142174,0.013416,-0.072493,0.294443,-0.001154,0.171564,0.033256,-0.076201,-0.00779,0.217563,-0.081693,0.032474,-0.2587,0.254968,0.095907,0.041331,-0.11,-0.091397,0.308602,-0.174829,0.073504,-0.272744,-0.240301,-0.46458,0.028092,0.237013,0.282669,-0.173624,0.336426,-0.086557,0.139963,0.306961,-0.18145,-0.219642,0.033648,-0.303767,-0.024109,-0.176421,0.300213,0.260322,0.171853,0.064987,0.263638,0.100676,0.162246,-0.104093,0.146445,0.323493,-0.27086,-0.076365,0.252405,-0.007741,0.432365,0.290236,-0.276724,0.26811,0.05539,0.318349,0.18479,-0.275699,0.286261,0.033282,-0.059012,-0.061978,-0.099733,0.161478,0.071421,-0.256863,0.013575,0.275189,0.089964,0.02814,0.074739,0.147024,-0.231379,-0.086794,-0.068696,-0.037757,0.00672,0.314261];
-      var GS = -16.983616;
-      var J = [];
-      (function(){ var k=0; for(var i=0;i<N;i++){ J.push(new Float64Array(N)); } for(var a=0;a<N;a++) for(var b=a+1;b<N;b++){ var v=JFLAT[k++]; J[a][b]=v; J[b][a]=v; } })();
+      var SYNTH_GS = -16.983616;
+      var N = SYNTH_N, GS = SYNTH_GS;
+      var SYNTH_J = [], J = [], H_BIAS = new Float64Array(SYNTH_N);
+      (function(){ var k=0; for(var i=0;i<SYNTH_N;i++){ SYNTH_J.push(new Float64Array(SYNTH_N)); } for(var a=0;a<SYNTH_N;a++) for(var b=a+1;b<SYNTH_N;b++){ var v=JFLAT[k++]; SYNTH_J[a][b]=v; SYNTH_J[b][a]=v; } J=SYNTH_J; })();
+      var dataSource = "synthetic", liveEco = null;
 
-      function energy(s){ var E=0; for(var i=0;i<N;i++) for(var j=i+1;j<N;j++) E -= J[i][j]*s[i]*s[j]; return E; }
-      function field(s,i){ var h=0; for(var j=0;j<N;j++) if(j!==i) h += J[i][j]*s[j]; return h; }
+      function computeSokalTauInt(series){
+        var n = series.length;
+        if(n < 20) return { tau: 1.0, ess: n };
+        var mean = 0, i;
+        for(i = 0; i < n; i++) mean += series[i];
+        mean /= n;
+        var cen = new Float64Array(n), sumSq = 0;
+        for(i = 0; i < n; i++){ var d = series[i] - mean; cen[i] = d; sumSq += d * d; }
+        if(sumSq / n <= 1e-12) return { tau: 1.0, ess: n };
+        var tau = 0.5;
+        for(var lag = 1; lag < n; lag++){
+          var cross = 0, lim = n - lag;
+          for(var t = 0; t < lim; t++) cross += cen[t] * cen[t + lag];
+          tau += cross / (sumSq + 1e-12);
+          if(lag >= 5.0 * tau) break;
+        }
+        tau = Math.max(0.5, tau);
+        return { tau: tau, ess: Math.max(1.0, n / (2.0 * tau)) };
+      }
+
+      function energy(s){
+        var E = 0;
+        for(var i=0;i<N;i++){
+          E -= (H_BIAS[i] || 0) * s[i];
+          for(var j=i+1;j<N;j++) E -= J[i][j] * s[i] * s[j];
+        }
+        return E;
+      }
+      function field(s,i){
+        var h = H_BIAS[i] || 0;
+        for(var j=0;j<N;j++) if(j!==i) h += J[i][j]*s[j];
+        return h;
+      }
       function randSpin(){ var s=new Int8Array(N); for(var i=0;i<N;i++) s[i]=Math.random()<0.5?-1:1; return s; }
 
       var A = randSpin(), B = randSpin();
@@ -416,6 +463,8 @@
       function el(id){ return document.getElementById(id); }
       var gridA = el("gridA"), gridB = el("gridB");
       function buildGrid(grid, rep){
+        grid.innerHTML = "";
+        grid.style.gridTemplateColumns = N === 16 ? "repeat(4,1fr)" : "repeat(6,1fr)";
         var cells = [];
         for(var i=0;i<N;i++){
           (function(i){
@@ -525,15 +574,18 @@
         var up = cs.getPropertyValue("--up").trim(), down = cs.getPropertyValue("--down").trim();
         var good = cs.getPropertyValue("--good").trim(), line = cs.getPropertyValue("--line").trim(), faint = cs.getPropertyValue("--ink-faint").trim();
         ctx.clearRect(0,0,W,H);
-        var lo = -20, hi = 8;
+        var allVals = traceA.concat(traceB, [GS]);
+        var minV = Math.min.apply(null, allVals), maxV = Math.max.apply(null, allVals);
+        var lo = Math.floor(Math.min(-20, minV - 2)), hi = Math.ceil(Math.max(8, maxV + 2));
         function Y(e){ return H - 26 - ((e - lo)/(hi - lo)) * (H - 46); }
         function X(i, n){ return 8 + (i/Math.max(1,TRACE_MAX-1)) * (W - 16); }
         ctx.strokeStyle = line; ctx.lineWidth = 1;
-        [-15,-10,-5,0].forEach(function(g){
+        for(var gStep=0;gStep<=3;gStep++){
+          var g = Math.round(lo + (hi - lo) * (gStep / 4));
           ctx.beginPath(); ctx.moveTo(8, Y(g)); ctx.lineTo(W-8, Y(g)); ctx.stroke();
           ctx.fillStyle = faint; ctx.font = "20px 'IBM Plex Mono', monospace";
           ctx.fillText((g<0?"−"+Math.abs(g):""+g), 12, Y(g) - 5);
-        });
+        }
         ctx.strokeStyle = good; ctx.setLineDash([7,6]); ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(8, Y(GS)); ctx.lineTo(W-8, Y(GS)); ctx.stroke(); ctx.setLineDash([]);
         function plot(tr, col){
@@ -547,10 +599,21 @@
 
       /* ============ Frustration triangle ============ */
       var frustTris = [];
-      for(var i=0;i<N;i++) for(var j=i+1;j<N;j++) for(var k=j+1;k<N;k++)
-        if(J[i][j]*J[j][k]*J[i][k] < 0) frustTris.push([i,j,k]);
+      function rebuildFrustTris(){
+        frustTris = [];
+        for(var i=0;i<N;i++) for(var j=i+1;j<N;j++) for(var k=j+1;k<N;k++)
+          if(J[i][j]*J[j][k]*J[i][k] < 0) frustTris.push([i,j,k]);
+        var totalTris = (N * (N - 1) * (N - 2)) / 6;
+        el("frustSummary").innerHTML = '<span class="big-frac">' + frustTris.length.toLocaleString("en-US") + ' of ' + totalTris.toLocaleString("en-US") + '</span><br />triangles in this coupling instance are frustrated — the product of their three bonds is negative, so no spin assignment can satisfy all three at once. That impossibility, repeated across every triangle, is what makes the landscape rugged.';
+      }
+      rebuildFrustTris();
       var triSvg = el("triSvg");
       function drawTriangle(){
+        if(!frustTris.length){
+          triSvg.innerHTML = "";
+          el("triText").textContent = "No frustrated triangles in this coupling instance.";
+          return;
+        }
         var t = frustTris[(Math.random()*frustTris.length)|0];
         var pos = [[150,38],[52,178],[248,178]];
         var cs = getComputedStyle(document.documentElement);
@@ -670,6 +733,7 @@
           renderReplicas();
           el("sweeps").textContent = sweeps.toLocaleString("en-US");
           el("accept").textContent = attCount ? Math.round(100*accCount/attCount) + "%" : "—";
+          if(frame % 4 === 0) el("tauIntVal").textContent = computeSokalTauInt(traceA).tau.toFixed(2);
           if(frame % 6 === 0) drawPQ();
           if(frame % 3 === 0) drawTrace();
           if(frame % 150 === 0) drawTriangle();
@@ -683,6 +747,51 @@
         var mq = window.matchMedia("(prefers-color-scheme: dark)");
         if(mq.addEventListener) mq.addEventListener("change", function(){ drawPQ(); drawTrace(); drawTriangle(); });
       }
+
+      /* ============ Data Source Toggle ============ */
+      var dsSynthBtn = el("dsSynthBtn"), dsLiveBtn = el("dsLiveBtn"), dsBadge = el("dsBadge"), dsSwitch = el("dsSwitch");
+      function applySpinDataset(mode){
+        dataSource = mode;
+        dsSwitch.setAttribute("aria-checked", mode === "live" ? "true" : "false");
+        dsSynthBtn.classList.toggle("on", mode === "synthetic");
+        dsLiveBtn.classList.toggle("on", mode === "live");
+        dsLiveBtn.classList.toggle("live", mode === "live");
+        if(mode === "synthetic"){
+          N = SYNTH_N; J = SYNTH_J; H_BIAS = new Float64Array(SYNTH_N); GS = SYNTH_GS;
+          dsBadge.textContent = "Synthetic SK (N=24)";
+        } else if(liveEco && liveEco.J && liveEco.h){
+          N = liveEco.h.length; J = liveEco.J; H_BIAS = liveEco.h; GS = liveEco.exact_ground_state_energy;
+          var p = liveEco.provenance || {};
+          dsBadge.textContent = "USGS Estuary (N=" + N + ") · " + (p.source_mode || "live") + " · " + (p.captured_at_utc || "");
+        } else {
+          dsBadge.textContent = "Fetching /data/live_empirical_streams.json…";
+          fetch("/data/live_empirical_streams.json", { cache: "no-store" }).then(function(r){
+            if(!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          }).then(function(d){
+            if(d && d.ecological_ising && d.ecological_ising.J && d.ecological_ising.h){
+              liveEco = d.ecological_ising;
+              if(dataSource === "live") applySpinDataset("live");
+            } else { throw new Error("Missing ecological_ising"); }
+          }).catch(function(err){
+            if(dataSource === "live") dsBadge.textContent = "Live stream offline (" + err.message + ") · synthetic fallback";
+          });
+          return;
+        }
+        A = randSpin(); B = randSpin(); ra.s = A; rb.s = B;
+        EA = energy(A); EB = energy(B); bestE = Math.min(EA, EB);
+        sweeps = 0; attCount = 0; accCount = 0;
+        traceA.length = 0; traceB.length = 0;
+        cellsA = buildGrid(gridA, ra); cellsB = buildGrid(gridB, rb);
+        el("repSub").textContent = "N = " + N + " spins each · tap a spin to flip it";
+        el("gsFoot").textContent = fmtE(GS);
+        el("gsLegend").textContent = "- - exact ground state of this instance, " + fmtE(GS);
+        el("matchNote").textContent = "The annealer below hunts for it.";
+        rebuildFrustTris();
+        noteBest(); renderReplicas(); drawPQ(); drawTrace(); drawTriangle();
+      }
+      dsSynthBtn.addEventListener("click", function(){ applySpinDataset("synthetic"); });
+      dsLiveBtn.addEventListener("click", function(){ applySpinDataset("live"); });
 
       syncT(); noteBest(); renderReplicas(); drawPQ(); drawTrace(); drawTriangle();
       requestAnimationFrame(tick);

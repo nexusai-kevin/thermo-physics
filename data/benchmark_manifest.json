@@ -14,6 +14,28 @@
       "mean_energy_efficiency_multiplier": 1938760.0,
       "peak_energy_efficiency_multiplier": 20011683.0,
       "exact_ground_truth_matches": 16
+    },
+    "live_empirical_refinery": {
+      "schema_version": "1.0.0",
+      "generated_at_utc": "2026-11-18T20:01:04.144238+00:00",
+      "payload_hash": "f36444ab8d9dfb9781cc6d119fd090f78c86e27098701257fb87e95811b04741",
+      "stream_json_path": "/data/live_empirical_streams.json",
+      "stations_enriched": [
+        2,
+        4,
+        6,
+        7,
+        10,
+        11,
+        13
+      ],
+      "source_modes": {
+        "ecological_ising": "live_public_stream",
+        "rna_potts": "live_public_stream",
+        "market_qubo": "live_public_stream",
+        "affilai_product_graph": "live_public_stream"
+      },
+      "vault_snapshot": "refinery_snapshot_20261118T200104Z.json.gz"
     }
   },
   "stations": [
@@ -22,7 +44,7 @@
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "1D Ising Chain Starter",
-      "badge": "Station 1 \u2022 1D Ising Chain",
+      "badge": "Station 1 • 1D Ising Chain",
       "domain": "Statistical Physics (1D Chain)",
       "search_space_str": "2^5 = 32 states",
       "search_space_numeric": 32,
@@ -62,9 +84,9 @@
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "2D Ising Phase Transition",
-      "badge": "Station 2 \u2022 2D Onsager Criticality",
+      "badge": "Station 2 • 2D Onsager Criticality",
       "domain": "Statistical Physics (Criticality)",
-      "search_space_str": "2^1024 \u2248 1.80 x 10^308 states",
+      "search_space_str": "2^1024 ≈ 1.80 x 10^308 states",
       "search_space_numeric": 1.797e+308,
       "variables": 1024,
       "is_frustrated": false,
@@ -95,16 +117,29 @@
         "energy_efficiency_multiplier": 47819.0
       },
       "notes": "Spontaneous symmetry breaking across analytical Onsager critical threshold.",
-      "suite_exec_time_s": 0.035
+      "suite_exec_time_s": 0.035,
+      "live_empirical": {
+        "stream_key": "ecological_ising",
+        "source_label": "USGS National Water Information System (NWIS) Instantaneous Telemetry",
+        "source_mode": "live_public_stream",
+        "captured_at_utc": "2026-11-18T20:00:17.631214+00:00",
+        "station_count": 5,
+        "channel_count": 16,
+        "magnetization": -0.15039,
+        "frustration_pct": 35.0,
+        "exact_ground_state_energy": -12.18294,
+        "tau_int": 11.1855,
+        "ess": 14.30423
+      }
     },
     {
       "station_id": 3,
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "NP-Hard Max-Cut Optimizer",
-      "badge": "Station 3 \u2022 NP-Hard Max-Cut",
+      "badge": "Station 3 • NP-Hard Max-Cut",
       "domain": "Combinatorial Optimization (Graph Theory)",
-      "search_space_str": "2^50 \u2248 1.13 x 10^15 states",
+      "search_space_str": "2^50 ≈ 1.13 x 10^15 states",
       "search_space_numeric": 1125899906842624,
       "variables": 50,
       "is_frustrated": true,
@@ -142,9 +177,9 @@
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "Multistate Potts Model (K=4)",
-      "badge": "Station 4 \u2022 Multistate Potts (K=4)",
+      "badge": "Station 4 • Multistate Potts (K=4)",
       "domain": "Categorical PGM / Computer Vision",
-      "search_space_str": "4^576 \u2248 2.45 x 10^346 states",
+      "search_space_str": "4^576 ≈ 2.45 x 10^346 states",
       "search_space_numeric": 61172327492847069472032393719205726809135813743440799050195397570919697796091958321786863938157971792315844506873509046544459008355036150650333616890210625686064472971480622053109783197015954399612052812141827922088117778074833698589048132156300022844899841969874763871624802603515651998113045708569927237462546233168834543264678118409417047146496,
       "variables": 576,
       "is_frustrated": false,
@@ -154,7 +189,7 @@
       "thermo_name": "Softmax Categorical Gibbs (beta=1.50)",
       "thermo_score": "E = -1152.0 (99.2% alignment, domain clustering below beta_c = 1.0986)",
       "thermo_energy": -1152.0,
-      "delta_metric": "Forms coherent monochromatic territories past beta_c = ln(3) \u2248 1.0986",
+      "delta_metric": "Forms coherent monochromatic territories past beta_c = ln(3) ≈ 1.0986",
       "energy_advantage": 1008.0,
       "exact_ground_state": -1152.0,
       "exact_match": true,
@@ -175,16 +210,29 @@
         "energy_efficiency_multiplier": 43053.0
       },
       "notes": "Multivariate factor graph sampling for multi-category image segmentation and spin systems.",
-      "suite_exec_time_s": 0.009
+      "suite_exec_time_s": 0.009,
+      "live_empirical": {
+        "stream_key": "rna_potts",
+        "source_label": "Rfam RNA Family Stockholm/FASTA Alignments (RF00005 tRNA & RF00001 5S rRNA)",
+        "source_mode": "live_public_stream",
+        "captured_at_utc": "2026-11-18T20:00:36.959669+00:00",
+        "family_id": "RF00005",
+        "consensus_length": 24,
+        "q_states": 5,
+        "retained_sequences": 954,
+        "top_contact_frobenius": 0.40981,
+        "tau_int": 1.27375,
+        "ess": 125.6135
+      }
     },
     {
       "station_id": 5,
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "Clamped DTM Image Denoiser",
-      "badge": "Station 5 \u2022 Clamped DTM Denoiser",
+      "badge": "Station 5 • Clamped DTM Denoiser",
       "domain": "Computer Vision (Conditioned MRF)",
-      "search_space_str": "2^784 \u2248 1.02 x 10^236 states",
+      "search_space_str": "2^784 ≈ 1.02 x 10^236 states",
       "search_space_numeric": 101745825697019260773923519755878567461315282017759829107608914364075275235254395622580447400994175578963163918967182013639660669771108475957692810857098847138903161308502419410142185759152435680068435915159402496058513611411689167650816,
       "variables": 784,
       "is_frustrated": false,
@@ -222,9 +270,9 @@
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "RBM Associative Memory",
-      "badge": "Station 6 \u2022 RBM Associative Memory",
+      "badge": "Station 6 • RBM Associative Memory",
       "domain": "Unsupervised Learning (Bipartite Memory)",
-      "search_space_str": "2^64 \u2248 1.84 x 10^19 states",
+      "search_space_str": "2^64 ≈ 1.84 x 10^19 states",
       "search_space_numeric": 18446744073709551616,
       "variables": 96,
       "is_frustrated": false,
@@ -255,14 +303,26 @@
         "energy_efficiency_multiplier": 8681.0
       },
       "notes": "Hebbian energy-based associative memory recovering masked symbols in 2-step parallel sweeps.",
-      "suite_exec_time_s": 0.0
+      "suite_exec_time_s": 0.0,
+      "live_empirical": {
+        "stream_key": "affilai_product_graph",
+        "source_label": "AffilAI Live Shopify DTC Storefront Product Catalogs (15 Brands)",
+        "source_mode": "live_public_stream",
+        "captured_at_utc": "2026-11-18T20:00:42.056009+00:00",
+        "brand_count": 15,
+        "total_products_polled": 361,
+        "total_variants_polled": 1252,
+        "top_partner_brand": "Brooklinen",
+        "top_composite_deal_score": 89.17,
+        "mean_affinity_coupling": 0.1732
+      }
     },
     {
       "station_id": 7,
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "QUBO Portfolio Vault",
-      "badge": "Station 7 \u2022 QUBO Portfolio Vault",
+      "badge": "Station 7 • QUBO Portfolio Vault",
       "domain": "Quantitative Finance (Markowitz QUBO)",
       "search_space_str": "C(20,5) = 15,504 combinations (2^20 unconstrained)",
       "search_space_numeric": 15504,
@@ -295,14 +355,37 @@
         "energy_efficiency_multiplier": 1190000.0
       },
       "notes": "Maps binary variables to spins with exact field shifts matching brute-force enumeration.",
-      "suite_exec_time_s": 0.036
+      "suite_exec_time_s": 0.036,
+      "live_empirical": {
+        "stream_key": "market_qubo",
+        "source_label": "Yahoo Finance 1h OHLCV (16 Assets) + Polymarket CLOB Order Books (16 Active Markets)",
+        "source_mode": "live_public_stream",
+        "captured_at_utc": "2026-11-18T20:00:38.145577+00:00",
+        "n_assets": 16,
+        "k_target": 5,
+        "polymarket_markets_polled": 16,
+        "selected_tickers": [
+          "AAPL",
+          "AMZN",
+          "META",
+          "GC=F",
+          "NG=F"
+        ],
+        "exact_qubo_energy": 1.4205,
+        "expected_return": -0.64435,
+        "volatility": 0.81931,
+        "budget_feasibility_pct": 100.0,
+        "pareto_match_pct": 100.0,
+        "tau_int": 28.46349,
+        "ess": 5.62124
+      }
     },
     {
       "station_id": 8,
       "layer": 1,
       "layer_name": "Layer 1: Foundational Physics & Information Baselines",
       "name": "Continuous Double-Well Chain",
-      "badge": "Station 8 \u2022 Continuous Double-Well",
+      "badge": "Station 8 • Continuous Double-Well",
       "domain": "Analog Physics (ContinuousNode)",
       "search_space_str": "R^32 Continuous Phase Space",
       "search_space_numeric": 1000000000.0,
@@ -342,7 +425,7 @@
       "layer": 2,
       "layer_name": "Layer 2: Combinatorial QUBO & Complex Spin Glasses",
       "name": "10-City TSP Permutation Router",
-      "badge": "Station 9 \u2022 NP-Complete 10-City TSP",
+      "badge": "Station 9 • NP-Complete 10-City TSP",
       "domain": "Combinatorial Optimization (NP-Complete TSP)",
       "search_space_str": "10! = 3,628,800 tours (2^100 binary matrix)",
       "search_space_numeric": 3628800,
@@ -382,7 +465,7 @@
       "layer": 2,
       "layer_name": "Layer 2: Combinatorial QUBO & Complex Spin Glasses",
       "name": "Sherrington-Kirkpatrick Spin Glass",
-      "badge": "Station 10 \u2022 SK Frustrated Spin Glass",
+      "badge": "Station 10 • SK Frustrated Spin Glass",
       "domain": "Statistical Physics (Disordered Spin Glasses)",
       "search_space_str": "2^24 = 16,777,216 states (dense all-to-all)",
       "search_space_numeric": 16777216,
@@ -415,23 +498,36 @@
         "energy_efficiency_multiplier": 910167.0
       },
       "notes": "Dense Gaussian couplings with 276 frustrated interactions displaying Parisi Replica Symmetry Breaking.",
-      "suite_exec_time_s": 0.036
+      "suite_exec_time_s": 0.036,
+      "live_empirical": {
+        "stream_key": "ecological_ising",
+        "source_label": "USGS National Water Information System (NWIS) Instantaneous Telemetry",
+        "source_mode": "live_public_stream",
+        "captured_at_utc": "2026-11-18T20:00:17.631214+00:00",
+        "variables": 16,
+        "frustration_pct": 35.0,
+        "frustrated_triangles_pct": 52.14286,
+        "exact_ground_state_energy": -12.18294,
+        "min_sampled_energy": -12.18294,
+        "tau_int": 11.1855,
+        "ess": 14.30423
+      }
     },
     {
       "station_id": 11,
       "layer": 3,
       "layer_name": "Layer 3: Biophysics, Operations & Energy EBMs",
       "name": "RNA Conformational Folding Ensemble",
-      "badge": "Station 11 \u2022 RNA Folding Ensemble",
+      "badge": "Station 11 • RNA Folding Ensemble",
       "domain": "Biophysics (Conformational Thermodynamics)",
-      "search_space_str": "2^24 (Tier 1) / 2^72 \u2248 4.72 x 10^21 (Tier 2)",
+      "search_space_str": "2^24 (Tier 1) / 2^72 ≈ 4.72 x 10^21 (Tier 2)",
       "search_space_numeric": 16777216,
       "variables": 50,
       "is_frustrated": true,
       "baseline_name": "Denatured High-T Ensemble (beta=0.20)",
       "baseline_score": "E = -10.00 kcal/mol (Mean: +0.86 kcal/mol, S = 9.78 bits)",
       "baseline_energy": -10.0,
-      "thermo_name": "JAX Physiological Ensemble (beta=1.0, 37\u00b0C)",
+      "thermo_name": "JAX Physiological Ensemble (beta=1.0, 37°C)",
       "thermo_score": "E_MFE = -10.00 kcal/mol (Mean: -9.41 kcal/mol, S = 4.77 bits)",
       "thermo_energy": -10.0,
       "delta_metric": "Exact MFE -10.00 kcal/mol matched; captures thermal melting transition",
@@ -455,14 +551,61 @@
         "energy_efficiency_multiplier": 490000.0
       },
       "notes": "Quadratic formulation modeling base-pairing affinities, steric nucleotide exclusion, and pseudoknots.",
-      "suite_exec_time_s": 3.51
+      "suite_exec_time_s": 3.51,
+      "live_empirical": {
+        "stream_key": "rna_potts",
+        "source_label": "Rfam RNA Family Stockholm/FASTA Alignments (RF00005 tRNA & RF00001 5S rRNA)",
+        "source_mode": "live_public_stream",
+        "captured_at_utc": "2026-11-18T20:00:36.959669+00:00",
+        "family_id": "RF00005",
+        "raw_sequences": 954,
+        "retained_sequences": 954,
+        "consensus_length": 24,
+        "entropy_bits": 31.36252,
+        "top_contacts": [
+          {
+            "i": 8,
+            "j": 12,
+            "pos_i": 12,
+            "pos_j": 30,
+            "frobenius_score": 0.40981,
+            "consensus_pair": "C-G"
+          },
+          {
+            "i": 10,
+            "j": 12,
+            "pos_i": 14,
+            "pos_j": 30,
+            "frobenius_score": 0.18289,
+            "consensus_pair": "C-G"
+          },
+          {
+            "i": 8,
+            "j": 10,
+            "pos_i": 12,
+            "pos_j": 14,
+            "frobenius_score": 0.18214,
+            "consensus_pair": "C-C"
+          },
+          {
+            "i": 7,
+            "j": 13,
+            "pos_i": 11,
+            "pos_j": 31,
+            "frobenius_score": 0.15524,
+            "consensus_pair": "G-C"
+          }
+        ],
+        "tau_int": 1.27375,
+        "ess": 125.6135
+      }
     },
     {
       "station_id": 12,
       "layer": 3,
       "layer_name": "Layer 3: Biophysics, Operations & Energy EBMs",
       "name": "Power Grid SCUC Resource Dispatch",
-      "badge": "Station 12 \u2022 Power Grid SCUC QUBO",
+      "badge": "Station 12 • Power Grid SCUC QUBO",
       "domain": "Operations Research / Power Systems",
       "search_space_str": "2^24 = 16,777,216 schedules",
       "search_space_numeric": 16777216,
@@ -502,7 +645,7 @@
       "layer": 3,
       "layer_name": "Layer 3: Biophysics, Operations & Energy EBMs",
       "name": "mRNA Codon Optimization Potts EBM",
-      "badge": "Station 13 \u2022 Codon Optimization Potts EBM",
+      "badge": "Station 13 • Codon Optimization Potts EBM",
       "domain": "Synthetic Biology / Bioengineering",
       "search_space_str": "84,934,656 synonymous transcripts",
       "search_space_numeric": 84934656,
@@ -535,14 +678,26 @@
         "energy_efficiency_multiplier": 839772.0
       },
       "notes": "Balances human translation efficiency (CAI) with inverted-repeat stem-loop suppression.",
-      "suite_exec_time_s": 0.19
+      "suite_exec_time_s": 0.19,
+      "live_empirical": {
+        "stream_key": "rna_potts",
+        "source_label": "Rfam RNA Family Stockholm/FASTA Alignments (RF00005 tRNA & RF00001 5S rRNA)",
+        "source_mode": "live_public_stream",
+        "captured_at_utc": "2026-11-18T20:00:36.959669+00:00",
+        "family_id": "RF00005",
+        "q_states": 5,
+        "entropy_bits": 31.36252,
+        "min_energy": -3.33352,
+        "tau_int": 1.27375,
+        "ess": 125.6135
+      }
     },
     {
       "station_id": 14,
       "layer": 3,
       "layer_name": "Layer 3: Biophysics, Operations & Energy EBMs",
       "name": "Protein Side-Chain Rotamer Packing",
-      "badge": "Station 14 \u2022 Side-Chain Rotamer Packing",
+      "badge": "Station 14 • Side-Chain Rotamer Packing",
       "domain": "Structural Biology / Macromolecular Design",
       "search_space_str": "1.02 x 10^14 conformations (96 rotamer spins)",
       "search_space_numeric": 102000000000000.0,
@@ -583,7 +738,7 @@
       "layer": 4,
       "layer_name": "Layer 4: Advanced Non-Equilibrium & Autonomous Cognitive Systems",
       "name": "4-Organ Synthetic Intelligence (SI) Core",
-      "badge": "Station 15 \u2022 Thermodynamic SI Cognitive Core",
+      "badge": "Station 15 • Thermodynamic SI Cognitive Core",
       "domain": "Cognitive AI / Coupled Non-von-Neumann Thermodynamic Organs",
       "search_space_str": "Continuous R^64 x 4^6 Potts x QUBO",
       "search_space_numeric": 1e+20,
@@ -624,7 +779,7 @@
       "layer": 4,
       "layer_name": "Layer 4: Advanced Non-Equilibrium Architectures & Hybrid TPU",
       "name": "Non-Equilibrium Hybrid TPU & Frustration Breaking",
-      "badge": "Station 16 \u2022 Hybrid TPU Langevin & Frustration Breaking",
+      "badge": "Station 16 • Hybrid TPU Langevin & Frustration Breaking",
       "domain": "Non-Equilibrium SDEs / Continuous-Discrete Hybrid TPU",
       "search_space_str": "2^100 states (continuous-discrete R^100 x {-1, +1}^100)",
       "search_space_numeric": 1.2676506e+30,
