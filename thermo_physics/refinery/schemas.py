@@ -255,6 +255,17 @@ class AffilProvenance(BaseModel):
     total_variants_polled: int = Field(..., ge=0)
 
 
+class AffilFeaturedProduct(BaseModel):
+    title: str
+    handle: str = ""
+    product_url: str
+    image_url: str
+    price_usd: float
+    compare_at_price_usd: Optional[float] = None
+    available: bool = True
+    variant_count: int = 1
+
+
 class AffilBrandEntry(BaseModel):
     index: int
     brand: str
@@ -272,6 +283,11 @@ class AffilBrandEntry(BaseModel):
     composite_deal_score: float = Field(..., ge=0.0, le=100.0)
     recommended_commission_tier: str
     top_tags: List[str]
+    hero_image_url: str = ""
+    hero_product_title: str = ""
+    hero_product_price_usd: float = 0.0
+    hero_product_url: str = ""
+    featured_products: List[AffilFeaturedProduct] = Field(default_factory=list)
 
 
 class AffilProductGraphPayload(BaseModel):

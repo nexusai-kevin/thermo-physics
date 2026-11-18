@@ -441,6 +441,28 @@ def _normalize_tags(raw_tags: Any, product_type: Any = "") -> List[str]:
     return cleaned
 
 
+def _extract_product_image_url(prod: Dict[str, Any]) -> str:
+    """Extract and normalize the primary Shopify product image URL."""
+    candidates: List[Any] = []
+    images_list = prod.get("images")
+    if isinstance(images_list, list):
+        candidates.extend(images_list)
+    single_img = prod.get("image")
+    if single_img is not None:
+        candidates.append(single_img)
+
+    for entry in candidates:
+        raw_src = entry.get("src") if isinstance(entry, dict) else (entry if isinstance(entry, str) else "")
+        src = str(raw_src or "").strip()
+        if not src:
+            continue
+        if src.startswith("//"):
+            return f"https:{src}"
+        if src.startswith(("http://", "https://")):
+            return src
+    return ""
+
+
 def clean_shopify_catalogs(raw_shopify: Dict[str, Any]) -> Dict[str, Any]:
     """Strip malformed/zero-price variants, deduplicate SKUs, normalize prices and lowercase trimmed tags."""
     raw_brands = raw_shopify.get("brands", [])
@@ -461,6 +483,7 @@ def clean_shopify_catalogs(raw_shopify: Dict[str, Any]) -> Dict[str, Any]:
         updated_timestamps: List[float] = []
         tag_counts: Dict[str, int] = {}
         valid_product_count = 0
+        featured_candidates: List[Dict[str, Any]] = []
 
         for prod in brand_obj.get("products", []):
             if not isinstance(prod, dict):
@@ -478,6 +501,11 @@ def clean_shopify_catalogs(raw_shopify: Dict[str, Any]) -> Dict[str, Any]:
                     pass
 
             prod_has_valid_variant = False
+            first_price: Optional[float] = None
+            first_compare: Optional[float] = None
+            any_available = False
+            prod_variant_count = 0
+
             for var in prod.get("variants", []):
                 if not isinstance(var, dict):
                     continue
@@ -494,9 +522,15 @@ def clean_shopify_catalogs(raw_shopify: Dict[str, Any]) -> Dict[str, Any]:
                     continue
                 seen_skus.add(dedup_key)
 
+                var_avail = bool(var.get("available", True))
                 valid_prices.append(price)
-                available_flags.append(bool(var.get("available", True)))
+                available_flags.append(var_avail)
                 prod_has_valid_variant = True
+                prod_variant_count += 1
+                if first_price is None:
+                    first_price = price
+                if var_avail:
+                    any_available = True
 
                 cap_raw = var.get("compare_at_price")
                 if cap_raw is not None:
@@ -504,16 +538,40 @@ def clean_shopify_catalogs(raw_shopify: Dict[str, Any]) -> Dict[str, Any]:
                         cap = float(cap_raw)
                         if math.isfinite(cap) and cap > price:
                             discount_ratios.append((cap - price) / cap)
+                            if first_compare is None and first_price is not None and cap > first_price:
+                                first_compare = cap
                     except (TypeError, ValueError):
                         pass
 
-            if prod_has_valid_variant:
+            if prod_has_valid_variant and first_price is not None:
                 valid_product_count += 1
+                img_url = _extract_product_image_url(prod)
+                title = str(prod.get("title") or f"{brand_name} Featured Drop").strip()
+                handle = str(prod.get("handle") or "").strip()
+                product_url = f"https://{domain}/products/{handle}" if handle else f"https://{domain}"
+                featured_candidates.append(
+                    {
+                        "title": title,
+                        "handle": handle,
+                        "product_url": product_url,
+                        "image_url": img_url,
+                        "price_usd": round(float(first_price), 2),
+                        "compare_at_price_usd": round(float(first_compare), 2) if first_compare is not None else None,
+                        "available": any_available,
+                        "variant_count": prod_variant_count,
+                    }
+                )
 
         # Deterministic safe guard if a brand returned products without positive variant prices
         if not valid_prices:
             valid_prices = [48.0]
             available_flags = [True]
+
+        featured_candidates.sort(
+            key=lambda item: (bool(item["image_url"]), bool(item["available"])),
+            reverse=True,
+        )
+        featured_products = featured_candidates[:3]
 
         total_products += valid_product_count
         total_variants += len(valid_prices)
@@ -536,6 +594,7 @@ def clean_shopify_catalogs(raw_shopify: Dict[str, Any]) -> Dict[str, Any]:
                 "updated_timestamps": updated_timestamps,
                 "tag_counts": tag_counts,
                 "top_tags": top_tags,
+                "featured_products": featured_products,
             }
         )
 

@@ -433,6 +433,13 @@ def aggregate_affilai_product_graph(cleaned_shopify: Dict[str, Any]) -> Dict[str
         else:
             tier = "STANDARD_8_12"
 
+        featured_products = list(b.get("featured_products", []))
+        hero_product = featured_products[0] if featured_products else {}
+        hero_image_url = str(hero_product.get("image_url", ""))
+        hero_product_title = str(hero_product.get("title") or f"{b['brand']} Signature Drop")
+        hero_product_price = float(hero_product.get("price_usd", mean_prices[idx]))
+        hero_product_url = str(hero_product.get("product_url") or f"https://{b['domain']}")
+
         tag_sets.append(set(b.get("tag_counts", {}).keys()))
         brands_out.append(
             {
@@ -452,6 +459,11 @@ def aggregate_affilai_product_graph(cleaned_shopify: Dict[str, Any]) -> Dict[str
                 "composite_deal_score": composite,
                 "recommended_commission_tier": tier,
                 "top_tags": list(b.get("top_tags", [])),
+                "hero_image_url": hero_image_url,
+                "hero_product_title": hero_product_title,
+                "hero_product_price_usd": hero_product_price,
+                "hero_product_url": hero_product_url,
+                "featured_products": featured_products,
             }
         )
 

@@ -821,9 +821,15 @@ def _seeded_shopify_brand(index: int, brand: str, domain: str, vertical: str) ->
             {
                 "id": index * 100 + p_idx,
                 "title": f"{brand} Signature Item {p_idx + 1}",
+                "handle": f"{brand.lower().replace(' ', '-')}-item-{p_idx + 1}",
                 "product_type": vertical,
                 "updated_at": "2026-11-18T00:00:00Z",
                 "tags": tag_pool[: 3 + (p_idx % 4)],
+                "images": [
+                    {
+                        "src": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=700&auto=format&fit=crop"
+                    }
+                ],
                 "variants": variants,
             }
         )
