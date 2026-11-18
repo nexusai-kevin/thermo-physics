@@ -45,6 +45,7 @@ _EXTERNAL_ECOSYSTEM_TARGETS: List[tuple[Path, Path]] = [
     (Path(r"C:\Users\mcder\AffilAI"), Path(r"C:\Users\mcder\AffilAI\public\data\live_empirical_streams.json")),
     (Path(r"C:\Users\mcder\poseidon_echo_dojo"), Path(r"C:\Users\mcder\poseidon_echo_dojo\data\live_empirical_streams.json")),
     (Path(r"C:\Users\mcder\freshfish-collectr"), Path(r"C:\Users\mcder\freshfish-collectr\public\data\live_empirical_streams.json")),
+    (Path(r"C:\Users\mcder\Desktop\fish-dex-protocol"), Path(r"C:\Users\mcder\Desktop\fish-dex-protocol\frontend\public\data\live_empirical_streams.json")),
 ]
 
 

@@ -17,8 +17,8 @@
     },
     "live_empirical_refinery": {
       "schema_version": "1.0.0",
-      "generated_at_utc": "2026-11-18T20:42:19.683462+00:00",
-      "payload_hash": "58e542d36be4bb02bd014e4700ece6c09cb6df846a4c359a9733a37d414144a9",
+      "generated_at_utc": "2026-11-18T22:01:26.203429+00:00",
+      "payload_hash": "c491660a39f7c8b7d2283bd9f090618fdfa80ffee362190f40f07be043487c9b",
       "stream_json_path": "/data/live_empirical_streams.json",
       "stations_enriched": [
         2,
@@ -35,7 +35,7 @@
         "market_qubo": "live_public_stream",
         "affilai_product_graph": "live_public_stream"
       },
-      "vault_snapshot": "refinery_snapshot_20261118T204219Z.json.gz"
+      "vault_snapshot": "refinery_snapshot_20261118T220126Z.json.gz"
     }
   },
   "stations": [
@@ -122,14 +122,14 @@
         "stream_key": "ecological_ising",
         "source_label": "USGS National Water Information System (NWIS) Instantaneous Telemetry",
         "source_mode": "live_public_stream",
-        "captured_at_utc": "2026-11-18T20:41:45.754927+00:00",
+        "captured_at_utc": "2026-11-18T22:00:51.752831+00:00",
         "station_count": 5,
         "channel_count": 16,
-        "magnetization": -0.15039,
-        "frustration_pct": 35.0,
-        "exact_ground_state_energy": -12.18294,
-        "tau_int": 11.1855,
-        "ess": 14.30423
+        "magnetization": -0.1543,
+        "frustration_pct": 36.66667,
+        "exact_ground_state_energy": -10.80794,
+        "tau_int": 12.09735,
+        "ess": 13.22604
       }
     },
     {
@@ -215,7 +215,7 @@
         "stream_key": "rna_potts",
         "source_label": "Rfam RNA Family Stockholm/FASTA Alignments (RF00005 tRNA & RF00001 5S rRNA)",
         "source_mode": "live_public_stream",
-        "captured_at_utc": "2026-11-18T20:41:51.317293+00:00",
+        "captured_at_utc": "2026-11-18T22:00:57.535917+00:00",
         "family_id": "RF00005",
         "consensus_length": 24,
         "q_states": 5,
@@ -308,10 +308,10 @@
         "stream_key": "affilai_product_graph",
         "source_label": "AffilAI Live Shopify DTC Storefront Product Catalogs (15 Brands)",
         "source_mode": "live_public_stream",
-        "captured_at_utc": "2026-11-18T20:41:56.537517+00:00",
+        "captured_at_utc": "2026-11-18T22:01:03.001422+00:00",
         "brand_count": 15,
         "total_products_polled": 361,
-        "total_variants_polled": 1256,
+        "total_variants_polled": 1257,
         "top_partner_brand": "Brooklinen",
         "top_composite_deal_score": 89.17,
         "mean_affinity_coupling": 0.1733
@@ -360,7 +360,7 @@
         "stream_key": "market_qubo",
         "source_label": "Yahoo Finance 1h OHLCV (16 Assets) + Polymarket CLOB Order Books (16 Active Markets)",
         "source_mode": "live_public_stream",
-        "captured_at_utc": "2026-11-18T20:41:52.668947+00:00",
+        "captured_at_utc": "2026-11-18T22:00:58.920716+00:00",
         "n_assets": 16,
         "k_target": 5,
         "polymarket_markets_polled": 16,
@@ -371,13 +371,13 @@
           "GC=F",
           "NG=F"
         ],
-        "exact_qubo_energy": 1.47763,
-        "expected_return": -0.70466,
-        "volatility": 0.81749,
+        "exact_qubo_energy": 1.45037,
+        "expected_return": -0.62204,
+        "volatility": 0.81541,
         "budget_feasibility_pct": 100.0,
         "pareto_match_pct": 100.0,
-        "tau_int": 27.88186,
-        "ess": 5.7385
+        "tau_int": 29.42079,
+        "ess": 5.43833
       }
     },
     {
@@ -503,14 +503,14 @@
         "stream_key": "ecological_ising",
         "source_label": "USGS National Water Information System (NWIS) Instantaneous Telemetry",
         "source_mode": "live_public_stream",
-        "captured_at_utc": "2026-11-18T20:41:45.754927+00:00",
+        "captured_at_utc": "2026-11-18T22:00:51.752831+00:00",
         "variables": 16,
-        "frustration_pct": 35.0,
-        "frustrated_triangles_pct": 52.14286,
-        "exact_ground_state_energy": -12.18294,
-        "min_sampled_energy": -12.18294,
-        "tau_int": 11.1855,
-        "ess": 14.30423
+        "frustration_pct": 36.66667,
+        "frustrated_triangles_pct": 52.5,
+        "exact_ground_state_energy": -10.80794,
+        "min_sampled_energy": -10.6676,
+        "tau_int": 12.09735,
+        "ess": 13.22604
       }
     },
     {
@@ -556,7 +556,7 @@
         "stream_key": "rna_potts",
         "source_label": "Rfam RNA Family Stockholm/FASTA Alignments (RF00005 tRNA & RF00001 5S rRNA)",
         "source_mode": "live_public_stream",
-        "captured_at_utc": "2026-11-18T20:41:51.317293+00:00",
+        "captured_at_utc": "2026-11-18T22:00:57.535917+00:00",
         "family_id": "RF00005",
         "raw_sequences": 954,
         "retained_sequences": 954,
@@ -683,7 +683,7 @@
         "stream_key": "rna_potts",
         "source_label": "Rfam RNA Family Stockholm/FASTA Alignments (RF00005 tRNA & RF00001 5S rRNA)",
         "source_mode": "live_public_stream",
-        "captured_at_utc": "2026-11-18T20:41:51.317293+00:00",
+        "captured_at_utc": "2026-11-18T22:00:57.535917+00:00",
         "family_id": "RF00005",
         "q_states": 5,
         "entropy_bits": 31.36252,

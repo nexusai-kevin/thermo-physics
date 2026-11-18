@@ -582,6 +582,7 @@ def test_phase4_and_5_persisted_repo_artifacts_and_targets() -> None:
             (Path(r"C:\Users\mcder\AffilAI"), Path(r"C:\Users\mcder\AffilAI\public\data\live_empirical_streams.json")),
             (Path(r"C:\Users\mcder\poseidon_echo_dojo"), Path(r"C:\Users\mcder\poseidon_echo_dojo\data\live_empirical_streams.json")),
             (Path(r"C:\Users\mcder\freshfish-collectr"), Path(r"C:\Users\mcder\freshfish-collectr\public\data\live_empirical_streams.json")),
+            (Path(r"C:\Users\mcder\Desktop\fish-dex-protocol"), Path(r"C:\Users\mcder\Desktop\fish-dex-protocol\frontend\public\data\live_empirical_streams.json")),
         ]
         for root_dir, expected_out in expected_ecosystem:
             if root_dir.exists():
