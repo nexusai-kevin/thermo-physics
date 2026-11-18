@@ -59,3 +59,15 @@ Gibbs/Langevin kernel for the stated Hamiltonian. All timings are CPU.
 ## Request
 
 Technical feedback on workload relevance and benchmarking protocols (particularly standardizing ESS, τ_int, and parallel speedups across thermodynamic hardware architectures), alongside developer/researcher access and partnership under the Extropic Algorithmic Partnership & Open Research Grant Track.
+
+## Live Public Telemetry Observatory & 6-Hour Compounding Vault (November 2026 Update)
+
+Since the initial October 29 benchmark suite, `/thermo-lab` and `thermo-physics` have been extended with a zero-permission, 5-phase Live-Stream Data Refinery (`thermo_physics/refinery/`) running on a 6-hour compounding schedule (`.github/workflows/live_data_refinery.yml` + local scheduler):
+
+1. **Four Unauthenticated Public Empirical Streams (`live_empirical_streams.json`):**
+   - **Ecological Ising (`N=16`):** 5 USGS NWIS river/estuary monitoring stations (`01463500`, `02171645`, `07374000`, `11447650`, `14211720`) mapped via rolling-window binarization and regularized mean-field inversion into frustrated `(J, h)` couplings (latest snapshot: `E_0 = -12.18294`, edge frustration `35.0%`, Sokal $\tau_{\text{int}} = 11.19$, $\text{ESS} = 14.30$).
+   - **RNA Potts Co-Evolution (`L=24, q=5`):** Rfam `RF00005` tRNA alignment (`954 / 954` sequences retained) producing single-site frequencies $f_i(a)$ and covariance tensors $C_{ij}(a,b)$ (`E_min = -3.33352`, $S = 31.36\text{ bits}$, $\tau_{\text{int}} = 1.27$, $\text{ESS} = 125.61$).
+   - **Market & Polymarket QUBO (`N=16, K=5`):** Hourly cross-asset return covariance across 16 assets penalized by live Polymarket CLOB order-book imbalances (16 markets), solved against exact brute-force portfolio optima (`100.0%` feasibility & Pareto match, $\tau_{\text{int}} = 28.46$, $\text{ESS} = 5.62$).
+   - **DTC Brand Affinity Graph (`N=15`):** 15 live Shopify `/products.json` storefronts (`361` products, `1,252` variants).
+2. **Tri-Mode Interactive Browser Observatory & Inbound Corpus:** `/thermo-lab` (`LiveEmpiricalRefineryDeck.tsx`) lets visitors toggle between **Synthetic Baseline**, **Live Public Telemetry**, and **Upload Custom Matrix / FASTA** (running client-side sweeps and live $\tau_{\text{int}}$ estimation on user-supplied CSV/JSON matrices or FASTA alignments, with strict opt-in `anonymized_consent` contributions via `/api/thermo-refinery/contribute` that block `raw_sequences` and PII).
+3. **Gzipped Vault & Automated Regime Detection:** Every 6-hour run archives SHA-256 indexed `.json.gz` snapshots under `data/historical_vault/` (with cross-snapshot regime shift alerts—such as USGS frustration deltas and $\tau_{\text{int}}$ slowing—logged automatically by `morning_consolidation.py`). See [`PUBLIC_OBSERVATORY_PROOF_DOSSIER.md`](./PUBLIC_OBSERVATORY_PROOF_DOSSIER.md) for verification commands.
