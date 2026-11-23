@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "model_id": "Qwen/Qwen3.8-27B",
+  "cached_at": "2026-11-23T21:22:33.630533+00:00",
+  "offload_mode": true,
+  "arch": {
+    "id": "Qwen/Qwen3.8-27B",
+    "slug": "qwen-qwen3.8-27b",
+    "model_type": "qwen3_5_text",
+    "architecture_class": "Qwen3_5ForCausalLM",
+    "is_moe": false,
+    "num_experts": 0,
+    "num_layers": 64
+  },
+  "base_metrics": {
+    "total_params": 26895998464,
+    "non_embedding_params": 25624600064,
+    "peak_vram_gb": 56.1094,
+    "throughput_tok_s": 0.11,
+    "latency_ms_per_tok": 8848.613,
+    "vertical_accuracy_pct": 100.0,
+    "json_valid_pct": 100.0,
+    "perplexity": 5.98,
+    "sample_outputs": [
+      {
+        "id": "sas-041",
+        "domain": "saas_billing",
+        "expected": {
+          "product": "Snowflake Enterprise",
+          "account_id": "SNF-9921",
+          "annual_spend_usd": "144000",
+          "renewal_date": "2027-01-15"
+        },
+        "predicted": {
+          "product": "Snowflake Enterprise",
+          "account_id": "SNF-9921",
+          "annual_spend_usd": 144000,
+          "renewal_date": "2027-01-15"
+        },
+        "raw_output": "{\n  \"product\": \"Snowflake Enterprise\",\n  \"account_id\": \"SNF-9921\",\n  \"annual_spend_usd\": 144000,\n  \"renewal_date\": \"2027-01-15\"\n}",
+        "fields_matched": 4,
+        "fields_total": 4
+      },
+      {
+        "id": "sas-042",
+        "domain": "saas_billing",
+        "expected": {
+          "product": "Datadog APM Pro",
+          "account_id": "DD-4018",
+          "annual_spend_usd": "78500",
+          "renewal_date": "2026-12-31"
+        },
+        "predicted": {
+          "product": "Datadog APM Pro",
+          "account_id": "DD-4018",
+          "annual_spend_usd": 78500,
+          "renewal_date": "2026-12-31"
+        },
+        "raw_output": "{\n  \"product\": \"Datadog APM Pro\",\n  \"account_id\": \"DD-4018\",\n  \"annual_spend_usd\": 78500,\n  \"renewal_date\": \"2026-12-31\"\n}",
+        "fields_matched": 4,
+        "fields_total": 4
+      },
+      {
+        "id": "sas-043",
+        "domain": "saas_billing",
+        "expected": {
+          "product": "Okta Workforce Identity",
+          "account_id": "OKT-7730",
+          "annual_spend_usd": "61200",
+          "renewal_date": "2027-02-01"
+        },
+        "predicted": {
+          "product": "Okta Workforce Identity",
+          "account_id": "OKT-7730",
+          "annual_spend_usd": 61200,
+          "renewal_date": "2027-02-01"
+        },
+        "raw_output": "{\n  \"product\": \"Okta Workforce Identity\",\n  \"account_id\": \"OKT-7730\",\n  \"annual_spend_usd\": 61200,\n  \"renewal_date\": \"2027-02-01\"\n}",
+        "fields_matched": 4,
+        "fields_total": 4
+      }
+    ],
+    "measured_local_peak_vram_gb": 12.3317
+  }
+}

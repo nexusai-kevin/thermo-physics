@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vertical Tensor Compression Dossier — {{ model.id }}</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --ink: #0f172a;
+      --ink-dim: #475569;
+      --ink-faint: #94a3b8;
+      --line: #e2e8f0;
+      --surface: #f8fafc;
+      --accent: #0f766e;
+      --accent-soft: #f0fdfa;
+      --accent-border: #99f6e4;
+      --base-bar: #94a3b8;
+      --comp-bar: #0f766e;
+    }
+
+    @page {
+      size: letter portrait;
+      margin: 0.35in;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--ink);
+      background: #e2e8f0;
+      font-size: 11px;
+      line-height: 1.42;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      max-width: 8.5in;
+      min-height: 10.3in;
+      margin: 16px auto;
+      background: var(--bg);
+      padding: 26px 30px;
+      border-radius: 4px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.10);
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+      }
+      .page {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border-radius: 0;
+        max-width: none;
+        min-height: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kicker {
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 9.5px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      color: var(--ink-dim);
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    .meta-box {
+      text-align: right;
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 9.5px;
+      color: var(--ink-dim);
+      line-height: 1.5;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+      break-inside: avoid;
+    }
+
+    .kpi-card.highlight {
+      background: var(--accent-soft);
+      border-color: var(--accent-border);
+    }
+
+    .kpi-label {
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-dim);
+      margin-bottom: 4px;
+    }
+
+    .kpi-value {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-card.highlight .kpi-value {
+      color: var(--accent);
+    }
+
+    .kpi-sub {
+      font-size: 9.5px;
+      color: var(--ink-dim);
+      margin-top: 2px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px 14px;
+      background: var(--bg);
+      break-inside: avoid;
+    }
+
+    .panel-title {
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink);
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5px;
+    }
+
+    th {
+      text-align: left;
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      border-bottom: 1px solid var(--ink);
+      padding: 5px 4px;
+    }
+
+    td {
+      padding: 6px 4px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    td.num, th.num {
+      text-align: right;
+      font-family: "JetBrains Mono", "Consolas", monospace;
+    }
+
+    .delta-good {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .chart-row {
+      margin-bottom: 10px;
+    }
+
+    .chart-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .chart-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      margin-bottom: 3px;
+      color: var(--ink-dim);
+    }
+
+    .roi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 9.5px;
+    }
+
+    .code-pill {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 6px 8px;
+      font-family: "JetBrains Mono", "Consolas", monospace;
+      font-size: 9px;
+      color: var(--ink);
+      margin-top: 6px;
+      word-break: break-all;
+    }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: var(--ink-faint);
+    }
+
+    .print-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: var(--ink);
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
+  <div class="page">
+    <div class="header">
+      <div>
+        <div class="kicker">Vertical Tensor Compression // Executive Benchmark Dossier</div>
+        <h1>{{ model.id }}</h1>
+        <div class="subtitle">
+          Architecture: <strong>{{ model.architecture_class }}</strong> ({{ "MoE" if model.is_moe else "Dense" }}, {{ model.num_layers }} layers)
+          &middot; Method: <strong>{{ pipeline_config.method }}</strong> (target ratio {{ "%.0f"|format(pipeline_config.ratio_requested * 100) }}%)
+          &middot; Healing: <strong>{{ "LoRA Applied" if pipeline_config.heal_executed else "Skipped (Free-Proof)" }}</strong>
+        </div>
+      </div>
+      <div class="meta-box">
+        <div>Date: {{ generated_at[:10] }}</div>
+        <div>GPU: {{ hardware.gpu_name }}</div>
+        <div>VRAM Cap: {{ hardware.gpu_vram_gb }} GB</div>
+        <div>Host RAM: {{ hardware.system_ram_gb }} GB</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card highlight">
+        <div class="kpi-label">Peak VRAM Reduction</div>
+        <div class="kpi-value">{{ "%+.1f"|format(-deltas.vram_reduction_pct) }}%</div>
+        <div class="kpi-sub">{{ "%.2f"|format(base_metrics.peak_vram_gb) }} GB &rarr; {{ "%.2f"|format(compressed_metrics.peak_vram_gb) }} GB</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Throughput Speedup</div>
+        <div class="kpi-value">{{ "%.2f"|format(deltas.throughput_speedup_x) }}x</div>
+        <div class="kpi-sub">{{ "%.1f"|format(base_metrics.throughput_tok_s) }} &rarr; {{ "%.1f"|format(compressed_metrics.throughput_tok_s) }} tok/s</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Vertical Task Retention</div>
+        <div class="kpi-value">{{ "%.1f"|format(deltas.accuracy_retention_pct) }}%</div>
+        <div class="kpi-sub">Acc: {{ "%.1f"|format(base_metrics.vertical_accuracy_pct) }}% &rarr; {{ "%.1f"|format(compressed_metrics.vertical_accuracy_pct) }}%</div>
+      </div>
+      <div class="kpi-card highlight">
+        <div class="kpi-label">Est. Annual GPU Savings</div>
+        <div class="kpi-value">${{ "{:,.0f}".format(roi_estimate.annual_savings_usd) }}</div>
+        <div class="kpi-sub">{{ roi_estimate.base_tier }} &rarr; {{ roi_estimate.compressed_tier }}</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">
+          <span>Base vs. Compressed Telemetry</span>
+          <span class="mono">n={{ eval_summary.num_eval_samples }} eval</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th class="num">Base</th>
+              <th class="num">Compressed</th>
+              <th class="num">Delta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Total Parameters</td>
+              <td class="num">{{ "{:.3f}".format(base_metrics.total_params / 1e9) }}B</td>
+              <td class="num">{{ "{:.3f}".format(compressed_metrics.total_params / 1e9) }}B</td>
+              <td class="num delta-good">-{{ "%.1f"|format(deltas.param_reduction_pct) }}%</td>
+            </tr>
+            <tr>
+              <td>Peak Inference VRAM</td>
+              <td class="num">{{ "%.2f"|format(base_metrics.peak_vram_gb) }} GB</td>
+              <td class="num">{{ "%.2f"|format(compressed_metrics.peak_vram_gb) }} GB</td>
+              <td class="num delta-good">-{{ "%.1f"|format(deltas.vram_reduction_pct) }}%</td>
+            </tr>
+            <tr>
+              <td>Throughput</td>
+              <td class="num">{{ "%.1f"|format(base_metrics.throughput_tok_s) }} tok/s</td>
+              <td class="num">{{ "%.1f"|format(compressed_metrics.throughput_tok_s) }} tok/s</td>
+              <td class="num delta-good">{{ "%.2f"|format(deltas.throughput_speedup_x) }}x</td>
+            </tr>
+            <tr>
+              <td>Mean Token Latency</td>
+              <td class="num">{{ "%.2f"|format(base_metrics.latency_ms_per_tok) }} ms</td>
+              <td class="num">{{ "%.2f"|format(compressed_metrics.latency_ms_per_tok) }} ms</td>
+              <td class="num delta-good">{{ "%+.2f"|format(compressed_metrics.latency_ms_per_tok - base_metrics.latency_ms_per_tok) }} ms</td>
+            </tr>
+            <tr>
+              <td>Vertical JSON Accuracy</td>
+              <td class="num">{{ "%.1f"|format(base_metrics.vertical_accuracy_pct) }}%</td>
+              <td class="num">{{ "%.1f"|format(compressed_metrics.vertical_accuracy_pct) }}%</td>
+              <td class="num">{{ "%+.1f"|format(compressed_metrics.vertical_accuracy_pct - base_metrics.vertical_accuracy_pct) }}%</td>
+            </tr>
+            <tr>
+              <td>JSON Schema Validity</td>
+              <td class="num">{{ "%.1f"|format(base_metrics.json_valid_pct) }}%</td>
+              <td class="num">{{ "%.1f"|format(compressed_metrics.json_valid_pct) }}%</td>
+              <td class="num">{{ "%+.1f"|format(compressed_metrics.json_valid_pct - base_metrics.json_valid_pct) }}%</td>
+            </tr>
+            <tr>
+              <td>Calibration Perplexity</td>
+              <td class="num">{{ "%.2f"|format(base_metrics.perplexity) }}</td>
+              <td class="num">{{ "%.2f"|format(compressed_metrics.perplexity) }}</td>
+              <td class="num">{{ "%+.2f"|format(compressed_metrics.perplexity - base_metrics.perplexity) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>Footprint &amp; Layer Profile</span>
+          <span class="mono">SVD err: {{ "%.4f"|format(layer_summary.mean_weighted_rel_error) }}</span>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">
+            <span>Parameters (Billions)</span>
+            <span class="mono">{{ "%.2f"|format(base_metrics.total_params / 1e9) }}B vs {{ "%.2f"|format(compressed_metrics.total_params / 1e9) }}B</span>
+          </div>
+          <svg width="100%" height="26" viewBox="0 0 280 26">
+            <rect x="0" y="2" width="280" height="9" rx="2" fill="#e2e8f0" />
+            <rect x="0" y="2" width="280" height="9" rx="2" fill="#94a3b8" />
+            <rect x="0" y="14" width="280" height="9" rx="2" fill="#e2e8f0" />
+            <rect x="0" y="14" width="{{ [8, (280 * (1.0 - deltas.param_reduction_pct / 100.0))|round(1)]|max }}" height="9" rx="2" fill="#0f766e" />
+          </svg>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">
+            <span>Peak VRAM (GB)</span>
+            <span class="mono">{{ "%.2f"|format(base_metrics.peak_vram_gb) }} vs {{ "%.2f"|format(compressed_metrics.peak_vram_gb) }} GB</span>
+          </div>
+          <svg width="100%" height="26" viewBox="0 0 280 26">
+            <rect x="0" y="2" width="280" height="9" rx="2" fill="#e2e8f0" />
+            <rect x="0" y="2" width="280" height="9" rx="2" fill="#94a3b8" />
+            <rect x="0" y="14" width="280" height="9" rx="2" fill="#e2e8f0" />
+            <rect x="0" y="14" width="{{ [8, (280 * (compressed_metrics.peak_vram_gb / ([base_metrics.peak_vram_gb, 0.01]|max)))|round(1)]|max }}" height="9" rx="2" fill="#0f766e" />
+          </svg>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-label">
+            <span>Block-Wise Retention ({{ layer_summary.compressed_layers }}/{{ model.num_layers }} compressed)</span>
+            <span class="mono">1st/Last preserved</span>
+          </div>
+          <svg width="100%" height="44" viewBox="0 0 280 44">
+            {% set n_bars = layer_summary.per_layer_retention|length %}
+            {% if n_bars > 0 %}
+              {% set bar_w = (280.0 / n_bars) %}
+              {% for item in layer_summary.per_layer_retention %}
+                {% set h = (item.retention_pct / 100.0 * 38.0)|round(1) %}
+                <rect x="{{ (loop.index0 * bar_w)|round(2) }}"
+                      y="{{ (42 - h)|round(1) }}"
+                      width="{{ [1.0, bar_w - 1.0]|max|round(2) }}"
+                      height="{{ h }}"
+                      rx="1"
+                      fill="{{ '#94a3b8' if item.preserved else '#0f766e' }}" />
+              {% endfor %}
+            {% endif %}
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="roi-grid">
+      <div class="panel">
+        <div class="panel-title">
+          <span>Cloud GPU Economics (24/7 Production)</span>
+          <span class="mono">8,760 hrs/yr</span>
+        </div>
+        <p style="color: var(--ink-dim); margin-bottom: 6px;">
+          {{ roi_estimate.assumption_note }}
+        </p>
+        <table>
+          <tbody>
+            <tr>
+              <td>Base Fleet</td>
+              <td class="num">{{ roi_estimate.base_tier }} (${{ "%.2f"|format(roi_estimate.base_hourly_usd) }}/hr)</td>
+            </tr>
+            <tr>
+              <td>Compressed Fleet</td>
+              <td class="num">{{ roi_estimate.compressed_tier }} (${{ "%.2f"|format(roi_estimate.compressed_hourly_usd) }}/hr)</td>
+            </tr>
+            <tr>
+              <td><strong>Annual Cost Delta</strong></td>
+              <td class="num delta-good">-${{ "{:,.0f}".format(roi_estimate.annual_savings_usd) }} / yr ({{ "%.0f"|format(roi_estimate.savings_pct) }}%)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <span>Deployment Artifacts (GGUF &amp; vLLM)</span>
+          <span class="mono">Q4_K_M ~{{ "%.2f"|format(deployment_artifacts.estimated_q4_km_gguf_gb) }} GB</span>
+        </div>
+        <p style="color: var(--ink-dim);">
+          Standard HF safetensors + ready-to-run Ollama Q4_K_M &amp; vLLM scripts exported:
+        </p>
+        <div class="code-pill">ollama create {{ deployment_artifacts.slug }}-compressed -f deploy/Modelfile</div>
+        <div class="code-pill">bash {{ deployment_artifacts.serve_vllm_sh }}</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>Vertical Tensor Compression Pipeline &middot; Layer-by-Layer 16GB VRAM Streaming</div>
+      <div>Schema v{{ schema_version }} &middot; {{ generated_at }}</div>
+    </div>
+  </div>
+</body>
+</html>

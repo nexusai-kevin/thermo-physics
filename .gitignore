@@ -26,4 +26,10 @@ Thumbs.db
 # Sub-workspace (Block 2 Physical AI Teleoperation Middle Layer)
 nexus-teleop-bridge/
 
+# Vertical Tensor Compression large weights & temp caches
+output/
+tools/tensor-compressor/smoke_output/
+tools/tensor-compressor/calib_cache/*.pt
+
+
 
