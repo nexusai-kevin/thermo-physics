@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { EnergyBasinDescent } from "./EnergyBasinDescent";
+import { QuantumTunnelingCrossover } from "./QuantumTunnelingCrossover";
 import {
   LiveEmpiricalRefineryDeck,
   computeSokalTauInt,
@@ -170,6 +171,16 @@ const STATIONS: StationItem[] = [
     runtime: "1.58s",
     command: "uv run thrml-bench run --exp 16",
     href: "/stations/16",
+  },
+  {
+    id: 17,
+    name: "Quantum tunneling vs. thermal hopping",
+    desc: "P=32 Trotter-slice Path-Integral Monte Carlo (SQA) vs. thrml Block-Gibbs across double-well Ising barriers.",
+    metric: "W=1 P_gs 99.2% vs 12.9% (33.4x TTS_99 sweep gain) · crossovers W_c = 4.48 (N=32) / 3.74 (N=64)",
+    runtime: "0.09s",
+    command: "python stations/station_17_tunneling_vs_thermal.py",
+    href: "/stations/17",
+    apparatusHref: "#station-17-tunneling",
   },
 ];
 
@@ -1700,7 +1711,7 @@ export default function ThermoLabPage() {
             <h2>A landscape, a temperature, and time to settle.</h2>
             <p className="intro measure">
               Every problem on this page is rewritten the same way: as an energy. Good
-              answers sit low in the landscape; bad answers sit high. The sampler's job is
+              answers sit low in the landscape; bad answers sit high. The sampler&apos;s job is
               to find the valleys without getting trapped in the first dip it meets.
             </p>
             <div className="thermo-cols">
@@ -2027,7 +2038,7 @@ export default function ThermoLabPage() {
                   The evaluation harness is designed specifically for research facilities
                   that cannot transmit proprietary or pre-publication sequences off-site.
                   It is MIT open-source, makes zero network calls, and collects zero
-                  telemetry — running entirely on the laboratory's own infrastructure.
+                  telemetry — running entirely on the laboratory&apos;s own infrastructure.
                   Summary exports contain only aggregate statistics: sample counts, Spearman
                   ρ, Pearson r, p-values, and ROC-AUC. Zero sequences and zero construct IDs
                   leave the laboratory.
@@ -2043,9 +2054,9 @@ export default function ThermoLabPage() {
                   >
                     Request the evaluation CLI
                   </a>
-                  <a className="thermo-btn thermo-btn-ghost" href="/codon">
+                  <Link className="thermo-btn thermo-btn-ghost" href="/codon">
                     Read the full codon page
-                  </a>
+                  </Link>
                 </div>
               </div>
               <div className="side">
@@ -2074,7 +2085,7 @@ export default function ThermoLabPage() {
             </h3>
             <div className="thermo-codeblock">
               <code>
-                python scripts/biofoundry_codon_benchmark.py design --seq "MSKGEEL..."
+                python scripts/biofoundry_codon_benchmark.py design --seq &quot;MSKGEEL...&quot;
                 --host d_discoideum --candidates 5
               </code>
               <button
@@ -2111,7 +2122,7 @@ export default function ThermoLabPage() {
             </div>
             <p className="thermo-note-line">
               The first designs five synonymous candidates for a Dictyostelium host. The
-              second correlates sampler scores against a lab's own construct history — and
+              second correlates sampler scores against a lab&apos;s own construct history — and
               writes out only the aggregate summary named in the command.
             </p>
           </div>
@@ -2191,9 +2202,9 @@ export default function ThermoLabPage() {
               </button>
             </div>
             <div className="thermo-hero-actions">
-              <a className="thermo-btn thermo-btn-ghost" href="/dispatcher">
+              <Link className="thermo-btn thermo-btn-ghost" href="/dispatcher">
                 Read the full dispatcher page
-              </a>
+              </Link>
             </div>
           </div>
         </section>
@@ -2335,9 +2346,9 @@ export default function ThermoLabPage() {
               </div>
             </div>
             <div className="thermo-hero-actions">
-              <a className="thermo-btn thermo-btn-ghost" href="/microgrid">
+              <Link className="thermo-btn thermo-btn-ghost" href="/microgrid">
                 Read the full microgrid page
-              </a>
+              </Link>
             </div>
           </div>
         </section>
@@ -2357,6 +2368,26 @@ export default function ThermoLabPage() {
             </p>
             <div style={{ marginTop: "2rem" }}>
               <EnergyBasinDescent externalData={livePayload} />
+            </div>
+          </div>
+        </section>
+
+        {/* Station 17: Quantum Tunneling vs. Classical Thermal Barrier Hopping */}
+        <section className="thermo-blk" id="station-17-tunneling">
+          <div className="wrap">
+            <h2>Quantum tunneling versus thermal barrier hopping.</h2>
+            <p className="intro measure">
+              <span className="mono" style={{ fontSize: ".95em" }}>
+                stations/station_17_tunneling_vs_thermal.py
+              </span>{" "}
+              benchmarks classical 2-color Block-Gibbs thermal annealing (thrml 0.1.4)
+              against Simulated Quantum Annealing via Path-Integral Monte Carlo (P = 32
+              imaginary-time Trotter slices in JAX) across double-well Ising barriers of
+              fixed height H = 8.0 and Hamming width W in &#123;1, 2, 3, 4, 6&#125; for N = 32
+              and N = 64 spins.
+            </p>
+            <div style={{ marginTop: "2rem" }}>
+              <QuantumTunnelingCrossover />
             </div>
           </div>
         </section>

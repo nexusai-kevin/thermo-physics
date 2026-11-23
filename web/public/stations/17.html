@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Station 17 · Quantum Tunneling (PIMC/SQA) vs. Thermal Barrier Hopping</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#070d12;
+    --panel:#0c161d;
+    --panel-2:#091117;
+    --ink:#faf9f5;
+    --ink-soft:#9fb7c0;
+    --line:#1d323c;
+    --teal:#5eead4;
+    --emerald:#34d399;
+    --amber:#f59e0b;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.35);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:"Archivo",system-ui,sans-serif;line-height:1.45}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 16px 48px}
+  header.top{padding:12px 2px 22px}
+  .station-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+  .tag{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;letter-spacing:.12em;border:1px solid var(--line);border-radius:999px;padding:5px 12px;text-transform:uppercase;color:var(--ink-soft)}
+  .tag.callout{border-color:rgba(94,234,212,.45);background:rgba(94,234,212,.1);color:var(--teal)}
+  h1{font-size:clamp(28px,4.8vw,48px);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:0 0 10px}
+  h1 .accent{color:var(--teal)}
+  .lede{font-size:16px;color:var(--ink-soft);max-width:780px;margin:0}
+  .bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:20px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;min-width:0}
+  .tile h2{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 6px;color:var(--teal);font-family:"IBM Plex Mono",monospace}
+  .span-5{grid-column:span 5}
+  .span-7{grid-column:span 7}
+  .span-12{grid-column:span 12}
+  @media(max-width:900px){.span-5,.span-7{grid-column:span 12}}
+  .ctl-bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  .btn-group{display:inline-flex;flex-wrap:wrap;gap:6px}
+  button{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--ink-soft);padding:8px 12px;cursor:pointer}
+  button.active{background:var(--teal);border-color:var(--teal);color:#041513}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  @media(max-width:640px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .kpi .k{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);font-family:"IBM Plex Mono",monospace}
+  .kpi .v{font-size:20px;font-weight:600;margin-top:4px;font-family:"IBM Plex Mono",monospace}
+  table{width:100%;border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:12.5px;margin-top:10px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--ink-soft);font-weight:500}
+  tr.sel{background:rgba(94,234,212,.08)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="station-row">
+      <span class="tag">Station 17 · Layer 4</span>
+      <span class="tag">P = 32 Trotter Slices · H = 8.0</span>
+      <span class="tag callout" id="crossoverBadge">Crossover Threshold: W_c(sweeps) = 3.74 · W_c(wall) = 2.33</span>
+    </div>
+    <h1>Quantum Tunneling <span class="accent">(PIMC/SQA)</span> vs. Classical Thermal Hopping</h1>
+    <p class="lede">Benchmarks classical 2-color Block-Gibbs thermal annealing (thrml 0.1.4) against Simulated Quantum Annealing via Path-Integral Monte Carlo (P = 32 imaginary-time Trotter slices in JAX) across double-well Ising barriers of height H = 8.0 and Hamming width W in {1, 2, 3, 4, 6}.</p>
+  </header>
+
+  <div class="bento">
+    <section class="tile span-12">
+      <div class="ctl-bar">
+        <div>
+          <h2>System Dimension &amp; Metric Controls</h2>
+          <div class="btn-group" id="nBtns">
+            <button type="button" data-n="32">N = 32 (1,024 PIMC Spins)</button>
+            <button type="button" data-n="64" class="active">N = 64 (2,048 PIMC Spins)</button>
+          </div>
+        </div>
+        <div>
+          <h2>Sweep Metric</h2>
+          <div class="btn-group" id="mBtns">
+            <button type="button" data-m="pgs" class="active">P_gs (%)</button>
+            <button type="button" data-m="tts_sweeps">TTS_99 (Sweeps)</button>
+            <button type="button" data-m="tts_wall_ms">TTS_99 (Wall ms)</button>
+          </div>
+        </div>
+        <div>
+          <h2>Inspect Barrier Width W</h2>
+          <div class="btn-group" id="wBtns">
+            <button type="button" data-w="1" class="active">W=1</button>
+            <button type="button" data-w="2">W=2</button>
+            <button type="button" data-w="3">W=3</button>
+            <button type="button" data-w="4">W=4</button>
+            <button type="button" data-w="6">W=6</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tile span-5">
+      <h2>Double-Well Barrier Landscape (H = 8.0, ΔE_AB = 4.0)</h2>
+      <svg id="wellSvg" viewBox="0 0 360 190" style="width:100%;height:195px;background:#060b0f;border-radius:10px;border:1px solid var(--line)"></svg>
+      <div class="mono" style="font-size:12px;color:var(--ink-soft);margin-top:12px" id="wellNote"></div>
+    </section>
+
+    <section class="tile span-7">
+      <h2 id="chartTitle">Ground-State Success Probability (P_gs) vs. Barrier Width W</h2>
+      <svg id="sweepSvg" viewBox="0 0 540 220" style="width:100%;height:210px"></svg>
+      <div class="kpi-row" id="kpiRow"></div>
+    </section>
+
+    <section class="tile span-12">
+      <h2>Empirical Telemetry Table · /stations/station_17_telemetry.json</h2>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Width W</th>
+              <th>Thermal P_gs</th>
+              <th>PIMC P_gs</th>
+              <th>Thermal TTS_99 (sw)</th>
+              <th>PIMC TTS_99 (sw)</th>
+              <th>Thermal TTS_99 (ms)</th>
+              <th>PIMC TTS_99 (ms)</th>
+              <th>Sweep / Wall Gain</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+  var state = { n: 64, w: 1, m: "pgs", data: null };
+  function render(){
+    if(!state.data) return;
+    var sys = state.data.systems["N_" + state.n];
+    var th = sys.thermal_thrml_curve;
+    var qa = sys.quantum_pimc_curve;
+    var cr = sys.crossover_analysis;
+    document.getElementById("crossoverBadge").textContent =
+      "Crossover Threshold (N=" + state.n + "): W_c(sweeps) = " +
+      cr.tts_99_sweeps_crossover.crossover_width_w.toFixed(2) +
+      " · W_c(wall) = " + cr.tts_99_wall_ms_crossover.crossover_width_w.toFixed(2);
+
+    var selTh = th.find(function(x){return x.barrier_width_w===state.w;}) || th[0];
+    var selQa = qa.find(function(x){return x.barrier_width_w===state.w;}) || qa[0];
+    var swGain = selTh.tts_99_sweeps / Math.max(1e-6, selQa.tts_99_sweeps);
+    var wlGain = selTh.tts_99_wall_ms / Math.max(1e-6, selQa.tts_99_wall_ms);
+
+    document.getElementById("wellNote").textContent =
+      "W = " + state.w + " (" + (2*state.w) + " core spins) · PIMC P_gs = " +
+      (selQa.ground_state_prob_pgs*100).toFixed(1) + "% vs Thermal " +
+      (selTh.ground_state_prob_pgs*100).toFixed(1) + "% · Sweep speedup " + swGain.toFixed(2) + "x";
+
+    var kpiHtml = [
+      '<div class="kpi"><div class="k">PIMC P_gs (W=' + state.w + ')</div><div class="v" style="color:var(--teal)">' + (selQa.ground_state_prob_pgs*100).toFixed(1) + '%</div></div>',
+      '<div class="kpi"><div class="k">Thermal P_gs (W=' + state.w + ')</div><div class="v" style="color:var(--amber)">' + (selTh.ground_state_prob_pgs*100).toFixed(1) + '%</div></div>',
+      '<div class="kpi"><div class="k">PIMC TTS_99 (Sweeps)</div><div class="v" style="color:var(--emerald)">' + selQa.tts_99_sweeps.toFixed(1) + '</div></div>',
+      '<div class="kpi"><div class="k">Wall-Clock TTS_99</div><div class="v">' + selQa.tts_99_wall_ms.toFixed(3) + ' ms</div></div>'
+    ].join("");
+    document.getElementById("kpiRow").innerHTML = kpiHtml;
+
+    var rowsHtml = th.map(function(t, idx){
+      var q = qa[idx];
+      var sg = t.tts_99_sweeps / Math.max(1e-6, q.tts_99_sweeps);
+      var wg = t.tts_99_wall_ms / Math.max(1e-6, q.tts_99_wall_ms);
+      return '<tr class="' + (t.barrier_width_w===state.w?'sel':'') + '">' +
+        '<td>W = ' + t.barrier_width_w + '</td>' +
+        '<td style="color:var(--amber)">' + (t.ground_state_prob_pgs*100).toFixed(1) + '%</td>' +
+        '<td style="color:var(--teal)">' + (q.ground_state_prob_pgs*100).toFixed(1) + '%</td>' +
+        '<td>' + t.tts_99_sweeps.toFixed(1) + '</td>' +
+        '<td style="color:var(--emerald)">' + q.tts_99_sweeps.toFixed(1) + '</td>' +
+        '<td>' + t.tts_99_wall_ms.toFixed(3) + ' ms</td>' +
+        '<td>' + q.tts_99_wall_ms.toFixed(3) + ' ms</td>' +
+        '<td>' + sg.toFixed(2) + 'x sw · ' + wg.toFixed(2) + 'x ms</td></tr>';
+    }).join("");
+    document.getElementById("tableBody").innerHTML = rowsHtml;
+  }
+
+  fetch("/stations/station_17_telemetry.json", {cache:"no-store"})
+    .then(function(r){return r.json();})
+    .then(function(d){state.data = d; render();})
+    .catch(function(){});
+
+  document.getElementById("nBtns").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    state.n = parseInt(b.getAttribute("data-n"), 10);
+    Array.from(this.querySelectorAll("button")).forEach(function(x){x.classList.toggle("active", x===b);});
+    render();
+  });
+  document.getElementById("mBtns").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    state.m = b.getAttribute("data-m");
+    Array.from(this.querySelectorAll("button")).forEach(function(x){x.classList.toggle("active", x===b);});
+    render();
+  });
+  document.getElementById("wBtns").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    state.w = parseInt(b.getAttribute("data-w"), 10);
+    Array.from(this.querySelectorAll("button")).forEach(function(x){x.classList.toggle("active", x===b);});
+    render();
+  });
+})();
+</script>
+</body>
+</html>
