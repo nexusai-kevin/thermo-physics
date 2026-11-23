@@ -1019,6 +1019,7 @@ export default function ThermoLabPage() {
         }
         .exp-side {
           text-align: right;
+          min-width: 0;
         }
         .exp-time {
           font-family: 'JetBrains Mono', monospace;
@@ -1031,6 +1032,9 @@ export default function ThermoLabPage() {
           align-items: center;
           gap: 0.45rem;
           margin-top: 0.45rem;
+          max-width: 100%;
+          overflow-wrap: anywhere;
+          word-break: break-word;
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.76rem;
           color: var(--ink-2);
