@@ -306,9 +306,19 @@
         <div class="kpi-sub">{{ "%.2f"|format(base_metrics.peak_vram_gb) }} GB &rarr; {{ "%.2f"|format(compressed_metrics.peak_vram_gb) }} GB</div>
       </div>
       <div class="kpi-card">
+        {% if pipeline_config.native_4bit_compressed %}
+        <div class="kpi-label">Native 4-Bit GPU Speed</div>
+        <div class="kpi-value">{{ "%.2f"|format(compressed_metrics.throughput_tok_s) }} tok/s</div>
+        <div class="kpi-sub">100% in {{ hardware.gpu_vram_gb }}GB GPU ({{ "%.2f"|format(compressed_metrics.native_4bit_vram_gb or compressed_metrics.measured_local_peak_vram_gb) }} GB) &middot; PyTorch ref (no Flash/Conv1D)</div>
+        {% elif pipeline_config.offload_mode %}
+        <div class="kpi-label">Strict JSON Validity</div>
+        <div class="kpi-value">{{ "%.1f"|format(compressed_metrics.json_valid_pct) }}%</div>
+        <div class="kpi-sub">Base: {{ "%.1f"|format(base_metrics.json_valid_pct) }}% &middot; BF16 Footprint Verified</div>
+        {% else %}
         <div class="kpi-label">Throughput Speedup</div>
         <div class="kpi-value">{{ "%.2f"|format(deltas.throughput_speedup_x) }}x</div>
         <div class="kpi-sub">{{ "%.1f"|format(base_metrics.throughput_tok_s) }} &rarr; {{ "%.1f"|format(compressed_metrics.throughput_tok_s) }} tok/s</div>
+        {% endif %}
       </div>
       <div class="kpi-card">
         <div class="kpi-label">Vertical Task Retention</div>
@@ -350,8 +360,22 @@
               <td class="num">{{ "%.2f"|format(compressed_metrics.peak_vram_gb) }} GB</td>
               <td class="num delta-good">-{{ "%.1f"|format(deltas.vram_reduction_pct) }}%</td>
             </tr>
+            {% if pipeline_config.native_4bit_compressed and not pipeline_config.native_4bit_base %}
             <tr>
-              <td>Throughput</td>
+              <td>Throughput (4-Bit Ref)</td>
+              <td class="num">&gt;16GB (offloaded)</td>
+              <td class="num">{{ "%.2f"|format(compressed_metrics.throughput_tok_s) }} tok/s</td>
+              <td class="num delta-good">100% 16GB GPU (PyTorch ref)</td>
+            </tr>
+            <tr>
+              <td>Mean Token Latency</td>
+              <td class="num">&gt;16GB (offloaded)</td>
+              <td class="num">{{ "%.1f"|format(compressed_metrics.latency_ms_per_tok) }} ms</td>
+              <td class="num">No Flash/Conv1D kernels</td>
+            </tr>
+            {% elif not pipeline_config.offload_mode or (pipeline_config.native_4bit_compressed and pipeline_config.native_4bit_base) %}
+            <tr>
+              <td>Throughput{{ " (4-Bit)" if pipeline_config.native_4bit_compressed else "" }}</td>
               <td class="num">{{ "%.1f"|format(base_metrics.throughput_tok_s) }} tok/s</td>
               <td class="num">{{ "%.1f"|format(compressed_metrics.throughput_tok_s) }} tok/s</td>
               <td class="num delta-good">{{ "%.2f"|format(deltas.throughput_speedup_x) }}x</td>
@@ -362,6 +386,7 @@
               <td class="num">{{ "%.2f"|format(compressed_metrics.latency_ms_per_tok) }} ms</td>
               <td class="num delta-good">{{ "%+.2f"|format(compressed_metrics.latency_ms_per_tok - base_metrics.latency_ms_per_tok) }} ms</td>
             </tr>
+            {% endif %}
             <tr>
               <td>Vertical JSON Accuracy</td>
               <td class="num">{{ "%.1f"|format(base_metrics.vertical_accuracy_pct) }}%</td>

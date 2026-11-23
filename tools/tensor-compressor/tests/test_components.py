@@ -66,12 +66,13 @@ def test_moe_compression_hook() -> None:
     assert prune_cold and r_cold > 0.35
 
 
-def test_hybrid_qwen35_pipeline_roundtrip(tmp_path: Path) -> None:
+def test_hybrid_qwen35_pipeline_roundtrip(tmp_path: Path, monkeypatch) -> None:
     from transformers import AutoModelForCausalLM, Qwen3_5TextConfig
     from common.model_utils import load_compressed_model
     from stages.calibrate import run_calibration
     from stages.decompose import run_decomposition
     from stages.export import run_export
+    import stages.heal as heal_mod
 
     cfg = Qwen3_5TextConfig(
         vocab_size=256,
@@ -95,10 +96,11 @@ def test_hybrid_qwen35_pipeline_roundtrip(tmp_path: Path) -> None:
         eos_token = "</s>"
 
         def __call__(self, texts, return_tensors="pt", padding=True, truncation=True, max_length=32):
-            n = len(texts)
+            n = 1 if isinstance(texts, str) else len(texts)
+            seq = 8 if (isinstance(texts, str) and "JSON:\n" in texts and texts.endswith("JSON:\n")) else 16
             return {
-                "input_ids": torch.randint(2, 200, (n, 16)),
-                "attention_mask": torch.ones((n, 16), dtype=torch.long),
+                "input_ids": torch.randint(2, 200, (n, seq)),
+                "attention_mask": torch.ones((n, seq), dtype=torch.long),
             }
 
         def save_pretrained(self, _dir: str) -> None:
@@ -115,6 +117,12 @@ def test_hybrid_qwen35_pipeline_roundtrip(tmp_path: Path) -> None:
     assert manifest["params_after"]["total"] < manifest["params_before"]["total"]
 
     export_sum = run_export(model, tok, manifest, "dummy/qwen35-hybrid", output_dir=tmp_path)
+    monkeypatch.setattr(heal_mod.AutoTokenizer, "from_pretrained", lambda *a, **kw: tok)
+    heal_sum = heal_mod.run_checkpoint_healing(
+        export_sum["compressed_hf_dir"], samples, steps=2, max_seq_len=32, device=device
+    )
+    assert heal_sum["executed"] and heal_sum["merged_tensors"] > 0
+
     reloaded = load_compressed_model(export_sum["compressed_hf_dir"], device=device, dtype=torch.bfloat16)
     out = reloaded(input_ids=torch.randint(2, 200, (1, 12), device=device), use_cache=False)
     assert out.logits.shape == (1, 12, 256)
@@ -127,15 +135,15 @@ def test_json_extraction_and_stop_criteria() -> None:
     strict_obj, is_strict = _extract_json_object('{"product": "Snowflake", "annual_spend_usd": "144000"}')
     assert is_strict and strict_obj == {"product": "Snowflake", "annual_spend_usd": "144000"}
 
-    # 2. Truncated base & compressed outputs from Qwen3.8-27B run
+    # 2. Strict JSON enforcement: malformed/truncated outputs MUST NOT pass silently
     base_trunc = '{\n  "product": "Snowflake Enterprise",\n  "account_id": "SNF-9921",\n  "annual_spend_usd": 144000,\n  "renew'
-    comp_trunc = '{product": "Snowflake Enterprise", "account_id": "SNF-9921", "annual_spend_usd": 144000, "renewal_date": "2027-'
+    comp_malformed = '{product": "Snowflake Enterprise", "account_id": "SNF-9921", "annual_spend_usd": 144000, "renewal_date": "2027-01-15"}'
     keys = ["product", "account_id", "annual_spend_usd", "renewal_date"]
 
     b_obj, b_strict = _extract_json_object(base_trunc, keys)
-    c_obj, c_strict = _extract_json_object(comp_trunc, keys)
-    assert not b_strict and b_obj is not None and b_obj["product"] == "Snowflake Enterprise" and b_obj["account_id"] == "SNF-9921"
-    assert not c_strict and c_obj is not None and c_obj["product"] == "Snowflake Enterprise" and c_obj["account_id"] == "SNF-9921"
+    c_obj, c_strict = _extract_json_object(comp_malformed, keys)
+    assert not b_strict and b_obj is None
+    assert not c_strict and c_obj is None
 
     # 3. _StopOnJsonClose
     class _Tok:

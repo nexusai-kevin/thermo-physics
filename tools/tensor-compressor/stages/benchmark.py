@@ -15,13 +15,14 @@ import torch
 import torch.nn as nn
 from accelerate import dispatch_model, infer_auto_device_map
 from jinja2 import Environment, FileSystemLoader
-from transformers import AutoModelForCausalLM, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, StoppingCriteria, StoppingCriteriaList
 
 from common.model_utils import (
     count_parameters,
     detect_architecture,
     get_vram_stats_gb,
     load_compressed_model,
+    quantize_model_nf4_streaming,
     release_cuda,
 )
 
@@ -68,9 +69,8 @@ def _extract_json_object(
     text: str,
     expected_keys: list[str] | None = None,
 ) -> tuple[dict[str, Any] | None, bool]:
-    """Extract JSON object from model output, returning (parsed_dict, is_strict_json)."""
+    """Strictly extract a valid JSON object from model output (no silent syntax repair)."""
     text = text.strip()
-    # 1. Strict JSON pass: direct parse or balanced {...} span
     try:
         obj = json.loads(text)
         if isinstance(obj, dict):
@@ -86,35 +86,6 @@ def _extract_json_object(
         except Exception:
             continue
 
-    # 2. Fallback partial-JSON recovery (for truncated tails or missing opening quote)
-    if "{" in text:
-        cand = text[text.find("{") :]
-        cand = re.sub(r'^\{\s*([A-Za-z0-9_]+)"\s*:', r'{"\1":', cand)
-        cand_clean = re.sub(r",\s*$", "", cand.strip())
-        if not cand_clean.endswith("}"):
-            cand_clean = cand_clean + "}"
-        try:
-            obj = json.loads(cand_clean)
-            if isinstance(obj, dict):
-                return obj, False
-        except Exception:
-            pass
-
-    # 3. Field-level key/value regex recovery
-    recovered: dict[str, Any] = {}
-    for m in re.finditer(
-        r'"?([A-Za-z0-9_]+)"?\s*:\s*(?:"([^"]*)"|(-?\d+(?:\.\d+)?))',
-        text,
-    ):
-        key = m.group(1)
-        if expected_keys is not None and key not in expected_keys:
-            continue
-        val = m.group(2) if m.group(2) is not None else m.group(3)
-        if key not in recovered and val is not None:
-            recovered[key] = val
-
-    if recovered:
-        return recovered, False
     return None, False
 
 
@@ -224,7 +195,7 @@ def _evaluate_model(
     valid_json_count = 0
     sample_records: list[dict[str, Any]] = []
 
-    for sample in eval_samples:
+    for sample_idx, sample in enumerate(eval_samples):
         enc = tokenizer(sample["prompt"], return_tensors="pt", truncation=True, max_length=384).to(input_device)
         prompt_len = enc["input_ids"].shape[1]
         stop_list = StoppingCriteriaList([_StopOnJsonClose(tokenizer, prompt_len)])
@@ -264,6 +235,13 @@ def _evaluate_model(
                 if _normalize_val(parsed[k]) == _normalize_val(exp_v):
                     correct_fields += 1
                     sample_correct += 1
+
+        print(
+            f"  [Eval] {sample_idx + 1:02d}/{len(eval_samples):02d} ({sample['id']}) | "
+            f"strict_json={is_strict_json} | fields={sample_correct}/{len(expected)} | "
+            f"{n_tok} tok in {dt:.1f}s ({n_tok / dt:.1f} tok/s)",
+            flush=True,
+        )
 
         if len(sample_records) < 3:
             sample_records.append(
@@ -316,6 +294,7 @@ def _estimate_cloud_roi(
     base_vram_gb: float,
     comp_vram_gb: float,
     speedup_x: float,
+    speedup_comparable: bool = True,
 ) -> dict[str, Any]:
     """Estimate annual 24/7 cloud GPU savings from VRAM tier downshift & throughput gain."""
     base_b = base_params / 1e9
@@ -342,6 +321,18 @@ def _estimate_cloud_roi(
     annual_savings = round(max(0.0, annual_base - annual_comp), 2)
     savings_pct = round((annual_savings / max(annual_base, 1.0)) * 100.0, 1)
 
+    if speedup_comparable:
+        assumption_note = (
+            f"24/7 single-replica inference (8,760 hrs/yr) sizing {base_b:.1f}B -> {comp_b:.1f}B "
+            f"with {speedup_x:.2f}x throughput multiplier."
+        )
+    else:
+        vram_red = ((base_vram_gb - comp_vram_gb) / max(base_vram_gb, 0.1)) * 100.0
+        assumption_note = (
+            f"24/7 single-replica inference (8,760 hrs/yr) sizing {base_b:.1f}B -> {comp_b:.1f}B "
+            f"({vram_red:.1f}% BF16 VRAM reduction; native 16GB GPU PyTorch reference run without compiled Flash/Conv1D kernels)."
+        )
+
     return {
         "base_tier": base_tier,
         "base_hourly_usd": base_hr,
@@ -351,10 +342,7 @@ def _estimate_cloud_roi(
         "annual_compressed_usd": annual_comp,
         "annual_savings_usd": annual_savings,
         "savings_pct": savings_pct,
-        "assumption_note": (
-            f"24/7 single-replica inference (8,760 hrs/yr) sizing {base_b:.1f}B -> {comp_b:.1f}B "
-            f"with {speedup_x:.2f}x throughput multiplier."
-        ),
+        "assumption_note": assumption_note,
     }
 
 
@@ -406,16 +394,18 @@ def run_benchmark(
     offload_dir = out_path / "offload_tmp"
     cache_lookup_id = base_cache_model_id or base_model_id
     cached_base = load_base_benchmark_cache(cache_lookup_id) if use_base_cache else None
+    base_fully_on_gpu = not offload_mode
 
     if cached_base is not None:
         cache_path = get_base_cache_path(cache_lookup_id)
         print(f"  [Stage 5] Reusing cached base benchmark: {cache_path}", flush=True)
         arch = cached_base["arch"]
         base_metrics = cached_base["base_metrics"]
+        base_fully_on_gpu = bool(base_metrics.get("fully_on_gpu", not offload_mode))
     else:
         if offload_mode:
             offload_dir.mkdir(parents=True, exist_ok=True)
-            print(f"  [Stage 5] Offload mode enabled ({est_bf16_gb:.1f} GB > 12 GB): dispatching Base Model (12GiB GPU + 75GiB CPU)...", flush=True)
+            print(f"  [Stage 5] Large model ({est_bf16_gb:.1f} GB > 12 GB): dispatching Base Model (12GiB GPU + 75GiB CPU)...", flush=True)
             base_model = AutoModelForCausalLM.from_pretrained(
                 base_model_id,
                 dtype=dtype,
@@ -424,11 +414,18 @@ def run_benchmark(
                 offload_folder=str(offload_dir),
                 low_cpu_mem_usage=True,
             )
+            base_orig_params = {"total": manifest["params_before"]["total"], "non_embedding": manifest["params_before"]["non_embedding"]}
+            arch_full = detect_architecture(base_model)
+            arch = {k: v for k, v in arch_full.items() if k != "components"}
+            del arch_full
+            base_fully_on_gpu = False
         else:
             base_model = AutoModelForCausalLM.from_pretrained(base_model_id, dtype=dtype).to(device)
-        arch_full = detect_architecture(base_model)
-        arch = {k: v for k, v in arch_full.items() if k != "components"}
-        del arch_full
+            base_orig_params = count_parameters(base_model)
+            arch_full = detect_architecture(base_model)
+            arch = {k: v for k, v in arch_full.items() if k != "components"}
+            del arch_full
+
         base_metrics = _evaluate_model(
             base_model,
             tokenizer,
@@ -442,26 +439,38 @@ def run_benchmark(
         )
         del base_model
         release_cuda()
+        base_metrics["total_params"] = base_orig_params["total"]
+        base_metrics["non_embedding_params"] = base_orig_params["non_embedding"]
         base_metrics["measured_local_peak_vram_gb"] = base_metrics["peak_vram_gb"]
+        base_metrics["fully_on_gpu"] = base_fully_on_gpu
         if offload_mode:
+            base_metrics["native_4bit_vram_gb"] = (
+                base_metrics["measured_local_peak_vram_gb"]
+                if base_fully_on_gpu
+                else round(base_orig_params["total"] * 0.56 / (1024**3) + 2.5, 2)
+            )
             base_metrics["peak_vram_gb"] = round(base_metrics["total_params"] * 2 / (1024**3) * 1.12, 4)
         if use_base_cache:
             saved_cache = save_base_benchmark_cache(cache_lookup_id, arch, base_metrics, offload_mode)
             print(f"  [Stage 5] Cached base benchmark -> {saved_cache}", flush=True)
 
     # 2. Reload & Benchmark Compressed Model from disk in isolation
+    comp_fully_on_gpu = not offload_mode
     if offload_mode:
-        offload_dir.mkdir(parents=True, exist_ok=True)
-        print("  [Stage 5] Dispatching Compressed Model (12GiB GPU + 75GiB CPU)...", flush=True)
+        print("  [Stage 5] Loading Compressed Model in 4-bit NF4 on RTX 5080 (native GPU throughput)...", flush=True)
         comp_model = load_compressed_model(compressed_hf_dir, device="cpu", dtype=dtype)
-        dm = infer_auto_device_map(
-            comp_model,
-            max_memory={0: "12GiB", "cpu": "75GiB"},
-            no_split_module_classes=getattr(comp_model, "_no_split_modules", None),
+        comp_orig_params = count_parameters(comp_model)
+        comp_model, comp_fully_on_gpu, comp_gpu_layers, comp_total_layers = quantize_model_nf4_streaming(
+            comp_model, compute_dtype=dtype, device=device, max_gpu_gb=13.5
         )
-        comp_model = dispatch_model(comp_model, device_map=dm, offload_dir=str(offload_dir))
+        print(
+            f"  [Stage 5] Compressed 4-bit NF4: fully_on_gpu={comp_fully_on_gpu} ({comp_gpu_layers}/{comp_total_layers} layers on GPU)",
+            flush=True,
+        )
     else:
         comp_model = load_compressed_model(compressed_hf_dir, device=device, dtype=dtype)
+        comp_orig_params = count_parameters(comp_model)
+
     comp_metrics = _evaluate_model(
         comp_model,
         tokenizer,
@@ -479,8 +488,12 @@ def run_benchmark(
         import shutil
         shutil.rmtree(offload_dir, ignore_errors=True)
 
+    comp_metrics["total_params"] = comp_orig_params["total"]
+    comp_metrics["non_embedding_params"] = comp_orig_params["non_embedding"]
     comp_metrics["measured_local_peak_vram_gb"] = comp_metrics["peak_vram_gb"]
+    comp_metrics["fully_on_gpu"] = comp_fully_on_gpu
     if offload_mode:
+        comp_metrics["native_4bit_vram_gb"] = comp_metrics["measured_local_peak_vram_gb"]
         comp_metrics["peak_vram_gb"] = round(comp_metrics["total_params"] * 2 / (1024**3) * 1.12, 4)
 
     # 3. Compute Deltas & ROI
@@ -510,12 +523,15 @@ def run_benchmark(
             2,
         )
 
+    speedup_comparable = (not offload_mode) or (comp_fully_on_gpu and base_fully_on_gpu)
+
     roi = _estimate_cloud_roi(
         base_metrics["total_params"],
         comp_metrics["total_params"],
         base_metrics["peak_vram_gb"],
         comp_metrics["peak_vram_gb"],
         speedup_x,
+        speedup_comparable=speedup_comparable,
     )
 
     per_layer_retention: list[dict[str, Any]] = []
@@ -566,13 +582,16 @@ def run_benchmark(
             "heal_executed": bool(heal_summary.get("executed", False)),
             "heal_steps": heal_summary.get("steps", 0),
             "offload_mode": offload_mode,
+            "native_4bit_compressed": comp_fully_on_gpu,
+            "native_4bit_base": base_fully_on_gpu,
         },
         "base_metrics": base_metrics,
         "compressed_metrics": comp_metrics,
         "deltas": {
             "param_reduction_pct": param_red_pct,
             "vram_reduction_pct": vram_red_pct,
-            "throughput_speedup_x": speedup_x,
+            "throughput_speedup_x": speedup_x if speedup_comparable else None,
+            "throughput_speedup_comparable": speedup_comparable,
             "accuracy_retention_pct": acc_retention_pct,
             "ppl_delta": round(comp_metrics["perplexity"] - base_metrics["perplexity"], 3),
         },

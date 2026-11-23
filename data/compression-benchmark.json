@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-11-23T20:59:29.388612+00:00",
+  "generated_at": "2026-11-23T23:49:03.100324+00:00",
   "model": {
     "id": "Qwen/Qwen3.8-27B",
     "slug": "qwen-qwen3.8-27b",
@@ -20,9 +20,11 @@
     "ratio_requested": 0.35,
     "preserve_first": 1,
     "preserve_last": 1,
-    "heal_executed": false,
-    "heal_steps": 0,
-    "offload_mode": true
+    "heal_executed": true,
+    "heal_steps": 12,
+    "offload_mode": true,
+    "native_4bit_compressed": true,
+    "native_4bit_base": false
   },
   "base_metrics": {
     "total_params": 26895998464,
@@ -98,11 +100,11 @@
     "total_params": 18629778944,
     "non_embedding_params": 17358380544,
     "peak_vram_gb": 38.8647,
-    "throughput_tok_s": 0.18,
-    "latency_ms_per_tok": 5601.851,
+    "throughput_tok_s": 2.15,
+    "latency_ms_per_tok": 465.869,
     "vertical_accuracy_pct": 100.0,
-    "json_valid_pct": 0.0,
-    "perplexity": 6.023,
+    "json_valid_pct": 100.0,
+    "perplexity": 6.78,
     "sample_outputs": [
       {
         "id": "sas-041",
@@ -116,10 +118,10 @@
         "predicted": {
           "product": "Snowflake Enterprise",
           "account_id": "SNF-9921",
-          "annual_spend_usd": 144000,
+          "annual_spend_usd": "144000",
           "renewal_date": "2027-01-15"
         },
-        "raw_output": "{product\": \"Snowflake Enterprise\", \"account_id\": \"SNF-9921\", \"annual_spend_usd\": 144000, \"renewal_date\": \"2027-01-15\"}\n\n",
+        "raw_output": "{\"product\": \"Snowflake Enterprise\", \"account_id\": \"SNF-9921\", \"annual_spend_usd\": \"144000\", \"renewal_date\": \"2027-01-15\"}",
         "fields_matched": 4,
         "fields_total": 4
       },
@@ -135,10 +137,10 @@
         "predicted": {
           "product": "Datadog APM Pro",
           "account_id": "DD-4018",
-          "annual_spend_usd": 78500,
+          "annual_spend_usd": "78500",
           "renewal_date": "2026-12-31"
         },
-        "raw_output": "{product\": \"Datadog APM Pro\", \"account_id\": \"DD-4018\", \"annual_spend_usd\": 78500, \"renewal_date\": \"2026-12-31\"}\n\n",
+        "raw_output": "{\"product\": \"Datadog APM Pro\", \"account_id\": \"DD-4018\", \"annual_spend_usd\": \"78500\", \"renewal_date\": \"2026-12-31\"}",
         "fields_matched": 4,
         "fields_total": 4
       },
@@ -157,19 +159,22 @@
           "annual_spend_usd": "61200",
           "renewal_date": "2027-02-01"
         },
-        "raw_output": "{product\": \"Okta Workforce Identity\", \"account_id\": \"OKT-7730\", \"annual_spend_usd\": 61200, \"renewal_date\": \"2027-02-01\"}\n\n<think>",
+        "raw_output": "{\"product\": \"Okta Workforce Identity\", \"account_id\": \"OKT-7730\", \"annual_spend_usd\": \"61200\", \"annual_spend_usd\": \"61200\", \"renewal_date\": \"2027-02-01\"}",
         "fields_matched": 4,
         "fields_total": 4
       }
     ],
-    "measured_local_peak_vram_gb": 12.1923
+    "measured_local_peak_vram_gb": 13.0899,
+    "fully_on_gpu": true,
+    "native_4bit_vram_gb": 13.0899
   },
   "deltas": {
     "param_reduction_pct": 30.73,
     "vram_reduction_pct": 30.73,
-    "throughput_speedup_x": 1.636,
+    "throughput_speedup_x": null,
     "accuracy_retention_pct": 100.0,
-    "ppl_delta": 0.043
+    "ppl_delta": 0.8,
+    "throughput_speedup_comparable": false
   },
   "roi_estimate": {
     "base_tier": "1x A100-80GB",
@@ -180,7 +185,7 @@
     "annual_compressed_usd": 10074.0,
     "annual_savings_usd": 9198.0,
     "savings_pct": 47.7,
-    "assumption_note": "24/7 single-replica inference (8,760 hrs/yr) sizing 26.9B -> 18.6B with 1.64x throughput multiplier."
+    "assumption_note": "24/7 single-replica inference (8,760 hrs/yr) sizing 26.9B -> 18.6B (30.7% BF16 VRAM reduction; native 16GB GPU PyTorch reference run without compiled Flash/Conv1D kernels)."
   },
   "layer_summary": {
     "compressed_layers": 62,
@@ -510,16 +515,17 @@
     ]
   },
   "eval_summary": {
-    "num_eval_samples": 5,
+    "num_eval_samples": 10,
+    "num_ppl_samples": 10,
     "num_calib_samples": 40
   },
   "deployment_artifacts": {
     "slug": "qwen-qwen3.8-27b",
     "compressed_hf_dir": "output\\qwen-qwen3.8-27b\\compressed_hf",
-    "compressed_hf_size_gb": 34.7196,
+    "compressed_hf_size_gb": 34.7197,
     "estimated_q4_km_gguf_gb": 11.31,
     "export_gguf_sh": "output\\qwen-qwen3.8-27b\\deploy\\export_gguf.sh",
     "serve_vllm_sh": "output\\qwen-qwen3.8-27b\\deploy\\serve_vllm.sh"
   },
-  "benchmark_duration_sec": 4741.84
+  "benchmark_duration_sec": 488.91
 }

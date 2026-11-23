@@ -21,7 +21,7 @@ from stages.benchmark import run_benchmark
 from stages.calibrate import run_calibration
 from stages.decompose import run_decomposition
 from stages.export import run_export
-from stages.heal import run_healing
+from stages.heal import run_checkpoint_healing, run_healing
 
 
 def _configure_utf8_console() -> None:
@@ -73,6 +73,11 @@ def parse_args() -> argparse.Namespace:
         "--benchmark-only",
         action="store_true",
         help="Skip Stages 1-4 and run Stage 5 benchmark on an existing compressed_hf/ checkpoint in --output-dir",
+    )
+    parser.add_argument(
+        "--heal-only",
+        action="store_true",
+        help="Run Stage 3 QLoRA checkpoint healing on an existing compressed_hf/ checkpoint in --output-dir",
     )
     parser.add_argument(
         "--fast-eval",
@@ -129,12 +134,30 @@ def main() -> int:
     max_seq_len = 160 if args.smoke_test else 256
     print(f"[Dataset] Loaded {len(samples)} samples -> {len(calib_samples)} calib, {len(eval_samples)} eval")
 
+    if args.heal_only:
+        print("\n[Stage 3/5] Running checkpoint QLoRA healing on existing compressed_hf/...")
+        heal_steps = min(args.heal_steps, 6) if args.smoke_test else args.heal_steps
+        heal_summary = run_checkpoint_healing(
+            compressed_hf_dir=out_dir / "compressed_hf",
+            calib_samples=calib_samples,
+            steps=heal_steps,
+            max_seq_len=max_seq_len,
+            device=device,
+        )
+        print(
+            f"[Stage 3/5] Healed in {heal_summary['duration_sec']}s ({heal_summary['steps']} steps, "
+            f"{heal_summary['merged_tensors']} tensors merged) | "
+            f"Loss: {heal_summary['loss_before']} -> {heal_summary['loss_after']}"
+        )
+        if not args.benchmark_only:
+            return 0
+
     if args.benchmark_only:
         import json
         import re as _re
         hf_dir = out_dir / "compressed_hf"
         manifest = json.loads((hf_dir / "compression_manifest.json").read_text(encoding="utf-8"))
-        heal_summary = {"executed": False, "steps": 0}
+        heal_summary = manifest.get("heal_summary", {"executed": False, "steps": 0})
         slug = _re.sub(r"[^a-zA-Z0-9._-]+", "-", args.model).strip("-").lower()
         est_b = manifest["params_after"]["total"] / 1e9
         hf_size_gb = round(sum(f.stat().st_size for f in hf_dir.rglob("*") if f.is_file()) / (1024**3), 4)

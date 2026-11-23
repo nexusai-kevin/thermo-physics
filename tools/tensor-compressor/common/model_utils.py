@@ -510,3 +510,74 @@ def load_compressed_model(
     if device != "cpu":
         model = model.to(device)
     return model
+
+
+def quantize_model_nf4_streaming(
+    model: nn.Module,
+    compute_dtype: torch.dtype = torch.bfloat16,
+    device: str = "cuda",
+    max_gpu_gb: float = 13.5,
+) -> tuple[nn.Module, bool, int, int]:
+    """Quantize transformer block linears to 4-bit NF4 and place on GPU up to max_gpu_gb.
+
+    Returns (model, fully_on_gpu, gpu_layers_count, total_layers_count).
+    If the 4-bit model exceeds max_gpu_gb (e.g. 27B base on 16GB VRAM), remaining
+    layers stay on CPU and are dispatched cleanly via accelerate.
+    """
+    import bitsandbytes as bnb
+    from accelerate import dispatch_model, infer_auto_device_map
+
+    comps = _locate_backbone_components(model)
+    layers: nn.ModuleList = comps["layers"]
+    total_layers = len(layers)
+
+    for layer in layers:
+        for name, mod in list(layer.named_modules()):
+            if not isinstance(mod, nn.Linear):
+                continue
+            # Keep tiny scalar/router gates in original dtype for numerical stability
+            if min(mod.in_features, mod.out_features) < 64:
+                continue
+            q_mod = bnb.nn.Linear4bit(
+                mod.in_features,
+                mod.out_features,
+                bias=(mod.bias is not None),
+                compute_dtype=compute_dtype,
+                compress_statistics=True,
+                quant_type="nf4",
+            )
+            q_mod.weight = bnb.nn.Params4bit(
+                mod.weight.data.cpu(),
+                requires_grad=False,
+                compress_statistics=True,
+                quant_type="nf4",
+            )
+            if mod.bias is not None:
+                q_mod.bias = nn.Parameter(mod.bias.data.cpu().to(compute_dtype), requires_grad=False)
+            replace_submodule(layer, name, q_mod)
+
+    if device != "cuda" or not torch.cuda.is_available():
+        return model, False, 0, total_layers
+
+    release_cuda()
+    # Estimate if full 4-bit model fits under max_gpu_gb
+    # Note: Params4bit quantizes to ~0.55 bytes/param once moved to CUDA
+    est_4bit_gb = sum(
+        (p.numel() * 0.56 if isinstance(p, bnb.nn.Params4bit) else p.numel() * p.element_size())
+        for p in model.parameters()
+    ) / (1024**3)
+
+    if est_4bit_gb <= max_gpu_gb:
+        model.to(device)
+        release_cuda()
+        return model, True, total_layers, total_layers
+
+    # Hybrid GPU+CPU dispatch for oversized base models (e.g. 27B base > 13.5 GB)
+    dm = infer_auto_device_map(
+        model,
+        max_memory={0: f"{int(max_gpu_gb)}GiB", "cpu": "75GiB"},
+        no_split_module_classes=getattr(model, "_no_split_modules", None),
+    )
+    model = dispatch_model(model, device_map=dm)
+    gpu_layers = sum(1 for k, v in dm.items() if "layers." in k and (v == 0 or v == "cuda:0"))
+    return model, False, gpu_layers, total_layers
