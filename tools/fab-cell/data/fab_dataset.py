@@ -11,8 +11,14 @@ from sim.fluidnc_twin import FaultType, FluidNCTwin, TelemetryFrame, WorkEnvelop
 FIELDS: list[str] = ["status", "fault_type", "action", "gcode", "confidence"]
 
 _SYSTEM_PROMPT = (
-    'Evaluate the ESP32-S3 FluidNC telemetry frame and emit a valid JSON object '
-    'with keys ["status", "fault_type", "action", "gcode", "confidence"]. '
+    "ESP32-S3 FluidNC controller. Output ONLY compact JSON "
+    '{"status","fault_type","action","gcode","confidence"}:\n'
+    '1. limit_triggered or X not in [0,300] or Y not in [0,300] or Z not in [-50,0] -> {"status":"FAULT","fault_type":"limit_breach","action":"ESTOP","gcode":"M5","confidence":0.99}\n'
+    '2. pos_error_mm>=0.25 -> {"status":"FAULT","fault_type":"step_skip","action":"FEED_HOLD","gcode":"!","confidence":0.97}\n'
+    '3. spindle_temp_c>=65.0 -> {"status":"WARNING","fault_type":"thermal_drift","action":"RETRACT_SAFE_Z","gcode":"G1 Z0 F600","confidence":0.95}\n'
+    '4. motor_current_a>=4.5 or motor_load_pct>=80.0 -> {"status":"WARNING","fault_type":"spindle_overload","action":"REDUCE_FEED","gcode":"G1 Z-2.0 F400","confidence":0.96}\n'
+    '5. imu_vibration_rms_g>=1.2 -> {"status":"WARNING","fault_type":"tool_chatter","action":"SPINDLE_ADJUST","gcode":"M3 S12000","confidence":0.94}\n'
+    '6. else -> {"status":"NOMINAL","fault_type":"none","action":"CONTINUE","gcode":"~","confidence":0.98}\n'
     "Return ONLY JSON.\n\nTelemetry:\n"
 )
 
@@ -102,7 +108,7 @@ def _make_fab_sample(
     doc = frame.to_json()
     expected = reference_controller_policy(frame)
     prompt = f"{_SYSTEM_PROMPT}{doc}\n\nJSON:\n"
-    completion = json.dumps(expected, ensure_ascii=False)
+    completion = json.dumps(expected, ensure_ascii=False, separators=(",", ":"))
     return {
         "id": sample_id,
         "domain": "fab_cell_fluidnc",

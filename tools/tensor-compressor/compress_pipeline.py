@@ -40,6 +40,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", required=True, help="Hugging Face model ID or local path")
     parser.add_argument(
         "--calib-data",
+        "--dataset",
+        dest="calib_data",
         default=None,
         help="Optional path to JSONL vertical calibration dataset (defaults to built-in 50-sample set)",
     )
@@ -146,7 +148,7 @@ def main() -> int:
 
     samples = load_calibration_dataset(args.calib_data)
     calib_samples, eval_samples = split_calib_eval(samples, smoke_test=args.smoke_test)
-    max_seq_len = 160 if args.smoke_test else 256
+    max_seq_len = 160 if args.smoke_test else 768
     print(f"[Dataset] Loaded {len(samples)} samples -> {len(calib_samples)} calib, {len(eval_samples)} eval")
 
     if args.heal_only:

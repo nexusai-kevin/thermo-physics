@@ -39,8 +39,11 @@ def _compute_eval_loss(
         for batch in encoded_batches[:4]:
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
-            labels = input_ids.clone()
-            labels[attention_mask == 0] = -100
+            if "labels" in batch:
+                labels = batch["labels"].to(device)
+            else:
+                labels = input_ids.clone()
+                labels[attention_mask == 0] = -100
             with torch.amp.autocast("cuda", dtype=dtype, enabled=(device == "cuda")):
                 out = model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
             total_loss += float(out.loss.item())
@@ -81,18 +84,21 @@ def run_healing(
     if device == "cpu":
         amp_dtype = torch.float32
 
-    encoded_batches: list[dict[str, torch.Tensor]] = []
-    for sample in calib_samples:
-        enc = tokenizer(
-            sample["text"],
-            return_tensors="pt",
-            truncation=True,
-            max_length=max_seq_len,
-            padding="max_length",
-        )
-        encoded_batches.append(enc)
+    if calib_samples and all(isinstance(s.get("prompt"), str) and s["prompt"] for s in calib_samples):
+        encoded_batches = _prepare_masked_batches(tokenizer, calib_samples, max_seq_len)
+    else:
+        encoded_batches = []
+        for sample in calib_samples:
+            enc = tokenizer(
+                sample["text"],
+                return_tensors="pt",
+                truncation=True,
+                max_length=max_seq_len,
+                padding="max_length",
+            )
+            encoded_batches.append(enc)
 
-    # Target inner u_proj nn.Linear inside LowRankLinear (avoids colliding with self_attn.v_proj)
+    # Target inner u_proj / v_proj nn.Linear inside LowRankLinear (avoids colliding with self_attn.v_proj)
     linear_names = {
         name.split(".")[-1]
         for name, mod in model.named_modules()
@@ -128,6 +134,8 @@ def run_healing(
         bias="none",
         task_type="CAUSAL_LM",
     )
+    if steps <= 16 and lr == 1e-4:
+        lr = 3e-4
     peft_model = get_peft_model(model, lora_cfg)
     optimizer = torch.optim.AdamW(
         [p for p in peft_model.parameters() if p.requires_grad],
@@ -136,25 +144,30 @@ def run_healing(
     )
 
     peft_model.train()
-    grad_accum = 4
+    grad_accum = min(4, max(1, len(encoded_batches) // max(steps, 1))) if steps <= 16 else 4
     optimizer.zero_grad(set_to_none=True)
 
-    for step in range(steps):
-        batch = encoded_batches[step % len(encoded_batches)]
-        input_ids = batch["input_ids"].to(device)
-        attention_mask = batch["attention_mask"].to(device)
-        labels = input_ids.clone()
-        labels[attention_mask == 0] = -100
+    sample_cursor = 0
+    for _step in range(steps):
+        for _micro in range(grad_accum):
+            batch = encoded_batches[sample_cursor % len(encoded_batches)]
+            sample_cursor += 1
+            input_ids = batch["input_ids"].to(device)
+            attention_mask = batch["attention_mask"].to(device)
+            if "labels" in batch:
+                labels = batch["labels"].to(device)
+            else:
+                labels = input_ids.clone()
+                labels[attention_mask == 0] = -100
 
-        with torch.amp.autocast("cuda", dtype=amp_dtype, enabled=(device == "cuda")):
-            out = peft_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
-            loss = out.loss / grad_accum
-        loss.backward()
+            with torch.amp.autocast("cuda", dtype=amp_dtype, enabled=(device == "cuda")):
+                out = peft_model(input_ids=input_ids, attention_mask=attention_mask, labels=labels)
+                loss = out.loss / grad_accum
+            loss.backward()
 
-        if (step + 1) % grad_accum == 0 or (step + 1) == steps:
-            torch.nn.utils.clip_grad_norm_(peft_model.parameters(), 1.0)
-            optimizer.step()
-            optimizer.zero_grad(set_to_none=True)
+        torch.nn.utils.clip_grad_norm_(peft_model.parameters(), 1.0)
+        optimizer.step()
+        optimizer.zero_grad(set_to_none=True)
 
     loss_after = _compute_eval_loss(peft_model, encoded_batches, device, amp_dtype)
     peak_vram = get_vram_stats_gb()["peak_gb"]

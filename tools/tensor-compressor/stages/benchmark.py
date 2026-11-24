@@ -196,7 +196,7 @@ def _evaluate_model(
     sample_records: list[dict[str, Any]] = []
 
     for sample_idx, sample in enumerate(eval_samples):
-        enc = tokenizer(sample["prompt"], return_tensors="pt", truncation=True, max_length=384).to(input_device)
+        enc = tokenizer(sample["prompt"], return_tensors="pt", truncation=True, max_length=768).to(input_device)
         prompt_len = enc["input_ids"].shape[1]
         stop_list = StoppingCriteriaList([_StopOnJsonClose(tokenizer, prompt_len)])
 
@@ -261,7 +261,7 @@ def _evaluate_model(
     total_nll = 0.0
     nll_batches = 0
     for s in ppl_source[:ppl_samples]:
-        enc = tokenizer(s["text"], return_tensors="pt", truncation=True, max_length=256).to(input_device)
+        enc = tokenizer(s["text"], return_tensors="pt", truncation=True, max_length=768).to(input_device)
         with torch.no_grad():
             out = model(**enc, labels=enc["input_ids"])
         total_nll += float(out.loss.item())

@@ -473,17 +473,18 @@ def load_calibration_dataset(
                 expected = row["expected"]
                 prompt = str(row["prompt"])
                 text = str(row.get("text") or (prompt + json.dumps(expected, ensure_ascii=False)))
-                samples.append(
-                    {
-                        "id": sid,
-                        "domain": domain,
-                        "document": str(row.get("document", "")),
-                        "fields": list(expected.keys()),
-                        "expected": expected,
-                        "prompt": prompt,
-                        "text": text,
-                    }
-                )
+                item = {
+                    "id": sid,
+                    "domain": domain,
+                    "document": str(row.get("document", "")),
+                    "fields": list(expected.keys()),
+                    "expected": expected,
+                    "prompt": prompt,
+                    "text": text,
+                }
+                if "split" in row:
+                    item["split"] = row["split"]
+                samples.append(item)
             elif "input" in row and "output" in row:
                 prompt = str(row["input"])
                 output = row["output"]
@@ -555,6 +556,11 @@ def split_calib_eval(
             return calib, eval_set
         split_idx = max(1, int(len(samples) * 0.7))
         return samples[:split_idx], samples[split_idx:] or samples[-2:]
+
+    calib_tagged = [s for s in samples if s.get("split") == "calib"]
+    eval_tagged = [s for s in samples if s.get("split") == "eval"]
+    if calib_tagged and eval_tagged:
+        return calib_tagged, eval_tagged
 
     n_eval = max(2, min(10, int(round(len(samples) * eval_fraction))))
     if len(samples) <= n_eval:
