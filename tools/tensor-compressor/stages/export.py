@@ -114,6 +114,8 @@ def run_export(
             "source_model": model_id,
             "method": manifest["method"],
             "ratio_requested": manifest["ratio_requested"],
+            "align_multiple": manifest.get("align_multiple", 64),
+            "allocation_mode": manifest.get("allocation_mode", "energy_optimal"),
             "actual_total_reduction": manifest["actual_total_reduction"],
             "params_before": manifest["params_before"]["total"],
             "params_after": manifest["params_after"]["total"],

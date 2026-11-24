@@ -47,7 +47,19 @@ def parse_args() -> argparse.Namespace:
         "--ratio",
         type=float,
         default=0.35,
-        help="Target parameter compression ratio per decomposed linear layer (default: 0.35)",
+        help="Target parameter compression ratio across decomposed linear layers (default: 0.35)",
+    )
+    parser.add_argument(
+        "--align-multiple",
+        type=int,
+        default=64,
+        help="Hardware rank alignment multiple for fused 4-bit CUDA kernels (default: 64)",
+    )
+    parser.add_argument(
+        "--allocation",
+        choices=["energy_optimal", "uniform"],
+        default="energy_optimal",
+        help="Rank budget allocation strategy across layers (default: energy_optimal)",
     )
     parser.add_argument(
         "--method",
@@ -125,7 +137,10 @@ def main() -> int:
     print("VERTICAL TENSOR COMPRESSION // 5-STAGE PIPELINE")
     print(f"Model:       {args.model}")
     print(f"Device:      {device} ({torch.cuda.get_device_name(0) if device == 'cuda' else 'CPU'}) | dtype={dtype}")
-    print(f"Config:      method={args.method}, ratio={args.ratio:.2f}, heal={args.heal}, smoke_test={args.smoke_test}")
+    print(
+        f"Config:      method={args.method}, ratio={args.ratio:.2f}, align={args.align_multiple}, "
+        f"allocation={args.allocation}, heal={args.heal}, smoke_test={args.smoke_test}"
+    )
     print(f"Output Dir:  {out_dir}")
     print("=" * 72)
 
@@ -208,11 +223,13 @@ def main() -> int:
             preserve_first=args.preserve_first,
             preserve_last=args.preserve_last,
             device=device,
+            align_multiple=args.align_multiple,
+            allocation=args.allocation,
         )
         print(
             f"[Stage 2/5] Done in {manifest['duration_sec']}s | "
             f"Params: {manifest['params_before']['total']:,} -> {manifest['params_after']['total']:,} "
-            f"(-{manifest['actual_total_reduction']*100:.1f}%) | "
+            f"(-{manifest['actual_total_reduction']*100:.1f}%, align={manifest['align_multiple']}, {manifest['allocation_mode']}) | "
             f"Mean SVD Err={manifest['mean_weighted_rel_error']:.4f} | Peak VRAM={manifest['peak_vram_gb']:.3f} GB"
         )
 

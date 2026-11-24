@@ -192,3 +192,206 @@ def test_lead_scraper_infra_exclusion_and_vertical_scoring() -> None:
         ["legal", "compliance"],
     )
     assert score >= 3 and "legal" in matches and "compliance" in matches
+
+
+def test_64_aligned_rank_snapping_and_builders() -> None:
+    from stages.compress import compute_target_rank as compress_compute_target_rank
+    from stages.decompose import compute_target_rank
+
+    assert compress_compute_target_rank is compute_target_rank
+
+    qwen27b_shapes = [
+        (10240, 5120),
+        (5120, 6144),
+        (6144, 5120),
+        (17408, 5120),
+        (5120, 17408),
+        (12288, 5120),
+        (1024, 5120),
+    ]
+    for out_f, in_f in qwen27b_shapes:
+        r64 = compute_target_rank(out_f, in_f, ratio=0.35, align_multiple=64)
+        assert r64 > 0 and r64 % 64 == 0
+        assert r64 * (out_f + in_f) < out_f * in_f
+
+        r128 = compute_target_rank(out_f, in_f, ratio=0.35, align_multiple=128)
+        assert r128 > 0 and r128 % 128 == 0
+        assert r128 * (out_f + in_f) < out_f * in_f
+
+    torch.manual_seed(7)
+    lin_std = nn.Linear(512, 1024, bias=True)
+    lr_mod = LowRankLinear.from_linear(lin_std, target_ratio=0.35, align_multiple=64)
+    assert lr_mod.rank % 64 == 0
+    assert lr_mod.v_proj.out_features % 64 == 0 and lr_mod.u_proj.in_features % 64 == 0
+
+    mpo_mod = MPOLinear.from_dense_weight(lin_std.weight.data, lin_std.bias.data, target_ratio=0.35, align_multiple=64)
+    if isinstance(mpo_mod, MPOLinear):
+        assert mpo_mod._bond_dim % 64 == 0
+    else:
+        assert mpo_mod.rank % 64 == 0
+
+    # Prime dimension triggers LowRankLinear fallback inside MPOLinear.from_dense_weight
+    lin_prime = nn.Linear(512, 257, bias=False)
+    mpo_fb = MPOLinear.from_dense_weight(lin_prime.weight.data, None, target_ratio=0.35, align_multiple=64)
+    assert isinstance(mpo_fb, LowRankLinear)
+    assert mpo_fb.rank % 64 == 0
+
+
+def test_energy_optimal_global_budget_and_4bit_alignment(tmp_path: Path) -> None:
+    import copy
+    import warnings
+    from transformers import AutoModelForCausalLM, Qwen3_5TextConfig
+    from common.model_utils import quantize_model_nf4_streaming
+    from stages.calibrate import run_calibration
+    from stages.compress import allocate_energy_optimal_ranks, run_compression
+
+    torch.manual_seed(42)
+    cfg = Qwen3_5TextConfig(
+        vocab_size=256,
+        hidden_size=512,
+        intermediate_size=1536,
+        num_hidden_layers=8,
+        num_attention_heads=8,
+        num_key_value_heads=4,
+        head_dim=64,
+        linear_num_key_heads=4,
+        linear_num_value_heads=8,
+        linear_key_head_dim=64,
+        linear_value_head_dim=64,
+        layer_types=[
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+            "linear_attention",
+            "linear_attention",
+            "linear_attention",
+            "full_attention",
+        ],
+    )
+    model_opt = AutoModelForCausalLM.from_config(cfg).to(torch.bfloat16)
+
+    # Give all layers high-entropy Gaussian weights, except middle MLPs (layers 3..4) which get sharp low-rank decay
+    with torch.no_grad():
+        for l_idx, layer in enumerate(model_opt.model.layers):
+            for name, mod in layer.named_modules():
+                if not isinstance(mod, nn.Linear):
+                    continue
+                out_f, in_f = mod.weight.shape
+                if l_idx in (3, 4) and name.startswith("mlp."):
+                    # Sharp rank-64 structure with negligible tail energy
+                    u = torch.randn(out_f, 64, dtype=torch.float32)
+                    v = torch.randn(64, in_f, dtype=torch.float32)
+                    mod.weight.copy_((u @ v / (in_f ** 0.5)).to(torch.bfloat16))
+                else:
+                    mod.weight.copy_((torch.randn(out_f, in_f) * 0.05).to(torch.bfloat16))
+
+    model_uni = copy.deepcopy(model_opt)
+
+    class _DummyTokenizer:
+        pad_token_id = 0
+        eos_token_id = 1
+        eos_token = "</s>"
+
+        def __call__(self, texts, return_tensors="pt", padding=True, truncation=True, max_length=32):
+            n = 1 if isinstance(texts, str) else len(texts)
+            return {
+                "input_ids": torch.randint(2, 200, (n, 16)),
+                "attention_mask": torch.ones((n, 16), dtype=torch.long),
+            }
+
+    tok = _DummyTokenizer()
+    samples = BUILTIN_EXTRACTION_SAMPLES[:4]
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    calib_opt_dir = tmp_path / "opt"
+    calib_uni_dir = tmp_path / "uni"
+    calib_opt = run_calibration(model_opt, tok, samples, output_dir=calib_opt_dir, device=device, max_seq_len=32, batch_size=2)
+    calib_uni = run_calibration(model_uni, tok, samples, output_dir=calib_uni_dir, device=device, max_seq_len=32, batch_size=2)
+
+    manifest_opt = run_compression(
+        model_opt,
+        calib_opt,
+        ratio=0.35,
+        preserve_first=0,
+        preserve_last=0,
+        device=device,
+        align_multiple=64,
+        allocation="energy_optimal",
+    )
+    manifest_uni = run_compression(
+        model_uni,
+        calib_uni,
+        ratio=0.35,
+        preserve_first=0,
+        preserve_last=0,
+        device=device,
+        align_multiple=64,
+        allocation="uniform",
+    )
+
+    # 1. Every compressed LowRankLinear inner dimension inside transformer blocks must be divisible by 64
+    compressed_count = 0
+    for layer in model_opt.model.layers:
+        for _, mod in layer.named_modules():
+            if isinstance(mod, LowRankLinear):
+                compressed_count += 1
+                assert mod.rank % 64 == 0
+                assert mod.v_proj.out_features % 64 == 0
+                assert mod.u_proj.in_features % 64 == 0
+            elif isinstance(mod, nn.Linear) and min(mod.in_features, mod.out_features) >= 64:
+                assert mod.in_features % 64 == 0
+                assert mod.out_features % 64 == 0
+    assert compressed_count > 0
+
+    # 2. Global parameter reduction matches target --ratio 0.35 within tight tolerance
+    assert abs(manifest_opt["actual_compressible_reduction"] - 0.35) < 0.015
+    assert abs(manifest_opt["actual_block_reduction"] - 0.35) < 0.015
+
+    # 3. Non-uniformity: boundary layers & attention retain more than low-rank middle MLPs; lower error than uniform
+    def _layer_ret(m_dict, idx):
+        projs = m_dict["layers"][idx]["projections"].values()
+        return sum(p["compressed_params"] for p in projs) / max(sum(p["original_params"] for p in projs), 1)
+
+    def _mlp_ret(m_dict, idx):
+        projs = [p for k, p in m_dict["layers"][idx]["projections"].items() if k.startswith("mlp.")]
+        return sum(p["compressed_params"] for p in projs) / max(sum(p["original_params"] for p in projs), 1)
+
+    assert _layer_ret(manifest_opt, 0) > _layer_ret(manifest_opt, 4)
+    assert _mlp_ret(manifest_opt, 0) > _mlp_ret(manifest_opt, 3)
+    assert _mlp_ret(manifest_opt, 7) > _mlp_ret(manifest_opt, 4)
+    assert manifest_opt["mean_weighted_rel_error"] < manifest_uni["mean_weighted_rel_error"]
+
+    # 4. Determinism check on allocate_energy_optimal_ranks
+    toy_specs = [
+        {
+            "key": (i, "mlp.gate_proj" if i in (1, 2) else "self_attn.q_proj"),
+            "layer_idx": i,
+            "num_layers": 4,
+            "proj_name": "mlp.gate_proj" if i in (1, 2) else "self_attn.q_proj",
+            "in_features": 512,
+            "out_features": 1024,
+            "bias_params": 0,
+            "cost_per_rank": 1536,
+            "max_rank_cap": 511,
+            "energy_spectrum": torch.linspace(100.0, 1.0, 512),
+        }
+        for i in range(4)
+    ]
+    a1 = allocate_energy_optimal_ranks(toy_specs, ratio=0.35, align_multiple=64)
+    a2 = allocate_energy_optimal_ranks(toy_specs, ratio=0.35, align_multiple=64)
+    assert a1["ranks"] == a2["ranks"]
+
+    # 5. CUDA 4-bit NF4 verification: zero blocksize=64 alignment fallback warnings
+    if torch.cuda.is_available():
+        q_model, fully_on_gpu, _, _ = quantize_model_nf4_streaming(
+            model_opt, compute_dtype=torch.bfloat16, device="cuda", max_gpu_gb=13.5
+        )
+        assert fully_on_gpu
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            with torch.no_grad():
+                out = q_model(input_ids=torch.randint(2, 200, (1, 8), device="cuda"), use_cache=False)
+            assert out.logits.shape == (1, 8, 256)
+        align_warns = [w for w in caught if "not aligned for fast kernel" in str(w.message)]
+        assert len(align_warns) == 0, f"Unexpected bnb alignment warnings: {[str(w.message) for w in align_warns]}"

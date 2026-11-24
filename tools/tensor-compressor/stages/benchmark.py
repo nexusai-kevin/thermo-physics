@@ -577,6 +577,8 @@ def run_benchmark(
         "pipeline_config": {
             "method": manifest["method"],
             "ratio_requested": manifest["ratio_requested"],
+            "align_multiple": manifest.get("align_multiple", 64),
+            "allocation_mode": manifest.get("allocation_mode", "energy_optimal"),
             "preserve_first": manifest["preserve_first"],
             "preserve_last": manifest["preserve_last"],
             "heal_executed": bool(heal_summary.get("executed", False)),

@@ -105,6 +105,20 @@ def _best_two_factors(n: int) -> tuple[int, int]:
     return 1, n
 
 
+def snap_aligned_rank(raw_rank: float | int, max_rank: int, align_multiple: int = 64) -> int:
+    """Snap a target rank/bond_dim to a hardware-aligned multiple (default: 64)."""
+    if align_multiple < 1:
+        raise ValueError("align_multiple must be >= 1")
+    if align_multiple == 1:
+        return max(1, min(int(float(raw_rank) + 0.5), int(max_rank)))
+    m = int(align_multiple)
+    max_aligned = (int(max_rank) // m) * m
+    if max_aligned < m:
+        return m
+    snapped = int(float(raw_rank) / m + 0.5) * m
+    return max(m, min(snapped, max_aligned))
+
+
 class LowRankLinear(nn.Module):
     """Two-stage factorized linear projection: x -> v_proj(x) -> u_proj(h)."""
 
@@ -147,6 +161,34 @@ class LowRankLinear(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.u_proj(self.v_proj(x))
+
+    @classmethod
+    @torch.no_grad()
+    def from_linear(
+        cls,
+        linear: nn.Linear,
+        rank: int | None = None,
+        target_ratio: float = 0.35,
+        align_multiple: int = 64,
+    ) -> "LowRankLinear":
+        """Factorize an nn.Linear via SVD with hardware-aligned bottleneck rank."""
+        out_f, in_f = linear.weight.shape
+        max_saving_r = min(min(out_f, in_f) - 1, (out_f * in_f - 1) // (out_f + in_f))
+        raw_r = float(rank) if rank is not None else ((1.0 - target_ratio) * out_f * in_f) / (out_f + in_f)
+        if align_multiple >= 1 and max_saving_r >= align_multiple:
+            r = snap_aligned_rank(raw_r, max_saving_r, align_multiple=align_multiple)
+        else:
+            r = max(1, min(max_saving_r, int(raw_r + 0.5)))
+
+        u, s, vh = torch.linalg.svd(linear.weight.detach().float(), full_matrices=False)
+        r = min(r, s.numel())
+        sq = torch.sqrt(s[:r].clamp_min(1e-12))
+        layer = cls(in_f, out_f, r, bias=(linear.bias is not None), dtype=linear.weight.dtype)
+        layer.u_proj.weight.data.copy_((u[:, :r] * sq.unsqueeze(0)).to(linear.weight.dtype))
+        layer.v_proj.weight.data.copy_((sq.unsqueeze(1) * vh[:r, :]).to(linear.weight.dtype))
+        if linear.bias is not None and layer.u_proj.bias is not None:
+            layer.u_proj.bias.data.copy_(linear.bias.detach().to(linear.weight.dtype))
+        return layer
 
     @torch.no_grad()
     def to_dense_linear(self) -> nn.Linear:
@@ -222,6 +264,8 @@ class MPOLinear(nn.Module):
         weight: torch.Tensor,
         bias: torch.Tensor | None,
         target_ratio: float,
+        bond_dim: int | None = None,
+        align_multiple: int = 64,
     ) -> "MPOLinear | LowRankLinear":
         """Factorize a 2D weight matrix (out, in) into a 2-core MPO via reshaped SVD."""
         out_f, in_f = weight.shape
@@ -230,8 +274,12 @@ class MPOLinear(nn.Module):
 
         # Fallback to LowRankLinear if dimensions are prime or degenerate
         if min(i1, i2, o1, o2) < 4:
-            rank = max(8, min(out_f, in_f) - 1)
-            rank = min(rank, max(8, int(((1.0 - target_ratio) * out_f * in_f) / (out_f + in_f))))
+            max_saving_r = min(min(out_f, in_f) - 1, (out_f * in_f - 1) // (out_f + in_f))
+            raw_r = float(bond_dim) if bond_dim is not None else ((1.0 - target_ratio) * out_f * in_f) / (out_f + in_f)
+            if align_multiple >= 1 and max_saving_r >= align_multiple:
+                rank = snap_aligned_rank(raw_r, max_saving_r, align_multiple=align_multiple)
+            else:
+                rank = max(1, min(max_saving_r, int(raw_r + 0.5)))
             layer = LowRankLinear(in_f, out_f, rank, bias=bias is not None, dtype=weight.dtype)
             u, s, vh = torch.linalg.svd(weight.float(), full_matrices=False)
             sq = torch.sqrt(s[:rank].clamp_min(1e-12))
@@ -241,9 +289,13 @@ class MPOLinear(nn.Module):
                 layer.u_proj.bias.data.copy_(bias.to(weight.dtype))
             return layer
 
-        target_params = max(1, int((1.0 - target_ratio) * out_f * in_f))
         denom = o1 * i1 + o2 * i2
-        chi = max(4, min(o1 * i1, o2 * i2, target_params // denom))
+        max_saving_chi = min(o1 * i1, o2 * i2, (out_f * in_f - 1) // denom)
+        raw_chi = float(bond_dim) if bond_dim is not None else ((1.0 - target_ratio) * out_f * in_f) / denom
+        if align_multiple >= 1 and max_saving_chi >= align_multiple:
+            chi = snap_aligned_rank(raw_chi, max_saving_chi, align_multiple=align_multiple)
+        else:
+            chi = max(4, min(max_saving_chi, int(raw_chi)))
 
         # Reshape (o1, o2, i1, i2) -> permute (o1, i1, o2, i2) -> matrix (o1*i1, o2*i2)
         w_4d = weight.float().reshape(o1, o2, i1, i2).permute(0, 2, 1, 3).contiguous()
